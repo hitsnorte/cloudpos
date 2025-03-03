@@ -1,0 +1,31 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model cloud_groups {
+  id                          Int                           @id @default(autoincrement())
+  group_name                  String                        @db.VarChar(100)
+  cloud_family_group_relation cloud_family_group_relation[]
+}
+
+model cloud_family {
+  id                          Int                           @id @default(autoincrement())
+  family_name                 String                        @db.VarChar(100)
+  cloud_family_group_relation cloud_family_group_relation[]
+}
+
+model cloud_family_group_relation {
+  id              Int          @id @default(autoincrement())
+  cloud_group_id  Int
+  cloud_family_id Int
+  cloud_groups    cloud_groups @relation(fields: [cloud_group_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "cloud_family_group_relation_ibfk_1")
+  cloud_family    cloud_family @relation(fields: [cloud_family_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "cloud_family_group_relation_ibfk_2")
+
+  @@unique([cloud_family_id, cloud_group_id], map: "unique_group_family")
+  @@index([cloud_group_id], map: "cloud_group_id")
+}

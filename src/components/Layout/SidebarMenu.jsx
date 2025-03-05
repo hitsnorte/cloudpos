@@ -4,6 +4,8 @@ import { ChevronDown, ChevronRight } from "lucide-react";
 import { FaLayerGroup } from "react-icons/fa";
 import { TbLayoutDashboardFilled } from "react-icons/tb"; // Ícone para o submenu
 
+
+
 // Item de menu principal
 function SidebarItem({ icon, text, active, alert, submenu }) {
   const { expanded } = useContext(SidebarContext);
@@ -78,7 +80,8 @@ export default function SidebarMenu() {
         "Family": {
             icon: <FaLayerGroup size={20} />,
             submenu: [
-                { ref: "/homepage/teste", label: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> },
+                { ref: "/family/cards", label: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> },
+                {ref:"/family/tabelas" , label:"Tabela" , },
             ],
         },
     };

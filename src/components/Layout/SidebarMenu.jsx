@@ -77,6 +77,7 @@ export default function SidebarMenu() {
             ],
         },
 
+        //Nova aba na Sidebar de Family
         "Family": {
             icon: <FaLayerGroup size={20} />,
             submenu: [

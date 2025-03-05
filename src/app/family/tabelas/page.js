@@ -8,64 +8,78 @@ import {
     TableRow,
     TableCell,
     getKeyValue,
-} from "@heroui/react";
+} from "@heroui/react"; // Importação dos componentes necessários para construir a tabela
 
+// Dados da tabela (por enquanto está hardcoded)
 const rows = [
     {
-        key: "1",
-        name: "Tony Reichert",
-        role: "CEO",
-        status: "Active",
+        key: "1", // Chave única para cada linha
+        id: 1,
+        nome: "Familia A",
     },
     {
         key: "2",
-        name: "Zoey Lang",
-        role: "Technical Lead",
-        status: "Paused",
+        id: "2",
+        nome: "Familia B",
     },
     {
         key: "3",
-        name: "Jane Fisher",
-        role: "Senior Developer",
-        status: "Active",
+        id: "3",
+        nome: "Familia C",
     },
     {
         key: "4",
-        name: "William Howard",
-        role: "Community Manager",
-        status: "Vacation",
+        id: "4",
+        nome: "Familia D",
     },
 ];
 
+// Definição de cada coluna da tabela
 const columns = [
     {
-        key: "name",
-        label: "NAME",
+        key: "id",
+        label: "ID",
     },
     {
-        key: "role",
-        label: "ROLE",
-    },
-    {
-        key: "status",
-        label: "STATUS",
+        key: "nome",  // key é o nome da coluna
+        label: "NOME", // label é o nome apresentado da coluna com a key em cima
     },
 ];
 
 export default function App() {
     return (
-        <Table aria-label="Example table with dynamic content" className={"border border-gray-300 bg-white shadow-md rounded-lg"}>
+
+        <Table aria-label="Example table with dynamic content" className="border border-gray-300 bg-white shadow-md rounded-lg w-full">
+            {/* Cabeçalho da tabela */}
             <TableHeader columns={columns}>
-                {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
+                {(column) => (
+                    // Para cada coluna definida, renderiza o TableColumn
+                    <TableColumn
+                        key={column.key} // chave única da coluna
+                        className="px-4 py-2 text-left font-semibold border-b border-gray-300"
+                    >
+                        {column.label}  {/* Exibe o rótulo da coluna */}
+                    </TableColumn>
+                )}
             </TableHeader>
+
+            {/* Corpo da tabela */}
             <TableBody items={rows}>
                 {(item) => (
-                    <TableRow key={item.key}>
-                        {(columnKey) => <TableCell>{getKeyValue(item, columnKey)}</TableCell>}
+                    // Para cada linha de dados, renderiza um TableRow
+                    <TableRow key={item.key} className="border-b border-gray-300">
+                        {(columnKey) => (
+                            // Para cada célula, exibe o valor correspondente à chave da coluna
+                            <TableCell
+                                key={columnKey} // chave da coluna
+                                className="px-4 py-2 text-left border-r border-gray-300"
+                            >
+                                {getKeyValue(item, columnKey)}
+                            </TableCell>
+                        )}
                     </TableRow>
                 )}
             </TableBody>
         </Table>
     );
 }
-

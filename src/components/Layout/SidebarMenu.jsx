@@ -72,6 +72,7 @@ export default function SidebarMenu() {
       icon: <FaLayerGroup size={20} />, 
       submenu: [
         { ref: "/homepage/teste", label: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> },
+        { ref: "/#", label: "Cards", icon: <TbLayoutDashboardFilled size={18} /> },
       ],
     },
   };

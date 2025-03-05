@@ -67,16 +67,23 @@ function SidebarSubItem({ ref, label, icon, expanded }) {
 export default function SidebarMenu() {
   const { expanded } = useContext(SidebarContext);
 
-  const menuItems = {
-    "Group": {
-      icon: <FaLayerGroup size={20} />, 
-      submenu: [
-        { ref: "/homepage/teste", label: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> },
-      ],
-    },
-  };
+    const menuItems = {
+        "Group": {
+            icon: <FaLayerGroup size={20} />,
+            submenu: [
+                { ref: "/homepage/teste", label: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> },
+            ],
+        },
 
-  return (
+        "Family": {
+            icon: <FaLayerGroup size={20} />,
+            submenu: [
+                { ref: "/homepage/teste", label: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> },
+            ],
+        },
+    };
+
+    return (
     <>
       {Object.entries(menuItems).map(([key, value]) => (
         <SidebarItem key={key} text={key} icon={value.icon} submenu={value.submenu} />

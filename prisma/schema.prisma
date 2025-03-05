@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model cloudfamily {
+  id          Int    @id @default(autoincrement())
+  family_name String @db.VarChar(100)
+}
+
+model cloudfamilygrouprelation {
+  id              Int @id @default(autoincrement())
+  cloud_group_id  Int
+  cloud_family_id Int
+
+  @@unique([cloud_family_id, cloud_group_id], map: "unique_group_family")
+  @@index([cloud_group_id], map: "cloud_group_id")
+}
+
+model cloudgroup {
+  id         Int    @id @default(autoincrement())
+  group_name String @db.VarChar(100)
+}
+
+model Cloud_product {
+  id           Int                    @id @default(autoincrement())
+  product_name String                 @db.VarChar(255)
+  quantity     Int
+  relations    cloud_product_relation[] @relation("CloudProductToRelation")
+
+  @@map("cloud_product")
+}
+
+model Subfamilia {
+  id           Int                    @id @default(autoincrement())
+  nome         String                 @db.VarChar(255)
+ // relations    cloud_product_relation[] @relation("SubfamiliaToRelation")
+
+  @@map("subfamilia")
+}
+
+model cloud_product_relation {
+  id                Int           @id @default(autoincrement())
+  cloud_product_id  Int
+  cloud_subfamily_id Int
+  cloud_product     Cloud_product @relation("CloudProductToRelation", fields: [cloud_product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+ // subfamilia        Subfamilia    @relation("SubfamiliaToRelation", fields: [cloud_subfamily_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([cloud_product_id, cloud_subfamily_id], name: "unique_product_subfamily")
+  @@index([cloud_subfamily_id])
+  @@map("cloud_product_relation")
+}

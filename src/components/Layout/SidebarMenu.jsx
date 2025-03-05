@@ -3,6 +3,7 @@ import { SidebarContext } from "./Sidebar"; // Importa o contexto da Sidebar
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { FaLayerGroup } from "react-icons/fa";
 import { TbLayoutDashboardFilled } from "react-icons/tb"; // Ícone para o submenu
+import { HiOutlineArchive,  HiOutlineCube } from "react-icons/hi";
 
 // Item de menu principal
 function SidebarItem({ icon, text, active, alert, submenu }) {
@@ -72,6 +73,12 @@ export default function SidebarMenu() {
       icon: <FaLayerGroup size={20} />, 
       submenu: [
         { ref: "/homepage/teste", label: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> },
+      ],
+    },
+    "Producs": {
+      icon: <HiOutlineArchive  size={20} />, 
+      submenu: [
+        { ref: "/homepage/product/stock", label: "Stock", icon: <HiOutlineCube size={18} /> },
       ],
     },
   };

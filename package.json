@@ -9,15 +9,29 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@heroui/card": "^2.2.14",
+
+    "@heroicons/react": "^2.2.0",
+    "@heroui/button": "^2.2.15",
+    "@heroui/dropdown": "^2.3.15",
+    "@heroui/form": "^2.1.14",
+    "@heroui/input": "^2.4.15",
+    "@heroui/modal": "^2.2.12",
+    "@heroui/number-input": "^2.0.5",
     "@heroui/react": "^2.7.4",
+    "@heroui/system": "^2.4.11",
     "@heroui/table": "^2.2.14",
+    "@heroui/theme": "^2.4.11",
+    "@nextui-org/react": "^2.6.11",
     "@prisma/client": "^6.4.1",
+    "@react-aria/ssr": "^3.9.7",
+
     "axios": "^1.8.1",
     "framer-motion": "^12.4.7",
     "i": "^0.3.7",
     "lucide-react": "^0.476.0",
+    "mysql2": "^3.12.0",
     "next": "15.2.0",
+    "prisma": "^6.4.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-icons": "^5.5.0"
@@ -25,6 +39,8 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@types/node": "22.13.8",
+    "@types/react": "19.0.10",
     "eslint": "^9",
     "eslint-config-next": "15.2.0",
     "prisma": "^6.4.1",

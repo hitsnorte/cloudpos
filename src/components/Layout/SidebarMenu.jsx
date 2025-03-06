@@ -1,8 +1,10 @@
 import { useContext, useState } from "react";
 import { SidebarContext } from "./Sidebar"; // Importa o contexto da Sidebar
 import { ChevronDown, ChevronRight } from "lucide-react";
-import { FaLayerGroup } from "react-icons/fa";
+import { FaLayerGroup, } from "react-icons/fa";
 import { TbLayoutDashboardFilled } from "react-icons/tb"; // Ícone para o submenu
+import { HiOutlineArchive,  HiOutlineCube } from "react-icons/hi";
+import { PiUsersLight } from "react-icons/pi";
 
 
 
@@ -70,22 +72,20 @@ export default function SidebarMenu() {
   const { expanded } = useContext(SidebarContext);
 
   const menuItems = {
-    "Group": {
-      icon: <FaLayerGroup size={20} />,
-      submenu: [
-        { ref: "/homepage/teste", label: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> },
-        { ref: "/#", label: "Cards", icon: <TbLayoutDashboardFilled size={18} /> }, // Merged submenu item from 'main' branch
-      ],
-    },
 
-    //Nova aba Family na sidebar
-    "Family": {
-      icon: <FaLayerGroup size={20} />,
+    "Grupo": {
+      icon: <PiUsersLight size={20} />, 
       submenu: [
-        { ref: "/family/cards", label: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> },
-        { ref: "/family/tabelas", label: "Tabela" },
+        { ref: "/homepage/grupos", label: "Grupos", icon: <PiUsersLight size={18} /> }
+        ],
+    },
+    "Producs": {
+      icon: <HiOutlineArchive  size={20} />, 
+      submenu: [
+        { ref: "/homepage/product/stock", label: "Stock", icon: <HiOutlineCube size={18} /> },
       ],
     },
+    
   };
 
   return (

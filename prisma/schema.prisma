@@ -17,6 +17,7 @@ model cloud_family {
   id                          Int                           @id @default(autoincrement())
   family_name                 String                        @db.VarChar(100)
   cloud_family_group_relation cloud_family_group_relation[]
+  cloud_family_subfamilia     cloud_family_subfamilia[]
 }
 
 model cloud_family_group_relation {
@@ -26,6 +27,29 @@ model cloud_family_group_relation {
   cloud_groups    cloud_groups @relation(fields: [cloud_group_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "cloud_family_group_relation_ibfk_1")
   cloud_family    cloud_family @relation(fields: [cloud_family_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "cloud_family_group_relation_ibfk_2")
 
-  @@unique([cloud_family_id, cloud_group_id], map: "unique_group_family")
-  @@index([cloud_group_id], map: "cloud_group_id")
+  @@unique([cloud_group_id, cloud_family_id], map: "unique_group_family")
+  @@index([cloud_family_id], map: "cloud_family_id")
+}
+
+model Cloud_product {
+  id           Int    @id @default(autoincrement())
+  product_name String @db.VarChar(255)
+  quantity     Int
+}
+
+model cloud_family_subfamilia {
+  id              Int          @id @default(autoincrement())
+  id_cloud_family Int
+  id_subfamilia   Int
+  cloud_family    cloud_family @relation(fields: [id_cloud_family], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "cloud_family_subfamilia_ibfk_1")
+  subfamilia      subfamilia   @relation(fields: [id_subfamilia], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "cloud_family_subfamilia_ibfk_2")
+
+  @@index([id_cloud_family], map: "id_cloud_family")
+  @@index([id_subfamilia], map: "id_subfamilia")
+}
+
+model subfamilia {
+  id                      Int                       @id @default(autoincrement())
+  nome                    String                    @db.VarChar(255)
+  cloud_family_subfamilia cloud_family_subfamilia[]
 }

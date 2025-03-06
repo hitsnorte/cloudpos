@@ -69,7 +69,7 @@ export default function SidebarMenu() {
   const { expanded } = useContext(SidebarContext);
 
   const menuItems = {
-    "Group": {
+    "Grupo": {
       icon: <FaLayerGroup size={20} />, 
       submenu: [
         { ref: "/homepage/teste", label: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> },
@@ -81,6 +81,7 @@ export default function SidebarMenu() {
         { ref: "/homepage/product/stock", label: "Stock", icon: <HiOutlineCube size={18} /> },
       ],
     },
+    
   };
 
   return (

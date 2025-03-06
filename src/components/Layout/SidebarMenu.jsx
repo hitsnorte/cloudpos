@@ -67,27 +67,25 @@ function SidebarSubItem({ ref, label, icon, expanded }) {
 
 // Menu completo
 export default function SidebarMenu() {
-    const { expanded } = useContext(SidebarContext);
+  const { expanded } = useContext(SidebarContext);
 
     const menuItems = {
         "Group": {
             icon: <FaLayerGroup size={20} />,
             submenu: [
                 { ref: "/homepage/teste", label: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> },
-                { ref: "/#", label: "Cards", icon: <TbLayoutDashboardFilled size={18} /> },
             ],
         },
-        // Nova aba Family na sidebar
+
+        //Nova aba Family na sidebar
         "Family": {
             icon: <FaLayerGroup size={20} />,
             submenu: [
                 { ref: "/family/cards", label: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> },
-                { ref: "/family/tabelas", label: "Tabela" },
+                {ref:"/family/tabelas" , label:"Tabela" , },
             ],
         },
     };
-
-}
 
     return (
     <>

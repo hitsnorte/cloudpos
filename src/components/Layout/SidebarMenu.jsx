@@ -4,6 +4,8 @@ import { ChevronDown, ChevronRight } from "lucide-react";
 import { FaLayerGroup } from "react-icons/fa";
 import { TbLayoutDashboardFilled } from "react-icons/tb"; // Ícone para o submenu
 
+
+
 // Item de menu principal
 function SidebarItem({ icon, text, active, alert, submenu }) {
   const { expanded } = useContext(SidebarContext);
@@ -69,10 +71,19 @@ export default function SidebarMenu() {
 
   const menuItems = {
     "Group": {
-      icon: <FaLayerGroup size={20} />, 
+      icon: <FaLayerGroup size={20} />,
       submenu: [
         { ref: "/homepage/teste", label: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> },
-        { ref: "/#", label: "Cards", icon: <TbLayoutDashboardFilled size={18} /> },
+        { ref: "/#", label: "Cards", icon: <TbLayoutDashboardFilled size={18} /> }, // Merged submenu item from 'main' branch
+      ],
+    },
+
+    //Nova aba Family na sidebar
+    "Family": {
+      icon: <FaLayerGroup size={20} />,
+      submenu: [
+        { ref: "/family/cards", label: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> },
+        { ref: "/family/tabelas", label: "Tabela" },
       ],
     },
   };

@@ -7,17 +7,20 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
 model Subfamilia {
   id   Int    @id @default(autoincrement())
   nome String @db.VarChar(255)
 
   @@map("subfamilia")
+
 }
 
 model Cloud_product {
   id           Int    @id @default(autoincrement())
   product_name String @db.VarChar(255)
   quantity     Int
+
 
   @@map("Cloud_product")
 }
@@ -55,4 +58,5 @@ model Cloud_product_relation {
   @@index([cloud_product_id])
   @@index([id_subfamilia])
   @@map("cloud_product_relation")
+
 }

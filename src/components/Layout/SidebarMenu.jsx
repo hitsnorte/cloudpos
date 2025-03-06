@@ -6,6 +6,8 @@ import { TbLayoutDashboardFilled } from "react-icons/tb"; // Ícone para o subme
 import { HiOutlineArchive,  HiOutlineCube } from "react-icons/hi";
 import { PiUsersLight } from "react-icons/pi";
 
+
+
 // Item de menu principal
 function SidebarItem({ icon, text, active, alert, submenu }) {
   const { expanded } = useContext(SidebarContext);
@@ -70,11 +72,12 @@ export default function SidebarMenu() {
   const { expanded } = useContext(SidebarContext);
 
   const menuItems = {
+
     "Grupo": {
       icon: <PiUsersLight size={20} />, 
       submenu: [
-        { ref: "/homepage/grupos", label: "Grupos", icon: <PiUsersLight size={18} /> },
-      ],
+        { ref: "/homepage/grupos", label: "Grupos", icon: <PiUsersLight size={18} /> }
+        ],
     },
     "Producs": {
       icon: <HiOutlineArchive  size={20} />, 

@@ -4,11 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
+
     "@heroicons/react": "^2.2.0",
     "@heroui/button": "^2.2.15",
     "@heroui/dropdown": "^2.3.15",
@@ -23,6 +24,7 @@
     "@nextui-org/react": "^2.6.11",
     "@prisma/client": "^6.4.1",
     "@react-aria/ssr": "^3.9.7",
+
     "axios": "^1.8.1",
     "framer-motion": "^12.4.7",
     "i": "^0.3.7",
@@ -41,6 +43,7 @@
     "@types/react": "19.0.10",
     "eslint": "^9",
     "eslint-config-next": "15.2.0",
+    "prisma": "^6.4.1",
     "tailwindcss": "^4"
   }
 }

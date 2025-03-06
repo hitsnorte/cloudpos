@@ -7,6 +7,7 @@ export default function SubfamiliaPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [currentSubfamilia, setCurrentSubfamilia] = useState({ id: null, nome: "" });
 
+
   // Fetch subfamilias
   useEffect(() => {
     fetch("/api/subfamily/get_subfamily")
@@ -66,12 +67,7 @@ export default function SubfamiliaPage() {
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Lista de Subfamílias</h1>
 
-      <button
-        onClick={() => setIsEditing(false)}
-        className="mb-4 p-2 bg-blue-500 text-white rounded"
-      >
-        Criar nova subfamília
-      </button>
+   
 
       {/* Tabela */}
       <table className="w-full table-auto border-collapse border border-gray-300">
@@ -113,6 +109,26 @@ export default function SubfamiliaPage() {
           )}
         </tbody>
       </table>
+    
+      {/* Formulário para criar/editar subfamília */}
+      <div className="mt-4">
+        <h2 className="text-xl font-semibold">{isEditing ? "Editar Subfamília" : "Criar Subfamília"}</h2>
+        <input
+          type="text"
+          className="mt-2 p-2 border border-gray-300 rounded"
+          placeholder="Nome da Subfamília"
+          value={currentSubfamilia.nome}
+          onChange={(e) =>
+            setcurrentsubfamilia({ ...currentSubfamilia, nome: e.target.value })
+          }
+        />
+        <button
+          onClick={handleSave}
+          className="ml-4 p-2 bg-green-500 text-white rounded"
+        >
+          {isEditing ? "Salvar alterações" : "Criar"}
+        </button>
+      </div>
     </div>
   )
 }

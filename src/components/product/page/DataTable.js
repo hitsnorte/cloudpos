@@ -1,8 +1,9 @@
 'use client'; // Necessário para componentes client-side no App Router
 
 import { useState, useEffect } from 'react';
+import { HiDotsVertical } from "react-icons/hi";
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
-import { fetchProducts, createProduct, deleteProduct, updateProduct } from '@/src/lib/api';
+import { fetchProducts, createProduct, deleteProduct, updateProduct } from '@/src/lib/apiprodut';
 import { HiOutlinePlusSm, HiOutlinePencil, HiOutlineTrash } from 'react-icons/hi';
 import {
   Modal,
@@ -10,10 +11,10 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-  Button,
   useDisclosure,
   Spinner,
 } from '@nextui-org/react';
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@heroui/react";
 
 const DataTable = () => {
   const [data, setData] = useState([]);
@@ -181,7 +182,7 @@ const DataTable = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Campo de pesquisa */}
+        {/* Campo de pesquisa */}
       <div className="mb-4 flex flex-col sm:flex-row items-center gap-4">
         <input
           type="text"
@@ -190,13 +191,7 @@ const DataTable = () => {
           placeholder="Pesquisar por ID ou Nome..."
           className="w-full max-w-md p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
         />
-        <Button
-          onPress={onAddModalOpen}
-          className="flex items-center gap-1 px-2 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 whitespace-nowrap"
-        >
-          <HiOutlinePlusSm size={15} />
-          Adicionar
-        </Button>
+     
       </div>
 
       {/* Modal para adicionar produto */}
@@ -336,7 +331,7 @@ const DataTable = () => {
             <Button
               type="submit"
               form="updateProductForm"
-              className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 font-medium transition duration-200"
+              className="px-6 py-2 bg-black text-white rounded-md hover:bg-gray-800 font-medium transition duration-200"
             >
               Salvar
             </Button>
@@ -399,79 +394,101 @@ const DataTable = () => {
   </Modal>
           {/*---------------------------------------------------------------------------------------------------------------------------------- */}
           <div className="overflow-x-auto sm:flex sm:flex-col bg-muted/40">
-              <table className="min-w-full bg-white border border-gray-200 mx-auto">
-                <thead className="bg-gray-200">
-                  <tr>
-                    <th
-                      className="px-2 sm:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                      onClick={() => handleSort('id')}
+    <table className="min-w-full bg-white border border-gray-200 mx-auto">
+      <thead className="bg-gray-200">
+        <tr>
+          <th
+            className="px-2 sm:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+            onClick={() => handleSort('id')}
+          >
+            <div className="flex items-center justify-center">
+              ID
+              {renderSortIcon('id')}
+            </div>
+          </th>
+          <th
+            className="px-2 sm:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+            onClick={() => handleSort('product_name')}
+          >
+            <div className="flex items-center justify-center">
+              Nome
+              {renderSortIcon('product_name')}
+            </div>
+          </th>
+          <th
+            className="px-2 sm:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+            onClick={() => handleSort('quantity')}
+          >
+            <div className="flex items-center justify-center">
+              Quantidade
+              {renderSortIcon('quantity')}
+            </div>
+          </th>
+          <th className="px-2 sm:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+            
+          </th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-gray-200">
+        {filteredData.map((item) => (
+          <tr key={item.id} className="hover:bg-gray-200">
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+              {item.id}
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+              {item.product_name}
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+              {item.quantity}
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                <Dropdown>
+                  <DropdownTrigger>
+                    <Button variant="bordered">
+                      <HiDotsVertical size={18} />
+                    </Button>
+                  </DropdownTrigger>
+                  <DropdownMenu 
+                    aria-label="Dynamic Actions"
+                    placement="bottom-end"
+                    className="bg-white shadow-lg rounded-md p-1"
+                    style={{ marginLeft: '80px' }}
+                  >
+                    <DropdownItem
+                      key="add"
+                      onPress={onAddModalOpen}
+                      className="hover:bg-gray-100"
                     >
-                      <div className="flex items-center justify-center">
-                        ID
-                        {renderSortIcon('id')}
-                      </div>
-                    </th>
-                    <th
-                      className="px-2 sm:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                      onClick={() => handleSort('product_name')}
+                      Adicionar
+                    </DropdownItem>
+                    <DropdownItem
+                      key="edit"
+                      onPress={() => {
+                        handleEditProduct(item);
+                        onEditModalOpen();
+                      }}
+                      className="hover:bg-gray-100"
                     >
-                      <div className="flex items-center justify-center">
-                        Nome
-                        {renderSortIcon('product_name')}
-                      </div>
-                    </th>
-                    <th
-                      className="px-2 sm:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                      onClick={() => handleSort('quantity')}
+                      Editar
+                    </DropdownItem>
+                    <DropdownItem
+                      key="delete"
+                      className="text-danger hover:bg-red-50"
+                      color="danger"
+                      onPress={() => {
+                        setProductToDelete(item.id);
+                        onDeleteModalOpen();
+                      }}
                     >
-                      <div className="flex items-center justify-center">
-                        Quantidade
-                        {renderSortIcon('quantity')}
-                      </div>
-                    </th>
-                    <th className="px-2 sm:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {filteredData.map((item) => (
-                    <tr key={item.id} className="hover:bg-gray-200">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
-                        {item.id}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
-                        {item.product_name}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                        {item.quantity}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap flex gap-2">
-                        <Button
-                          onPress={() => {
-                            handleEditProduct(item);
-                            onEditModalOpen();
-                          }}
-                          className="flex items-center gap-1 px-2 py-1 bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
-                        >
-                          <HiOutlinePencil size={15} />
-                          Editar
-                        </Button>
-                        <Button
-                          onPress={() => {
-                            setProductToDelete(item.id);
-                            onDeleteModalOpen();
-                          }}
-                          className="flex items-center gap-1 px-2 py-1 bg-red-500 text-white rounded-md hover:bg-red-600"
-                        >
-                          <HiOutlineTrash size={15} />
-                          Excluir
-                  </Button>
-                 
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                      Excluir
+                    </DropdownItem>
+                  </DropdownMenu>
+                </Dropdown>
+              </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
       </div>
       {filteredData.length === 0 && !error && (
         <p className="text-center py-4">Nenhum produto encontrado.</p>

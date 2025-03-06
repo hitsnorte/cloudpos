@@ -69,25 +69,26 @@ function SidebarSubItem({ ref, label, icon, expanded }) {
 export default function SidebarMenu() {
   const { expanded } = useContext(SidebarContext);
 
-    const menuItems = {
-        "Group": {
-            icon: <FaLayerGroup size={20} />,
-            submenu: [
-                { ref: "/homepage/teste", label: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> },
-            ],
-        },
+  const menuItems = {
+    "Group": {
+      icon: <FaLayerGroup size={20} />,
+      submenu: [
+        { ref: "/homepage/teste", label: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> },
+        { ref: "/#", label: "Cards", icon: <TbLayoutDashboardFilled size={18} /> }, // Merged submenu item from 'main' branch
+      ],
+    },
 
-        //Nova aba Family na sidebar
-        "Family": {
-            icon: <FaLayerGroup size={20} />,
-            submenu: [
-                { ref: "/family/cards", label: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> },
-                {ref:"/family/tabelas" , label:"Tabela" , },
-            ],
-        },
-    };
+    //Nova aba Family na sidebar
+    "Family": {
+      icon: <FaLayerGroup size={20} />,
+      submenu: [
+        { ref: "/family/cards", label: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> },
+        { ref: "/family/tabelas", label: "Tabela" },
+      ],
+    },
+  };
 
-    return (
+  return (
     <>
       {Object.entries(menuItems).map(([key, value]) => (
         <SidebarItem key={key} text={key} icon={value.icon} submenu={value.submenu} />

@@ -9,6 +9,8 @@ import { LuFolderOpenDot, LuFolderOpen, LuFolderCog, LuFolderDot } from "react-i
 
 
 
+
+
 // Item de menu principal
 function SidebarItem({ icon, text, active, alert, submenu }) {
   const { expanded } = useContext(SidebarContext);
@@ -73,12 +75,14 @@ export default function SidebarMenu() {
   const { expanded } = useContext(SidebarContext);
 
   const menuItems = {
+
     "Groups": {
       icon: <LuFolderCog  size={20} />, 
       submenu: [
         { ref: "/#", label: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> }, 
         { ref: "/homepage/grupos", label: "All Groups", icon: <FaTable size={18} /> }, 
       ],
+
     },
     "Families": {
       icon: <LuFolderDot size={20} />,

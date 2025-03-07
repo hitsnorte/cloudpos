@@ -1,5 +1,5 @@
 "use client";
-<<<<<<< HEAD
+
 
 import { Card, CardBody } from "@heroui/react";
 import { useRouter } from "next/navigation";
@@ -58,7 +58,7 @@ export default function App() {
     </div>
   );
 }
-=======
+
 
 import { Card, CardBody } from "@heroui/react";
 
@@ -112,4 +112,4 @@ export default function App() {
 );
 }
 
->>>>>>> 7f2970a2f7bc228806fc76ba8945cc4607cc95aa
+

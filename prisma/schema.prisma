@@ -24,12 +24,11 @@ model Cloud_product {
   quantity               Int
   cloud_product_relation Cloud_product_relation[]
 
-<<<<<<< HEAD
-  @@map("cloud_product")
-=======
+
+
 
   @@map("Cloud_product")
->>>>>>> 7f2970a2f7bc228806fc76ba8945cc4607cc95aa
+
 }
 
 model Cloud_family {
@@ -68,16 +67,14 @@ model Cloud_family_group_relation {
   cloud_groups    Cloud_groups @relation(fields: [cloud_group_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "cloud_family_group_relation_ibfk_1")
   cloud_family    Cloud_family @relation(fields: [cloud_family_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "cloud_family_group_relation_ibfk_2")
 
-<<<<<<< HEAD
-  @@unique([cloud_group_id, cloud_family_id], map: "unique_group_family")
-  @@index([cloud_family_id], map: "cloud_family_id")
-=======
+
   @@unique([cloud_product_id, id_subfamilia], map: "unique_product_subfamily")
   @@index([cloud_product_id])
   @@index([id_subfamilia])
   @@map("cloud_product_relation")
 
->>>>>>> 7f2970a2f7bc228806fc76ba8945cc4607cc95aa
+
+
 }
 
 model Cloud_product_relation {

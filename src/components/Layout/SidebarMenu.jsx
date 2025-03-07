@@ -1,10 +1,11 @@
 import { useContext, useState } from "react";
 import { SidebarContext } from "./Sidebar"; // Importa o contexto da Sidebar
 import { ChevronDown, ChevronRight } from "lucide-react";
-import { FaLayerGroup, } from "react-icons/fa";
 import { TbLayoutDashboardFilled } from "react-icons/tb"; // Ícone para o submenu
-import { HiOutlineArchive,  HiOutlineCube } from "react-icons/hi";
-import { PiUsersLight } from "react-icons/pi";
+import { HiOutlineCube } from "react-icons/hi";
+import { FaTable } from "react-icons/fa"
+import { LuFolderOpenDot, LuFolderOpen, LuFolderCog, LuFolderDot } from "react-icons/lu";
+
 
 // Item de menu principal
 function SidebarItem({ icon, text, active, alert, submenu }) {
@@ -70,18 +71,32 @@ export default function SidebarMenu() {
   const { expanded } = useContext(SidebarContext);
 
   const menuItems = {
-    "Grupo": {
-      icon: <PiUsersLight size={20} />, 
+    "Groups": {
+      icon: <LuFolderCog  size={20} />, 
       submenu: [
-        { ref: "/homepage/grupos", label: "Grupos", icon: <PiUsersLight size={18} /> },
+        { ref: "/#", label: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> }, 
+        { ref: "/homepage/grupos", label: "All Groups", icon: <FaTable size={18} /> }, 
+      ],
+    },
+    "Families": {
+      icon: <LuFolderDot size={20} />,
+      submenu: [
+                { ref: "/homepage/family", label: "All Families", icon: <FaTable size={18} /> },
+      ],
+    },
+    "Sub Families": {
+      icon: <LuFolderOpenDot  size={20} />, 
+      submenu: [
+        { ref: "/homepage/product/stock", label: "All SubFamilies", icon: <FaTable size={18} /> }, //Criar tabela da sub familia e colocar o caminho
       ],
     },
     "Producs": {
-      icon: <HiOutlineArchive  size={20} />, 
+      icon: <LuFolderOpen  size={20} />, 
       submenu: [
-        { ref: "/homepage/product/stock", label: "Stock", icon: <HiOutlineCube size={18} /> },
+        { ref: "/homepage/product/stock", label: "All Producs", icon: <FaTable size={18} /> }, 
       ],
     },
+   
     
   };
 

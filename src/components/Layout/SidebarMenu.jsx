@@ -2,9 +2,11 @@ import { useContext, useState } from "react";
 import { SidebarContext } from "./Sidebar"; // Importa o contexto da Sidebar
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { TbLayoutDashboardFilled } from "react-icons/tb"; // Ícone para o submenu
-import { HiOutlineCube } from "react-icons/hi";
+
 import { FaTable } from "react-icons/fa"
 import { LuFolderOpenDot, LuFolderOpen, LuFolderCog, LuFolderDot } from "react-icons/lu";
+
+
 
 
 // Item de menu principal
@@ -89,6 +91,7 @@ export default function SidebarMenu() {
       submenu: [
         { ref: "/homepage/product/stock", label: "All SubFamilies", icon: <FaTable size={18} /> }, //Criar tabela da sub familia e colocar o caminho
       ],
+
     },
     "Producs": {
       icon: <LuFolderOpen  size={20} />, 

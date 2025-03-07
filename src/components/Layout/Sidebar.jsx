@@ -2,7 +2,8 @@
 import { MoreVertical, ChevronLast, ChevronFirst, X } from "lucide-react";
 import { createContext, useEffect, useState } from "react";
 import SidebarMenu from "./SidebarMenu";
-import { FaUser, FaCloud } from "react-icons/fa";
+import { FaUser } from "react-icons/fa";
+import Image from "next/image";
 
 export const SidebarContext = createContext();
 
@@ -37,7 +38,8 @@ export default function Sidebar({ mobileOpen, setMobileOpen, expanded, setExpand
           <nav className="h-full flex flex-col relative w-full">
             {/* Cabeçalho */}
             <div className="p-4 pb-2 flex items-center">
-              <FaCloud size={35} color="gray" />
+           
+              <Image src="/logo/cloudPos-logo.png" alt="CloudPos Logo" width={35} height={35} />
               <p className={`font-bold transition-all ml-3 ${expanded || isMobile ? "opacity-100 w-auto" : "opacity-0 w-0 overflow-hidden"}`}>
                 CloudPos
               </p>

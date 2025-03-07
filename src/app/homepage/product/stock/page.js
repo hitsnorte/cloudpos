@@ -1,4 +1,4 @@
-import DataTable from '@/src/components/product/page/DataTable';
+import DataTable from '@/src/components/page/product/PageTable';
 
 export default function Home() {
   return (

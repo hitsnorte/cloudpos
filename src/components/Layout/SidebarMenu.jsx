@@ -78,7 +78,7 @@ export default function SidebarMenu() {
 
     "Dashboard": {
       icon: <LuFolderCog  size={20} />, 
-        ref: "/#", label: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> 
+        ref: "#", label: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> 
     },
 
     "Groups": {

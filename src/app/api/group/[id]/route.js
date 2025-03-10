@@ -6,7 +6,7 @@ export async function DELETE(request, { params }) {
   const { id } = params; // Extrai o ID da rota dinâmica
 
   try {
-    const group = await prisma.Cloud_groups.delete({
+    const group = await prisma.cloud_groups.delete({
       where: { id: parseInt(id) },
     });
     const response = {

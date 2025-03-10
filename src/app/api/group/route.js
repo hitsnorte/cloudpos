@@ -3,7 +3,7 @@ import prisma from '@/src/lib/prisma';
 
 export async function GET(request) {
   try {
-    const group = await prisma.Cloud_groups.findMany();
+    const group = await prisma.cloud_groups.findMany();
     const response = {
       status: 'success',
       data: group,
@@ -43,7 +43,7 @@ export async function POST(request) {
         headers: { 'Content-Type': 'application/json' },
       });
     }
-    const group = await prisma.Cloud_groups.create({
+    const group = await prisma.cloud_groups.create({
       data: {
         group_name,
       },

@@ -76,10 +76,14 @@ export default function SidebarMenu() {
 
   const menuItems = {
 
+    "Dashboard": {
+      icon: <LuFolderCog  size={20} />, 
+        ref: "/#", label: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> 
+    },
+
     "Groups": {
       icon: <LuFolderCog  size={20} />, 
       submenu: [
-        { ref: "/#", label: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> }, 
         { ref: "/homepage/grupos", label: "All Groups", icon: <FaTable size={18} /> }, 
       ],
 
@@ -87,13 +91,13 @@ export default function SidebarMenu() {
     "Families": {
       icon: <LuFolderDot size={20} />,
       submenu: [
-                { ref: "/homepage/family", label: "All Families", icon: <FaTable size={18} /> },
+        { ref: "/homepage/family", label: "All Families", icon: <FaTable size={18} /> },
       ],
     },
     "Sub Families": {
       icon: <LuFolderOpenDot  size={20} />, 
       submenu: [
-        { ref: "/homepage/product/stock", label: "All SubFamilies", icon: <FaTable size={18} /> }, //Criar tabela da sub familia e colocar o caminho
+        { ref: "/homepage/subfamilia", label: "All SubFamilies", icon: <FaTable size={18} /> }, //Criar tabela da sub familia e colocar o caminho
       ],
 
     },

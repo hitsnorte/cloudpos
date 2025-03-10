@@ -3,7 +3,7 @@ import prisma from '@/src/lib/prisma';
 
 export async function GET(request) {
   try {
-    const products = await prisma.Cloud_product.findMany();
+    const products = await prisma.cloud_product.findMany();
     const response = {
       status: 'success',
       data: products,
@@ -52,7 +52,7 @@ export async function POST(request) {
         headers: { 'Content-Type': 'application/json' },
       });
     }
-    const product = await prisma.Cloud_product.create({
+    const product = await prisma.cloud_product.create({
       data: {
         product_name,
         quantity: parseInt(quantity),

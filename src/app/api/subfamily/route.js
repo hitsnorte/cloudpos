@@ -62,7 +62,7 @@ export async function POST(request) {
   } catch (error) {
     const response = {
       status: 'error',
-      message: 'Erro ao criar grupo',
+      message: 'Erro ao criar sub familia',
       error: error.message,
     };
     return new Response(JSON.stringify(response), {

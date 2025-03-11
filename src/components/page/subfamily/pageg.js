@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { HiDotsVertical } from "react-icons/hi";
+import { FaGear } from "react-icons/fa6";
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
 import { fetchGrup, createGrup, deleteGrup, updateGrupt } from '@/src/lib/apisubfamily';
 import {
@@ -106,7 +107,7 @@ const DataSubfamilia = () => {
       (subfamilia) => subfamilia.nome.toLowerCase() === newSubfamilia.nome.toLowerCase()
     );
     if (subfamiliaExists) {
-      setError('Este grupo já existe. Por favor, use um nome diferente.');
+      setError('Esta sub familia já existe. Por favor, use um nome diferente.');
       return;
     }
 
@@ -172,7 +173,7 @@ const DataSubfamilia = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Campo de pesquisa */}
+      {/* Campo de pesquisa 
       <div className="mb-4 flex flex-col sm:flex-row items-center gap-4">
         <input
           type="text"
@@ -181,7 +182,7 @@ const DataSubfamilia = () => {
           placeholder="Pesquisar por ID ou Nome da sub familia..."
           className="w-full max-w-md p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
         />
-      </div>
+      </div>*/}
 
       {/* Modal para adicionar grupo */}
       <Modal
@@ -212,7 +213,7 @@ const DataSubfamilia = () => {
                       name="nome"
                       value={newSubfamilia.nome}
                       onChange={handleInputChange}
-                      placeholder="Digite o nome do grupo"
+                      placeholder="Digite o nome da sub familia"
                       className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
                       required
                     />
@@ -256,7 +257,7 @@ const DataSubfamilia = () => {
     {(onClose) => (
       <>
         <ModalHeader className="flex justify-center items-center border-b border-gray-200 pb-4">
-          <h3 className="text-lg font-semibold text-gray-900">Editar Grupo</h3>
+          <h3 className="text-lg font-semibold text-gray-900">Editar sub familia</h3>
         </ModalHeader>
         <ModalBody className="py-6 px-8">
           {editSubfamilia && (
@@ -272,7 +273,7 @@ const DataSubfamilia = () => {
                   onChange={(e) =>
                     setEditSubfamilia({ ...editSubfamilia, nome: e.target.value })
                   }
-                  placeholder="Digite o nome do grupo"
+                  placeholder="Digite o nome da sub familia"
                   className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition duration-200"
                   required
                 />
@@ -303,7 +304,7 @@ const DataSubfamilia = () => {
   </ModalContent>
 </Modal>
 
-      {/* Modal para excluir grupo */}
+      {/* Modal para excluir sub familia */}
       <Modal
         isOpen={isDeleteModalOpen}
         onOpenChange={onDeleteModalClose}
@@ -351,42 +352,31 @@ const DataSubfamilia = () => {
 
       {/* Tabela */}
       <div className="overflow-x-auto sm:flex sm:flex-col bg-muted/40">
-        <table className="min-w-full bg-white border border-gray-200 mx-auto">
-          <thead className="bg-gray-200">
+        <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB] mx-auto">
+          <thead>
             <tr>
-              <th
-                className="px-2 sm:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                onClick={() => handleSort('id')}
-              >
-                <div className="flex items-center justify-center">
+              <th className="border-collapse border border-[#EDEBEB] !w-[2px] px-1 sm:px-5 py-4 bg-[#FC9D25]">
+                <div className=" flex items-left justify-left">
+                  <FaGear size={20} color='white'/>
+                </div>
+              </th>
+              <th className="border-collapse border border-[#EDEBEB] w-1 px-1 sm:px-5 py-4 bg-[#FC9D25] text-[#FAFAFA]">
+                <div className="w-2 flex items-right justify-right"> 
                   ID
-                  {renderSortIcon('id')}
                 </div>
               </th>
-              <th
-                className="px-2 sm:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                onClick={() => handleSort('nome')}
-              >
-                <div className="flex items-center justify-center">
-                  Nome da sub familia
-                  {renderSortIcon('nome')}
-                </div>
-              </th>
-              <th className="px-2 sm:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-             
+              <th className="border-collapse border border-[#EDEBEB] sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA]">
+               <div className="flex items-center justify-left "> 
+                  NAME
+              </div>
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+
+          <tbody className="divide-y divide-gray-300">
             {filteredSubfamilias.map((subfamilia) => (
-              <tr key={subfamilia.id} className="hover:bg-gray-200">
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
-                  {subfamilia.id}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
-                  {subfamilia.nome}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+              <tr key={subfamilia.id} className="hover:bg-gray-100">
+                <td className="border-collapse border border-[#EDEBEB] w-1 py-1 whitespace-nowrap text-sm text-[#191919] text-center">
                   <Dropdown>
                     <DropdownTrigger>
                       <Button variant="bordered">
@@ -395,7 +385,7 @@ const DataSubfamilia = () => {
                     </DropdownTrigger>
                     <DropdownMenu
                       aria-label="Dynamic Actions"
-                      placement="bottom-end"
+                      placement="bottom-up"
                       className="bg-white shadow-lg rounded-md p-1"
                       style={{ marginLeft: '80px' }}
                     >
@@ -416,7 +406,7 @@ const DataSubfamilia = () => {
                       >
                         Editar
                       </DropdownItem>*/}
-                      <DropdownItem
+                      {/* <DropdownItem
                         key="delete"
                         className="text-danger hover:bg-red-50"
                         color="danger"
@@ -426,10 +416,19 @@ const DataSubfamilia = () => {
                         }}
                       >
                         Excluir
-                      </DropdownItem>
+                      </DropdownItem> */}
                     </DropdownMenu>
                   </Dropdown>
                 </td>
+                
+                <td className="border-collapse border border-[#EDEBEB] px-3 py-2 whitespace-nowrap text-sm text-[#191919] text-right">
+
+                  {subfamilia.id}
+                </td>
+                <td className="border-collapse border border-[#EDEBEB] px-4 py-2 whitespace-nowrap text-sm text-[#191919] text-left">
+                  {subfamilia.nome}
+                </td>
+                
               </tr>
             ))}
           </tbody>

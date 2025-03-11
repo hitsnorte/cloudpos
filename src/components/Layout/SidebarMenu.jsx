@@ -76,18 +76,23 @@ export default function SidebarMenu() {
 
   const menuItems = {
 
+   
     "Dashboard": {
       icon: <LuFolderCog  size={20} />, 
-        ref: "#", label: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> 
+      submenu: [
+        {  ref: "/", label: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> }, 
+      ], 
+
     },
 
     "Groups": {
       icon: <LuFolderCog  size={20} />, 
       submenu: [
         { ref: "/homepage/grupos", label: "All Groups", icon: <FaTable size={18} /> }, 
-      ],
+      ], 
 
     },
+    
     "Families": {
       icon: <LuFolderDot size={20} />,
       submenu: [

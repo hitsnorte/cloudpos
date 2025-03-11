@@ -1,7 +1,7 @@
 // src/lib/apisubfamily.js
 export const fetchGrup = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/subfamily', {
+      const response = await fetch('/api/subfamily', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -20,7 +20,7 @@ export const fetchGrup = async () => {
   
   export const createGrup = async (subfamiliaData) => {
     try {
-      const response = await fetch('http://localhost:3000/api/subfamilia', {
+      const response = await fetch('/api/subfamily', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -40,7 +40,7 @@ export const fetchGrup = async () => {
   
   export const deleteGrup = async (id) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/subfamily/${id}`, {
+      const response = await fetch(`/api/subfamily/${id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -58,7 +58,7 @@ export const fetchGrup = async () => {
   
   export const updateGrupt = async (id, subfamiliaData) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/subfamily/${id}`, {
+      const response = await fetch(`/api/subfamily/${id}`, {
         method: 'PUT', // Troque para 'PATCH' se necessário
         headers: {
           'Content-Type': 'application/json',

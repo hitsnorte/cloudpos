@@ -7,7 +7,11 @@ module.exports = {
     "./node_modules/@heroui/theme/dist/components/(table|checkbox|form|spacer).js",
   ],
   theme: {
-    extend: {},
+    extend: { 
+      colors: {
+        customOrange: '#FC9D25',
+      },
+    },
   },
   darkMode: "class",
   plugins: [heroui()],

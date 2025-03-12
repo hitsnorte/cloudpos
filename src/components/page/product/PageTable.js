@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { HiDotsVertical } from "react-icons/hi";
+import { FaGear } from "react-icons/fa6";
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
 import { fetchProducts, createProduct, deleteProduct, updateProduct } from '@/src/lib/apiprodut';
 import {
@@ -181,7 +182,7 @@ const DataTable = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-        {/* Campo de pesquisa */}
+        {/* Campo de pesquisa 
       <div className="mb-4 flex flex-col sm:flex-row items-center gap-4">
         <input
           type="text"
@@ -191,7 +192,7 @@ const DataTable = () => {
           className="w-full max-w-md p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
         />
      
-      </div>
+      </div>*/}
 
       {/* Modal para adicionar produto */}
       <Modal
@@ -393,97 +394,89 @@ const DataTable = () => {
   </Modal>
           {/*---------------------------------------------------------------------------------------------------------------------------------- */}
           <div className="overflow-x-auto sm:flex sm:flex-col bg-muted/40">
-    <table className="min-w-full bg-white border border-gray-200 mx-auto">
-      <thead className="bg-gray-200">
-        <tr>
-          <th
-            className="px-2 sm:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-            onClick={() => handleSort('id')}
-          >
-            <div className="flex items-center justify-center">
-              ID
-              {renderSortIcon('id')}
-            </div>
-          </th>
-          <th
-            className="px-2 sm:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-            onClick={() => handleSort('product_name')}
-          >
-            <div className="flex items-center justify-center">
-              Nome
-              {renderSortIcon('product_name')}
-            </div>
-          </th>
-          <th
-            className="px-2 sm:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-            onClick={() => handleSort('quantity')}
-          >
-            <div className="flex items-center justify-center">
-              Quantidade
-              {renderSortIcon('quantity')}
-            </div>
-          </th>
-          <th className="px-2 sm:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-            
-          </th>
-        </tr>
-      </thead>
-      <tbody className="divide-y divide-gray-200">
+    <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB] mx-auto">
+    <thead>
+            <tr>
+              <th className="border-collapse border border-[#EDEBEB] !w-[1px] px-1 sm:px-5 py-4 bg-[#FC9D25]">
+                <div className=" flex items-left justify-left">
+                  <FaGear size={20} color='white'/>
+                </div>
+              </th>
+              <th className="border-collapse border border-[#EDEBEB] w-1 px-1 sm:px-5 py-4 bg-[#FC9D25] text-[#FAFAFA]">
+                <div className="w-2 flex items-right justify-right"> 
+                  ID
+                </div>
+              </th>
+              <th className="border-collapse border border-[#EDEBEB] sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA]">
+               <div className="flex items-center justify-left "> 
+                  NAME
+              </div>
+              </th>
+              <th className="border-collapse border border-[#EDEBEB] sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA]">
+               <div className="flex items-center justify-left "> 
+                  QUANTITY
+              </div>
+              </th>
+            </tr>
+          </thead>
+      <tbody className="divide-y divide-gray-300">
         {filteredData.map((item) => (
           <tr key={item.id} className="hover:bg-gray-200">
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+            <td className="border-collapse border border-[#EDEBEB] w-1 py-1 whitespace-nowrap text-sm text-[#191919] text-center">
+                <Dropdown>
+                    <DropdownTrigger>
+                      <Button variant="bordered">
+                        <HiDotsVertical size={18} />
+                      </Button>
+                    </DropdownTrigger>
+                    <DropdownMenu
+                      aria-label="Dynamic Actions"
+                      placement="bottom-end"
+                      className="bg-white shadow-lg rounded-md p-1"
+                      style={{ marginLeft: '80px' }}
+                    >
+                      <DropdownItem
+                        key="add"
+                        onPress={onAddModalOpen}
+                        className="hover:bg-gray-100"
+                      >
+                        Adicionar
+                      </DropdownItem>
+                      {/*<DropdownItem
+                        key="edit"
+                        onPress={() => {
+                          handleEditGroup(group);
+                          onEditModalOpen();
+                        }}
+                        className="hover:bg-gray-100"
+                      >
+                        Editar
+                      </DropdownItem>*/}
+                      {/*<DropdownItem
+                        key="delete"
+                        className="text-danger hover:bg-red-50"
+                        color="danger"
+                        onPress={() => {
+                          setGroupToDelete(group.id);
+                          onDeleteModalOpen();
+                        }}
+                      >
+                        Excluir
+                      </DropdownItem>*/}
+                    </DropdownMenu>
+                  </Dropdown>
+
+                  </td>
+            <td className="border-collapse border border-[#EDEBEB] px-3 py-2 whitespace-nowrap text-sm text-[#191919] text-right">
               {item.id}
             </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+            <td className="border-collapse border border-[#EDEBEB] px-4 py-2 whitespace-nowrap text-sm text-[#191919] text-left">
               {item.product_name}
             </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+            <td className="border-collapse border border-[#EDEBEB] px-4 py-2 whitespace-nowrap text-sm text-[#191919] text-left">
               {item.quantity}
             </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                <Dropdown>
-                  <DropdownTrigger>
-                    <Button variant="bordered">
-                      <HiDotsVertical size={18} />
-                    </Button>
-                  </DropdownTrigger>
-                  <DropdownMenu 
-                    aria-label="Dynamic Actions"
-                    placement="bottom-end"
-                    className="bg-white shadow-lg rounded-md p-1"
-                    style={{ marginLeft: '80px' }}
-                  >
-                    <DropdownItem
-                      key="add"
-                      onPress={onAddModalOpen}
-                      className="hover:bg-gray-100"
-                    >
-                      Adicionar
-                    </DropdownItem>
-                    <DropdownItem
-                      key="edit"
-                      onPress={() => {
-                        handleEditProduct(item);
-                        onEditModalOpen();
-                      }}
-                      className="hover:bg-gray-100"
-                    >
-                      Editar
-                    </DropdownItem>
-                    <DropdownItem
-                      key="delete"
-                      className="text-danger hover:bg-red-50"
-                      color="danger"
-                      onPress={() => {
-                        setProductToDelete(item.id);
-                        onDeleteModalOpen();
-                      }}
-                    >
-                      Excluir
-                    </DropdownItem>
-                  </DropdownMenu>
-                </Dropdown>
-              </td>
+            
           </tr>
         ))}
       </tbody>

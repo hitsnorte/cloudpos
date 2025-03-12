@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { HiDotsVertical } from "react-icons/hi";
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
 import { fetchProducts, createProduct, deleteProduct, updateProduct } from '@/src/lib/apiprodut';
-import { HiOutlinePlusSm, HiOutlinePencil, HiOutlineTrash } from 'react-icons/hi';
 import {
   Modal,
   ModalContent,
@@ -95,7 +94,7 @@ const DataTable = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     if (name === 'quantity') {
-      const numValue = value.replace(/[^0-9]/g, ''); // Remove caracteres não numéricos
+      const numValue = value.replace(/[^0-9]/g, ''); 
       if (numValue === '' || parseInt(numValue) > 0) {
         setNewProduct((prev) => ({ ...prev, [name]: numValue }));
         setQuantityError('');

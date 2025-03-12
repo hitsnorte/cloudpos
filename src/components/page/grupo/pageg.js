@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { HiDotsVertical } from "react-icons/hi";
+import { FaGear } from "react-icons/fa6";
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
-import { fetchGrup, createGrup, deleteGrup, updateGrupt } from '@/src/lib/apigrup';
+import { fetchGrup, createGrup, deleteGrup, updateGrupt } from '@/src/lib/apigroup';
 import {
   Modal,
   ModalContent,
@@ -172,7 +173,7 @@ const DataGrupo = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Campo de pesquisa */}
+      {/* Campo de pesquisa 
       <div className="mb-4 flex flex-col sm:flex-row items-center gap-4">
         <input
           type="text"
@@ -181,7 +182,7 @@ const DataGrupo = () => {
           placeholder="Pesquisar por ID ou Nome do Grupo..."
           className="w-full max-w-md p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
         />
-      </div>
+      </div>*/}
 
       {/* Modal para adicionar grupo */}
       <Modal
@@ -351,43 +352,31 @@ const DataGrupo = () => {
 
       {/* Tabela */}
       <div className="overflow-x-auto sm:flex sm:flex-col bg-muted/40">
-        <table className="min-w-full bg-white border border-gray-200 mx-auto">
-          <thead className="bg-gray-200">
+        <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB] mx-auto">
+          <thead>
             <tr>
-              <th
-                className="px-2 sm:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                onClick={() => handleSort('id')}
-              >
-                <div className="flex items-center justify-center">
+              <th className="border-collapse border border-[#EDEBEB] !w-[1px] px-1 sm:px-5 py-4 bg-[#FC9D25]">
+                <div className=" flex items-left justify-left">
+                  <FaGear size={20} color='white'/>
+                </div>
+              </th>
+              <th className="border-collapse border border-[#EDEBEB] w-1 px-1 sm:px-5 py-4 bg-[#FC9D25] text-[#FAFAFA]">
+                <div className="w-2 flex items-right justify-right"> 
                   ID
-                  {renderSortIcon('id')}
                 </div>
               </th>
-              <th
-                className="px-2 sm:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                onClick={() => handleSort('group_name')}
-              >
-                <div className="flex items-center justify-center">
-                  Nome do Grupo
-                  {renderSortIcon('group_name')}
-                </div>
-              </th>
-              <th className="px-2 sm:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-             
+              <th className="border-collapse border border-[#EDEBEB] sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA]">
+               <div className="flex items-center justify-left "> 
+                  NAME
+              </div>
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody className="divide-y divide-gray-300">
             {filteredGroups.map((group) => (
-              <tr key={group.id} className="hover:bg-gray-200">
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
-                  {group.id}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
-                  {group.group_name}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                  <Dropdown>
+              <tr key={group.id} className="hover:bg-gray-100">
+                <td className="border-collapse border border-[#EDEBEB] w-1 py-1 whitespace-nowrap text-sm text-[#191919] text-center">
+                <Dropdown>
                     <DropdownTrigger>
                       <Button variant="bordered">
                         <HiDotsVertical size={18} />
@@ -416,7 +405,7 @@ const DataGrupo = () => {
                       >
                         Editar
                       </DropdownItem>*/}
-                      <DropdownItem
+                      {/*<DropdownItem
                         key="delete"
                         className="text-danger hover:bg-red-50"
                         color="danger"
@@ -426,9 +415,17 @@ const DataGrupo = () => {
                         }}
                       >
                         Excluir
-                      </DropdownItem>
+                      </DropdownItem>*/}
                     </DropdownMenu>
                   </Dropdown>
+
+                  </td>
+                  <td className="border-collapse border border-[#EDEBEB] px-3 py-2 whitespace-nowrap text-sm text-[#191919] text-right">
+ 
+                  {group.id}
+                </td>
+                <td className="border-collapse border border-[#EDEBEB] px-4 py-2 whitespace-nowrap text-sm text-[#191919] text-left">
+                  {group.group_name}
                 </td>
               </tr>
             ))}

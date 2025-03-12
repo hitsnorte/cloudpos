@@ -5,7 +5,7 @@ export async function DELETE(request, { params }) {
   const { id } = params; // Extrai o ID da rota dinâmica
 
   try {
-    const product = await prisma.Cloud_product.delete({
+    const product = await prisma.cloud_product.delete({
       where: { id: parseInt(id) },
     });
     const response = {
@@ -44,7 +44,7 @@ export async function PUT(request, { params }) {
         headers: { 'Content-Type': 'application/json' },
       });
     }
-    const product = await prisma.Cloud_product.update({
+    const product = await prisma.cloud_product.update({
       where: { id: parseInt(id) },
       data: {
         product_name,

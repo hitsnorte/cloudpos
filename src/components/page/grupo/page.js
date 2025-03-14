@@ -167,6 +167,7 @@ const DataGrupo = () => {
       onEditModalClose();
     } catch (err) {
       console.error('Erro ao atualizar grupo:', err.message);
+      console.log('Erro ao atualizar grupo:', err.message);
       setError(err.message); // Define o erro para exibição no modal
     }
   };
@@ -186,10 +187,10 @@ const DataGrupo = () => {
           placement="bottom-end"
           className="bg-white shadow-lg rounded-md p-1"
           style={{ marginLeft: '80px' }}
+          
              >
               <DropdownItem
                 type="text"
-                placeholder="Digite o nome"
                 key="add"
                 onPress={onAddModalOpen}
                 
@@ -198,28 +199,30 @@ const DataGrupo = () => {
           </DropdownItem>
         </DropdownMenu>
       </Dropdown>
+
         {/* Modal para adicionar grupo */}
+
       <Modal
         isOpen={isAddModalOpen}
         onOpenChange={onAddModalClose}
         size="md"
         placement="center"
-        className="bg-white shadow-xl rounded-lg"
+        className="w-100  shadow-xl rounded-lg"
       >
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex justify-center items-center border-b border-gray-200 pb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Adicionar Novo Grupo</h3>
+              <ModalHeader className="rounded bg-[#FC9D25] flex justify-left items-left">
+                <div className="text-xl flex justify-left items-left font-bold text-white">New Group</div>
               </ModalHeader>
-              <ModalBody className="py-6 px-8">
+              <ModalBody className="py-5 px-6">
                 <form id="addGroupForm" onSubmit={handleAddGroup} className="space-y-6">
                   <div>
                     <label
                       htmlFor="newGroupName"
-                      className="block text-sm font-medium text-gray-700 mb-1"
+                      className="block text-sm font-medium text-gray-400 mb-1"
                     >
-                      Nome do Grupo
+                      Name
                     </label>
                     <input
                       id="newGroupName"
@@ -227,8 +230,7 @@ const DataGrupo = () => {
                       name="group_name"
                       value={newGroup.group_name}
                       onChange={handleInputChange}
-                      placeholder="Digite o nome do grupo"
-                      className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                      className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
                       required
                     />
                     {error && (
@@ -237,21 +239,14 @@ const DataGrupo = () => {
                   </div>
                 </form>
               </ModalBody>
-              <ModalFooter className="flex justify-end border-t border-gray-200 pt-4 px-8">
+              <ModalFooter className="w-102 border-t border-gray-200 pt-2 px-8">
                 <Button
                   type="submit"
                   form="addGroupForm"
-                  className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 font-medium transition duration-200"
+                  className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
                   disabled={isLoading}
                 >
-                  {isLoading ? <Spinner size="sm" color="white" /> : 'Adicionar'}
-                </Button>
-                <Button
-                  onPress={onClose}
-                  className="px-6 py-2 bg-black text-white rounded-md hover:bg-gray-600 font-medium ml-3 transition duration-200"
-                  disabled={isLoading}
-                >
-                  Cancelar
+                  {isLoading ? <Spinner size="sm" color="white" /> : 'Save'}
                 </Button>
               </ModalFooter>
             </>
@@ -261,62 +256,56 @@ const DataGrupo = () => {
 
       {/* Modal para editar grupo */}
       <Modal
-  isOpen={isEditModalOpen}
-  onOpenChange={onEditModalClose}
-  size="md"
-  placement="center"
-  className="bg-white shadow-xl rounded-lg"
->
-  <ModalContent>
-    {(onClose) => (
-      <>
-        <ModalHeader className="flex justify-center items-center border-b border-gray-200 pb-4">
-          <h3 className="text-lg font-semibold text-gray-900">Editar Grupo</h3>
-        </ModalHeader>
-        <ModalBody className="py-6 px-8">
-          {editGroup && (
-            <form id="updateGroupForm" onSubmit={handleUpdateGroup} className="space-y-6">
-              <div>
-                <label htmlFor="groupName" className="block text-sm font-medium text-gray-700 mb-1">
-                  Nome do Grupo
-                </label>
-                <input
-                  id="groupName"
-                  type="text"
-                  value={editGroup.group_name || ''} // Garante que não seja undefined
-                  onChange={(e) =>
-                    setEditGroup({ ...editGroup, group_name: e.target.value })
-                  }
-                  placeholder="Digite o nome do grupo"
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition duration-200"
-                  required
-                />
-                {error && (
-                  <p className="text-red-500 text-sm mt-1">{error}</p>
+        isOpen={isEditModalOpen}
+        onOpenChange={onEditModalClose}
+        size="md"
+        placement="center"
+        className="w-100 bg-white shadow-xl rounded-lg"
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="rounded bg-[#FC9D25] flex justify-left items-left">
+                <h3 className="text-xl flex justify-left items-left font-bold text-white">Editar Grupo</h3>
+              </ModalHeader>
+              <ModalBody className="py-5 px-6">
+                {editGroup && (
+                  <form id="updateGroupForm" onSubmit={handleUpdateGroup} className="space-y-6">
+                    <div>
+                      <label htmlFor="groupName" className="block text-sm font-medium text-gray-400 mb-1">
+                        Name
+                      </label>
+                      <input
+                        id="groupName"
+                        type="text"
+                        value={editGroup.group_name || ''} // Garante que não seja undefined
+                        onChange={(e) =>
+                          setEditGroup({ ...editGroup, group_name: e.target.value })
+                        }
+                        placeholder="Digite o nome do grupo"
+                        className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                        required
+                      />
+                      {error && (
+                        <p className="text-red-500 text-sm mt-1">{error}</p>
+                      )}
+                    </div>
+                  </form>
                 )}
-              </div>
-            </form>
+              </ModalBody>
+              <ModalFooter className="w-102 border-t border-gray-200 pt-2 px-8">
+                <Button
+                  type="submit"
+                  form="updateGroupForm"
+                  className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
+                >
+                  Save
+                </Button>
+              </ModalFooter>
+            </>
           )}
-        </ModalBody>
-        <ModalFooter className="flex justify-end border-t border-gray-200 pt-4 px-8">
-          <Button
-            type="submit"
-            form="updateGroupForm"
-            className="px-6 py-2 bg-black text-white rounded-md hover:bg-gray-800 font-medium transition duration-200"
-          >
-            Salvar
-          </Button>
-          <Button
-            onPress={onClose}
-            className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 font-medium ml-3 transition duration-200"
-          >
-            Cancelar
-          </Button>
-        </ModalFooter>
-      </>
-    )}
-  </ModalContent>
-</Modal>
+        </ModalContent>
+      </Modal>
 
       {/* Modal para excluir grupo */}
       <Modal

@@ -1,6 +1,6 @@
 // src/app/api/cloudproducts/[id]/route.js
 import prisma from '@/src/lib/prisma';
-
+import { NextResponse } from 'next/server';
 
 export async function DELETE(request, { params }) {
   const { id } = params; // Extrai o ID da rota dinâmica
@@ -30,7 +30,7 @@ export async function DELETE(request, { params }) {
   }
 }
 
-/*export async function PUT(request, { params }) {
+export async function PATCH(request, { params }) {
   const id = params.id; // Extrai o ID da rota dinâmica
 
   try {
@@ -66,6 +66,7 @@ export async function DELETE(request, { params }) {
     );
   } catch (error) {
     console.error('Erro ao atualizar grupo:', error);
+
     return NextResponse.json(
       {
         status: 'error',
@@ -78,4 +79,3 @@ export async function DELETE(request, { params }) {
     await prisma.$disconnect();
   }
 }
-  */

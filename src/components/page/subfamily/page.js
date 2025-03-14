@@ -450,7 +450,7 @@ const DataSubfamilia = () => {
         </table>
       </div>
       {filteredSubfamilias.length === 0 && !error && (
-        <p className="text-center py-4">Nenhum Sub familia encontrada.</p>
+        <p className="text-center py-4">Nenhuma Sub familia encontrada.</p>
       )}
     </div>
   );

@@ -1,4 +1,4 @@
-import Pagesubfamily from '@/src/components/page/subfamily/pageg';
+import Pagesubfamily from '@/src/components/page/subfamily/page';
 
 export default function Home() {
   return (

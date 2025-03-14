@@ -1,4 +1,4 @@
-import Pagefamily from '@/src/components/page/family/pageg';
+import Pagefamily from '@/src/components/page/family/page';
 import { Plus } from "lucide-react";
 
 export default function Home() {

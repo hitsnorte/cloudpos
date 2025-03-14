@@ -59,7 +59,7 @@ export const deleteGrup = async (id) => {
 export const updateGrupt = async (id, groupData) => {
   try {
     const response = await fetch(`/api/group/${id}`, {
-      method: 'PUT', // Troque para 'PATCH' se necessário
+      method: 'PATCH', // Troque para 'PATCH' se necessário
       headers: {
         'Content-Type': 'application/json',
       },

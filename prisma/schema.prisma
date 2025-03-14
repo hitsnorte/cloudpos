@@ -66,3 +66,63 @@ model subfamilia {
   Cloud_product_relation  Cloud_product_relation[]
   cloud_family_subfamilia cloud_family_subfamilia[]
 }
+
+model cloud_chain {
+  chainID                                                           Int                     @id @default(autoincrement())
+  chainTag                                                          String                  @unique(map: "chainTag") @db.VarChar(100)
+  chainName                                                         String                  @db.VarChar(100)
+  cloud_chainProperties_cloud_chainProperties_chainIDTocloud_chain  cloud_chainProperties[] @relation("cloud_chainProperties_chainIDTocloud_chain")
+  cloud_chainProperties_cloud_chainProperties_chainTagTocloud_chain cloud_chainProperties[] @relation("cloud_chainProperties_chainTagTocloud_chain")
+}
+
+model cloud_chainProperties {
+  chainID                                                              Int
+  chainTag                                                             String?           @db.VarChar(100)
+  propertyID                                                           Int
+  propertyTag                                                          String?           @db.VarChar(100)
+  cloud_chain_cloud_chainProperties_chainIDTocloud_chain               cloud_chain       @relation("cloud_chainProperties_chainIDTocloud_chain", fields: [chainID], references: [chainID], onDelete: Cascade, onUpdate: NoAction, map: "cloud_chainProperties_ibfk_1")
+  cloud_chain_cloud_chainProperties_chainTagTocloud_chain              cloud_chain?      @relation("cloud_chainProperties_chainTagTocloud_chain", fields: [chainTag], references: [chainTag], onDelete: Cascade, onUpdate: NoAction, map: "cloud_chainProperties_ibfk_2")
+  cloud_properties_cloud_chainProperties_propertyIDTocloud_properties  cloud_properties  @relation("cloud_chainProperties_propertyIDTocloud_properties", fields: [propertyID], references: [propertyID], onDelete: Cascade, onUpdate: NoAction, map: "cloud_chainProperties_ibfk_3")
+  cloud_properties_cloud_chainProperties_propertyTagTocloud_properties cloud_properties? @relation("cloud_chainProperties_propertyTagTocloud_properties", fields: [propertyTag], references: [propertyTag], onDelete: Cascade, onUpdate: NoAction, map: "cloud_chainProperties_ibfk_4")
+
+  @@id([chainID, propertyID])
+  @@index([chainTag], map: "chainTag")
+  @@index([propertyID], map: "propertyID")
+  @@index([propertyTag], map: "propertyTag")
+}
+
+model cloud_properties {
+  propertyID                                                                Int                     @id @default(autoincrement())
+  propertyTag                                                               String                  @unique(map: "propertyTag") @db.VarChar(100)
+  propertyName                                                              String                  @db.VarChar(100)
+  propertyServer                                                            String                  @db.VarChar(255)
+  propertyPort                                                              String                  @db.VarChar(50)
+  mpeHotel                                                                  Int?
+  cloud_chainProperties_cloud_chainProperties_propertyIDTocloud_properties  cloud_chainProperties[] @relation("cloud_chainProperties_propertyIDTocloud_properties")
+  cloud_chainProperties_cloud_chainProperties_propertyTagTocloud_properties cloud_chainProperties[] @relation("cloud_chainProperties_propertyTagTocloud_properties")
+  cloud_userProperties_cloud_userProperties_propertyIDTocloud_properties    cloud_userProperties[]  @relation("cloud_userProperties_propertyIDTocloud_properties")
+  cloud_userProperties_cloud_userProperties_propertyTagTocloud_properties   cloud_userProperties[]  @relation("cloud_userProperties_propertyTagTocloud_properties")
+}
+
+model cloud_userProperties {
+  userID                                                              Int
+  propertyID                                                          Int
+  propertyTag                                                         String?           @db.VarChar(100)
+  cloud_users                                                         cloud_users       @relation(fields: [userID], references: [userID], onDelete: Cascade, onUpdate: NoAction, map: "cloud_userProperties_ibfk_1")
+  cloud_properties_cloud_userProperties_propertyIDTocloud_properties  cloud_properties  @relation("cloud_userProperties_propertyIDTocloud_properties", fields: [propertyID], references: [propertyID], onDelete: Cascade, onUpdate: NoAction, map: "cloud_userProperties_ibfk_2")
+  cloud_properties_cloud_userProperties_propertyTagTocloud_properties cloud_properties? @relation("cloud_userProperties_propertyTagTocloud_properties", fields: [propertyTag], references: [propertyTag], onDelete: Cascade, onUpdate: NoAction, map: "cloud_userProperties_ibfk_3")
+
+  @@id([userID, propertyID])
+  @@index([propertyID], map: "propertyID")
+  @@index([propertyTag], map: "propertyTag")
+}
+
+model cloud_users {
+  userID               Int                    @id @default(autoincrement())
+  firstName            String?                @db.VarChar(50)
+  secondName           String?                @db.VarChar(50)
+  email                String                 @db.VarChar(100)
+  password             String                 @db.VarChar(255)
+  createdAt            DateTime?              @default(now()) @db.Timestamp(0)
+  cloud_userProperties cloud_userProperties[]
+}

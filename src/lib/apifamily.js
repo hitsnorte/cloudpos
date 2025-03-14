@@ -66,7 +66,8 @@ export const fetchGrup = async () => {
         body: JSON.stringify(familyData),
       });
       if (!response.ok) {
-        throw new Error('Erro ao atualizar familia');
+        const errorDetails = await response.text(); // Obtém detalhes da resposta de erro
+        throw new Error(`Erro ao atualizar família: ${errorDetails}`);
       }
       const data = await response.json();
       return data.data;

@@ -5,7 +5,7 @@ import { HiDotsVertical } from "react-icons/hi";
 import { FaGear } from "react-icons/fa6";
 import { Plus } from "lucide-react";
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
-import { fetchGrup, createGrup, deleteGrup, updateGrupt } from '@/src/lib/apigroup';
+import { fetchGrup, createGrup, deleteGrup, updateGrupt } from '@/src/lib/apifamily';
 import {
   Modal,
   ModalContent,
@@ -17,16 +17,16 @@ import {
 } from '@nextui-org/react';
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@heroui/react";
 
-const DataGrupo = () => {
-  const [groups, setGroups] = useState([]);
+const DataFamily = () => {
+  const [families, setFamilies] = useState([]);
   const [sortField, setSortField] = useState('id');
   const [sortOrder, setSortOrder] = useState('asc');
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [newGroup, setNewGroup] = useState({ group_name: '' });
-  const [editGroup, setEditGroup] = useState(null);
+  const [newFamily, setNewFamily] = useState({ family_name: '' });
+  const [editFamily, setEditFamily] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [groupToDelete, setGroupToDelete] = useState(null);
+  const [familyToDelete, setFamilyToDelete] = useState(null);
 
   const {
     isOpen: isAddModalOpen,
@@ -45,13 +45,13 @@ const DataGrupo = () => {
   } = useDisclosure();
 
   useEffect(() => {
-    loadGroups();
+    loadFamilies();
   }, []);
 
-  const loadGroups = async () => {
+  const loadFamilies = async () => {
     try {
-      const grupos = await fetchGrup();
-      setGroups(grupos);
+      const families = await fetchGrup();
+      setFamilies(families);
     } catch (err) {
       setError(err.message);
     }
@@ -64,7 +64,7 @@ const DataGrupo = () => {
       setSortField(field);
       setSortOrder('asc');
     }
-    const sortedGroups = [...groups].sort((a, b) => {
+    const sortedFamilies = [...families].sort((a, b) => {
       if (field === 'id') {
         return sortOrder === 'asc' ? a[field] - b[field] : b[field] - a[field];
       }
@@ -72,7 +72,7 @@ const DataGrupo = () => {
         ? a[field].localeCompare(b[field])
         : b[field].localeCompare(a[field]);
     });
-    setGroups(sortedGroups);
+    setFamilies(sortedFamilies);
   };
 
   const renderSortIcon = (field) => {
@@ -84,40 +84,40 @@ const DataGrupo = () => {
     );
   };
 
-  const filteredGroups = groups.filter((group) => {
+  const filteredFamilies = families.filter((family) => {
     const searchLower = searchTerm.toLowerCase();
     return (
-      group.id.toString().includes(searchLower) ||
-      group.group_name.toString().toLowerCase().includes(searchLower)
+      family.id.toString().includes(searchLower) ||
+      family.family_name.toString().toLowerCase().includes(searchLower)
     );
   });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setNewGroup((prev) => ({ ...prev, [name]: value }));
+    setNewFamily((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleAddGroup = async (e) => {
+  const handleAddFamily = async (e) => {
     e.preventDefault();
-    if (!newGroup.group_name) {
-      setError('Preencha o nome do grupo.');
+    if (!newFamily.family_name) {
+      setError('Preencha o nome da familia.');
       return;
     }
 
-    const groupExists = groups.some(
-      (group) => group.group_name.toLowerCase() === newGroup.group_name.toLowerCase()
+    const familyExists = families.some(
+      (family) => family.family_name.toLowerCase() === newFamily.family_name.toLowerCase()
     );
-    if (groupExists) {
-      setError('Este grupo já existe. Por favor, use um nome diferente.');
+    if (familyExists) {
+      setError('Esta familia já existe. Por favor, use um nome diferente.');
       return;
     }
 
     try {
       setIsLoading(true);
-      const groupData = { group_name: newGroup.group_name };
-      const createdGroup = await createGrup(groupData);
-      setGroups([...groups, createdGroup]);
-      setNewGroup({ group_name: '' });
+      const familyData = { family_name: newFamily.family_name };
+      const createdFamily = await createGrup(familyData);
+      setFamilies([...families, createdFamily]);
+      setNewFamily({ family_name: '' });
       setError(null); // Limpa o erro após sucesso
       onAddModalClose();
     } catch (err) {
@@ -127,13 +127,13 @@ const DataGrupo = () => {
     }
   };
 
-  const handleDeleteGroup = async () => {
-    if (groupToDelete) {
+  const handleDeleteFamily = async () => {
+    if (familyToDelete) {
       setIsLoading(true);
       try {
-        await deleteGrup(groupToDelete);
-        setGroups(groups.filter((group) => group.id !== groupToDelete));
-        setGroupToDelete(null);
+        await deleteGrup(familyToDelete);
+        setFamilies(families.filter((family) => family.id !== familyToDelete));
+        setFamilyToDelete(null);
         onDeleteModalClose();
       } catch (err) {
         setError(err.message);
@@ -143,30 +143,30 @@ const DataGrupo = () => {
     }
   };
 
-  const handleEditGroup = (group) => {
-    setEditGroup({ ...group });
+  const handleEditFamily = (family) => {
+    setEditFamily({ ...family });
     onEditModalOpen();
   };
 
-  const handleUpdateGroup = async (e) => {
+  const handleUpdateFamily = async (e) => {
     e.preventDefault();
-    if (!editGroup || !editGroup.group_name) {
-      setError('Preencha o nome do grupo.');
+    if (!editFamily || !editFamily.family_name) {
+      setError('Preencha o nome da familia.');
       return;
     }
   
     try {
-      console.log('Enviando para API:', { id: editGroup.id, group_name: editGroup.group_name });
-      const updatedGroup = await updateGrupt(editGroup.id, {
-        group_name: editGroup.group_name,
+      console.log('Enviando para API:', { id: editFamily.id, family_name: editFamily.family_name });
+      const updatedFamily = await updateGrupt(editFamily.id, {
+        family_name: editFamily.family_name,
       });
-      console.log('Resposta da API:', updatedGroup);
-      setGroups(groups.map((group) => (group.id === updatedGroup.id ? updatedGroup : group)));
-      setEditGroup(null);
+      console.log('Resposta da API:', updatedFamily);
+      setFamilies(families.map((family) => (family.id === updatedFamily.id ? updatedFamily : family)));
+      setEditFamily(null);
       setError(null); // Limpa o erro após sucesso
       onEditModalClose();
     } catch (err) {
-      console.error('Erro ao atualizar grupo:', err.message);
+      console.error('Erro ao atualizar a familia:', err.message);
       setError(err.message); // Define o erro para exibição no modal
     }
   };
@@ -174,7 +174,6 @@ const DataGrupo = () => {
 
   return (
     <div className="p-4">
-      {/* button */}
       <Dropdown>
       <DropdownTrigger>
       <button className="absolute top-4 right-10 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
@@ -198,7 +197,6 @@ const DataGrupo = () => {
           </DropdownItem>
         </DropdownMenu>
       </Dropdown>
-        {/* Modal para adicionar grupo */}
       <Modal
         isOpen={isAddModalOpen}
         onOpenChange={onAddModalClose}
@@ -213,21 +211,21 @@ const DataGrupo = () => {
                 <h3 className="text-lg font-semibold text-gray-900">Adicionar Novo Grupo</h3>
               </ModalHeader>
               <ModalBody className="py-6 px-8">
-                <form id="addGroupForm" onSubmit={handleAddGroup} className="space-y-6">
+                <form id="addFamilyForm" onSubmit={handleAddFamily} className="space-y-6">
                   <div>
                     <label
-                      htmlFor="newGroupName"
+                      htmlFor="newFamilyName"
                       className="block text-sm font-medium text-gray-700 mb-1"
                     >
-                      Nome do Grupo
+                      Nome da familia
                     </label>
                     <input
-                      id="newGroupName"
+                      id="newFamilyName"
                       type="text"
-                      name="group_name"
-                      value={newGroup.group_name}
+                      name="family_name"
+                      value={newFamily.family_name}
                       onChange={handleInputChange}
-                      placeholder="Digite o nome do grupo"
+                      placeholder="Digite o nome da familia"
                       className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
                       required
                     />
@@ -240,7 +238,7 @@ const DataGrupo = () => {
               <ModalFooter className="flex justify-end border-t border-gray-200 pt-4 px-8">
                 <Button
                   type="submit"
-                  form="addGroupForm"
+                  form="addFamilyForm"
                   className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 font-medium transition duration-200"
                   disabled={isLoading}
                 >
@@ -271,23 +269,23 @@ const DataGrupo = () => {
     {(onClose) => (
       <>
         <ModalHeader className="flex justify-center items-center border-b border-gray-200 pb-4">
-          <h3 className="text-lg font-semibold text-gray-900">Editar Grupo</h3>
+          <h3 className="text-lg font-semibold text-gray-900">Editar familia</h3>
         </ModalHeader>
         <ModalBody className="py-6 px-8">
-          {editGroup && (
-            <form id="updateGroupForm" onSubmit={handleUpdateGroup} className="space-y-6">
+          {editFamily && (
+            <form id="updateFamilyForm" onSubmit={handleUpdateFamily} className="space-y-6">
               <div>
-                <label htmlFor="groupName" className="block text-sm font-medium text-gray-700 mb-1">
-                  Nome do Grupo
+                <label htmlFor="familyName" className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome da familia
                 </label>
                 <input
-                  id="groupName"
+                  id="familyName"
                   type="text"
-                  value={editGroup.group_name || ''} // Garante que não seja undefined
+                  value={editFamily.family_name || ''} // Garante que não seja undefined
                   onChange={(e) =>
-                    setEditGroup({ ...editGroup, group_name: e.target.value })
+                    setEditFamily({ ...editFamily, family_name: e.target.value })
                   }
-                  placeholder="Digite o nome do grupo"
+                  placeholder="Digite o nome da familia"
                   className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition duration-200"
                   required
                 />
@@ -301,7 +299,7 @@ const DataGrupo = () => {
         <ModalFooter className="flex justify-end border-t border-gray-200 pt-4 px-8">
           <Button
             type="submit"
-            form="updateGroupForm"
+            form="updateFamilyForm"
             className="px-6 py-2 bg-black text-white rounded-md hover:bg-gray-800 font-medium transition duration-200"
           >
             Salvar
@@ -351,7 +349,7 @@ const DataGrupo = () => {
                 </Button>
                 <Button
                   onPress={() => {
-                    handleDeleteGroup(groupToDelete);
+                    handleDeleteFamily(familyToDelete);
                     onClose();
                   }}
                   className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 font-medium ml-3"
@@ -387,8 +385,8 @@ const DataGrupo = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-300">
-            {filteredGroups.map((group) => (
-              <tr key={group.id} className="hover:bg-gray-100">
+            {filteredFamilies.map((family) => (
+              <tr key={family.id} className="hover:bg-gray-100">
                 <td className="border-collapse border border-[#EDEBEB] w-1 py-1 whitespace-nowrap text-sm text-[#191919] text-center">
                 <Dropdown>
                     <DropdownTrigger>
@@ -402,14 +400,14 @@ const DataGrupo = () => {
                       className="bg-white shadow-lg rounded-md p-1"
                       style={{ marginLeft: '80px' }}
                     >
-                     {/* <DropdownItem
+                      <DropdownItem
                         key="add"
                         onPress={onAddModalOpen}
                         className="hover:bg-gray-100"
                       >
                         Adicionar
-                      </DropdownItem>*/}
-                      <DropdownItem
+                      </DropdownItem>
+                      {/*<DropdownItem
                         key="edit"
                         onPress={() => {
                           handleEditGroup(group);
@@ -418,7 +416,7 @@ const DataGrupo = () => {
                         className="hover:bg-gray-100"
                       >
                         Editar
-                      </DropdownItem>
+                      </DropdownItem>*/}
                       {/*<DropdownItem
                         key="delete"
                         className="text-danger hover:bg-red-50"
@@ -436,21 +434,21 @@ const DataGrupo = () => {
                   </td>
                   <td className="border-collapse border border-[#EDEBEB] px-3 py-2 whitespace-nowrap text-sm text-[#191919] text-right">
  
-                  {group.id}
+                  {family.id}
                 </td>
                 <td className="border-collapse border border-[#EDEBEB] px-4 py-2 whitespace-nowrap text-sm text-[#191919] text-left">
-                  {group.group_name}
+                  {family.family_name}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      {filteredGroups.length === 0 && !error && (
-        <p className="text-center py-4">Nenhum grupo encontrado.</p>
+      {filteredFamilies.length === 0 && !error && (
+        <p className="text-center py-4">Nenhuma familia encontrada.</p>
       )}
     </div>
   );
 };
 
-export default DataGrupo;
+export default DataFamily;

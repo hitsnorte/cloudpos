@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { HiDotsVertical } from "react-icons/hi";
 import { FaGear } from "react-icons/fa6";
+import { Plus } from "lucide-react";
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
 import { fetchProducts, createProduct, deleteProduct, updateProduct } from '@/src/lib/apiprodut';
 import {
@@ -181,18 +182,31 @@ const DataTable = () => {
   if (error) return <div className="text-red-500">Erro: {error}</div>;
 
   return (
-    <div className="container mx-auto px-4 py-8">
-        {/* Campo de pesquisa 
-      <div className="mb-4 flex flex-col sm:flex-row items-center gap-4">
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Pesquisar por ID ou Nome..."
-          className="w-full max-w-md p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-        />
-     
-      </div>*/}
+    <div className="p-4">
+      {/* button */}
+            <Dropdown>
+            <DropdownTrigger>
+            <button className="absolute top-4 right-10 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
+                < Plus size={25} />     
+            </button>
+            </DropdownTrigger>
+             <DropdownMenu
+                aria-label="Dynamic Actions"
+                placement="bottom-end"
+                className="bg-white shadow-lg rounded-md p-1"
+                style={{ marginLeft: '80px' }}
+                   >
+                    <DropdownItem
+                      type="text"
+                      placeholder="Digite o nome"
+                      key="add"
+                      onPress={onAddModalOpen}
+                      
+                    >
+                    adicionar        
+                </DropdownItem>
+              </DropdownMenu>
+            </Dropdown>
 
       {/* Modal para adicionar produto */}
       <Modal

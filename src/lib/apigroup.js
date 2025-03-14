@@ -1,7 +1,7 @@
 // src/lib/apigrup.js
 export const fetchGrup = async () => {
   try {
-    const response = await fetch('http://localhost:3000/api/group', {
+    const response = await fetch('/api/group', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -20,7 +20,7 @@ export const fetchGrup = async () => {
 
 export const createGrup = async (groupData) => {
   try {
-    const response = await fetch('http://localhost:3000/api/group', {
+    const response = await fetch('/api/group', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -40,7 +40,7 @@ export const createGrup = async (groupData) => {
 
 export const deleteGrup = async (id) => {
   try {
-    const response = await fetch(`http://localhost:3000/api/group/${id}`, {
+    const response = await fetch(`/api/group/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -58,7 +58,7 @@ export const deleteGrup = async (id) => {
 
 export const updateGrupt = async (id, groupData) => {
   try {
-    const response = await fetch(`http://localhost:3000/api/group/${id}`, {
+    const response = await fetch(`/api/group/${id}`, {
       method: 'PUT', // Troque para 'PATCH' se necessário
       headers: {
         'Content-Type': 'application/json',

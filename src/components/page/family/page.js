@@ -316,7 +316,7 @@ const DataFamily = () => {
   </ModalContent>
 </Modal>
 
-      {/* Modal para excluir grupo */}
+      {/* Modal para excluir familia */}
       <Modal
         isOpen={isDeleteModalOpen}
         onOpenChange={onDeleteModalClose}
@@ -337,7 +337,7 @@ const DataFamily = () => {
                     <span className="ml-2">Excluindo...</span>
                   </div>
                 ) : (
-                  <p className="text-center text-gray-700">Tem certeza que deseja excluir o grupo?</p>
+                  <p className="text-center text-gray-700">Tem certeza que deseja excluir a familia?</p>
                 )}
               </ModalBody>
               <ModalFooter className="flex justify-end border-t border-gray-200 pt-4 px-8">

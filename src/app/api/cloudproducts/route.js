@@ -3,12 +3,12 @@ import prisma from '@/src/lib/prisma';
 
 export async function GET(request) {
   try {
-    const products = await prisma.cloud_product.findMany();
+    const product = await prisma.cloud_product.findMany();
     const response = {
       status: 'success',
-      data: products,
+      data: product,
       meta: {
-        total: products.length,
+        total: product.length,
         timestamp: new Date().toISOString(),
       },
     };

@@ -1,4 +1,4 @@
-// src/lib/apigrup.js
+// src/lib/apigroup.js
 export const fetchGrup = async () => {
   try {
     const response = await fetch('/api/group', {

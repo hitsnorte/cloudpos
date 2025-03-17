@@ -5,7 +5,7 @@ import { HiDotsVertical } from "react-icons/hi";
 import { Plus } from "lucide-react";
 import { FaGear } from "react-icons/fa6";
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
-import { fetchGrup, createGrup, deleteGrup, updateGrupt } from '@/src/lib/apisubfamily';
+import { fetchSubfamily, createSubfamily, deleteSubfamily, updateSubfamily } from '@/src/lib/apisubfamily';
 import {
   Modal,
   ModalContent,
@@ -50,7 +50,7 @@ const DataSubfamilia = () => {
 
   const loadSubfamilias = async () => {
     try {
-      const subfamilias = await fetchGrup();
+      const subfamilias = await fetchSubfamily();
       setSubfamilias(subfamilias);
     } catch (err) {
       setError(err.message);
@@ -115,7 +115,7 @@ const DataSubfamilia = () => {
     try {
       setIsLoading(true);
       const subfamiliaData = { nome: newSubfamilia.nome };
-      const createdSubfamilia = await createGrup(subfamiliaData);
+      const createdSubfamilia = await createSubfamily(subfamiliaData);
       setSubfamilias([...subfamilias, createdSubfamilia]);
       setNewSubfamilia({ nome: '' });
       setError(null); // Limpa o erro após sucesso
@@ -131,7 +131,7 @@ const DataSubfamilia = () => {
     if (subfamiliaToDelete) {
       setIsLoading(true);
       try {
-        await deleteGrup(subfamiliaToDelete);
+        await deleteSubfamily(subfamiliaToDelete);
         setSubfamilias(subfamilias.filter((subfamilia) => subfamilia.id !== subfamiliaToDelete));
         setSubfamiliaToDelete(null);
         onDeleteModalClose();
@@ -157,7 +157,7 @@ const DataSubfamilia = () => {
   
     try {
       console.log('Enviando para API:', { id: editSubfamilia.id, nome: editSubfamilia.nome });
-      const updatedSubfamilia = await updateGrupt(editSubfamilia.id, {
+      const updatedSubfamilia = await updateSubfamily(editSubfamilia.id, {
         nome: editSubfamilia.nome,
       });
       console.log('Resposta da API:', updatedSubfamilia);
@@ -167,6 +167,7 @@ const DataSubfamilia = () => {
       onEditModalClose();
     } catch (err) {
       console.error('Erro ao atualizar a sub familia:', err.message);
+      console.log('Erro ao atualizar sub familia:', err.message);
       setError(err.message); // Define o erro para exibição no modal
     }
   };
@@ -194,7 +195,7 @@ const DataSubfamilia = () => {
                 onPress={onAddModalOpen}
                 
               >
-              adicionar        
+              Add        
           </DropdownItem>
         </DropdownMenu>
       </Dropdown>
@@ -205,22 +206,22 @@ const DataSubfamilia = () => {
         onOpenChange={onAddModalClose}
         size="md"
         placement="center"
-        className="bg-white shadow-xl rounded-lg"
+        className="w-100  shadow-xl rounded-lg"
       >
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex justify-center items-center border-b border-gray-200 pb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Adicionar Nova sub familia</h3>
+              <ModalHeader className="rounded bg-[#FC9D25] flex justify-left items-left">
+                <h3 className="text-xl flex justify-left items-left font-bold text-white">New Sub Family</h3>
               </ModalHeader>
-              <ModalBody className="py-6 px-8">
+              <ModalBody className="py-5 px-6">
                 <form id="addSubfamiliaForm" onSubmit={handleAddSubfamilia} className="space-y-6">
                   <div>
                     <label
                       htmlFor="newSubfamiliaName"
-                      className="block text-sm font-medium text-gray-700 mb-1"
+                      className="block text-sm font-medium text-gray-400 mb-1"
                     >
-                      Nome da sub familia
+                      Name
                     </label>
                     <input
                       id="newSubfamiliaName"
@@ -229,7 +230,7 @@ const DataSubfamilia = () => {
                       value={newSubfamilia.nome}
                       onChange={handleInputChange}
                       placeholder="Digite o nome da sub familia"
-                      className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                      className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
                       required
                     />
                     {error && (
@@ -238,21 +239,14 @@ const DataSubfamilia = () => {
                   </div>
                 </form>
               </ModalBody>
-              <ModalFooter className="flex justify-end border-t border-gray-200 pt-4 px-8">
+              <ModalFooter className="w-102 border-t border-gray-200 pt-2 px-8">
                 <Button
                   type="submit"
                   form="addSubfamiliaForm"
-                  className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 font-medium transition duration-200"
+                  className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
                   disabled={isLoading}
                 >
-                  {isLoading ? <Spinner size="sm" color="white" /> : 'Adicionar'}
-                </Button>
-                <Button
-                  onPress={onClose}
-                  className="px-6 py-2 bg-black text-white rounded-md hover:bg-gray-600 font-medium ml-3 transition duration-200"
-                  disabled={isLoading}
-                >
-                  Cancelar
+                  {isLoading ? <Spinner size="sm" color="white" /> : 'Save'}
                 </Button>
               </ModalFooter>
             </>
@@ -266,20 +260,20 @@ const DataSubfamilia = () => {
   onOpenChange={onEditModalClose}
   size="md"
   placement="center"
-  className="bg-white shadow-xl rounded-lg"
+  className="w-100 bg-white shadow-xl rounded-lg"
 >
   <ModalContent>
     {(onClose) => (
       <>
-        <ModalHeader className="flex justify-center items-center border-b border-gray-200 pb-4">
-          <h3 className="text-lg font-semibold text-gray-900">Editar sub familia</h3>
+        <ModalHeader className="rounded bg-[#FC9D25] flex justify-left items-left">
+          <h3 className="text-xl flex justify-left items-left font-bold text-white">Editar sub familia</h3>
         </ModalHeader>
-        <ModalBody className="py-6 px-8">
+        <ModalBody className="py-5 px-6">
           {editSubfamilia && (
             <form id="updateSubfamiliaForm" onSubmit={handleUpdateSubfamilia} className="space-y-6">
               <div>
-                <label htmlFor="subfamiliaName" className="block text-sm font-medium text-gray-700 mb-1">
-                  Nome da sub familia
+                <label htmlFor="subfamiliaName" className="block text-sm font-medium text-gray-400 mb-1">
+                  Name
                 </label>
                 <input
                   id="subfamiliaName"
@@ -289,7 +283,7 @@ const DataSubfamilia = () => {
                     setEditSubfamilia({ ...editSubfamilia, nome: e.target.value })
                   }
                   placeholder="Digite o nome da sub familia"
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition duration-200"
+                  className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
                   required
                 />
                 {error && (
@@ -299,19 +293,13 @@ const DataSubfamilia = () => {
             </form>
           )}
         </ModalBody>
-        <ModalFooter className="flex justify-end border-t border-gray-200 pt-4 px-8">
+        <ModalFooter className="w-102 border-t border-gray-200 pt-2 px-8">
           <Button
             type="submit"
             form="updateSubfamiliaForm"
-            className="px-6 py-2 bg-black text-white rounded-md hover:bg-gray-800 font-medium transition duration-200"
+            className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
           >
-            Salvar
-          </Button>
-          <Button
-            onPress={onClose}
-            className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 font-medium ml-3 transition duration-200"
-          >
-            Cancelar
+            Save
           </Button>
         </ModalFooter>
       </>
@@ -331,16 +319,16 @@ const DataSubfamilia = () => {
           {(onClose) => (
             <>
               <ModalHeader className="flex justify-center items-center border-b border-gray-200 pb-2">
-                <h3 className="text-lg font-semibold text-gray-900">Confirmar Exclusão</h3>
+                <h3 className="text-lg font-semibold text-gray-900">Confirm Deletion</h3>
               </ModalHeader>
               <ModalBody className="py-6 px-8">
                 {isLoading ? (
                   <div className="flex justify-center items-center">
                     <Spinner size="lg" />
-                    <span className="ml-2">Excluindo...</span>
+                    <span className="ml-2">Deletion...</span>
                   </div>
                 ) : (
-                  <p className="text-center text-gray-700">Tem certeza que deseja excluir a sub familia?</p>
+                  <p className="text-center text-gray-700">Are you sure you want to delete the sub family?</p>
                 )}
               </ModalBody>
               <ModalFooter className="flex justify-end border-t border-gray-200 pt-4 px-8">
@@ -348,7 +336,7 @@ const DataSubfamilia = () => {
                   onPress={onClose}
                   className="px-6 py-2 bg-black text-white rounded-md hover:bg-gray-800 font-medium"
                 >
-                  Cancelar
+                  Cancel
                 </Button>
                 <Button
                   onPress={() => {
@@ -357,7 +345,7 @@ const DataSubfamilia = () => {
                   }}
                   className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 font-medium ml-3"
                 >
-                  Excluir
+                  Exclude
                 </Button>
               </ModalFooter>
             </>

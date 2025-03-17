@@ -1,6 +1,6 @@
 // src/app/api/cloudproducts/[id]/route.js
 import prisma from '@/src/lib/prisma';
-
+import { NextResponse } from 'next/server';
 
 export async function DELETE(request, { params }) {
   const { id } = params; // Extrai o ID da rota dinâmica
@@ -30,14 +30,14 @@ export async function DELETE(request, { params }) {
   }
 }
 
-/*export async function PUT(request, { params }) {
+export async function PATCH(request, { params }) {
   const id = params.id; // Extrai o ID da rota dinâmica
 
   try {
-    const { group_name } = await request.json();
+    const { nome } = await request.json();
 
-    // Validação: group_name é obrigatório
-    if (!group_name) {
+    // Validação: name é obrigatório
+    if (!nome) {
       return NextResponse.json(
         {
           status: 'error',
@@ -47,17 +47,17 @@ export async function DELETE(request, { params }) {
       );
     }
 
-    const group = await prisma.cloud_groups.update({
+    const subfamilia = await prisma.subfamilia.update({
       where: { id: parseInt(id) },
       data: {
-        group_name,
+        nome,
       },
     });
 
     return NextResponse.json(
       {
         status: 'success',
-        data: group,
+        data: subfamilia,
         meta: {
           updatedAt: new Date().toISOString(),
         },
@@ -65,11 +65,11 @@ export async function DELETE(request, { params }) {
       { status: 200 }
     );
   } catch (error) {
-    console.error('Erro ao atualizar grupo:', error);
+    console.error('Erro ao atualizar a subfamilia:', error);
     return NextResponse.json(
       {
         status: 'error',
-        message: 'Erro ao atualizar grupo',
+        message: 'Erro ao atualizar subfamilia',
         error: error.message,
       },
       { status: error.code === 'P2025' ? 404 : 500 } // 404 se o grupo não for encontrado
@@ -78,4 +78,3 @@ export async function DELETE(request, { params }) {
     await prisma.$disconnect();
   }
 }
-  */

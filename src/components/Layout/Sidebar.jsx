@@ -1,6 +1,7 @@
 "use client";
 import { ChevronDown, ChevronUp, ChevronLast, ChevronFirst, X } from "lucide-react";
 import { createContext, useEffect, useState } from "react";
+import { useRouter } from "next/navigation"; // ✅ Import useRouter
 import SidebarMenu from "./SidebarMenu";
 import { FaUser } from "react-icons/fa";
 import Image from "next/image";
@@ -9,6 +10,7 @@ import { signOut } from "next-auth/react";
 export const SidebarContext = createContext();
 
 export default function Sidebar({ mobileOpen, setMobileOpen, expanded, setExpanded }) {
+  const router = useRouter(); // ✅ Initialize router
   const [isMobile, setIsMobile] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
@@ -17,7 +19,6 @@ export default function Sidebar({ mobileOpen, setMobileOpen, expanded, setExpand
       const mobile = window.innerWidth < 700;
       setIsMobile(mobile);
 
-      // Fecha o menu móvel se a tela for maior que 700px
       if (!mobile) {
         setMobileOpen(false);
       }
@@ -37,7 +38,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen, expanded, setExpand
           ${isMobile ? "w-screen" : expanded ? "w-[250px]" : "w-[80px]"}`}
             >
               <nav className="h-full flex flex-col relative w-full">
-                {/* Cabeçalho */}
+                {/* Header */}
                 <div className="p-4 pb-2 flex items-center">
                   <Image src="/logo/cloudPos-logo.png" alt="CloudPos Logo" width={35} height={35} />
                   <p className={`font-bold transition-all ml-3 ${expanded || isMobile ? "opacity-100 w-auto" : "opacity-0 w-0 overflow-hidden"}`}>
@@ -68,7 +69,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen, expanded, setExpand
                   <SidebarMenu />
                 </ul>
 
-                {/* Rodapé com Utilizadr */}
+                {/* Footer with User Info */}
                 <div className="border-t border-gray-200 shadow-sm flex p-3 w-full relative">
                   <div className="flex justify-center items-center bg-gray-200 p-3 rounded-lg">
                     <FaUser size={20} color="gray" />
@@ -86,6 +87,20 @@ export default function Sidebar({ mobileOpen, setMobileOpen, expanded, setExpand
                   {/* Dropdown Menu */}
                   {showUserMenu && (
                       <div className="absolute bottom-14 right-3 w-32 bg-white border shadow-lg rounded-md z-50">
+                        <button
+                            onClick={() => router.push("/homepage/properties")} // ✅ Fixed
+                            className="block w-full text-left px-4 py-2 text-sm text-[#191919] hover:bg-gray-100"
+                        >
+                          All Properties
+                        </button>
+
+                        <button
+                            onClick={() => router.push("/homepage/profiles")} // ✅ Fixed
+                            className="block w-full text-left px-4 py-2 text-sm text-[#191919] hover:bg-gray-100"
+                        >
+                          All Profiles
+                        </button>
+
                         <button
                             onClick={() => signOut({ callbackUrl: "/login" })}
                             className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"

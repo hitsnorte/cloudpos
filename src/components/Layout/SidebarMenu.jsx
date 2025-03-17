@@ -104,7 +104,7 @@ export default function SidebarMenu() {
     "Products": {
       icon: <LuFolderOpen  size={20} />, 
       submenu: [
-        { ref: "/homepage/product/stock", label: "All Products", icon: <FaTable size={18} /> },
+        { ref: "/homepage/product", label: "All Products", icon: <FaTable size={18} /> },
       ],
     },
    

@@ -195,20 +195,20 @@ const DataGrupo = () => {
                 onPress={onAddModalOpen}
                 
               >
-              adicionar        
+              Add       
           </DropdownItem>
         </DropdownMenu>
       </Dropdown>
 
         {/* Modal para adicionar grupo */}
-
+      
       <Modal
         isOpen={isAddModalOpen}
         onOpenChange={onAddModalClose}
         size="md"
         placement="center"
         className="w-100  shadow-xl rounded-lg"
-      >
+      >  
         <ModalContent>
           {(onClose) => (
             <>
@@ -266,7 +266,7 @@ const DataGrupo = () => {
           {(onClose) => (
             <>
               <ModalHeader className="rounded bg-[#FC9D25] flex justify-left items-left">
-                <h3 className="text-xl flex justify-left items-left font-bold text-white">Editar Grupo</h3>
+                <h3 className="text-xl flex justify-left items-left font-bold text-white">Edit group</h3>
               </ModalHeader>
               <ModalBody className="py-5 px-6">
                 {editGroup && (
@@ -319,16 +319,16 @@ const DataGrupo = () => {
           {(onClose) => (
             <>
               <ModalHeader className="flex justify-center items-center border-b border-gray-200 pb-2">
-                <h3 className="text-lg font-semibold text-gray-900">Confirmar Exclusão</h3>
+                <h3 className="text-lg font-semibold text-gray-900">Confirm Deletion</h3>
               </ModalHeader>
               <ModalBody className="py-6 px-8">
                 {isLoading ? (
                   <div className="flex justify-center items-center">
                     <Spinner size="lg" />
-                    <span className="ml-2">Excluindo...</span>
+                    <span className="ml-2">Excluding...</span>
                   </div>
                 ) : (
-                  <p className="text-center text-gray-700">Tem certeza que deseja excluir o grupo?</p>
+                  <p className="text-center text-gray-700">Are u sure u want to exclude the Group?</p>
                 )}
               </ModalBody>
               <ModalFooter className="flex justify-end border-t border-gray-200 pt-4 px-8">
@@ -345,7 +345,7 @@ const DataGrupo = () => {
                   }}
                   className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 font-medium ml-3"
                 >
-                  Excluir
+                  Exclude
                 </Button>
               </ModalFooter>
             </>
@@ -406,7 +406,7 @@ const DataGrupo = () => {
                         }}
                         className="hover:bg-gray-100"
                       >
-                        Editar
+                        Edit
                       </DropdownItem>
                       {/*<DropdownItem
                         key="delete"
@@ -436,7 +436,7 @@ const DataGrupo = () => {
         </table>
       </div>
       {filteredGroups.length === 0 && !error && (
-        <p className="text-center py-4">Nenhum grupo encontrado.</p>
+        <p className="text-center py-4">No groups found.</p>
       )}
     </div>
   );

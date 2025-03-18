@@ -24,7 +24,7 @@ const ProfilesTable = () => {
         password: ''
     });
 
-    // Fetch profiles
+
     const fetchProfiles = async () => {
         try {
             const response = await fetch('/api/user');

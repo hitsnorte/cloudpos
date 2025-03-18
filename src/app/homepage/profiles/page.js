@@ -100,7 +100,7 @@ const ProfilesTable = () => {
                                 <form id="addProfileForm" onSubmit={handleAddProfile} className="space-y-6">
                                     {["firstName", "secondName", "email", "password"].map((field, index) => (
                                         <div key={index}>
-                                            <label htmlFor={field} className="block text-sm font-medium text-gray-400 mb-1">
+                                            <label htmlFor={field} className="block text-sm font-medium text-[#191919] mb-1">
                                                 {field.charAt(0).toUpperCase() + field.slice(1)}
                                             </label>
                                             <input

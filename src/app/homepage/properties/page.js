@@ -70,7 +70,7 @@ const PropertiesTable = () => {
                             <ModalBody className="py-5 px-6 bg-white">
                                 <form id="addPropertyForm" onSubmit={handleAddProperty} className="space-y-6">
                                     <div>
-                                        <label htmlFor="propertyTag" className="block text-sm font-medium text-gray-400 mb-1">
+                                        <label htmlFor="propertyTag" className="block text-sm font-medium text-[#191919] mb-1">
                                             Property Tag
                                         </label>
                                         <input
@@ -82,16 +82,54 @@ const PropertiesTable = () => {
                                             className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
                                             required
                                         />
-                                    </div>
-                                    <div>
-                                        <label htmlFor="propertyName" className="block text-sm font-medium text-gray-400 mb-1">
-                                            Name
+
+                                        <label htmlFor="propertyName" className="block text-sm font-medium text-[#191919] mb-1">
+                                            Property Name
                                         </label>
                                         <input
                                             id="propertyName"
                                             type="text"
-                                            name="name"
-                                            value={newProperty.name}
+                                            name="propertyTag"
+                                            value={newProperty.propertyTag}
+                                            onChange={handleInputChange}
+                                            className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                                            required
+                                        />
+
+                                        <label htmlFor="propertyServer" className="block text-sm font-medium text-[#191919] mb-1">
+                                            Property Server
+                                        </label>
+                                        <input
+                                            id="propertyServer"
+                                            type="text"
+                                            name="propertyTag"
+                                            value={newProperty.propertyTag}
+                                            onChange={handleInputChange}
+                                            className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                                            required
+                                        />
+
+                                        <label htmlFor="propertyPort" className="block text-sm font-medium text-[#191919] mb-1">
+                                            Property Port
+                                        </label>
+                                        <input
+                                            id="propertyPort"
+                                            type="text"
+                                            name="propertyTag"
+                                            value={newProperty.propertyTag}
+                                            onChange={handleInputChange}
+                                            className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                                            required
+                                        />
+
+                                        <label htmlFor="propertyMpe" className="block text-sm font-medium text-[#191919] mb-1">
+                                            Property MPE
+                                        </label>
+                                        <input
+                                            id="propertyMpe"
+                                            type="text"
+                                            name="propertyTag"
+                                            value={newProperty.propertyTag}
                                             onChange={handleInputChange}
                                             className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
                                             required
@@ -100,7 +138,7 @@ const PropertiesTable = () => {
                                 </form>
                             </ModalBody>
                             <ModalFooter className="w-102 border-t border-gray-200 pt-2 px-8">
-                                <Button onPress={onClose} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition duration-200">
+                                <Button onPress={onClose} className="px-6 py-2 text-[#191919] rounded-md hover:bg-gray-100 transition duration-200">
                                     Cancel
                                 </Button>
                                 <Button

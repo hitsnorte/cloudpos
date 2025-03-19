@@ -17,28 +17,42 @@ import {
 const ProfilesTable = () => {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [profiles, setProfiles] = useState([]);
+    const [properties, setProperties] = useState([]);
     const [newProfile, setNewProfile] = useState({
         firstName: '',
         secondName: '',
         email: '',
-        password: ''
+        password: '',
+        propertyIDs: [],
+        propertyTags: [],
     });
 
-
+    // Fetch all profiles
     const fetchProfiles = async () => {
         try {
             const response = await fetch('/api/user');
             const data = await response.json();
-
-            // Garante que os dados estão no formato desejado
             setProfiles(data.users || data);
         } catch (error) {
+            console.error("Error fetching profiles:", error);
+        }
+    };
 
+    // Fetch all properties
+    const fetchProperties = async () => {
+        try {
+            const response = await fetch('/api/properties');
+
+            const data = await response.json();
+            setProperties(data || []);
+        } catch (error) {
+            console.error("Error fetching properties:", error);
         }
     };
 
     useEffect(() => {
         fetchProfiles();
+        fetchProperties();
     }, []);
 
     const handleInputChange = (e) => {
@@ -47,6 +61,19 @@ const ProfilesTable = () => {
             [e.target.name]: e.target.value
         });
     };
+
+    const handlePropertyChange = (e) => {
+        const selectedOptions = Array.from(e.target.selectedOptions);
+        const selectedIDs = selectedOptions.map(option => option.value);
+        const selectedTags = selectedOptions.map(option => option.dataset.tag);
+
+        setNewProfile(prevProfile => ({
+            ...prevProfile,
+            propertyIDs: [...new Set([...prevProfile.propertyIDs, ...selectedIDs])], // Avoid duplicates
+            propertyTags: [...new Set([...prevProfile.propertyTags, ...selectedTags])],
+        }));
+    };
+
 
     const handleAddProfile = async (e) => {
         e.preventDefault();
@@ -59,15 +86,18 @@ const ProfilesTable = () => {
 
             if (!response.ok) throw new Error("Failed to add profile");
 
-            setNewProfile({ firstName: '', secondName: '', email: '', password: '' });
+            setNewProfile({ firstName: '', secondName: '', email: '', password: '', propertyIDs: [], propertyTags: [] });
 
-            // atualiza tabela
             fetchProfiles();
             onClose();
         } catch (error) {
             console.error("Error adding profile:", error);
         }
     };
+
+    useEffect(()=> {
+        console.log("Property IDs:" , newProfile.propertyIDs);
+    }, [newProfile.propertyIDs]);
 
     return (
         <div className="p-4">
@@ -86,15 +116,13 @@ const ProfilesTable = () => {
                 </Dropdown>
             </div>
 
-            {/* Form para adicionar perfis*/}
+            {/* Modal de adição de perfil */}
             <Modal isOpen={isOpen} onOpenChange={onClose} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
                 <ModalContent>
                     {(onClose) => (
                         <>
                             <ModalHeader className="rounded bg-[#FC9D25] flex justify-start items-center">
-                                <div className="text-xl font-bold text-white">
-                                    New Profile
-                                </div>
+                                <div className="text-xl font-bold text-white">New Profile</div>
                             </ModalHeader>
                             <ModalBody className="py-5 px-6 bg-white">
                                 <form id="addProfileForm" onSubmit={handleAddProfile} className="space-y-6">
@@ -114,6 +142,32 @@ const ProfilesTable = () => {
                                             />
                                         </div>
                                     ))}
+
+                                    {/* Seleção de propriedades*/}
+                                    <div>
+                                        <label htmlFor="propertyIDs" className="block text-sm font-medium text-[#191919] mb-1">
+                                            Select Properties
+                                        </label>
+                                        <select
+                                            id="propertyIDs"
+                                            name="propertyIDs"
+                                            multiple
+                                            value={newProfile.propertyIDs}
+                                            onChange={handlePropertyChange}
+                                            required
+                                            className="w-full p-2 border rounded"
+                                        >
+                                            {properties.map((property, index) => (
+                                                <option
+                                                    key={property.propertyID || `property-${index}`}
+                                                    value={property.propertyID}
+                                                    data-tag={property.propertyTag}
+                                                >
+                                                    {property.propertyName} ({property.propertyTag})
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
                                 </form>
                             </ModalBody>
                             <ModalFooter className="border-t border-gray-200 pt-2 px-8">
@@ -134,7 +188,6 @@ const ProfilesTable = () => {
                 <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB] mx-auto">
                     <thead>
                     <tr className="bg-[#FC9D25] text-white">
-                        {/* Settings Column - Restricted Size */}
                         <th className="border border-[#EDEBEB] w-[50px] px-2 py-2 text-center">
                             <FaGear size={20} />
                         </th>
@@ -148,7 +201,6 @@ const ProfilesTable = () => {
                     {profiles.length > 0 ? (
                         profiles.map((profile, index) => (
                             <tr key={profile.id || `profile-${index}`} className="hover:bg-gray-100">
-                                {/* Settings Column - Restricted Size */}
                                 <td className="border border-[#EDEBEB] w-[50px] px-2 py-2 text-center">
                                     <Dropdown>
                                         <DropdownTrigger>
@@ -157,27 +209,21 @@ const ProfilesTable = () => {
                                             </Button>
                                         </DropdownTrigger>
                                         <DropdownMenu aria-label="Actions" className="bg-white shadow-lg rounded-md p-1">
-                                            <DropdownItem
-                                                key="edit"
-                                                onPress={() => console.log("Edit profile:", profile)}
-                                                className="hover:bg-gray-100"
-                                            >
+                                            <DropdownItem key="edit" onPress={() => console.log("Edit profile:", profile)}>
                                                 Edit
                                             </DropdownItem>
                                         </DropdownMenu>
                                     </Dropdown>
                                 </td>
-                                <td className="border border-[#EDEBEB] px-4 py-2 text-right">{profile.id}</td>
-                                <td className="border border-[#EDEBEB] px-4 py-2 text-left">{profile.firstName}</td>
-                                <td className="border border-[#EDEBEB] px-4 py-2 text-left">{profile.secondName}</td>
-                                <td className="border border-[#EDEBEB] px-4 py-2 text-left">{profile.email}</td>
+                                <td className="border border-[#EDEBEB] px-4 py-2">{profile.userID}</td>
+                                <td className="border border-[#EDEBEB] px-4 py-2">{profile.firstName}</td>
+                                <td className="border border-[#EDEBEB] px-4 py-2">{profile.secondName}</td>
+                                <td className="border border-[#EDEBEB] px-4 py-2">{profile.email}</td>
                             </tr>
                         ))
                     ) : (
                         <tr>
-                            <td colSpan="5" className="text-center py-4 text-gray-500">
-                                No profiles found.
-                            </td>
+                            <td colSpan="5" className="text-center py-4 text-gray-500">No profiles found.</td>
                         </tr>
                     )}
                     </tbody>

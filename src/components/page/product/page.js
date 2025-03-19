@@ -185,9 +185,9 @@ const DataProduct = () => {
             </DropdownTrigger>
              <DropdownMenu
                 aria-label="Dynamic Actions"
-                placement="bottom-end"
+
                 className="bg-white shadow-lg rounded-md p-1"
-                style={{ marginLeft: '80px' }}
+
                    >
                     <DropdownItem
                       type="text"

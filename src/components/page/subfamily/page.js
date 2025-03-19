@@ -5,6 +5,7 @@ import { HiDotsVertical } from "react-icons/hi";
 import { Plus } from "lucide-react";
 import { FaGear } from "react-icons/fa6";
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
+import { Select,  SelectItem} from "@heroui/select";
 import { fetchSubfamily, createSubfamily, deleteSubfamily, updateSubfamily } from '@/src/lib/apisubfamily';
 import {
   Modal,
@@ -172,6 +173,12 @@ const DataSubfamilia = () => {
     }
   };
 
+ {/*  useEffect(() => {
+    fetch("/api/subfamily") // Substitua pela URL da sua API
+      .then((response) => response.json())
+      .then((data) => setSubfamilias(data))
+      .catch((error) => console.error("Erro ao procurar subfamilias:", error));
+  }, []); */}
 
   return (
     <div className="p-4">
@@ -184,23 +191,21 @@ const DataSubfamilia = () => {
       </DropdownTrigger>
        <DropdownMenu
           aria-label="Dynamic Actions"
-          placement="bottom-end"
+
           className="bg-white shadow-lg rounded-md p-1"
-          style={{ marginLeft: '80px' }}
+
              >
               <DropdownItem
                 type="text"
                 placeholder="Digite o nome"
                 key="add"
                 onPress={onAddModalOpen}
-                
-              >
-              Add        
+              > Add        
           </DropdownItem>
         </DropdownMenu>
       </Dropdown>
 
-      {/* Modal para adicionar grupo */}
+      {/* Modal para adicionar subfamilia */}
       <Modal
         isOpen={isAddModalOpen}
         onOpenChange={onAddModalClose}
@@ -237,6 +242,15 @@ const DataSubfamilia = () => {
                       <p className="text-red-500 text-sm mt-1">{error}</p>
                     )}
                   </div>
+                  <div className="flex w-full flex-wrap md:flex-nowrap gap-4">
+                  <Select required 
+                          className="max-w-m" 
+                          label="Select a family" >
+                       {subfamilias.map((subfamilia) => (
+                       <SelectItem key={subfamilia.key}>{subfamilia.label}</SelectItem>
+                      ))}
+                   </Select>
+                   </div>
                 </form>
               </ModalBody>
               <ModalFooter className="w-102 border-t border-gray-200 pt-2 px-8">

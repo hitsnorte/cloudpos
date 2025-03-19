@@ -7,20 +7,30 @@ const prisma = new PrismaClient();
 export async function POST(req) {
     try {
         const body = await req.json();
-        console.log("Received Data:", body); //
+        console.log("Received Data:", body);
 
-        let { firstName, secondName, email, password } = body;
+        let { firstName, secondName, email, password, propertyIDs, propertyTags } = body;
 
         // Valida campos necessários
-        if (!firstName || !secondName || !email || !password) {
-            return NextResponse.json({ error: "All fields are required" }, { status: 400 });
+        if (!firstName || !secondName || !email || !password || !propertyIDs || !propertyTags) {
+            return NextResponse.json({ error: "All fields (including propertyIDs and propertyTags) are required" }, { status: 400 });
         }
 
-        // certifica que inputs são strings
+        // Converte inputs para os formatos corretos
         firstName = String(firstName).trim();
         secondName = String(secondName).trim();
         email = String(email).trim();
         password = String(password).trim();
+
+        // Certifica que propertyIDs e propertyTags são arrays
+        if (!Array.isArray(propertyIDs) || !Array.isArray(propertyTags)) {
+            return NextResponse.json({ error: "propertyIDs and propertyTags must be arrays" }, { status: 400 });
+        }
+
+        // Valida se os arrays possuem o mesmo tamanho
+        if (propertyIDs.length !== propertyTags.length) {
+            return NextResponse.json({ error: "propertyIDs and propertyTags must have the same length" }, { status: 400 });
+        }
 
         // Valida formato do email
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -28,7 +38,7 @@ export async function POST(req) {
             return NextResponse.json({ error: "Invalid email format" }, { status: 400 });
         }
 
-        // Encripta Password
+        // Encripta a senha
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Guarda utilizador na BD
@@ -36,15 +46,27 @@ export async function POST(req) {
             data: { firstName, secondName, email, password: hashedPassword },
         });
 
-        return NextResponse.json({ message: "User registered!", user }, { status: 201 });
+        console.log("User created:", user);
+
+        // Cria múltiplos registos na tabela cloud_userProperties
+        const userPropertiesData = propertyIDs.map((propertyID, index) => ({
+            userID: user.userID,
+            propertyID: parseInt(propertyID),
+            propertyTag: propertyTags[index],
+        }));
+
+        const userProperties = await prisma.cloud_userProperties.createMany({
+            data: userPropertiesData,
+        });
+
+        return NextResponse.json({ message: "User registered and properties linked!", user, userProperties }, { status: 201 });
     } catch (error) {
-        console.error("Error creating user:", error);
+        console.error("Error creating user or linking properties:", error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
 
-
-// Buscar todos os users na bd
+// Busca todos os users na bd
 export async function GET() {
     try {
         const users = await prisma.cloud_users.findMany();

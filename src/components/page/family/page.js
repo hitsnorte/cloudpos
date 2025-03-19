@@ -154,7 +154,7 @@ const DataFamily = () => {
       setError('Preencha o nome da familia.');
       return;
     }
-  
+
     try {
       console.log('Enviando para API:', { id: editFamily.id, family_name: editFamily.family_name });
       const updatedFamily = await updateGrupt(editFamily.id, {
@@ -175,28 +175,79 @@ const DataFamily = () => {
   return (
     <div className="p-4">
       <Dropdown>
-      <DropdownTrigger>
-      <button className="absolute top-4 right-10 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
-          < Plus size={25} />     
-      </button>
-      </DropdownTrigger>
-       <DropdownMenu
-          aria-label="Dynamic Actions"
-          placement="bottom-end"
-          className="bg-white shadow-lg rounded-md p-1"
-          style={{ marginLeft: '80px' }}
-             >
-              <DropdownItem
-                type="text"
-                placeholder="Digite o nome"
-                key="add"
-                onPress={onAddModalOpen}
-                
-              >
-              adicionar        
+        <DropdownTrigger>
+          <button
+              className="absolute top-4 right-10 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded"
+              onClick={onAddModalOpen}
+          >
+            <Plus size={25} />
+          </button>
+        </DropdownTrigger>
+        <DropdownMenu
+            aria-label="Dynamic Actions"
+            placement="bottom-end"
+            className="bg-white shadow-lg rounded-md p-1"
+            style={{ marginLeft: '80px' }}
+        >
+          <DropdownItem key="add" onPress={onAddModalOpen}>
+            Adicionar
           </DropdownItem>
         </DropdownMenu>
       </Dropdown>
+
+
+      <Modal
+          isOpen={isAddModalOpen}
+          onOpenChange={onAddModalClose}
+          size="md"
+          placement="center"
+          className="w-100  shadow-xl rounded-lg"
+      >
+        <ModalContent>
+          {(onClose) => (
+              <>
+                <ModalHeader className="rounded bg-[#FC9D25] flex justify-left items-left">
+                  <div className="text-xl flex justify-left items-left font-bold text-white">New Group</div>
+                </ModalHeader>
+                <ModalBody className="py-5 px-6">
+                  <form id="addGroupForm" onSubmit={handleAddGroup} className="space-y-6">
+                    <div>
+                      <label
+                          htmlFor="newGroupName"
+                          className="block text-sm font-medium text-gray-400 mb-1"
+                      >
+                        Name
+                      </label>
+                      <input
+                          id="newGroupName"
+                          type="text"
+                          name="group_name"
+                          value={newGroup.group_name}
+                          onChange={handleInputChange}
+                          className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                          required
+                      />
+                      {error && (
+                          <p className="text-red-500 text-sm mt-1">{error}</p>
+                      )}
+                    </div>
+                  </form>
+                </ModalBody>
+                <ModalFooter className="w-102 border-t border-gray-200 pt-2 px-8">
+                  <Button
+                      type="submit"
+                      form="addGroupForm"
+                      className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
+                      disabled={isLoading}
+                  >
+                    {isLoading ? <Spinner size="sm" color="white" /> : 'Save'}
+                  </Button>
+                </ModalFooter>
+              </>
+          )}
+        </ModalContent>
+      </Modal>
+
       <Modal
         isOpen={isAddModalOpen}
         onOpenChange={onAddModalClose}
@@ -373,12 +424,12 @@ const DataFamily = () => {
                 </div>
               </th>
               <th className="border-collapse border border-[#EDEBEB] w-1 px-1 sm:px-5 py-4 bg-[#FC9D25] text-[#FAFAFA]">
-                <div className="w-2 flex items-right justify-right"> 
+                <div className="w-2 flex items-right justify-right">
                   ID
                 </div>
               </th>
               <th className="border-collapse border border-[#EDEBEB] sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA]">
-               <div className="flex items-center justify-left "> 
+               <div className="flex items-center justify-left ">
                   NAME
               </div>
               </th>
@@ -433,7 +484,7 @@ const DataFamily = () => {
 
                   </td>
                   <td className="border-collapse border border-[#EDEBEB] px-3 py-2 whitespace-nowrap text-sm text-[#191919] text-right">
- 
+
                   {family.id}
                 </td>
                 <td className="border-collapse border border-[#EDEBEB] px-4 py-2 whitespace-nowrap text-sm text-[#191919] text-left">

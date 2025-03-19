@@ -17,7 +17,16 @@ import {
 const PropertiesTable = () => {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [properties, setProperties] = useState([]);
-    const [newProperty, setNewProperty] = useState({ propertyTag: "", propertyName: ""  , propertyServer: "" , propertyPort:"" , mpeHotel: ""});
+    const [chains, setChains] = useState([]);
+
+    const [newProperty, setNewProperty] = useState({
+        propertyTag: "",
+        propertyName: "",
+        propertyServer: "",
+        propertyPort: "",
+        mpeHotel: "",
+        chainID: "",
+    });
 
     useEffect(() => {
         const fetchProperties = async () => {
@@ -30,39 +39,86 @@ const PropertiesTable = () => {
                 console.error("Error fetching properties:", error);
             }
         };
+
+        const fetchChains = async () => {
+            try {
+                const response = await fetch("/api/chains");
+                if (!response.ok) throw new Error("Failed to fetch chains");
+                const data = await response.json();
+                setChains(data);
+            } catch (error) {
+                console.error("Error fetching chains:", error);
+            }
+        };
+
         fetchProperties();
+        fetchChains();
     }, []);
 
-    const handleInputChange = (e) => {
-        setNewProperty({ ...newProperty, [e.target.name]: e.target.value });
+    const handleInputChange = (event) => {
+        const { name, value, options } = event.target;
+
+        if (options) {
+            // Se existirem opções são um elemento do select
+            const selectedValues = Array.from(options)
+                .filter(option => option.selected)
+                .map(option => option.value);
+
+            setNewProperty((prev) => ({
+                ...prev,
+                propertyChain: selectedValues, // garante que a chain é guardada como um array
+            }));
+        } else {
+
+            setNewProperty((prev) => ({
+                ...prev,
+                [name]: value,
+            }));
+        }
     };
+
+
 
     const handleAddProperty = async (e) => {
         e.preventDefault();
+
+        if (!newProperty.propertyChain || newProperty.propertyChain.length === 0) {
+            alert("Please select a chain before creating the property.");
+            return;
+        }
+
+        const formattedProperty = {
+            ...newProperty,
+            chainID: newProperty.propertyChain, // Map propertyChain to chainID
+        };
+
         try {
             const response = await fetch("/api/properties", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(newProperty),
+                body: JSON.stringify(formattedProperty),  // Send the correctly formatted object
             });
-
-            const createdProperty = await response.json();
-            console.log("Created Property:", createdProperty); // Debugging
 
             if (!response.ok) throw new Error("Failed to add property");
 
-            setNewProperty({ propertyTag: '', propertyName: '', propertyServer: '', propertyPort: '', mpeHotel: '' });
+            const createdProperty = await response.json();
+            console.log("Created Property:", createdProperty);
+
+            setNewProperty({
+                propertyTag: '',
+                propertyName: '',
+                propertyServer: '',
+                propertyPort: '',
+                mpeHotel: '',
+                propertyChain: [],
+            });
+
             onClose();
 
-            // Use functional update
-            setProperties((prevProperties) => [...prevProperties, createdProperty]);
-
-            // Delay re-fetch to ensure data is stored
-            setTimeout(async () => {
-                const updatedPropertiesResponse = await fetch("/api/properties");
-                const updatedProperties = await updatedPropertiesResponse.json();
-                setProperties(updatedProperties);
-            }, 500);
+            // Fetch updated list immediately
+            const updatedPropertiesResponse = await fetch("/api/properties");
+            const updatedProperties = await updatedPropertiesResponse.json();
+            setProperties(updatedProperties);
 
         } catch (error) {
             console.error("Error adding property:", error);
@@ -93,37 +149,60 @@ const PropertiesTable = () => {
                 <ModalContent>
                     {(onClose) => (
                         <>
-                            <ModalHeader className="rounded bg-[#FC9D25] flex justify-left items-left">
-                                <div className="text-xl flex justify-left items-left font-bold text-white">New Property</div>
+                            <ModalHeader className="rounded bg-[#FC9D25] flex justify-start items-center">
+                                <div className="text-xl font-bold text-white">New Property</div>
                             </ModalHeader>
                             <ModalBody className="py-5 px-6 bg-white">
                                 <form id="addPropertyForm" onSubmit={handleAddProperty} className="space-y-6">
-                                    {["propertyTag", "propertyName", "propertyServer", "propertyPort" , "mpeHotel"].map((field, index) => (
+                                    {['propertyTag', 'propertyName', 'propertyServer', 'propertyPort', 'mpeHotel'].map((field, index) => (
                                         <div key={index}>
                                             <label htmlFor={field} className="block text-sm font-medium text-[#191919] mb-1">
                                                 {field.charAt(0).toUpperCase() + field.slice(1)}
                                             </label>
                                             <input
                                                 id={field}
-                                                type={field === "password" ? "password" : "text"}
+                                                type="text"
                                                 name={field}
                                                 value={newProperty[field]}
                                                 onChange={handleInputChange}
-                                                className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                                                className="w-full p-2 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
                                                 required
                                             />
                                         </div>
                                     ))}
+
+                                    {/* Chain selection dropdown */}
+                                    <div>
+                                        <label htmlFor="propertyChain" className="block text-sm font-medium text-[#191919] mb-1">
+                                            Select Property Chain
+                                        </label>
+                                        <select
+                                            id="propertyChain"
+                                            name="propertyChain"
+                                            multiple
+                                            value={Array.isArray(newProperty.propertyChain) ? newProperty.propertyChain : []}
+                                            onChange={handleInputChange}
+                                            required
+                                            className="w-full p-2 border rounded"
+                                        >
+                                            {chains.map((chain, index) => (
+                                                <option key={chain.chainTag || `chain-${index}`} value={chain.chainTag}>
+                                                    {chain.chainName} ({chain.chainTag})
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
                                 </form>
                             </ModalBody>
-                            <ModalFooter className="w-102 border-t border-gray-200 pt-2 px-8">
-                                <Button onPress={onClose} className="px-6 py-2 text-[#191919] rounded-md hover:bg-gray-100 transition duration-200">Cancel</Button>
-                                <Button type="submit" form="addPropertyForm" className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray-600 font-medium transition duration-200">Save</Button>
+                            <ModalFooter className="border-t border-gray-200 pt-2 px-8">
+                                <Button onPress={onClose} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">Cancel</Button>
+                                <Button type="submit" form="addPropertyForm" className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray-600 transition">Save</Button>
                             </ModalFooter>
                         </>
                     )}
                 </ModalContent>
             </Modal>
+
 
             <div className="overflow-x-auto sm:flex sm:flex-col bg-muted/40 mt-10">
                 <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB] mx-auto">
@@ -136,8 +215,8 @@ const PropertiesTable = () => {
                     </tr>
                     </thead>
                     <tbody>
-                    {properties.map((property) => (
-                        <tr key={property.id || property.propertyTag} className="hover:bg-gray-100">
+                    {properties.map((property, index) => (
+                        <tr key={property.id ?? `property-${index}`} className="hover:bg-gray-100">
                             <td className="border border-[#EDEBEB] px-3 py-2 text-center">
                                 <Dropdown>
                                     <DropdownTrigger>

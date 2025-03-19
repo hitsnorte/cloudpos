@@ -25,7 +25,7 @@ const PropertiesTable = () => {
         propertyServer: "",
         propertyPort: "",
         mpeHotel: "",
-        chainID: "",
+        propertyChain: "",
     });
 
     useEffect(() => {
@@ -82,6 +82,8 @@ const PropertiesTable = () => {
     const handleAddProperty = async (e) => {
         e.preventDefault();
 
+        console.log("Sending new property data:", newProperty);
+
         if (!newProperty.propertyChain || newProperty.propertyChain.length === 0) {
             alert("Please select a chain before creating the property.");
             return;
@@ -89,14 +91,13 @@ const PropertiesTable = () => {
 
         const formattedProperty = {
             ...newProperty,
-            chainID: newProperty.propertyChain, // Map propertyChain to chainID
         };
 
         try {
             const response = await fetch("/api/properties", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formattedProperty),  // Send the correctly formatted object
+                body: JSON.stringify(formattedProperty),
             });
 
             if (!response.ok) throw new Error("Failed to add property");
@@ -110,7 +111,7 @@ const PropertiesTable = () => {
                 propertyServer: '',
                 propertyPort: '',
                 mpeHotel: '',
-                propertyChain: [],
+                propertyChain: '',
             });
 
             onClose();

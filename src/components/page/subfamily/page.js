@@ -5,7 +5,7 @@ import { HiDotsVertical } from "react-icons/hi";
 import { Plus } from "lucide-react";
 import { FaGear } from "react-icons/fa6";
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
-import { Select,  SelectItem} from "@heroui/select";
+import { Select, MenuItem, FormControl, InputLabel } from "@mui/material";
 import { fetchSubfamily, createSubfamily, deleteSubfamily, updateSubfamily } from '@/src/lib/apisubfamily';
 import {
   Modal,
@@ -20,14 +20,13 @@ import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@
 
 const DataSubfamilia = () => {
   const [subfamilias, setSubfamilias] = useState([]);
-  const [sortField, setSortField] = useState('id');
-  const [sortOrder, setSortOrder] = useState('asc');
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [newSubfamilia, setNewSubfamilia] = useState({ nome: '' });
   const [editSubfamilia, setEditSubfamilia] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [subfamiliaToDelete, setSubfamiliaToDelete] = useState(null);
+  const [selectedSubfamilia, setSelectedSubfamilia] = useState("");
 
   const {
     isOpen: isAddModalOpen,
@@ -45,9 +44,35 @@ const DataSubfamilia = () => {
     onClose: onDeleteModalClose,
   } = useDisclosure();
 
+  {/* // Fetch all subfamilies
+  const fetchSubfamilys = async () => {
+    try {
+        const response = await fetch('/api/user');
+        const data = await response.json();
+        setSubfamilias(data.users || data);
+    } catch (error) {
+        console.error("Error fetching subfamilias:", error);
+    }
+  };
+
+  // Fetch all familias
+  const fetchFamilies = async () => {
+    try {
+        const response = await fetch('/api/properties');
+
+        const data = await response.json();
+        setProperties(data || []);
+    } catch (error) {
+        console.error("Error fetching properties:", error);
+    }
+  };  */}
+
   useEffect(() => {
+   // fetchSubfamilys();
+   // fetchFamilies();
     loadSubfamilias();
   }, []);
+
 
   const loadSubfamilias = async () => {
     try {
@@ -56,33 +81,6 @@ const DataSubfamilia = () => {
     } catch (err) {
       setError(err.message);
     }
-  };
-
-  const handleSort = (field) => {
-    if (sortField === field) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortOrder('asc');
-    }
-    const sortedSubfamilias = [...subfamilias].sort((a, b) => {
-      if (field === 'id') {
-        return sortOrder === 'asc' ? a[field] - b[field] : b[field] - a[field];
-      }
-      return sortOrder === 'asc'
-        ? a[field].localeCompare(b[field])
-        : b[field].localeCompare(a[field]);
-    });
-    setSubfamilias(sortedSubfamilias);
-  };
-
-  const renderSortIcon = (field) => {
-    if (sortField !== field) return null;
-    return sortOrder === 'asc' ? (
-      <ArrowUpIcon className="w-4 h-4 ml-1" />
-    ) : (
-      <ArrowDownIcon className="w-4 h-4 ml-1" />
-    );
   };
 
   const filteredSubfamilias = subfamilias.filter((subfamilia) => {
@@ -173,12 +171,7 @@ const DataSubfamilia = () => {
     }
   };
 
- {/*  useEffect(() => {
-    fetch("/api/subfamily") // Substitua pela URL da sua API
-      .then((response) => response.json())
-      .then((data) => setSubfamilias(data))
-      .catch((error) => console.error("Erro ao procurar subfamilias:", error));
-  }, []); */}
+  
 
   return (
     <div className="p-4">
@@ -220,7 +213,9 @@ const DataSubfamilia = () => {
                 <h3 className="text-xl flex justify-left items-left font-bold text-white">New Sub Family</h3>
               </ModalHeader>
               <ModalBody className="py-5 px-6">
-                <form id="addSubfamiliaForm" onSubmit={handleAddSubfamilia} className="space-y-6">
+                <form id="addSubfamiliaForm" className="space-y-6">
+                
+                
                   <div>
                     <label
                       htmlFor="newSubfamiliaName"
@@ -242,15 +237,25 @@ const DataSubfamilia = () => {
                       <p className="text-red-500 text-sm mt-1">{error}</p>
                     )}
                   </div>
-                  <div className="flex w-full flex-wrap md:flex-nowrap gap-4">
-                  <Select required 
-                          className="max-w-m" 
-                          label="Select a family" >
-                       {subfamilias.map((subfamilia) => (
-                       <SelectItem key={subfamilia.key}>{subfamilia.label}</SelectItem>
+                  <div>
+                    <label htmlFor="selectSubfamilia" className="block text-sm font-medium text-gray-400 mb-1">
+                      Select a subfamilia
+                    </label>
+                    <select
+                      id="selectSubfamilia"
+                      value={selectedSubfamilia}
+                      onChange={(e) => setSelectedSubfamilia(e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-[#FC9D25]"
+                    >
+                      <option value="">Select one Sub Family</option>
+                      {subfamilias.map((subfamilia) => (
+                        <option key={subfamilia.id} value={subfamilia.id}>
+                          {subfamilia.nome}
+                        </option>
                       ))}
-                   </Select>
-                   </div>
+                    </select>
+                  </div>
+
                 </form>
               </ModalBody>
               <ModalFooter className="w-102 border-t border-gray-200 pt-2 px-8">
@@ -280,7 +285,7 @@ const DataSubfamilia = () => {
     {(onClose) => (
       <>
         <ModalHeader className="rounded bg-[#FC9D25] flex justify-left items-left">
-          <h3 className="text-xl flex justify-left items-left font-bold text-white">Editar sub familia</h3>
+          <h3 className="text-xl flex justify-left items-left font-bold text-white">Edit Subfamily</h3>
         </ModalHeader>
         <ModalBody className="py-5 px-6">
           {editSubfamilia && (
@@ -311,6 +316,7 @@ const DataSubfamilia = () => {
           <Button
             type="submit"
             form="updateSubfamiliaForm"
+            onClick={handleAddSubfamilia}
             className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
           >
             Save

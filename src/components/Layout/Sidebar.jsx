@@ -88,14 +88,21 @@ export default function Sidebar({ mobileOpen, setMobileOpen, expanded, setExpand
                   {showUserMenu && (
                       <div className="absolute bottom-14 right-3 w-32 bg-white border shadow-lg rounded-md z-50">
                         <button
-                            onClick={() => router.push("/homepage/properties")} // ✅ Fixed
+                            onClick={() => router.push("/homepage/Chains")}
+                            className="block w-full text-left px-4 py-2 text-sm text-[#191919] hover:bg-gray-100"
+                        >
+                          All chains
+                        </button>
+
+                        <button
+                            onClick={() => router.push("/homepage/properties")}
                             className="block w-full text-left px-4 py-2 text-sm text-[#191919] hover:bg-gray-100"
                         >
                           All Properties
                         </button>
 
                         <button
-                            onClick={() => router.push("/homepage/profiles")} // ✅ Fixed
+                            onClick={() => router.push("/homepage/profiles")}
                             className="block w-full text-left px-4 py-2 text-sm text-[#191919] hover:bg-gray-100"
                         >
                           All Profiles

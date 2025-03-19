@@ -3,20 +3,20 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-// Create a new property
+// Cria nova propriedade
 export async function POST(req) {
     try {
         const body = await req.json();
         console.log("Received Property Data:", body);
 
-        let { propertyTag, propertyName, propertyServer, propertyPort, mpeHotel } = body;
+        let { propertyTag, propertyName, propertyServer, propertyPort, mpeHotel, propertyChain } = body;
 
-        // Validate required fields
-        if (!propertyTag || !propertyName || !propertyServer || !propertyPort) {
-            return NextResponse.json({ error: "All fields are required" }, { status: 400 });
+        // Valida campos obrigatórios
+        if (!propertyTag || !propertyName || !propertyServer || !propertyPort || !propertyChain?.length) {
+            return NextResponse.json({ error: "All fields are required, including at least one property chain" }, { status: 400 });
         }
 
-        // Ensure inputs are strings
+        // garante que inputs são strings
         propertyTag = String(propertyTag).trim();
         propertyName = String(propertyName).trim();
         propertyServer = String(propertyServer).trim();
@@ -32,12 +32,42 @@ export async function POST(req) {
             return NextResponse.json({ error: "Property tag already exists" }, { status: 400 });
         }
 
-        // Guardar propriedade na BD
+        // Guarda propriedade na BD
         const property = await prisma.cloud_properties.create({
             data: { propertyTag, propertyName, propertyServer, propertyPort, mpeHotel }
         });
 
-        return NextResponse.json({ message: "Property created successfully!", property }, { status: 201 });
+        console.log("Property created:", property);
+
+        // Map chainTags to their corresponding chainIDs
+        const chains = await prisma.cloud_chain.findMany({
+            where: { chainTag: { in: propertyChain } },
+            select: { chainID: true, chainTag: true }
+        });
+
+        console.log("Chains found:", chains);
+
+        if (!chains.length) {
+            return NextResponse.json({ error: "Invalid property chains selected" }, { status: 400 });
+        }
+
+        // Insert property-chain relationships into cloud_chainProperties
+        const chainPropertyData = chains.map(chain => ({
+            chainID: chain.chainID,
+            chainTag: chain.chainTag,
+            propertyID: property.propertyID,
+            propertyTag: property.propertyTag
+        }));
+
+        console.log("Data to insert in cloud_chainProperties:", chainPropertyData);
+
+        await prisma.cloud_chainProperties.createMany({
+            data: chainPropertyData
+        });
+
+        console.log("Property linked to chains successfully");
+
+        return NextResponse.json({ message: "Property created and linked to chains successfully!", property }, { status: 201 });
     } catch (error) {
         console.error("Error creating property:", error);
         return NextResponse.json({ error: error.message }, { status: 500 });

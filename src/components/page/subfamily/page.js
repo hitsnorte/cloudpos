@@ -5,8 +5,8 @@ import { HiDotsVertical } from "react-icons/hi";
 import { Plus } from "lucide-react";
 import { FaGear } from "react-icons/fa6";
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
-import { Select, MenuItem, FormControl, InputLabel } from "@mui/material";
 import { fetchSubfamily, createSubfamily, deleteSubfamily, updateSubfamily } from '@/src/lib/apisubfamily';
+import { fetchFamily } from '@/src/lib/apifamily';
 import {
   Modal,
   ModalContent,
@@ -20,13 +20,14 @@ import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@
 
 const DataSubfamilia = () => {
   const [subfamilias, setSubfamilias] = useState([]);
+  const [families, setFamilies] = useState([]);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [newSubfamilia, setNewSubfamilia] = useState({ nome: '' });
   const [editSubfamilia, setEditSubfamilia] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [subfamiliaToDelete, setSubfamiliaToDelete] = useState(null);
-  const [selectedSubfamilia, setSelectedSubfamilia] = useState("");
+  const [selectedFamily, setSelectedFamily] = useState("");
 
   const {
     isOpen: isAddModalOpen,
@@ -44,33 +45,9 @@ const DataSubfamilia = () => {
     onClose: onDeleteModalClose,
   } = useDisclosure();
 
-  {/* // Fetch all subfamilies
-  const fetchSubfamilys = async () => {
-    try {
-        const response = await fetch('/api/user');
-        const data = await response.json();
-        setSubfamilias(data.users || data);
-    } catch (error) {
-        console.error("Error fetching subfamilias:", error);
-    }
-  };
-
-  // Fetch all familias
-  const fetchFamilies = async () => {
-    try {
-        const response = await fetch('/api/properties');
-
-        const data = await response.json();
-        setProperties(data || []);
-    } catch (error) {
-        console.error("Error fetching properties:", error);
-    }
-  };  */}
-
   useEffect(() => {
-   // fetchSubfamilys();
-   // fetchFamilies();
     loadSubfamilias();
+    loadFamilies();
   }, []);
 
 
@@ -83,13 +60,23 @@ const DataSubfamilia = () => {
     }
   };
 
-  const filteredSubfamilias = subfamilias.filter((subfamilia) => {
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      subfamilia.id.toString().includes(searchLower) ||
-      subfamilia.nome.toString().toLowerCase().includes(searchLower)
-    );
-  });
+  const loadFamilies = async () => {
+      try {
+        const families = await fetchFamily();
+        setFamilies(families);
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+
+    const filteredSubfamilias = (subfamilias || []).filter((subfamilia) => {
+      if (!subfamilia || !subfamilia.nome) return false; // Verifica se `subfamilia` e `subfamilia.nome` existem
+      const searchLower = searchTerm.toLowerCase();
+      return (
+        (subfamilia.id && subfamilia.id.toString().includes(searchLower)) || 
+        (subfamilia.nome && subfamilia.nome.toLowerCase().includes(searchLower))
+      );
+    });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -97,34 +84,45 @@ const DataSubfamilia = () => {
   };
 
   const handleAddSubfamilia = async (e) => {
-    e.preventDefault();
-    if (!newSubfamilia.nome) {
-      setError('Preencha o nome da sub familia.');
-      return;
-    }
-
-    const subfamiliaExists = subfamilias.some(
-      (subfamilia) => subfamilia.nome.toLowerCase() === newSubfamilia.nome.toLowerCase()
-    );
-    if (subfamiliaExists) {
-      setError('Esta sub familia já existe. Por favor, use um nome diferente.');
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      const subfamiliaData = { nome: newSubfamilia.nome };
-      const createdSubfamilia = await createSubfamily(subfamiliaData);
-      setSubfamilias([...subfamilias, createdSubfamilia]);
-      setNewSubfamilia({ nome: '' });
-      setError(null); // Limpa o erro após sucesso
-      onAddModalClose();
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      e.preventDefault();
+      
+      if (!newSubfamilia.nome || !selectedFamily) {
+        setError('Preencha o nome da Sub família e selecione uma familia.');
+        return;
+      }
+    
+      const subfamiliaExists = subfamilias.some(
+        (subfamilia) => subfamilia.nome.toLowerCase() === newSubfamilia.nome.toLowerCase()
+      );
+    
+      if (subfamiliaExists) {
+        setError('Esta sub família já existe. Por favor, use um nome diferente.');
+        return;
+      }
+    
+      try {
+        setIsLoading(true);
+        
+        const subfamiliaData = {
+          nome: newSubfamilia.nome,
+          selectedFamily: selectedFamily, // Certifique-se de que a chave no backend espera esse nome
+        };
+    
+        const createdSubfamilia = await createSubfamily(subfamiliaData);
+        setSubfamilias([...subfamilias, createdSubfamilia]);
+    
+        // Limpa os campos após sucesso
+        setNewSubfamilia({ nome: '' });
+        setSelectedFamily('');
+        setError(null);
+    
+        onAddModalClose();
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
   const handleDeleteSubfamilia = async () => {
     if (subfamiliaToDelete) {
@@ -213,7 +211,7 @@ const DataSubfamilia = () => {
                 <h3 className="text-xl flex justify-left items-left font-bold text-white">New Sub Family</h3>
               </ModalHeader>
               <ModalBody className="py-5 px-6">
-                <form id="addSubfamiliaForm" className="space-y-6">
+                <form id="addSubfamiliaForm" onSubmit={handleAddSubfamilia} className="space-y-6">
                 
                 
                   <div>
@@ -238,19 +236,19 @@ const DataSubfamilia = () => {
                     )}
                   </div>
                   <div>
-                    <label htmlFor="selectSubfamilia" className="block text-sm font-medium text-gray-400 mb-1">
-                      Select a subfamilia
+                    <label htmlFor="selectFamily" className="block text-sm font-medium text-gray-400 mb-1">
+                      Select a Family
                     </label>
                     <select
-                      id="selectSubfamilia"
-                      value={selectedSubfamilia}
-                      onChange={(e) => setSelectedSubfamilia(e.target.value)}
+                      id="selectFamily"
+                      value={selectedFamily}
+                      onChange={(e) => setSelectedFamily(e.target.value)}
                       className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-[#FC9D25]"
                     >
-                      <option value="">Select one Sub Family</option>
-                      {subfamilias.map((subfamilia) => (
-                        <option key={subfamilia.id} value={subfamilia.id}>
-                          {subfamilia.nome}
+                      <option value="">Select...</option>
+                      {families.map((family) => (
+                        <option key={family.id} value={family.id}>
+                          {family.family_name}
                         </option>
                       ))}
                     </select>

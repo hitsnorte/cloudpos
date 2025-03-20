@@ -21,8 +21,6 @@ import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@
 const DataFamily = () => {
   const [families, setFamilies] = useState([]);
   const [groups, setGroups] = useState([]);
-  const [sortField, setSortField] = useState('id');
-  const [sortOrder, setSortOrder] = useState('asc');
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [newFamily, setNewFamily] = useState({ family_name: '' });
@@ -236,8 +234,8 @@ const DataFamily = () => {
                       )}
                     </div>
                     <div>
-                      <label htmlFor="selectFamily" className="block text-sm font-medium text-gray-400 mb-1">
-                        Select a Family
+                      <label htmlFor="selectGroup" className="block text-sm font-medium text-gray-400 mb-1">
+                        Select a Group
                       </label>
                       <select
                         id="selectFamily"
@@ -245,7 +243,7 @@ const DataFamily = () => {
                         onChange={(e) => setSelectedGroup(e.target.value)}
                         className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-[#FC9D25]"
                       >
-                        <option value="">Select one Group</option>
+                        <option value="">Select...</option>
                         {groups.map((group) => (
                           <option key={group.id} value={group.id}>
                             {group.group_name}

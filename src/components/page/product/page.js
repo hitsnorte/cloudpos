@@ -19,8 +19,6 @@ import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@
 
 const DataProduct = () => {
   const [products, setProducts] = useState([]);
-  const [sortField, setSortField] = useState('id');
-  const [sortOrder, setSortOrder] = useState('asc');
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [newProduct, setNewProduct] = useState({ product_name: '', quantity: '' });
@@ -28,6 +26,7 @@ const DataProduct = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
   const [quantityError, setQuantityError] = useState(''); 
+  const [selectedProduct, setSelectedProduct] = useState("");
 
   const {
     isOpen: isAddModalOpen,
@@ -185,9 +184,9 @@ const DataProduct = () => {
             </DropdownTrigger>
              <DropdownMenu
                 aria-label="Dynamic Actions"
-                placement="bottom-end"
+
                 className="bg-white shadow-lg rounded-md p-1"
-                style={{ marginLeft: '80px' }}
+
                    >
                     <DropdownItem
                       type="text"
@@ -252,6 +251,24 @@ const DataProduct = () => {
                     {quantityError && (
                       <p className="text-red-500 text-sm mt-1">{quantityError}</p>
                     )}
+                  </div>
+                  <div>
+                    <label htmlFor="selectProduct" className="block text-sm font-medium text-gray-400 mb-1">
+                      Select a Product
+                    </label>
+                    <select
+                      id="selectProduct"
+                      value={selectedProduct}
+                      onChange={(e) => setSelectedProduct(e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-[#FC9D25]"
+                    >
+                      <option value="">Select one Product</option>
+                      {products.map((product) => (
+                        <option key={product.id} value={product.id}>
+                          {product.product_name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </form>
               </ModalBody>

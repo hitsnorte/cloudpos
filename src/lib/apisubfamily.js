@@ -66,6 +66,7 @@ export const fetchSubfamily = async () => {
         body: JSON.stringify(subfamiliaData),
       });
       if (!response.ok) {
+        const errorDetails = await response.text(); // Obtém detalhes da resposta de erro
         throw new Error('Erro ao atualizar subfamilia');
       }
       const data = await response.json();

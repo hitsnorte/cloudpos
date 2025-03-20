@@ -6,6 +6,7 @@ import { Plus } from "lucide-react";
 import { FaGear } from "react-icons/fa6";
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
 import { fetchSubfamily, createSubfamily, deleteSubfamily, updateSubfamily } from '@/src/lib/apisubfamily';
+import { fetchFamily } from '@/src/lib/apifamily';
 import {
   Modal,
   ModalContent,
@@ -19,14 +20,14 @@ import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@
 
 const DataSubfamilia = () => {
   const [subfamilias, setSubfamilias] = useState([]);
-  const [sortField, setSortField] = useState('id');
-  const [sortOrder, setSortOrder] = useState('asc');
+  const [families, setFamilies] = useState([]);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [newSubfamilia, setNewSubfamilia] = useState({ nome: '' });
   const [editSubfamilia, setEditSubfamilia] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [subfamiliaToDelete, setSubfamiliaToDelete] = useState(null);
+  const [selectedFamily, setSelectedFamily] = useState("");
 
   const {
     isOpen: isAddModalOpen,
@@ -46,7 +47,9 @@ const DataSubfamilia = () => {
 
   useEffect(() => {
     loadSubfamilias();
+    loadFamilies();
   }, []);
+
 
   const loadSubfamilias = async () => {
     try {
@@ -57,40 +60,23 @@ const DataSubfamilia = () => {
     }
   };
 
-  const handleSort = (field) => {
-    if (sortField === field) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortOrder('asc');
-    }
-    const sortedSubfamilias = [...subfamilias].sort((a, b) => {
-      if (field === 'id') {
-        return sortOrder === 'asc' ? a[field] - b[field] : b[field] - a[field];
+  const loadFamilies = async () => {
+      try {
+        const families = await fetchFamily();
+        setFamilies(families);
+      } catch (err) {
+        setError(err.message);
       }
-      return sortOrder === 'asc'
-        ? a[field].localeCompare(b[field])
-        : b[field].localeCompare(a[field]);
+    };
+
+    const filteredSubfamilias = (subfamilias || []).filter((subfamilia) => {
+      if (!subfamilia || !subfamilia.nome) return false; // Verifica se `subfamilia` e `subfamilia.nome` existem
+      const searchLower = searchTerm.toLowerCase();
+      return (
+        (subfamilia.id && subfamilia.id.toString().includes(searchLower)) || 
+        (subfamilia.nome && subfamilia.nome.toLowerCase().includes(searchLower))
+      );
     });
-    setSubfamilias(sortedSubfamilias);
-  };
-
-  const renderSortIcon = (field) => {
-    if (sortField !== field) return null;
-    return sortOrder === 'asc' ? (
-      <ArrowUpIcon className="w-4 h-4 ml-1" />
-    ) : (
-      <ArrowDownIcon className="w-4 h-4 ml-1" />
-    );
-  };
-
-  const filteredSubfamilias = subfamilias.filter((subfamilia) => {
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      subfamilia.id.toString().includes(searchLower) ||
-      subfamilia.nome.toString().toLowerCase().includes(searchLower)
-    );
-  });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -98,34 +84,45 @@ const DataSubfamilia = () => {
   };
 
   const handleAddSubfamilia = async (e) => {
-    e.preventDefault();
-    if (!newSubfamilia.nome) {
-      setError('Preencha o nome da sub familia.');
-      return;
-    }
-
-    const subfamiliaExists = subfamilias.some(
-      (subfamilia) => subfamilia.nome.toLowerCase() === newSubfamilia.nome.toLowerCase()
-    );
-    if (subfamiliaExists) {
-      setError('Esta sub familia já existe. Por favor, use um nome diferente.');
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      const subfamiliaData = { nome: newSubfamilia.nome };
-      const createdSubfamilia = await createSubfamily(subfamiliaData);
-      setSubfamilias([...subfamilias, createdSubfamilia]);
-      setNewSubfamilia({ nome: '' });
-      setError(null); // Limpa o erro após sucesso
-      onAddModalClose();
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      e.preventDefault();
+      
+      if (!newSubfamilia.nome || !selectedFamily) {
+        setError('Preencha o nome da Sub família e selecione uma familia.');
+        return;
+      }
+    
+      const subfamiliaExists = subfamilias.some(
+        (subfamilia) => subfamilia.nome.toLowerCase() === newSubfamilia.nome.toLowerCase()
+      );
+    
+      if (subfamiliaExists) {
+        setError('Esta sub família já existe. Por favor, use um nome diferente.');
+        return;
+      }
+    
+      try {
+        setIsLoading(true);
+        
+        const subfamiliaData = {
+          nome: newSubfamilia.nome,
+          selectedFamily: selectedFamily, // Certifique-se de que a chave no backend espera esse nome
+        };
+    
+        const createdSubfamilia = await createSubfamily(subfamiliaData);
+        setSubfamilias([...subfamilias, createdSubfamilia]);
+    
+        // Limpa os campos após sucesso
+        setNewSubfamilia({ nome: '' });
+        setSelectedFamily('');
+        setError(null);
+    
+        onAddModalClose();
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
   const handleDeleteSubfamilia = async () => {
     if (subfamiliaToDelete) {
@@ -172,6 +169,7 @@ const DataSubfamilia = () => {
     }
   };
 
+  
 
   return (
     <div className="p-4">
@@ -184,23 +182,21 @@ const DataSubfamilia = () => {
       </DropdownTrigger>
        <DropdownMenu
           aria-label="Dynamic Actions"
-          placement="bottom-end"
+
           className="bg-white shadow-lg rounded-md p-1"
-          style={{ marginLeft: '80px' }}
+
              >
               <DropdownItem
                 type="text"
                 placeholder="Digite o nome"
                 key="add"
                 onPress={onAddModalOpen}
-                
-              >
-              Add        
+              > Add        
           </DropdownItem>
         </DropdownMenu>
       </Dropdown>
 
-      {/* Modal para adicionar grupo */}
+      {/* Modal para adicionar subfamilia */}
       <Modal
         isOpen={isAddModalOpen}
         onOpenChange={onAddModalClose}
@@ -216,6 +212,8 @@ const DataSubfamilia = () => {
               </ModalHeader>
               <ModalBody className="py-5 px-6">
                 <form id="addSubfamiliaForm" onSubmit={handleAddSubfamilia} className="space-y-6">
+                
+                
                   <div>
                     <label
                       htmlFor="newSubfamiliaName"
@@ -237,6 +235,25 @@ const DataSubfamilia = () => {
                       <p className="text-red-500 text-sm mt-1">{error}</p>
                     )}
                   </div>
+                  <div>
+                    <label htmlFor="selectFamily" className="block text-sm font-medium text-gray-400 mb-1">
+                      Select a Family
+                    </label>
+                    <select
+                      id="selectFamily"
+                      value={selectedFamily}
+                      onChange={(e) => setSelectedFamily(e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-[#FC9D25]"
+                    >
+                      <option value="">Select...</option>
+                      {families.map((family) => (
+                        <option key={family.id} value={family.id}>
+                          {family.family_name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
                 </form>
               </ModalBody>
               <ModalFooter className="w-102 border-t border-gray-200 pt-2 px-8">
@@ -266,7 +283,7 @@ const DataSubfamilia = () => {
     {(onClose) => (
       <>
         <ModalHeader className="rounded bg-[#FC9D25] flex justify-left items-left">
-          <h3 className="text-xl flex justify-left items-left font-bold text-white">Editar sub familia</h3>
+          <h3 className="text-xl flex justify-left items-left font-bold text-white">Edit Subfamily</h3>
         </ModalHeader>
         <ModalBody className="py-5 px-6">
           {editSubfamilia && (
@@ -297,6 +314,7 @@ const DataSubfamilia = () => {
           <Button
             type="submit"
             form="updateSubfamiliaForm"
+            onClick={handleAddSubfamilia}
             className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
           >
             Save

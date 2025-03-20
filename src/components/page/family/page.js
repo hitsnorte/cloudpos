@@ -5,7 +5,8 @@ import { HiDotsVertical } from "react-icons/hi";
 import { FaGear } from "react-icons/fa6";
 import { Plus } from "lucide-react";
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
-import { fetchGrup, createGrup, deleteGrup, updateGrupt } from '@/src/lib/apifamily';
+import { fetchFamily, createFamily, deleteFamily, updateFamily } from '@/src/lib/apifamily';
+import { fetchGrup } from '@/src/lib/apigroup';
 import {
   Modal,
   ModalContent,
@@ -19,14 +20,14 @@ import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@
 
 const DataFamily = () => {
   const [families, setFamilies] = useState([]);
-  const [sortField, setSortField] = useState('id');
-  const [sortOrder, setSortOrder] = useState('asc');
+  const [groups, setGroups] = useState([]);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [newFamily, setNewFamily] = useState({ family_name: '' });
   const [editFamily, setEditFamily] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [familyToDelete, setFamilyToDelete] = useState(null);
+  const [selectedGroup, setSelectedGroup] = useState("");
 
   const {
     isOpen: isAddModalOpen,
@@ -46,79 +47,77 @@ const DataFamily = () => {
 
   useEffect(() => {
     loadFamilies();
+    loadGroups();
   }, []);
 
+  
   const loadFamilies = async () => {
     try {
-      const families = await fetchGrup();
+      const families = await fetchFamily();
       setFamilies(families);
     } catch (err) {
       setError(err.message);
     }
   };
 
-  const handleSort = (field) => {
-    if (sortField === field) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortOrder('asc');
+  const loadGroups = async () => {
+    try {
+      const groups = await fetchGrup();
+      setGroups(groups);
+    } catch (err) {
+      setError(err.message);
     }
-    const sortedFamilies = [...families].sort((a, b) => {
-      if (field === 'id') {
-        return sortOrder === 'asc' ? a[field] - b[field] : b[field] - a[field];
-      }
-      return sortOrder === 'asc'
-        ? a[field].localeCompare(b[field])
-        : b[field].localeCompare(a[field]);
-    });
-    setFamilies(sortedFamilies);
   };
 
-  const renderSortIcon = (field) => {
-    if (sortField !== field) return null;
-    return sortOrder === 'asc' ? (
-      <ArrowUpIcon className="w-4 h-4 ml-1" />
-    ) : (
-      <ArrowDownIcon className="w-4 h-4 ml-1" />
-    );
-  };
-
-  const filteredFamilies = families.filter((family) => {
+  const filteredFamilies = (families || []).filter((family) => {
+    if (!family || !family.family_name) return false; // Verifica se `family` e `family.family_name` existem
     const searchLower = searchTerm.toLowerCase();
     return (
-      family.id.toString().includes(searchLower) ||
-      family.family_name.toString().toLowerCase().includes(searchLower)
+      (family.id && family.id.toString().includes(searchLower)) || 
+      (family.family_name && family.family_name.toLowerCase().includes(searchLower))
     );
   });
+  
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewFamily((prev) => ({ ...prev, [name]: value }));
   };
 
+
   const handleAddFamily = async (e) => {
     e.preventDefault();
-    if (!newFamily.family_name) {
-      setError('Preencha o nome da familia.');
+    
+    if (!newFamily.family_name || !selectedGroup) {
+      setError('Preencha o nome da família e selecione um grupo.');
       return;
     }
-
+  
     const familyExists = families.some(
       (family) => family.family_name.toLowerCase() === newFamily.family_name.toLowerCase()
     );
+  
     if (familyExists) {
-      setError('Esta familia já existe. Por favor, use um nome diferente.');
+      setError('Esta família já existe. Por favor, use um nome diferente.');
       return;
     }
-
+  
     try {
       setIsLoading(true);
-      const familyData = { family_name: newFamily.family_name };
-      const createdFamily = await createGrup(familyData);
+      
+      const familyData = {
+        family_name: newFamily.family_name,
+        selectedGroup: selectedGroup, // Certifique-se de que a chave no backend espera esse nome
+      };
+  
+      const createdFamily = await createFamily(familyData);
       setFamilies([...families, createdFamily]);
+  
+      // Limpa os campos após sucesso
       setNewFamily({ family_name: '' });
-      setError(null); // Limpa o erro após sucesso
+      setSelectedGroup('');
+      setError(null);
+  
       onAddModalClose();
     } catch (err) {
       setError(err.message);
@@ -126,12 +125,13 @@ const DataFamily = () => {
       setIsLoading(false);
     }
   };
+  
 
   const handleDeleteFamily = async () => {
     if (familyToDelete) {
       setIsLoading(true);
       try {
-        await deleteGrup(familyToDelete);
+        await deleteFamily(familyToDelete);
         setFamilies(families.filter((family) => family.id !== familyToDelete));
         setFamilyToDelete(null);
         onDeleteModalClose();
@@ -157,7 +157,7 @@ const DataFamily = () => {
 
     try {
       console.log('Enviando para API:', { id: editFamily.id, family_name: editFamily.family_name });
-      const updatedFamily = await updateGrupt(editFamily.id, {
+      const updatedFamily = await updateFamily(editFamily.id, {
         family_name: editFamily.family_name,
       });
       console.log('Resposta da API:', updatedFamily);
@@ -171,31 +171,32 @@ const DataFamily = () => {
     }
   };
 
-
   return (
     <div className="p-4">
+      {/* button */}
       <Dropdown>
-        <DropdownTrigger>
-          <button
-              className="absolute top-4 right-10 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded"
-              onClick={onAddModalOpen}
-          >
-            <Plus size={25} />
-          </button>
-        </DropdownTrigger>
-        <DropdownMenu
-            aria-label="Dynamic Actions"
-            placement="bottom-end"
-            className="bg-white shadow-lg rounded-md p-1"
-            style={{ marginLeft: '80px' }}
-        >
-          <DropdownItem key="add" onPress={onAddModalOpen}>
-            Adicionar
+      <DropdownTrigger>
+      <button className="absolute top-4 right-10 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
+          < Plus size={25} />     
+      </button>
+      </DropdownTrigger>
+       <DropdownMenu
+          aria-label="Dynamic Actions"
+
+          className="bg-white shadow-lg rounded-md p-1"
+
+             >
+              <DropdownItem
+                type="text"
+                placeholder="Digite o nome"
+                key="add"
+                onPress={onAddModalOpen}
+              > Add        
           </DropdownItem>
         </DropdownMenu>
       </Dropdown>
 
-
+      {/* Modal para adicionar grupo */}
       <Modal
           isOpen={isAddModalOpen}
           onOpenChange={onAddModalClose}
@@ -207,23 +208,24 @@ const DataFamily = () => {
           {(onClose) => (
               <>
                 <ModalHeader className="rounded bg-[#FC9D25] flex justify-left items-left">
-                  <div className="text-xl flex justify-left items-left font-bold text-white">New Group</div>
+                  <div className="text-xl flex justify-left items-left font-bold text-white">New Family</div>
                 </ModalHeader>
                 <ModalBody className="py-5 px-6">
-                  <form id="addGroupForm" onSubmit={handleAddGroup} className="space-y-6">
+                  <form id="addFamilyForm" onSubmit={handleAddFamily} className="space-y-6">
                     <div>
                       <label
-                          htmlFor="newGroupName"
+                          htmlFor="newFamilyName"
                           className="block text-sm font-medium text-gray-400 mb-1"
                       >
                         Name
                       </label>
                       <input
-                          id="newGroupName"
+                          id="newFamilyName"
                           type="text"
-                          name="group_name"
-                          value={newGroup.group_name}
+                          name="family_name"
+                          value={newFamily.family_name}
                           onChange={handleInputChange}
+                          placeholder="Digite o nome da familia"
                           className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
                           required
                       />
@@ -231,12 +233,31 @@ const DataFamily = () => {
                           <p className="text-red-500 text-sm mt-1">{error}</p>
                       )}
                     </div>
+                    <div>
+                      <label htmlFor="selectGroup" className="block text-sm font-medium text-gray-400 mb-1">
+                        Select a Group
+                      </label>
+                      <select
+                        id="selectFamily"
+                        value={selectedGroup}
+                        onChange={(e) => setSelectedGroup(e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-[#FC9D25]"
+                      >
+                        <option value="">Select...</option>
+                        {groups.map((group) => (
+                          <option key={group.id} value={group.id}>
+                            {group.group_name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    
                   </form>
                 </ModalBody>
                 <ModalFooter className="w-102 border-t border-gray-200 pt-2 px-8">
                   <Button
                       type="submit"
-                      form="addGroupForm"
+                      form="addFamilyForm"
                       className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
                       disabled={isLoading}
                   >
@@ -248,86 +269,26 @@ const DataFamily = () => {
         </ModalContent>
       </Modal>
 
-      <Modal
-        isOpen={isAddModalOpen}
-        onOpenChange={onAddModalClose}
-        size="md"
-        placement="center"
-        className="bg-white shadow-xl rounded-lg"
-      >
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader className="flex justify-center items-center border-b border-gray-200 pb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Adicionar Novo Grupo</h3>
-              </ModalHeader>
-              <ModalBody className="py-6 px-8">
-                <form id="addFamilyForm" onSubmit={handleAddFamily} className="space-y-6">
-                  <div>
-                    <label
-                      htmlFor="newFamilyName"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
-                      Nome da familia
-                    </label>
-                    <input
-                      id="newFamilyName"
-                      type="text"
-                      name="family_name"
-                      value={newFamily.family_name}
-                      onChange={handleInputChange}
-                      placeholder="Digite o nome da familia"
-                      className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-                      required
-                    />
-                    {error && (
-                      <p className="text-red-500 text-sm mt-1">{error}</p>
-                    )}
-                  </div>
-                </form>
-              </ModalBody>
-              <ModalFooter className="flex justify-end border-t border-gray-200 pt-4 px-8">
-                <Button
-                  type="submit"
-                  form="addFamilyForm"
-                  className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 font-medium transition duration-200"
-                  disabled={isLoading}
-                >
-                  {isLoading ? <Spinner size="sm" color="white" /> : 'Adicionar'}
-                </Button>
-                <Button
-                  onPress={onClose}
-                  className="px-6 py-2 bg-black text-white rounded-md hover:bg-gray-600 font-medium ml-3 transition duration-200"
-                  disabled={isLoading}
-                >
-                  Cancelar
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
-
       {/* Modal para editar grupo */}
       <Modal
   isOpen={isEditModalOpen}
   onOpenChange={onEditModalClose}
   size="md"
   placement="center"
-  className="bg-white shadow-xl rounded-lg"
+  className="w-100 bg-white shadow-xl rounded-lg"
 >
   <ModalContent>
     {(onClose) => (
       <>
-        <ModalHeader className="flex justify-center items-center border-b border-gray-200 pb-4">
-          <h3 className="text-lg font-semibold text-gray-900">Editar familia</h3>
+        <ModalHeader className="rounded bg-[#FC9D25] flex justify-left items-left">
+          <h3 className="text-xl flex justify-left items-left font-bold text-white">Edit Family</h3>
         </ModalHeader>
-        <ModalBody className="py-6 px-8">
+        <ModalBody className="py-5 px-6">
           {editFamily && (
             <form id="updateFamilyForm" onSubmit={handleUpdateFamily} className="space-y-6">
               <div>
-                <label htmlFor="familyName" className="block text-sm font-medium text-gray-700 mb-1">
-                  Nome da familia
+                <label htmlFor="familyName" className="block text-sm font-medium text-gray-400 mb-1">
+                  Name
                 </label>
                 <input
                   id="familyName"
@@ -337,7 +298,7 @@ const DataFamily = () => {
                     setEditFamily({ ...editFamily, family_name: e.target.value })
                   }
                   placeholder="Digite o nome da familia"
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition duration-200"
+                  className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
                   required
                 />
                 {error && (
@@ -351,15 +312,9 @@ const DataFamily = () => {
           <Button
             type="submit"
             form="updateFamilyForm"
-            className="px-6 py-2 bg-black text-white rounded-md hover:bg-gray-800 font-medium transition duration-200"
+            className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
           >
-            Salvar
-          </Button>
-          <Button
-            onPress={onClose}
-            className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 font-medium ml-3 transition duration-200"
-          >
-            Cancelar
+            Save
           </Button>
         </ModalFooter>
       </>
@@ -418,7 +373,7 @@ const DataFamily = () => {
         <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB] mx-auto">
           <thead>
             <tr>
-              <th className="border-collapse border border-[#EDEBEB] !w-[1px] px-1 sm:px-5 py-4 bg-[#FC9D25]">
+              <th className="border-collapse border border-[#EDEBEB] !w-[2px] px-1 sm:px-5 py-4 bg-[#FC9D25]">
                 <div className=" flex items-left justify-left">
                   <FaGear size={20} color='white'/>
                 </div>
@@ -451,23 +406,23 @@ const DataFamily = () => {
                       className="bg-white shadow-lg rounded-md p-1"
                       style={{ marginLeft: '80px' }}
                     >
-                      <DropdownItem
+                    {/*  <DropdownItem
                         key="add"
                         onPress={onAddModalOpen}
                         className="hover:bg-gray-100"
                       >
                         Adicionar
-                      </DropdownItem>
-                      {/*<DropdownItem
+                      </DropdownItem>*/}
+                    <DropdownItem
                         key="edit"
                         onPress={() => {
-                          handleEditGroup(group);
+                          handleEditFamily(family);
                           onEditModalOpen();
                         }}
                         className="hover:bg-gray-100"
                       >
                         Editar
-                      </DropdownItem>*/}
+                      </DropdownItem>
                       {/*<DropdownItem
                         key="delete"
                         className="text-danger hover:bg-red-50"

@@ -198,13 +198,13 @@ const DataGrupo = () => {
           </DropdownItem>
         </DropdownMenu>
       </Dropdown>
-        {/* Modal para adicionar grupo */}
+      {/* Modal para adicionar grupo */}
       <Modal
         isOpen={isAddModalOpen}
         onOpenChange={onAddModalClose}
         size="md"
         placement="center"
-        className="bg-white shadow-xl rounded-lg"
+        className="w-1/3 bg-white shadow-xl rounded-lg"
       >
         <ModalContent>
           {(onClose) => (
@@ -228,7 +228,7 @@ const DataGrupo = () => {
                       value={newGroup.group_name}
                       onChange={handleInputChange}
                       placeholder="Digite o nome do grupo"
-                      className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                      className="flex justify-center items-center p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
                       required
                     />
                     {error && (
@@ -248,7 +248,7 @@ const DataGrupo = () => {
                 </Button>
                 <Button
                   onPress={onClose}
-                  className="px-6 py-2 bg-black text-white rounded-md hover:bg-gray-600 font-medium ml-3 transition duration-200"
+                  className="flex items-left px-6 py-2 bg-black text-white rounded-md hover:bg-gray-600 font-medium ml-3 transition duration-200"
                   disabled={isLoading}
                 >
                   Cancelar

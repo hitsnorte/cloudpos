@@ -178,80 +178,74 @@ const DataGrupo = () => {
       {/* button */}
       <Dropdown>
       <DropdownTrigger>
-      <button className="absolute top-4 right-10 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
-          < Plus size={25} />     
+      <button 
+          onClick={onAddModalOpen}
+          className="absolute top-4 right-10 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
+          < Plus size={25}  />     
       </button>
       </DropdownTrigger>
-       <DropdownMenu
-          aria-label="Dynamic Actions"
-
-          className="bg-white shadow-lg rounded-md p-1"
-
-          
-             >
-              <DropdownItem
-                type="text"
-                key="add"
-                onPress={onAddModalOpen}
-                
-              >
-              Add       
-          </DropdownItem>
-        </DropdownMenu>
       </Dropdown>
       {/* Modal para adicionar grupo */} 
       <Modal
-        isOpen={isAddModalOpen}
-        onOpenChange={onAddModalClose}
-        size="md"
-        placement="center"
-        className="w-1/3 bg-white shadow-xl rounded-lg"
-      >
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader className="rounded bg-[#FC9D25] flex justify-left items-left">
-                <div className="text-xl flex justify-left items-left font-bold text-white">New Group</div>
-              </ModalHeader>
-              <ModalBody className="py-5 px-6">
-                <form id="addGroupForm" onSubmit={handleAddGroup} className="space-y-6">
-                  <div>
-                    <label
-                      htmlFor="newGroupName"
-                      className="block text-sm font-medium text-gray-400 mb-1"
-                    >
-                      Name
-                    </label>
-                    <input
-                      id="newGroupName"
-                      type="text"
-                      name="group_name"
-                      value={newGroup.group_name}
-                      onChange={handleInputChange}
-                      placeholder="Digite o nome do grupo"
-                      className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
-                      required
-                    />
-                    {error && (
-                      <p className="text-red-500 text-sm mt-1">{error}</p>
-                    )}
-                  </div>
-                </form>
-              </ModalBody>
-              <ModalFooter className="w-102 border-t border-gray-200 pt-2 px-8">
-                <Button
-                  type="submit"
-                  form="addGroupForm"
-                  className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
-                  disabled={isLoading}
-                >
-                  {isLoading ? <Spinner size="sm" color="white" /> : 'Adicionar'}
-               </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
+      isOpen={isAddModalOpen}
+      onOpenChange={onAddModalClose}
+      size="md"
+      placement="center"
+      className="w-100 bg-white shadow-xl rounded-lg"
+      hideCloseButton={true}
+    >
+      <ModalContent>
+        {(onClose) => (
+          <>
+            <ModalHeader className="rounded bg-[#FC9D25] flex justify-between items-center">
+              <div className="text-xl font-bold text-white">New Group</div>
+              <Button
+                onClick={onClose}
+                className="text-white bg-transparent border-0 text-2xl p-0"
+                aria-label="Close"
+              >
+                &times; {/* Unicode for "×" sign */}
+              </Button>
+            </ModalHeader>
+            <ModalBody className="py-5 px-6">
+              <form id="addGroupForm" onSubmit={handleAddGroup} className="space-y-6">
+                <div>
+                  <label
+                    htmlFor="newGroupName"
+                    className="block text-sm font-medium text-gray-400 mb-1"
+                  >
+                    Name
+                  </label>
+                  <input
+                    id="newGroupName"
+                    type="text"
+                    name="group_name"
+                    value={newGroup.group_name}
+                    onChange={handleInputChange}
+                    placeholder="Digite o nome do grupo"
+                    className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                    required
+                  />
+                  {error && (
+                    <p className="text-red-500 text-sm mt-1">{error}</p>
+                  )}
+                </div>
+              </form>
+            </ModalBody>
+            <ModalFooter className="w-102 border-t border-gray-200 pt-2 px-8">
+              <Button
+                type="submit"
+                form="addGroupForm"
+                className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
+                disabled={isLoading}
+              >
+                {isLoading ? <Spinner size="sm" color="white" /> : 'Save'}
+              </Button>
+            </ModalFooter>
+          </>
+        )}
+      </ModalContent>
+    </Modal>
 
       {/* Modal para editar grupo */}
       <Modal

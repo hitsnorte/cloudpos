@@ -6,11 +6,6 @@ import { TbLayoutDashboardFilled } from "react-icons/tb"; // Ícone para o subme
 import { FaTable } from "react-icons/fa"
 import { LuFolderOpenDot, LuFolderOpen, LuFolderCog, LuFolderDot } from "react-icons/lu";
 
-
-
-
-
-
 // Item de menu principal
 function SidebarItem({ icon, text, active, alert, submenu }) {
   const { expanded } = useContext(SidebarContext);
@@ -106,10 +101,10 @@ export default function SidebarMenu() {
       ],
 
     },
-    "Producs": {
+    "Products": {
       icon: <LuFolderOpen  size={20} />, 
       submenu: [
-        { ref: "/homepage/product/stock", label: "All Producs", icon: <FaTable size={18} /> }, 
+        { ref: "/homepage/product", label: "All Products", icon: <FaTable size={18} /> },
       ],
     },
    

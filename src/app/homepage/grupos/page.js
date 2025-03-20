@@ -1,4 +1,4 @@
-import Pagegrupo from '@/src/components/page/grupo/pageg';
+import Pagegrupo from '@/src/components/page/grupo/page';
 
 export default function Home() {
   return (

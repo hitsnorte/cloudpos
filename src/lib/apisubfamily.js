@@ -1,5 +1,5 @@
 // src/lib/apisubfamily.js
-export const fetchGrup = async () => {
+export const fetchSubfamily = async () => {
     try {
       const response = await fetch('/api/subfamily', {
         method: 'GET',
@@ -18,14 +18,14 @@ export const fetchGrup = async () => {
     }
   };
   
-  export const createGrup = async (subfamiliaData) => {
+  export const createSubfamily = async (subfamiliaData) => {
     try {
       const response = await fetch('/api/subfamily', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(subfamiliaDataData), // Espera { nome: string }
+        body: JSON.stringify(subfamiliaData), // Espera { nome: string }
       });
       if (!response.ok) {
         throw new Error('Erro ao criar uma sub familia');
@@ -38,7 +38,7 @@ export const fetchGrup = async () => {
     }
   };
   
-  export const deleteGrup = async (id) => {
+  export const deleteSubfamily = async (id) => {
     try {
       const response = await fetch(`/api/subfamily/${id}`, {
         method: 'DELETE',
@@ -56,22 +56,23 @@ export const fetchGrup = async () => {
     }
   };
   
-  export const updateGrupt = async (id, subfamiliaData) => {
+  export const updateSubfamily = async (id, subfamiliaData) => {
     try {
       const response = await fetch(`/api/subfamily/${id}`, {
-        method: 'PUT', // Troque para 'PATCH' se necessário
+        method: 'PATCH', // Troque para 'PATCH' se necessário
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(subfamiliaData),
       });
       if (!response.ok) {
-        throw new Error('Erro ao atualizar grupo');
+        const errorDetails = await response.text(); // Obtém detalhes da resposta de erro
+        throw new Error('Erro ao atualizar subfamilia');
       }
       const data = await response.json();
       return data.data;
     } catch (error) {
-      console.error('Erro ao atualizar grupo:', error);
+      console.error('Erro ao atualizar subfamilia:', error);
       throw error;
     }
   };

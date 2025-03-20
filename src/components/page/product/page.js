@@ -5,7 +5,8 @@ import { HiDotsVertical } from "react-icons/hi";
 import { FaGear } from "react-icons/fa6";
 import { Plus } from "lucide-react";
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
-import { fetchProducts, createProduct, deleteProduct, updateProduct } from '@/src/lib/apiprodut';
+import { fetchProduct, createProduct, deleteProduct, updateProduct } from '@/src/lib/apiproduct';
+import { fetchSubfamily } from '@/src/lib/apisubfamily';
 import {
   Modal,
   ModalContent,
@@ -17,10 +18,9 @@ import {
 } from '@nextui-org/react';
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@heroui/react";
 
-const DataTable = () => {
-  const [data, setData] = useState([]);
-  const [sortField, setSortField] = useState('id');
-  const [sortOrder, setSortOrder] = useState('asc');
+const DataProduct = () => {
+  const [products, setProducts] = useState([]);
+  const [subfamilies, setSubfamilies] = useState([]);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [newProduct, setNewProduct] = useState({ product_name: '', quantity: '' });
@@ -28,6 +28,7 @@ const DataTable = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
   const [quantityError, setQuantityError] = useState(''); 
+  const [selectedSubfamily, setSelectedSubfamily] = useState("");
 
   const {
     isOpen: isAddModalOpen,
@@ -47,106 +48,93 @@ const DataTable = () => {
 
   useEffect(() => {
     loadProducts();
+    loadSubfamilies();
   }, []);
 
   const loadProducts = async () => {
     try {
-      const products = await fetchProducts();
-      setData(products);
+      const products = await fetchProduct();
+      setProducts(products);
     } catch (err) {
       setError(err.message);
     }
   };
 
-  const handleSort = (field) => {
-    if (sortField === field) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortOrder('asc');
-    }
-    const sortedData = [...data].sort((a, b) => {
-      if (field === 'quantity' || field === 'id') {
-        return sortOrder === 'asc' ? a[field] - b[field] : b[field] - a[field];
+  const loadSubfamilies = async () => {
+      try {
+        const subfamilies = await fetchSubfamily();
+        setSubfamilies(subfamilies);
+      } catch (err) {
+        setError(err.message);
       }
-      return sortOrder === 'asc'
-        ? a[field].localeCompare(b[field])
-        : b[field].localeCompare(a[field]);
-    });
-    setData(sortedData);
   };
 
-  const renderSortIcon = (field) => {
-    if (sortField !== field) return null;
-    return sortOrder === 'asc' ? (
-      <ArrowUpIcon className="w-4 h-4 ml-1" />
-    ) : (
-      <ArrowDownIcon className="w-4 h-4 ml-1" />
-    );
-  };
-
-  const filteredData = data.filter((item) => {
+  const filteredProducts = products.filter((product) => {
+    if (!product || !product.id || !product.product_name) {
+      return false; 
+    }
     const searchLower = searchTerm.toLowerCase();
     return (
-      item.id.toString().includes(searchLower) ||
-      item.product_name.toString().toLowerCase().includes(searchLower)
+      product.id.toString().includes(searchLower) ||
+      product.product_name.toString().toLowerCase().includes(searchLower)
     );
   });
+  
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    if (name === 'quantity') {
-      const numValue = value.replace(/[^0-9]/g, ''); 
-      if (numValue === '' || parseInt(numValue) > 0) {
-        setNewProduct((prev) => ({ ...prev, [name]: numValue }));
-        setQuantityError('');
-      } else {
-        setQuantityError('A quantidade deve ser maior que 0');
-      }
-    } else {
-      setNewProduct((prev) => ({ ...prev, [name]: value }));
-    }
+    setNewProduct((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleAddProduct = async (e) => {
-    e.preventDefault();
-    if (!newProduct.product_name || !newProduct.quantity || parseInt(newProduct.quantity) <= 0) {
-      setQuantityError('Preencha todos os campos corretamente. A quantidade deve ser maior que 0.');
-      return;
-    }
-  
-    const productExists = data.some(
-      (product) => product.product_name.toLowerCase() === newProduct.product_name.toLowerCase()
-    );
-    if (productExists) {
-      setQuantityError('Este produto já existe. Por favor, use um nome diferente.');
-      return;
-    }
-  
-    try {
-      setIsLoading(true);
-      const productData = {
-        product_name: newProduct.product_name,
-        quantity: parseInt(newProduct.quantity),
-      };
-      const createdProduct = await createProduct(productData);
-      setData([...data, createdProduct]);
-      setNewProduct({ product_name: '', quantity: '' });
-      setQuantityError(''); // Limpa a mensagem de erro após sucesso
-      onAddModalClose();
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+ const handleAddProduct = async (e) => {
+     e.preventDefault();
+     
+     if (!newProduct.product_name || !newProduct.quantity || !selectedSubfamily) {
+       setError('Preencha o nome do produto e selecione uma Subfamilia.');
+       return;
+     }
+   
+     const productExists = products.some(
+       (product) => product.product_name.toLowerCase() === newProduct.product_name.toLowerCase()
+      
+     );
+   
+     if (productExists) {
+       setError('Este produto ja existe. Por favor, use um nome diferente.');
+       return;
+     }
+   
+     try {
+       setIsLoading(true);
+       
+       const productData = {
+         product_name: newProduct.product_name,
+         quantity: newProduct.quantity,
+         selectedSubfamily: selectedSubfamily, // Certifique-se de que a chave no backend espera esse nome
+       };
+   
+       const createdProduct = await createProduct(productData);
+       setProducts([...products, createdProduct]);
+   
+       // Limpa os campos após sucesso
+       setNewProduct({ product_name: '' });
+       setSelectedSubfamily('');
+       setError(null);
+   
+       onAddModalClose();
+     } catch (err) {
+       setError(err.message);
+     } finally {
+       setIsLoading(false);
+     }
+   };
 
   const handleDeleteProduct = async () => {
     if (productToDelete) {
       setIsLoading(true);
       try {
         await deleteProduct(productToDelete);
-        setData(data.filter((item) => item.id !== productToDelete));
+        setProducts(products.filter((product) => product.id !== productToDelete));
         setProductToDelete(null);
         onDeleteModalClose();
       } catch (err) {
@@ -163,23 +151,29 @@ const DataTable = () => {
   };
 
   const handleUpdateProduct = async (e) => {
-    e.preventDefault();
-    if (editProduct) {
+      e.preventDefault();
+      if (!editProduct || !editProduct.product_name) {
+        setError('Preencha o nome do produto.');
+        return;
+      }
+    
       try {
+        console.log('Enviando para API:', { id: editProduct.id, product_name: editProduct.product_name });
         const updatedProduct = await updateProduct(editProduct.id, {
           product_name: editProduct.product_name,
-          quantity: parseInt(editProduct.quantity),
+          quantity: editProduct.quantity,
         });
-        setData(data.map((item) => (item.id === updatedProduct.id ? updatedProduct : item)));
+        console.log('Resposta da API:', updatedProduct);
+        setProducts(products.map((product) => (product.id === updatedProduct.id ? updatedProduct : product)));
         setEditProduct(null);
+        setError(null); // Limpa o erro após sucesso
         onEditModalClose();
       } catch (err) {
-        setError(err.message);
+        console.error('Erro ao atualizar produto:', err.message);
+        console.log('Erro ao atualizar produto:', err.message);
+        setError(err.message); // Define o erro para exibição no modal
       }
-    }
-  };
-
-  if (error) return <div className="text-red-500">Erro: {error}</div>;
+    };
 
   return (
     <div className="p-4">
@@ -192,44 +186,43 @@ const DataTable = () => {
             </DropdownTrigger>
              <DropdownMenu
                 aria-label="Dynamic Actions"
-                placement="bottom-end"
+
                 className="bg-white shadow-lg rounded-md p-1"
-                style={{ marginLeft: '80px' }}
+
                    >
                     <DropdownItem
                       type="text"
-                      placeholder="Digite o nome"
                       key="add"
                       onPress={onAddModalOpen}
                       
                     >
-                    adicionar        
+                    Add        
                 </DropdownItem>
               </DropdownMenu>
             </Dropdown>
 
       {/* Modal para adicionar produto */}
-      <Modal
+      <Modal 
         isOpen={isAddModalOpen}
         onOpenChange={onAddModalClose}
         size="md"
         placement="center"
-        className="bg-white shadow-xl rounded-lg"
+        className="w-100  shadow-xl rounded-lg"
       >
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex justify-center items-center border-b border-gray-200 pb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Adicionar Novo Produto</h3>
+              <ModalHeader className="rounded bg-[#FC9D25] flex justify-left items-left">
+                <h3 className="text-xl flex justify-left items-left font-bold text-white">New Product</h3>
               </ModalHeader>
-              <ModalBody className="py-6 px-8">
+              <ModalBody className="py-5 px-6">
                 <form id="addProductForm" onSubmit={handleAddProduct} className="space-y-6">
                   <div>
                     <label
                       htmlFor="newProductName"
-                      className="block text-sm font-medium text-gray-700 mb-1"
+                      className="block text-sm font-medium text-gray-400 mb-1"
                     >
-                      Nome do Produto
+                      Name
                     </label>
                     <input
                       id="newProductName"
@@ -237,17 +230,16 @@ const DataTable = () => {
                       name="product_name"
                       value={newProduct.product_name}
                       onChange={handleInputChange}
-                      placeholder="Digite o nome do produto"
-                      className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                      className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
                       required
                     />
                   </div>
                   <div>
                     <label
                       htmlFor="newQuantity"
-                      className="block text-sm font-medium text-gray-700 mb-1"
+                      className="block text-sm font-medium text-gray-400 mb-1"
                     >
-                      Quantidade
+                      Quantity
                     </label>
                     <input
                       id="newQuantity"
@@ -255,32 +247,42 @@ const DataTable = () => {
                       name="quantity"
                       value={newProduct.quantity}
                       onChange={handleInputChange}
-                      placeholder="Digite a quantidade"
-                      className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                      className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
                       required
                     />
                     {quantityError && (
                       <p className="text-red-500 text-sm mt-1">{quantityError}</p>
                     )}
                   </div>
+                  <div>
+                    <label htmlFor="selectSubfamily" className="block text-sm font-medium text-gray-400 mb-1">
+                      Select a Sub Family
+                    </label>
+                    <select
+                      id="selectProduct"
+                      value={selectedSubfamily}
+                      onChange={(e) => setSelectedSubfamily(e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-[#FC9D25]"
+                    >
+                      <option value="">Select...</option>
+                      {subfamilies.map((Subfamilia) => (
+                        <option key={Subfamilia.id} value={Subfamilia.id}>
+                          {Subfamilia.nome}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </form>
               </ModalBody>
-              <ModalFooter className="flex justify-end border-t border-gray-200 pt-4 px-8">
+              <ModalFooter className="w-102 border-t border-gray-200 pt-2 px-8">
                 <Button
                   type="submit"
                   form="addProductForm"
-                  className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 font-medium transition duration-200"
+                  className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
                   disabled={isLoading}
                 >
                   {isLoading ? <Spinner size="sm" color="white" /> : 'Adicionar'}
                 </Button>
-                <Button
-                  onPress={onClose}
-                  className="px-6 py-2 bg-black text-white rounded-md hover:bg-gray-600 font-medium ml-3 transition duration-200"
-                  disabled={isLoading}
-                >
-                  Cancelar
-            </Button>
           </ModalFooter>
         </>
       )}
@@ -293,20 +295,20 @@ const DataTable = () => {
     onOpenChange={onEditModalClose}
     size="md"
     placement="center" // Centraliza o modal
-    className="bg-white shadow-xl rounded-lg"
+    className="w-100 bg-white shadow-xl rounded-lg"
   >
     <ModalContent>
       {(onClose) => (
         <>
-          <ModalHeader className="flex justify-center items-center border-b border-gray-200 pb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Editar Produto</h3>
+          <ModalHeader className="rounded bg-[#FC9D25] flex justify-left items-left">
+            <h3 className="text-xl flex justify-left items-left font-bold text-white">Edit product</h3>
           </ModalHeader>
-          <ModalBody className="py-6 px-8">
+          <ModalBody className="py-5 px-6">
             {editProduct && (
               <form id="updateProductForm" onSubmit={handleUpdateProduct} className="space-y-6">
                 <div>
-                  <label htmlFor="productName" className="block text-sm font-medium text-gray-700 mb-1">
-                    Nome do Produto
+                  <label htmlFor="productName" className="block text-sm font-medium text-gray-400 mb-1">
+                    Name
                   </label>
                   <input
                     id="productName"
@@ -316,22 +318,24 @@ const DataTable = () => {
                       setEditProduct({ ...editProduct, product_name: e.target.value })
                     }
                     placeholder="Digite o nome do produto"
-                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:border-blue-400- transition duration-200"
+                    className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
                     required
                   />
                 </div>
                 <div>
-                  <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-1">
-                    Quantidade
+                  <label htmlFor="quantity" className="block text-sm font-medium text-gray-400 mb-1">
+                    Quantity
                   </label>
                   <input
                       id="newQuantity"
                       type="text"   
                       name="quantity"
-                      value={newProduct.quantity}
-                      onChange={handleInputChange}
+                      value={editProduct.quantity}
+                      onChange={(e) =>
+                        setEditProduct({ ...editProduct, quantity: e.target.value })
+                      }
                       placeholder="Digite a quantidade"
-                      className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                      className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
                       required
                     />
                     {quantityError && (
@@ -341,19 +345,13 @@ const DataTable = () => {
               </form>
             )}
           </ModalBody>
-          <ModalFooter className="flex justify-end border-t border-gray-200 pt-4 px-8">
+          <ModalFooter className="w-102 border-t border-gray-200 pt-2 px-8">
             <Button
               type="submit"
               form="updateProductForm"
-              className="px-6 py-2 bg-black text-white rounded-md hover:bg-gray-800 font-medium transition duration-200"
+              className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
             >
-              Salvar
-            </Button>
-            <Button
-              onPress={onClose}
-              className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 font-medium ml-3 transition duration-200"
-            >
-              Cancelar
+              Save
             </Button>
           </ModalFooter>
         </>
@@ -373,16 +371,16 @@ const DataTable = () => {
       {(onClose) => (
         <>
           <ModalHeader className="flex justify-center items-center border-b border-gray-200 pb-2">
-            <h3 className="text-lg font-semibold text-gray-900">Confirmar Exclusão</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Confirm Deletion</h3>
           </ModalHeader>
           <ModalBody className="py-6 px-8">
           {isLoading ? (
               <div className="flex justify-center items-center">
                 <Spinner size="lg" />
-                <span className="ml-2">Excluindo...</span>
+                <span className="ml-2">Deletion...</span>
               </div>
             ) : (
-            <p className="text-center text-gray-700">Tem certeza que deseja excluir o produto?</p>
+            <p className="text-center text-gray-700">Are you sure you want to delete the product?</p>
           )}
           </ModalBody>
           <ModalFooter className="flex justify-end border-t border-gray-200 pt-4 px-8">
@@ -390,7 +388,7 @@ const DataTable = () => {
               onPress={onClose}
               className="px-6 py-2 bg-black text-white rounded-md hover:bg-gray-800 font-medium"
             >
-              Cancelar
+              Cancel
             </Button>
             <Button
               onPress={() => {
@@ -399,7 +397,7 @@ const DataTable = () => {
               }}
               className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 font-medium ml-3"
             >
-              Excluir
+              Exclude
             </Button>
           </ModalFooter>
         </>
@@ -434,8 +432,8 @@ const DataTable = () => {
             </tr>
           </thead>
       <tbody className="divide-y divide-gray-300">
-        {filteredData.map((item) => (
-          <tr key={item.id} className="hover:bg-gray-200">
+        {filteredProducts.map((product) => (
+          <tr key={product.id} className="hover:bg-gray-200">
             <td className="border-collapse border border-[#EDEBEB] w-1 py-1 whitespace-nowrap text-sm text-[#191919] text-center">
                 <Dropdown>
                     <DropdownTrigger>
@@ -449,23 +447,23 @@ const DataTable = () => {
                       className="bg-white shadow-lg rounded-md p-1"
                       style={{ marginLeft: '80px' }}
                     >
-                      <DropdownItem
+                     {/* <DropdownItem
                         key="add"
                         onPress={onAddModalOpen}
                         className="hover:bg-gray-100"
                       >
                         Adicionar
-                      </DropdownItem>
-                      {/*<DropdownItem
+                      </DropdownItem>*/}
+                      <DropdownItem
                         key="edit"
                         onPress={() => {
-                          handleEditGroup(group);
+                          handleEditProduct(product);
                           onEditModalOpen();
                         }}
                         className="hover:bg-gray-100"
                       >
-                        Editar
-                      </DropdownItem>*/}
+                        Edit
+                      </DropdownItem>
                       {/*<DropdownItem
                         key="delete"
                         className="text-danger hover:bg-red-50"
@@ -482,25 +480,24 @@ const DataTable = () => {
 
                   </td>
             <td className="border-collapse border border-[#EDEBEB] px-3 py-2 whitespace-nowrap text-sm text-[#191919] text-right">
-              {item.id}
+              {product.id}
             </td>
             <td className="border-collapse border border-[#EDEBEB] px-4 py-2 whitespace-nowrap text-sm text-[#191919] text-left">
-              {item.product_name}
+              {product.product_name}
             </td>
             <td className="border-collapse border border-[#EDEBEB] px-4 py-2 whitespace-nowrap text-sm text-[#191919] text-left">
-              {item.quantity}
+              {product.quantity}
             </td>
-            
           </tr>
         ))}
       </tbody>
     </table>
       </div>
-      {filteredData.length === 0 && !error && (
-        <p className="text-center py-4">Nenhum produto encontrado.</p>
+      {filteredProducts.length === 0 && !error && (
+        <p className="text-center py-4">No products found.</p>
       )}
     </div>
   );
 };
 
-export default DataTable;
+export default DataProduct;

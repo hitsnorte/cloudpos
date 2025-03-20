@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { HiDotsVertical } from "react-icons/hi";
-import { Plus } from "lucide-react";
 import { FaGear } from "react-icons/fa6";
+import { Plus } from "lucide-react";
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
-import { fetchGrup, createGrup, deleteGrup, updateGrupt } from '@/src/lib/apisubfamily';
+import { fetchGrup, createGrup, deleteGrup, updateGrupt } from '@/src/lib/apigroup';
 import {
   Modal,
   ModalContent,
@@ -17,16 +17,16 @@ import {
 } from '@nextui-org/react';
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@heroui/react";
 
-const DataSubfamilia = () => {
-  const [subfamilias, setSubfamilias] = useState([]);
+const DataGrupo = () => {
+  const [groups, setGroups] = useState([]);
   const [sortField, setSortField] = useState('id');
   const [sortOrder, setSortOrder] = useState('asc');
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [newSubfamilia, setNewSubfamilia] = useState({ nome: '' });
-  const [editSubfamilia, setEditSubfamilia] = useState(null);
+  const [newGroup, setNewGroup] = useState({ group_name: '' });
+  const [editGroup, setEditGroup] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [subfamiliaToDelete, setSubfamiliaToDelete] = useState(null);
+  const [groupToDelete, setGroupToDelete] = useState(null);
 
   const {
     isOpen: isAddModalOpen,
@@ -45,13 +45,13 @@ const DataSubfamilia = () => {
   } = useDisclosure();
 
   useEffect(() => {
-    loadSubfamilias();
+    loadGroups();
   }, []);
 
-  const loadSubfamilias = async () => {
+  const loadGroups = async () => {
     try {
-      const subfamilias = await fetchGrup();
-      setSubfamilias(subfamilias);
+      const grupos = await fetchGrup();
+      setGroups(grupos);
     } catch (err) {
       setError(err.message);
     }
@@ -64,7 +64,7 @@ const DataSubfamilia = () => {
       setSortField(field);
       setSortOrder('asc');
     }
-    const sortedSubfamilias = [...subfamilias].sort((a, b) => {
+    const sortedGroups = [...groups].sort((a, b) => {
       if (field === 'id') {
         return sortOrder === 'asc' ? a[field] - b[field] : b[field] - a[field];
       }
@@ -72,7 +72,7 @@ const DataSubfamilia = () => {
         ? a[field].localeCompare(b[field])
         : b[field].localeCompare(a[field]);
     });
-    setSubfamilias(sortedSubfamilias);
+    setGroups(sortedGroups);
   };
 
   const renderSortIcon = (field) => {
@@ -84,40 +84,40 @@ const DataSubfamilia = () => {
     );
   };
 
-  const filteredSubfamilias = subfamilias.filter((subfamilia) => {
+  const filteredGroups = groups.filter((group) => {
     const searchLower = searchTerm.toLowerCase();
     return (
-      subfamilia.id.toString().includes(searchLower) ||
-      subfamilia.nome.toString().toLowerCase().includes(searchLower)
+      group.id.toString().includes(searchLower) ||
+      group.group_name.toString().toLowerCase().includes(searchLower)
     );
   });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setNewSubfamilia((prev) => ({ ...prev, [name]: value }));
+    setNewGroup((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleAddSubfamilia = async (e) => {
+  const handleAddGroup = async (e) => {
     e.preventDefault();
-    if (!newSubfamilia.nome) {
-      setError('Preencha o nome da sub familia.');
+    if (!newGroup.group_name) {
+      setError('Preencha o nome do grupo.');
       return;
     }
 
-    const subfamiliaExists = subfamilias.some(
-      (subfamilia) => subfamilia.nome.toLowerCase() === newSubfamilia.nome.toLowerCase()
+    const groupExists = groups.some(
+      (group) => group.group_name.toLowerCase() === newGroup.group_name.toLowerCase()
     );
-    if (subfamiliaExists) {
-      setError('Esta sub familia já existe. Por favor, use um nome diferente.');
+    if (groupExists) {
+      setError('Este grupo já existe. Por favor, use um nome diferente.');
       return;
     }
 
     try {
       setIsLoading(true);
-      const subfamiliaData = { nome: newSubfamilia.nome };
-      const createdSubfamilia = await createGrup(subfamiliaData);
-      setSubfamilias([...subfamilias, createdSubfamilia]);
-      setNewSubfamilia({ nome: '' });
+      const groupData = { group_name: newGroup.group_name };
+      const createdGroup = await createGrup(groupData);
+      setGroups([...groups, createdGroup]);
+      setNewGroup({ group_name: '' });
       setError(null); // Limpa o erro após sucesso
       onAddModalClose();
     } catch (err) {
@@ -127,13 +127,13 @@ const DataSubfamilia = () => {
     }
   };
 
-  const handleDeleteSubfamilia = async () => {
-    if (subfamiliaToDelete) {
+  const handleDeleteGroup = async () => {
+    if (groupToDelete) {
       setIsLoading(true);
       try {
-        await deleteGrup(subfamiliaToDelete);
-        setSubfamilias(subfamilias.filter((subfamilia) => subfamilia.id !== subfamiliaToDelete));
-        setSubfamiliaToDelete(null);
+        await deleteGrup(groupToDelete);
+        setGroups(groups.filter((group) => group.id !== groupToDelete));
+        setGroupToDelete(null);
         onDeleteModalClose();
       } catch (err) {
         setError(err.message);
@@ -143,30 +143,31 @@ const DataSubfamilia = () => {
     }
   };
 
-  const handleEditSubfamilia = (subfamilia) => {
-    setEditSubfamilia({ ...subfamilia });
+  const handleEditGroup = (group) => {
+    setEditGroup({ ...group });
     onEditModalOpen();
   };
 
-  const handleUpdateSubfamilia = async (e) => {
+  const handleUpdateGroup = async (e) => {
     e.preventDefault();
-    if (!editSubfamilia || !editSubfamilia.nome) {
-      setError('Preencha o nome da subfamilia.');
+    if (!editGroup || !editGroup.group_name) {
+      setError('Preencha o nome do grupo.');
       return;
     }
   
     try {
-      console.log('Enviando para API:', { id: editSubfamilia.id, nome: editSubfamilia.nome });
-      const updatedSubfamilia = await updateGrupt(editSubfamilia.id, {
-        nome: editSubfamilia.nome,
+      console.log('Enviando para API:', { id: editGroup.id, group_name: editGroup.group_name });
+      const updatedGroup = await updateGrupt(editGroup.id, {
+        group_name: editGroup.group_name,
       });
-      console.log('Resposta da API:', updatedSubfamilia);
-      setSubfamilias(subfamilias.map((subfamilia) => (subfamilia.id === updatedSubfamilia.id ? updatedSubfamilia : subfamilia)));
-      setEditSubfamilia(null);
+      console.log('Resposta da API:', updatedGroup);
+      setGroups(groups.map((group) => (group.id === updatedGroup.id ? updatedGroup : group)));
+      setEditGroup(null);
       setError(null); // Limpa o erro após sucesso
       onEditModalClose();
     } catch (err) {
-      console.error('Erro ao atualizar a sub familia:', err.message);
+      console.error('Erro ao atualizar grupo:', err.message);
+      console.log('Erro ao atualizar grupo:', err.message);
       setError(err.message); // Define o erro para exibição no modal
     }
   };
@@ -183,53 +184,52 @@ const DataSubfamilia = () => {
       </DropdownTrigger>
        <DropdownMenu
           aria-label="Dynamic Actions"
-          placement="bottom-end"
+
           className="bg-white shadow-lg rounded-md p-1"
-          style={{ marginLeft: '80px' }}
+
+          
              >
               <DropdownItem
                 type="text"
-                placeholder="Digite o nome"
                 key="add"
                 onPress={onAddModalOpen}
                 
               >
-              adicionar        
+              Add       
           </DropdownItem>
         </DropdownMenu>
       </Dropdown>
-
-      {/* Modal para adicionar grupo */}
+      {/* Modal para adicionar grupo */} 
       <Modal
         isOpen={isAddModalOpen}
         onOpenChange={onAddModalClose}
         size="md"
         placement="center"
-        className="bg-white shadow-xl rounded-lg"
+        className="w-1/3 bg-white shadow-xl rounded-lg"
       >
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex justify-center items-center border-b border-gray-200 pb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Adicionar Nova sub familia</h3>
+              <ModalHeader className="rounded bg-[#FC9D25] flex justify-left items-left">
+                <div className="text-xl flex justify-left items-left font-bold text-white">New Group</div>
               </ModalHeader>
-              <ModalBody className="py-6 px-8">
-                <form id="addSubfamiliaForm" onSubmit={handleAddSubfamilia} className="space-y-6">
+              <ModalBody className="py-5 px-6">
+                <form id="addGroupForm" onSubmit={handleAddGroup} className="space-y-6">
                   <div>
                     <label
-                      htmlFor="newSubfamiliaName"
-                      className="block text-sm font-medium text-gray-700 mb-1"
+                      htmlFor="newGroupName"
+                      className="block text-sm font-medium text-gray-400 mb-1"
                     >
-                      Nome da sub familia
+                      Name
                     </label>
                     <input
-                      id="newSubfamiliaName"
+                      id="newGroupName"
                       type="text"
-                      name="nome"
-                      value={newSubfamilia.nome}
+                      name="group_name"
+                      value={newGroup.group_name}
                       onChange={handleInputChange}
-                      placeholder="Digite o nome da sub familia"
-                      className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                      placeholder="Digite o nome do grupo"
+                      className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
                       required
                     />
                     {error && (
@@ -238,22 +238,15 @@ const DataSubfamilia = () => {
                   </div>
                 </form>
               </ModalBody>
-              <ModalFooter className="flex justify-end border-t border-gray-200 pt-4 px-8">
+              <ModalFooter className="w-102 border-t border-gray-200 pt-2 px-8">
                 <Button
                   type="submit"
-                  form="addSubfamiliaForm"
-                  className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 font-medium transition duration-200"
+                  form="addGroupForm"
+                  className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
                   disabled={isLoading}
                 >
                   {isLoading ? <Spinner size="sm" color="white" /> : 'Adicionar'}
-                </Button>
-                <Button
-                  onPress={onClose}
-                  className="px-6 py-2 bg-black text-white rounded-md hover:bg-gray-600 font-medium ml-3 transition duration-200"
-                  disabled={isLoading}
-                >
-                  Cancelar
-                </Button>
+               </Button>
               </ModalFooter>
             </>
           )}
@@ -262,64 +255,58 @@ const DataSubfamilia = () => {
 
       {/* Modal para editar grupo */}
       <Modal
-  isOpen={isEditModalOpen}
-  onOpenChange={onEditModalClose}
-  size="md"
-  placement="center"
-  className="bg-white shadow-xl rounded-lg"
->
-  <ModalContent>
-    {(onClose) => (
-      <>
-        <ModalHeader className="flex justify-center items-center border-b border-gray-200 pb-4">
-          <h3 className="text-lg font-semibold text-gray-900">Editar sub familia</h3>
-        </ModalHeader>
-        <ModalBody className="py-6 px-8">
-          {editSubfamilia && (
-            <form id="updateSubfamiliaForm" onSubmit={handleUpdateSubfamilia} className="space-y-6">
-              <div>
-                <label htmlFor="subfamiliaName" className="block text-sm font-medium text-gray-700 mb-1">
-                  Nome da sub familia
-                </label>
-                <input
-                  id="subfamiliaName"
-                  type="text"
-                  value={editSubfamilia.nome || ''} // Garante que não seja undefined
-                  onChange={(e) =>
-                    setEditSubfamilia({ ...editSubfamilia, nome: e.target.value })
-                  }
-                  placeholder="Digite o nome da sub familia"
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition duration-200"
-                  required
-                />
-                {error && (
-                  <p className="text-red-500 text-sm mt-1">{error}</p>
+        isOpen={isEditModalOpen}
+        onOpenChange={onEditModalClose}
+        size="md"
+        placement="center"
+        className="w-100 bg-white shadow-xl rounded-lg"
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="rounded bg-[#FC9D25] flex justify-left items-left">
+                <h3 className="text-xl flex justify-left items-left font-bold text-white">Edit group</h3>
+              </ModalHeader>
+              <ModalBody className="py-5 px-6">
+                {editGroup && (
+                  <form id="updateGroupForm" onSubmit={handleUpdateGroup} className="space-y-6">
+                    <div>
+                      <label htmlFor="groupName" className="block text-sm font-medium text-gray-400 mb-1">
+                        Name
+                      </label>
+                      <input
+                        id="groupName"
+                        type="text"
+                        value={editGroup.group_name || ''} // Garante que não seja undefined
+                        onChange={(e) =>
+                          setEditGroup({ ...editGroup, group_name: e.target.value })
+                        }
+                        placeholder="Digite o nome do grupo"
+                        className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                        required
+                      />
+                      {error && (
+                        <p className="text-red-500 text-sm mt-1">{error}</p>
+                      )}
+                    </div>
+                  </form>
                 )}
-              </div>
-            </form>
+              </ModalBody>
+              <ModalFooter className="w-102 border-t border-gray-200 pt-2 px-8">
+                <Button
+                  type="submit"
+                  form="updateGroupForm"
+                  className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
+                >
+                  Save
+                </Button>
+              </ModalFooter>
+            </>
           )}
-        </ModalBody>
-        <ModalFooter className="flex justify-end border-t border-gray-200 pt-4 px-8">
-          <Button
-            type="submit"
-            form="updateSubfamiliaForm"
-            className="px-6 py-2 bg-black text-white rounded-md hover:bg-gray-800 font-medium transition duration-200"
-          >
-            Salvar
-          </Button>
-          <Button
-            onPress={onClose}
-            className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 font-medium ml-3 transition duration-200"
-          >
-            Cancelar
-          </Button>
-        </ModalFooter>
-      </>
-    )}
-  </ModalContent>
-</Modal>
+        </ModalContent>
+      </Modal>
 
-      {/* Modal para excluir sub familia */}
+      {/* Modal para excluir grupo */}
       <Modal
         isOpen={isDeleteModalOpen}
         onOpenChange={onDeleteModalClose}
@@ -331,16 +318,16 @@ const DataSubfamilia = () => {
           {(onClose) => (
             <>
               <ModalHeader className="flex justify-center items-center border-b border-gray-200 pb-2">
-                <h3 className="text-lg font-semibold text-gray-900">Confirmar Exclusão</h3>
+                <h3 className="text-lg font-semibold text-gray-900">Confirm Deletion</h3>
               </ModalHeader>
               <ModalBody className="py-6 px-8">
                 {isLoading ? (
                   <div className="flex justify-center items-center">
                     <Spinner size="lg" />
-                    <span className="ml-2">Excluindo...</span>
+                    <span className="ml-2">Excluding...</span>
                   </div>
                 ) : (
-                  <p className="text-center text-gray-700">Tem certeza que deseja excluir a sub familia?</p>
+                  <p className="text-center text-gray-700">Are u sure u want to exclude the Group?</p>
                 )}
               </ModalBody>
               <ModalFooter className="flex justify-end border-t border-gray-200 pt-4 px-8">
@@ -352,12 +339,12 @@ const DataSubfamilia = () => {
                 </Button>
                 <Button
                   onPress={() => {
-                    handleDeleteSubfamilia(subfamiliaToDelete);
+                    handleDeleteGroup(groupToDelete);
                     onClose();
                   }}
                   className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 font-medium ml-3"
                 >
-                  Excluir
+                  Exclude
                 </Button>
               </ModalFooter>
             </>
@@ -370,7 +357,7 @@ const DataSubfamilia = () => {
         <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB] mx-auto">
           <thead>
             <tr>
-              <th className="border-collapse border border-[#EDEBEB] !w-[2px] px-1 sm:px-5 py-4 bg-[#FC9D25]">
+              <th className="border-collapse border border-[#EDEBEB] !w-[1px] px-1 sm:px-5 py-4 bg-[#FC9D25]">
                 <div className=" flex items-left justify-left">
                   <FaGear size={20} color='white'/>
                 </div>
@@ -387,12 +374,11 @@ const DataSubfamilia = () => {
               </th>
             </tr>
           </thead>
-
           <tbody className="divide-y divide-gray-300">
-            {filteredSubfamilias.map((subfamilia) => (
-              <tr key={subfamilia.id} className="hover:bg-gray-100">
+            {filteredGroups.map((group) => (
+              <tr key={group.id} className="hover:bg-gray-100">
                 <td className="border-collapse border border-[#EDEBEB] w-1 py-1 whitespace-nowrap text-sm text-[#191919] text-center">
-                  <Dropdown>
+                <Dropdown>
                     <DropdownTrigger>
                       <Button variant="bordered">
                         <HiDotsVertical size={18} />
@@ -400,11 +386,11 @@ const DataSubfamilia = () => {
                     </DropdownTrigger>
                     <DropdownMenu
                       aria-label="Dynamic Actions"
-                      placement="bottom-up"
+                      placement="bottom-end"
                       className="bg-white shadow-lg rounded-md p-1"
                       style={{ marginLeft: '80px' }}
                     >
-                      {/* <DropdownItem
+                     {/* <DropdownItem
                         key="add"
                         onPress={onAddModalOpen}
                         className="hover:bg-gray-100"
@@ -414,46 +400,45 @@ const DataSubfamilia = () => {
                       <DropdownItem
                         key="edit"
                         onPress={() => {
-                          handleEditSubfamilia(subfamilia);
+                          handleEditGroup(group);
                           onEditModalOpen();
                         }}
                         className="hover:bg-gray-100"
                       >
-                        Editar
+                        Edit
                       </DropdownItem>
-                      {/* <DropdownItem
+                      {/*<DropdownItem
                         key="delete"
                         className="text-danger hover:bg-red-50"
                         color="danger"
                         onPress={() => {
-                          setSubfamiliaToDelete(subfamilia.id);
+                          setGroupToDelete(group.id);
                           onDeleteModalOpen();
                         }}
                       >
                         Excluir
-                      </DropdownItem> */}
+                      </DropdownItem>*/}
                     </DropdownMenu>
                   </Dropdown>
-                </td>
-                
-                <td className="border-collapse border border-[#EDEBEB] px-3 py-2 whitespace-nowrap text-sm text-[#191919] text-right">
 
-                  {subfamilia.id}
+                  </td>
+                  <td className="border-collapse border border-[#EDEBEB] px-3 py-2 whitespace-nowrap text-sm text-[#191919] text-right">
+ 
+                  {group.id}
                 </td>
                 <td className="border-collapse border border-[#EDEBEB] px-4 py-2 whitespace-nowrap text-sm text-[#191919] text-left">
-                  {subfamilia.nome}
+                  {group.group_name}
                 </td>
-                
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      {filteredSubfamilias.length === 0 && !error && (
-        <p className="text-center py-4">Nenhum Sub familia encontrada.</p>
+      {filteredGroups.length === 0 && !error && (
+        <p className="text-center py-4">No groups found.</p>
       )}
     </div>
   );
 };
 
-export default DataSubfamilia;
+export default DataGrupo;

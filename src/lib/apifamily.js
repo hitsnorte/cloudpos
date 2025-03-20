@@ -1,5 +1,5 @@
-// src/lib/apigrup.js
-export const fetchGrup = async () => {
+// src/lib/apifamily.js
+export const fetchFamily = async () => {
     try {
       const response = await fetch('/api/family', {
         method: 'GET',
@@ -18,7 +18,7 @@ export const fetchGrup = async () => {
     }
   };
   
-  export const createGrup = async (familyData) => {
+  export const createFamily = async (familyData) => {
     try {
       const response = await fetch('/api/family', {
         method: 'POST',
@@ -38,7 +38,7 @@ export const fetchGrup = async () => {
     }
   };
   
-  export const deleteGrup = async (id) => {
+  export const deleteFamily = async (id) => {
     try {
       const response = await fetch(`/api/family/${id}`, {
         method: 'DELETE',
@@ -56,10 +56,10 @@ export const fetchGrup = async () => {
     }
   };
   
-  export const updateGrupt = async (id, familyData) => {
+  export const updateFamily = async (id, familyData) => {
     try {
       const response = await fetch(`/api/family/${id}`, {
-        method: 'PUT', // Troque para 'PATCH' se necessário
+        method: 'PATCH', // Troque para 'PATCH' se necessário
         headers: {
           'Content-Type': 'application/json',
         },

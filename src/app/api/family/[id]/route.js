@@ -6,12 +6,12 @@ export async function DELETE(request, { params }) {
   const { id } = params; // Extrai o ID da rota dinâmica
 
   try {
-    const group = await prisma.cloud_groups.delete({
+    const cloud_family = await prisma.cloud_family.delete({
       where: { id: parseInt(id) },
     });
     const response = {
       status: 'success',
-      message: 'Grupo excluído com sucesso',
+      message: 'familia excluída com sucesso',
     };
     return new Response(JSON.stringify(response), {
       status: 200,
@@ -20,7 +20,7 @@ export async function DELETE(request, { params }) {
   } catch (error) {
     const response = {
       status: 'error',
-      message: 'Erro ao excluir Grupo',
+      message: 'Erro ao excluir familia',
       error: error.message,
     };
     return new Response(JSON.stringify(response), {
@@ -34,30 +34,30 @@ export async function PATCH(request, { params }) {
   const id = params.id; // Extrai o ID da rota dinâmica
 
   try {
-    const { group_name } = await request.json();
+    const { family_name } = await request.json();
 
-    // Validação: group_name é obrigatório
-    if (!group_name) {
+    // Validação: name é obrigatório
+    if (!family_name) {
       return NextResponse.json(
         {
           status: 'error',
-          message: 'O nome do grupo é obrigatório',
+          message: 'O family_name da familia é obrigatório',
         },
         { status: 400 }
       );
     }
 
-    const group = await prisma.cloud_groups.update({
+    const cloud_family = await prisma.cloud_family.update({
       where: { id: parseInt(id) },
       data: {
-        group_name,
+        family_name,
       },
     });
 
     return NextResponse.json(
       {
         status: 'success',
-        data: group,
+        data: cloud_family,
         meta: {
           updatedAt: new Date().toISOString(),
         },
@@ -65,12 +65,11 @@ export async function PATCH(request, { params }) {
       { status: 200 }
     );
   } catch (error) {
-    console.error('Erro ao atualizar grupo:', error);
-
+    console.error('Erro ao atualizar a familia:', error);
     return NextResponse.json(
       {
         status: 'error',
-        message: 'Erro ao atualizar grupo',
+        message: 'Erro ao atualizar familia',
         error: error.message,
       },
       { status: error.code === 'P2025' ? 404 : 500 } // 404 se o grupo não for encontrado

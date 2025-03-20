@@ -3,12 +3,12 @@ import prisma from '@/src/lib/prisma';
 
 export async function GET(request) {
   try {
-    const products = await prisma.cloud_product.findMany();
+    const product = await prisma.cloud_product.findMany();
     const response = {
       status: 'success',
-      data: products,
+      data: product,
       meta: {
-        total: products.length,
+        total: product.length,
         timestamp: new Date().toISOString(),
       },
     };
@@ -31,53 +31,61 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
-    const { product_name, quantity } = await request.json();
-    if (!product_name || typeof product_name !== 'string') {
-      const response = {
-        status: 'error',
-        message: 'Nome do produto é obrigatório e deve ser uma string',
-      };
-      return new Response(JSON.stringify(response), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+    const { product_name, quantity, selectedSubfamily } = await request.json();
+    
+    console.log("dados:", product_name, quantity, selectedSubfamily);
+    
+    if (!product_name || typeof product_name !== "string") {
+      return new Response(
+        JSON.stringify({
+          status: "error",
+          message: "Nome do produto é obrigatório e deve ser uma string",
+        }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
     }
-    if (!quantity || isNaN(parseInt(quantity)) || parseInt(quantity) < 0) {
-      const response = {
-        status: 'error',
-        message: 'Quantidade é obrigatória, deve ser um número válido e maior ou igual a 0',
-      };
-      return new Response(JSON.stringify(response), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
+
+
+    // Criar a família na tabela cloud_family
     const product = await prisma.cloud_product.create({
       data: {
         product_name,
         quantity: parseInt(quantity),
       },
     });
-    const response = {
-      status: 'success',
-      data: product,
-      meta: {
-        createdAt: new Date().toISOString(),
+
+    // Inserir na tabela cloud_product_relation usando o ID da nova família
+    const productSubfamilyRelation = await prisma.cloud_product_relation.create({
+      data: {
+        cloud_product_id: product.id, // ID da nova família criada
+        cloud_subfamily_id: parseInt(selectedSubfamily), // ID do grupo selecionado
       },
-    };
-    return new Response(JSON.stringify(response), {
-      status: 201,
-      headers: { 'Content-Type': 'application/json' },
     });
+
+    return new Response(
+      JSON.stringify({
+        status: "success",
+        message: "Produto e relação com Sub familia criadas com sucesso!",
+        data: {
+          product,
+          productSubfamilyRelation,
+        },
+        meta: {
+          createdAt: new Date().toISOString(),
+        },
+      }),
+      { status: 201, headers: { "Content-Type": "application/json" } }
+    );
   } catch (error) {
-    const response = {
-      status: 'error',
-      message: 'Erro ao criar produto',
-      error: error.message,
-    };
-    return new Response(JSON.stringify(response), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    console.error("Erro ao criar Produto:", error);
+    console.log("Erro ao criar Produto:", error);
+    return new Response(
+      JSON.stringify({
+        status: "error",
+        message: "Erro ao criar Produto e relação com Sub familia",
+        error: error.message,
+      }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
   }
 }

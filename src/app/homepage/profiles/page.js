@@ -14,6 +14,7 @@ import {
     useDisclosure,
 } from '@nextui-org/react';
 
+
 const ProfilesTable = () => {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [profiles, setProfiles] = useState([]);
@@ -27,7 +28,7 @@ const ProfilesTable = () => {
         propertyTags: [],
     });
 
-    // Fetch all profiles
+    // Busca todos os perfis
     const fetchProfiles = async () => {
         try {
             const response = await fetch('/api/user');
@@ -38,7 +39,7 @@ const ProfilesTable = () => {
         }
     };
 
-    // Fetch all properties
+    // Busca todas as propriedades
     const fetchProperties = async () => {
         try {
             const response = await fetch('/api/properties');

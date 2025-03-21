@@ -11,16 +11,16 @@ export default function App() {
 
   useEffect(() => {
     if (status === "unauthenticated") {
-      router.push("/login"); // Redirect if user is not logged in
+      router.push("/login"); // Redireciona se o utilizador não deu login
     }
   }, [status, router]);
 
   if (status === "loading") {
-    return <p className="text-center text-lg">Loading...</p>; // Show loading while checking session
+    return <p className="text-center text-lg">Loading...</p>; // Mostra "Loading" enquanto carrega
   }
 
   if (!session) {
-    return null; // Prevent rendering before redirect
+    return null; // Previne mostrar a página antes de dar redirect para o login
   }
 
   const cardPaths = [
@@ -33,7 +33,7 @@ export default function App() {
   // Define handleCardClick
   const handleCardClick = (path) => {
     console.log(`Navigating to: ${path}`);
-    router.push(path); // Navigate to the given path
+    router.push(path); // Navega para o caminho dado
   };
 
   return (

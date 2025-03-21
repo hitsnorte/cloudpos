@@ -176,24 +176,13 @@ const DataSubfamilia = () => {
       {/* button */}
       <Dropdown>
       <DropdownTrigger>
-      <button className="absolute top-4 right-10 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
-          < Plus size={25} />     
+      <button 
+          onClick={onAddModalOpen}
+          className="absolute top-4 right-10 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
+          < Plus size={25}  />     
       </button>
       </DropdownTrigger>
-       <DropdownMenu
-          aria-label="Dynamic Actions"
-
-          className="bg-white shadow-lg rounded-md p-1"
-
-             >
-              <DropdownItem
-                type="text"
-                placeholder="Digite o nome"
-                key="add"
-                onPress={onAddModalOpen}
-              > Add        
-          </DropdownItem>
-        </DropdownMenu>
+       
       </Dropdown>
 
       {/* Modal para adicionar subfamilia */}
@@ -202,13 +191,21 @@ const DataSubfamilia = () => {
         onOpenChange={onAddModalClose}
         size="md"
         placement="center"
-        className="w-100  shadow-xl rounded-lg"
+        className="w-100 bg-white shadow-xl rounded-lg"
+        hideCloseButton={true}
       >
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="rounded bg-[#FC9D25] flex justify-left items-left">
-                <h3 className="text-xl flex justify-left items-left font-bold text-white">New Sub Family</h3>
+              <ModalHeader className="rounded bg-[#FC9D25] flex justify-between items-center">
+                <div className="text-xl font-bold text-white">New Sub Family</div>
+                <Button
+                  onClick={onClose}
+                  className="text-white bg-transparent border-0 text-2xl p-0"
+                  aria-label="Close"
+                >
+                  &times; {/* Unicode for "×" sign */}
+                </Button>
               </ModalHeader>
               <ModalBody className="py-5 px-6">
                 <form id="addSubfamiliaForm" onSubmit={handleAddSubfamilia} className="space-y-6">

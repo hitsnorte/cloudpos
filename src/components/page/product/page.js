@@ -6,6 +6,7 @@ import { FaGear } from "react-icons/fa6";
 import { Plus } from "lucide-react";
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
 import { fetchProduct, createProduct, deleteProduct, updateProduct } from '@/src/lib/apiproduct';
+import { fetchSubfamily } from '@/src/lib/apisubfamily';
 import {
   Modal,
   ModalContent,
@@ -19,6 +20,7 @@ import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@
 
 const DataProduct = () => {
   const [products, setProducts] = useState([]);
+  const [subfamilies, setSubfamilies] = useState([]);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [newProduct, setNewProduct] = useState({ product_name: '', quantity: '' });
@@ -26,7 +28,7 @@ const DataProduct = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
   const [quantityError, setQuantityError] = useState(''); 
-  const [selectedProduct, setSelectedProduct] = useState("");
+  const [selectedSubfamily, setSelectedSubfamily] = useState("");
 
   const {
     isOpen: isAddModalOpen,
@@ -46,6 +48,7 @@ const DataProduct = () => {
 
   useEffect(() => {
     loadProducts();
+    loadSubfamilies();
   }, []);
 
   const loadProducts = async () => {
@@ -57,75 +60,74 @@ const DataProduct = () => {
     }
   };
 
-  const handleSort = (field) => {
-    if (sortField === field) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortOrder('asc');
-    }
-    const sortedProducts = [...products].sort((a, b) => {
-      if (field === 'quantity' || field === 'id') {
-        return sortOrder === 'asc' ? a[field] - b[field] : b[field] - a[field];
+  const loadSubfamilies = async () => {
+      try {
+        const subfamilies = await fetchSubfamily();
+        setSubfamilies(subfamilies);
+      } catch (err) {
+        setError(err.message);
       }
-      return sortOrder === 'asc'
-        ? a[field].localeCompare(b[field])
-        : b[field].localeCompare(a[field]);
-    });
-    setProducts(sortedProducts);
-  };
-
-  const renderSortIcon = (field) => {
-    if (sortField !== field) return null;
-    return sortOrder === 'asc' ? (
-      <ArrowUpIcon className="w-4 h-4 ml-1" />
-    ) : (
-      <ArrowDownIcon className="w-4 h-4 ml-1" />
-    );
   };
 
   const filteredProducts = products.filter((product) => {
+    if (!product || !product.id || !product.product_name) {
+      return false; 
+    }
     const searchLower = searchTerm.toLowerCase();
     return (
       product.id.toString().includes(searchLower) ||
       product.product_name.toString().toLowerCase().includes(searchLower)
     );
   });
+  
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewProduct((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleAddProduct = async (e) => {
-    e.preventDefault();
-    if (!newProduct.product_name) {
-      setError('Preencha o nome do produto.');
-      return;
-    }
-  
-    const productExists = products.some(
-      (product) => product.product_name.toLowerCase() === newProduct.product_name.toLowerCase()
-    );
-    if (productExists) {
-      setQuantityError('Este produto já existe. Por favor, use um nome diferente.');
-      return;
-    }
-  
-    try {
-     setIsLoading(true);
-     const productData = { product_name: newProduct.product_name, quantity: newProduct.quantity };
-     const createdProduct = await createProduct(productData);
-     setProducts([...products, createdProduct]);
-     setNewProduct({ product_name: '' , quantity: ''});
-     setError(null); // Limpa o erro após sucesso
-     onAddModalClose();
+ const handleAddProduct = async (e) => {
+     e.preventDefault();
+     
+     if (!newProduct.product_name || !newProduct.quantity || !selectedSubfamily) {
+       setError('Preencha o nome do produto e selecione uma Subfamilia.');
+       return;
+     }
+   
+     const productExists = products.some(
+       (product) => product.product_name.toLowerCase() === newProduct.product_name.toLowerCase()
+      
+     );
+   
+     if (productExists) {
+       setError('Este produto ja existe. Por favor, use um nome diferente.');
+       return;
+     }
+   
+     try {
+       setIsLoading(true);
+       
+       const productData = {
+         product_name: newProduct.product_name,
+         quantity: newProduct.quantity,
+         selectedSubfamily: selectedSubfamily, // Certifique-se de que a chave no backend espera esse nome
+       };
+   
+       const createdProduct = await createProduct(productData);
+       setProducts([...products, createdProduct]);
+   
+       // Limpa os campos após sucesso
+       setNewProduct({ product_name: '' });
+       setSelectedSubfamily('');
+       setError(null);
+   
+       onAddModalClose();
      } catch (err) {
-        setError(err.message);
+       setError(err.message);
      } finally {
-        setIsLoading(false);
-  }
-};
+       setIsLoading(false);
+     }
+   };
 
   const handleDeleteProduct = async () => {
     if (productToDelete) {
@@ -178,25 +180,13 @@ const DataProduct = () => {
       {/* button */}
             <Dropdown>
             <DropdownTrigger>
-            <button className="absolute top-4 right-10 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
-                < Plus size={25} />     
-            </button>
+            <button 
+                onClick={onAddModalOpen}
+                className="absolute top-4 right-10 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
+                < Plus size={25}  />     
+            </button> 
             </DropdownTrigger>
-             <DropdownMenu
-                aria-label="Dynamic Actions"
-
-                className="bg-white shadow-lg rounded-md p-1"
-
-                   >
-                    <DropdownItem
-                      type="text"
-                      key="add"
-                      onPress={onAddModalOpen}
-                      
-                    >
-                    Add        
-                </DropdownItem>
-              </DropdownMenu>
+      
             </Dropdown>
 
       {/* Modal para adicionar produto */}
@@ -205,15 +195,23 @@ const DataProduct = () => {
         onOpenChange={onAddModalClose}
         size="md"
         placement="center"
-        className="w-100  shadow-xl rounded-lg"
+        className="w-100 bg-white shadow-xl rounded-lg"
+        hideCloseButton={true}
       >
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="rounded bg-[#FC9D25] flex justify-left items-left">
-                <h3 className="text-xl flex justify-left items-left font-bold text-white">New Product</h3>
+              <ModalHeader className="rounded bg-[#FC9D25] flex justify-between items-center">
+                <div className="text-xl font-bold text-white">New product</div>
+                <Button
+                  onClick={onClose}
+                  className="text-white bg-transparent border-0 text-2xl p-0"
+                  aria-label="Close"
+                >
+                  &times; {/* Unicode for "×" sign */}
+                </Button>
               </ModalHeader>
-              <ModalBody className="py-6 px-8">
+              <ModalBody className="py-5 px-6">
                 <form id="addProductForm" onSubmit={handleAddProduct} className="space-y-6">
                   <div>
                     <label
@@ -253,19 +251,19 @@ const DataProduct = () => {
                     )}
                   </div>
                   <div>
-                    <label htmlFor="selectProduct" className="block text-sm font-medium text-gray-400 mb-1">
-                      Select a Product
+                    <label htmlFor="selectSubfamily" className="block text-sm font-medium text-gray-400 mb-1">
+                      Select a Sub Family
                     </label>
                     <select
                       id="selectProduct"
-                      value={selectedProduct}
-                      onChange={(e) => setSelectedProduct(e.target.value)}
+                      value={selectedSubfamily}
+                      onChange={(e) => setSelectedSubfamily(e.target.value)}
                       className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-[#FC9D25]"
                     >
-                      <option value="">Select one Product</option>
-                      {products.map((product) => (
-                        <option key={product.id} value={product.id}>
-                          {product.product_name}
+                      <option value="">Select...</option>
+                      {subfamilies.map((Subfamilia) => (
+                        <option key={Subfamilia.id} value={Subfamilia.id}>
+                          {Subfamilia.nome}
                         </option>
                       ))}
                     </select>

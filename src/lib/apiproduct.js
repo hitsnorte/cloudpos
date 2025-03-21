@@ -29,12 +29,15 @@
         body: JSON.stringify(productData), // Espera { produto_name: string }
       });
       if (!response.ok) {
+        
         throw new Error('Erro ao criar produto');
       }
       const data = await response.json();
       return data.data; // Retorna o produto criado
     } catch (error) {
       console.error('Erro ao criar produto:', error);
+      console.log('Erro ao criar produto:', error);
+
       throw error;
     }
   };

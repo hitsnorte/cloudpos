@@ -7,15 +7,23 @@ import { Plus } from "lucide-react";
 import { Button, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@nextui-org/react";
 
 const ChainsTable = () => {
+    // Controla visibilidade do modal
     const [isOpen, setIsOpen] = useState(false);
+
+    // Guarda lista de cadeias
     const [chains, setChains] = useState([]);
+
+
     const [newChain, setNewChain] = useState({ chainTag: "", chainName: "" });
+
+    // Indica o loading enquanto carrega cadeias
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         fetchChains();
     }, []);
 
+    // Função para buscar cadeias á API
     const fetchChains = async () => {
         try {
             const res = await fetch("/api/chains");
@@ -27,14 +35,19 @@ const ChainsTable = () => {
         }
     };
 
+    // Função para abrir o modal
     const onOpen = () => setIsOpen(true);
+
+    // Função para fechar o modal
     const onClose = () => setIsOpen(false);
 
+    // HandleInputChange para o form de criação de cadeias
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setNewChain((prev) => ({ ...prev, [name]: value }));
     };
 
+    // adição de uma cadeia nova
     const handleAddChain = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -47,14 +60,11 @@ const ChainsTable = () => {
             });
 
             if (!res.ok) throw new Error("Failed to add chain");
-            const data = await res.json();
 
-            // Ensure the returned data includes a valid `id`
-            if (!data.chain || !data.chain.id) {
-                throw new Error("Invalid response from API");
-            }
+            // Busca cadeias na API
+            await fetchChains();
 
-            setChains((prevChains) => [...prevChains, data.chain]);
+            // Fecha modal e faz reset ao Form depois de adicionar uma nova chain
             setNewChain({ chainTag: "", chainName: "" });
             onClose();
         } catch (error) {
@@ -67,7 +77,7 @@ const ChainsTable = () => {
 
     return (
         <div className="p-4">
-            {/* Header with + Button */}
+            {/* Header c/ botão de adicionar */}
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold">All Chains</h2>
                 <Dropdown>
@@ -82,17 +92,20 @@ const ChainsTable = () => {
                 </Dropdown>
             </div>
 
-            {/* Add New Chain Modal */}
+            {/* Modal de adição de cadeias novas */}
             <Modal isOpen={isOpen} onOpenChange={onClose} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
                 <ModalContent>
                     {(onClose) => (
                         <>
+                            {/* Header */}
                             <ModalHeader className="rounded bg-[#FC9D25] flex justify-start items-center">
                                 <div className="text-xl font-bold text-white">New Chain</div>
                             </ModalHeader>
+
+                            {/* Body */}
                             <ModalBody className="py-5 px-6 bg-white">
                                 <form id="addChainForm" onSubmit={handleAddChain} className="space-y-6">
-                                    {["chainTag", "chainName"].map((field, index) => (
+                                    {['chainTag', 'chainName'].map((field, index) => (
                                         <div key={index}>
                                             <label htmlFor={field} className="block text-sm font-medium text-[#191919] mb-1">
                                                 {field === "chainTag" ? "Chain Tag" : "Chain Name"}
@@ -110,6 +123,8 @@ const ChainsTable = () => {
                                     ))}
                                 </form>
                             </ModalBody>
+
+                            {/* Footer com os botões Cancel e Save  */}
                             <ModalFooter className="border-t border-gray-200 pt-2 px-8">
                                 <Button onPress={onClose} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">
                                     Cancel
@@ -123,7 +138,7 @@ const ChainsTable = () => {
                 </ModalContent>
             </Modal>
 
-            {/* Chains Table */}
+            {/* Tabela */}
             <div className="overflow-x-auto bg-muted/40">
                 <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB] mx-auto">
                     <thead>
@@ -149,7 +164,7 @@ const ChainsTable = () => {
                             </tr>
                         ))
                     ) : (
-                        <tr key="no-chains">
+                        <tr>
                             <td colSpan="4" className="border border-[#EDEBEB] px-4 py-4 text-center text-gray-500">
                                 No chains available
                             </td>

@@ -40,6 +40,7 @@ const PropertiesTable = () => {
             }
         };
 
+        //Busca todas as cadeias
         const fetchChains = async () => {
             try {
                 const response = await fetch("/api/chains");
@@ -77,8 +78,7 @@ const PropertiesTable = () => {
         }
     };
 
-
-
+    //adiciona propriedades
     const handleAddProperty = async (e) => {
         e.preventDefault();
 
@@ -116,7 +116,7 @@ const PropertiesTable = () => {
 
             onClose();
 
-            // Fetch updated list immediately
+            // Busca imediatamente a lista atualizada
             const updatedPropertiesResponse = await fetch("/api/properties");
             const updatedProperties = await updatedPropertiesResponse.json();
             setProperties(updatedProperties);
@@ -172,7 +172,7 @@ const PropertiesTable = () => {
                                         </div>
                                     ))}
 
-                                    {/* Chain selection dropdown */}
+                                    {/* Seleção de cadeias */}
                                     <div>
                                         <label htmlFor="propertyChain" className="block text-sm font-medium text-[#191919] mb-1">
                                             Select Property Chain

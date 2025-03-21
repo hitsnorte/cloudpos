@@ -2,7 +2,7 @@
 
 import { Card, CardBody } from "@heroui/react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react"; // Import useSession
+import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 
 export default function App() {
@@ -16,7 +16,7 @@ export default function App() {
   }, [status, router]);
 
   if (status === "loading") {
-    return <p className="text-center text-lg">Loading...</p>; // Mostra "Loading" enquanto carrega
+    return <p className="text-center text-lg">Loading...</p>; // Mostra "Loading..." enquanto carrega
   }
 
   if (!session) {

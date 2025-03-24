@@ -47,6 +47,7 @@ function SidebarSubItem({ ref, label, icon, expanded }) {
 export default function SidebarMenu() {
     const { expanded } = useContext(SidebarContext);
     const [selectedProperty, setSelectedProperty] = useState(null);
+    const [tempSelectedProperty , setTempSelectedProperty] = useState(null);
     const [isConfirmed, setIsConfirmed] = useState(false);
     const [properties, setProperties] = useState([]);
 
@@ -63,33 +64,6 @@ export default function SidebarMenu() {
         };
         fetchProperties();
     }, []);
-
-    useEffect(() => {
-        const storedProperty = localStorage.getItem("selectedProperty");
-        const storedConfirmation = localStorage.getItem("isConfirmed");
-
-        if (storedProperty) {
-            setSelectedProperty(storedProperty);
-        }
-
-        if (storedConfirmation === "true") {
-            setIsConfirmed(true);
-        }
-    }, []);
-
-
-    useEffect(() => {
-        if (selectedProperty !== null) {
-            localStorage.setItem("selectedProperty", selectedProperty);
-        } else {
-            localStorage.removeItem("selectedProperty");
-        }
-    }, [selectedProperty]);
-
-    useEffect(() => {
-        localStorage.setItem("isConfirmed", isConfirmed);
-    }, [isConfirmed]);
-
 
     const menuItems = {
         "Dashboard": {
@@ -116,20 +90,20 @@ export default function SidebarMenu() {
 
     return (
         <div className="p-3">
-            {/* Select das propriedades */}
+            {/* Property Selection */}
             <Select
-                className="w-full h-12 px-4 py-3 bg-white border border-gray-300 rounded-md shadow-sm  focus:ring-indigo-500"
+                className="w-full h-12 px-4 py-3 bg-white border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-indigo-500"
                 placeholder="Select a property"
-                value={selectedProperty || ""}
-                onChange={(event) => {
-                    const newProperty = event?.target?.value || event;
+                value={selectedProperty}
+                onChange={(value) => {
+                    const newProperty = value?.target?.value || value;
 
-                    // Dá reset ao estado de confirmação caso uma nova propriedade seja escolhida
+                    // If user selects a new property, reset confirmation state
                     if (newProperty !== selectedProperty) {
                         setIsConfirmed(false);
                     }
 
-                    setSelectedProperty(newProperty);
+                    setTempSelectedProperty(newProperty);
                 }}
             >
                 {properties.map((property) => (
@@ -139,8 +113,8 @@ export default function SidebarMenu() {
                 ))}
             </Select>
 
-            {/* Mostra botoões quando uma propriedade é selecionada mas ainda não está confirmada */}
-            {selectedProperty && !isConfirmed && (
+            {/* Mostra botoões quando uma propriedade é escolhida mas não confirmada */}
+            {tempSelectedProperty && !isConfirmed && (
                 <div className="mt-4 flex flex-col gap-2">
                     <button
                         className="bg-red-500 text-white p-2 rounded"
@@ -150,15 +124,19 @@ export default function SidebarMenu() {
                     </button>
                     <button
                         className="bg-[#FC9D25] text-white p-2 rounded"
-                        onClick={() => setIsConfirmed(true)}
+                        onClick={() => {
+                            setSelectedProperty(tempSelectedProperty);
+                            setIsConfirmed(true);
+                        }}
                     >
                         Proceed
                     </button>
+
                 </div>
             )}
 
-            {/* Mostra os elementos da Sidebar apenas depois da confirmação*/}
-            {isConfirmed && (
+            {/* Sidebar só mostra depois da confirmacao */}
+            {selectedProperty && (
                 Object.entries(menuItems).map(([key, value]) => (
                     <SidebarItem key={key} text={key} icon={value.icon} submenu={value.submenu} />
                 ))

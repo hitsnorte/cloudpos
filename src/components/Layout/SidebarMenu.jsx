@@ -46,7 +46,9 @@ function SidebarSubItem({ ref, label, icon, expanded }) {
 
 export default function SidebarMenu() {
     const { expanded } = useContext(SidebarContext);
-    const [selectedProperty, setSelectedProperty] = useState(null);
+    const [selectedProperty, setSelectedProperty] = useState(() => {
+        return localStorage.getItem("selectedProperty") || null;
+    });
     const [tempSelectedProperty , setTempSelectedProperty] = useState(null);
     const [isConfirmed, setIsConfirmed] = useState(false);
     const [properties, setProperties] = useState([]);
@@ -122,11 +124,13 @@ export default function SidebarMenu() {
                     >
                         Cancel
                     </button>
+
                     <button
                         className="bg-[#FC9D25] text-white p-2 rounded"
                         onClick={() => {
                             setSelectedProperty(tempSelectedProperty);
                             setIsConfirmed(true);
+                            localStorage.setItem("selectedProperty" , tempSelectedProperty);
                         }}
                     >
                         Proceed

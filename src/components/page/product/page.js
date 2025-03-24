@@ -276,6 +276,7 @@ const DataProduct = () => {
                   form="addProductForm"
                   className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
                   disabled={isLoading}
+                  onClick={() => window.location.reload()} // Recarrega a página ao clicar
                 >
                   {isLoading ? <Spinner size="sm" color="white" /> : 'Adicionar'}
                 </Button>
@@ -346,6 +347,7 @@ const DataProduct = () => {
               type="submit"
               form="updateProductForm"
               className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
+              onClick={() => window.location.reload()} // Recarrega a página ao clicar
             >
               Save
             </Button>

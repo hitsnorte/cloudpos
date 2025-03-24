@@ -3,17 +3,44 @@
 import { Card, CardBody } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react"; // Import useSession
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { fetchDashboard } from '@/src/lib/apidashboard';
 
 export default function App() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const [dashboardData, setDashboardData] = useState(null);
 
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/login"); // Redirect if user is not logged in
     }
   }, [status, router]);
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      if (status === "authenticated") {
+        try {
+          // Chama a função fetchDashboard e aguarda a resposta
+          const data = await fetchDashboard();
+          
+          // Verifica se a propriedade 'totalGroups' está presente
+          if (data && data.totalGroups !== undefined && data.totalFamilies !== undefined && data.totalSubfamilies !== undefined && data.totalProducts !== undefined) {
+            setDashboardData(data); // Armazena os dados no estado
+          } else {
+            throw new Error('Dados inválidos recebidos da API');
+          }
+        } catch (error) {
+          console.log('Erro ao carregar os dados:', error);
+          console.error('Erro ao carregar os dados:', error);
+          // Em caso de erro, define valores padrão
+          setDashboardData({ grupos: 0, familias: 0, subfamilias: 0, produtos: 0 });
+        }
+      }
+    };
+
+    fetchData(); // Chama a função assíncrona para buscar os dados
+  }, [status]); // Recarrega quando o status de autenticação mudar
 
   if (status === "loading") {
     return <p className="text-center text-lg">Loading...</p>; // Show loading while checking session
@@ -23,11 +50,16 @@ export default function App() {
     return null; // Prevent rendering before redirect
   }
 
+  // Garantir que os dados estejam disponíveis antes de renderizar
+  if (!dashboardData) {
+    return <p className="text-center text-lg">Carregando dados...</p>;
+  }
+
   const cardPaths = [
-    { label: "GROUPS", value: 0, path: "/homepage/grupos" },
-    { label: "FAMILIES", value: 6, path: "/homepage/family" },
-    { label: "SUBFAMILIES", value: 0, path: "/subfamilias" },
-    { label: "PRODUCTS", value: 0, path: "/produtos" },
+    { label: "GROUPS", value: dashboardData.totalGroups || 0, path: "/homepage/grupos" },
+    { label: "FAMILIES", value: dashboardData.totalFamilies || 0, path: "/homepage/family" },
+    { label: "SUBFAMILIES", value: dashboardData.totalSubfamilies || 0, path: "/homepage/subfamilia" },
+    { label: "PRODUCTS", value: dashboardData.totalProducts || 0, path: "/homepage/product" },
   ];
 
   // Define handleCardClick

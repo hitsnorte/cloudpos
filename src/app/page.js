@@ -52,7 +52,7 @@ export default function App() {
 
   // Garantir que os dados estejam disponíveis antes de renderizar
   if (!dashboardData) {
-    return <p className="text-center text-lg">Carregando dados...</p>;
+    return <p className="text-center text-lg">Loading dashboard...</p>;
   }
 
   const cardPaths = [

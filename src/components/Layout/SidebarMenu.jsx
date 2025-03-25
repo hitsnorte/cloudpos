@@ -4,7 +4,7 @@ import { ChevronDown, ChevronRight } from "lucide-react";
 import { TbLayoutDashboardFilled } from "react-icons/tb";
 import { FaTable } from "react-icons/fa";
 import { LuFolderOpenDot, LuFolderOpen, LuFolderCog, LuFolderDot } from "react-icons/lu";
-import { Select, SelectItem } from "@heroui/react";
+import { useSession } from "next-auth/react";
 
 function SidebarItem({ icon, text, submenu }) {
     const { expanded } = useContext(SidebarContext);
@@ -18,8 +18,8 @@ function SidebarItem({ icon, text, submenu }) {
             >
                 {icon && <span className="mr-2">{icon}</span>}
                 <span className={`overflow-hidden transition-all ${expanded ? "w-52 ml-3 opacity-100" : "w-0 opacity-0"}`}>
-          {text}
-        </span>
+                    {text}
+                </span>
                 {submenu && <span className="ml-auto">{open ? <ChevronDown size={16} /> : <ChevronRight size={16} />}</span>}
             </div>
             {submenu && open && (
@@ -45,27 +45,17 @@ function SidebarSubItem({ ref, label, icon, expanded }) {
 }
 
 export default function SidebarMenu() {
+    const { data: session } = useSession();
     const { expanded } = useContext(SidebarContext);
+
     const [selectedProperty, setSelectedProperty] = useState(() => {
         return localStorage.getItem("selectedProperty") || null;
     });
-    const [tempSelectedProperty , setTempSelectedProperty] = useState(null);
-    const [isConfirmed, setIsConfirmed] = useState(false);
+    const [tempSelectedProperty, setTempSelectedProperty] = useState(null);
+    const [isConfirmed, setIsConfirmed] = useState(() => {
+        return JSON.parse(localStorage.getItem("isConfirmed")) || false;
+    });
     const [properties, setProperties] = useState([]);
-
-    useEffect(() => {
-        const fetchProperties = async () => {
-            try {
-                const response = await fetch("/api/properties");
-                if (!response.ok) throw new Error("Failed to fetch properties");
-                const data = await response.json();
-                setProperties(data);
-            } catch (error) {
-                console.error("Error fetching properties:", error);
-            }
-        };
-        fetchProperties();
-    }, []);
 
     const menuItems = {
         "Dashboard": {
@@ -90,37 +80,49 @@ export default function SidebarMenu() {
         },
     };
 
+    // ✅ Corrected Effect: Only fetch properties from session
+    useEffect(() => {
+        if (session?.propertyNames) {
+            setProperties(session.propertyNames);
+        }
+    }, [session?.propertyNames]);
+
     return (
         <div className="p-3">
             {/* Property Selection */}
-            <Select
-                className="w-full h-12 px-4 py-3 bg-white border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-indigo-500"
-                placeholder="Select a property"
-                value={selectedProperty}
-                onChange={(value) => {
-                    const newProperty = value?.target?.value || value;
+            <select
+                id="selectProperty"
+                value={selectedProperty || ""}
+                onChange={(e) => {
+                    const newProperty = e.target.value;
 
-                    // If user selects a new property, reset confirmation state
                     if (newProperty !== selectedProperty) {
                         setIsConfirmed(false);
                     }
 
                     setTempSelectedProperty(newProperty);
                 }}
+                className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-[#FC9D25]"
             >
+                <option value="">Select a property</option>
                 {properties.map((property) => (
-                    <SelectItem key={property.propertyID} value={property.propertyTag} className="bg-white hover:bg-gray-100 text-gray-900">
-                        {property.propertyName}
-                    </SelectItem>
+                    <option key={property.id} value={property.tag}>
+                        {property.name}
+                    </option>
                 ))}
-            </Select>
+            </select>
 
-            {/* Mostra botoões quando uma propriedade é escolhida mas não confirmada */}
+            {/* Show buttons when a property is selected but not confirmed */}
             {tempSelectedProperty && !isConfirmed && (
                 <div className="mt-4 flex flex-col gap-2">
                     <button
                         className="bg-red-500 text-white p-2 rounded"
-                        onClick={() => setSelectedProperty(null)}
+                        onClick={() => {
+                            setSelectedProperty(null);
+                            setIsConfirmed(false);
+                            localStorage.removeItem("selectedProperty");
+                            localStorage.removeItem("isConfirmed");
+                        }}
                     >
                         Cancel
                     </button>
@@ -130,17 +132,17 @@ export default function SidebarMenu() {
                         onClick={() => {
                             setSelectedProperty(tempSelectedProperty);
                             setIsConfirmed(true);
-                            localStorage.setItem("selectedProperty" , tempSelectedProperty);
+                            localStorage.setItem("selectedProperty", tempSelectedProperty);
+                            localStorage.setItem("isConfirmed", JSON.stringify(true));
                         }}
                     >
                         Proceed
                     </button>
-
                 </div>
             )}
 
-            {/* Sidebar só mostra depois da confirmacao */}
-            {selectedProperty && (
+            {/* Sidebar only shows after confirmation */}
+            {selectedProperty && isConfirmed && (
                 Object.entries(menuItems).map(([key, value]) => (
                     <SidebarItem key={key} text={key} icon={value.icon} submenu={value.submenu} />
                 ))

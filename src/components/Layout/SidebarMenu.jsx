@@ -72,15 +72,21 @@ export default function SidebarMenu() {
   const menuItems = {
 
    
-    "Dashboard": {
+    "Store Settings": {
       icon: <LuFolderCog  size={20} />, 
       submenu: [
         {  ref: "/", label: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> }, 
+        { ref: "/homepage/grupos", label: "Groups", icon: <FaTable size={18} /> }, 
+        { ref: "/homepage/family", label: "Families", icon: <FaTable size={18} /> },
+        { ref: "/homepage/subfamilia", label: "SubFamilies", icon: <FaTable size={18} /> },
+        { ref: "/homepage/product", label: "Products", icon: <FaTable size={18} /> },
+        { ref: "/homepage/Iva", label: "Iva", icon: <FaTable size={18} /> },
+        { ref: "/homepage/Unit", label: "Unit", icon: <FaTable size={18} /> },
       ], 
 
     },
 
-    "Groups": {
+    /*"Groups": {
       icon: <LuFolderCog  size={20} />, 
       submenu: [
         { ref: "/homepage/grupos", label: "All Groups", icon: <FaTable size={18} /> }, 
@@ -106,7 +112,7 @@ export default function SidebarMenu() {
       submenu: [
         { ref: "/homepage/product", label: "All Products", icon: <FaTable size={18} /> },
       ],
-    },
+    }, */
    
     
   };

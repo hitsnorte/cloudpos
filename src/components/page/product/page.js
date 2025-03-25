@@ -29,6 +29,10 @@ const DataProduct = () => {
   const [productToDelete, setProductToDelete] = useState(null);
   const [quantityError, setQuantityError] = useState(''); 
   const [selectedSubfamily, setSelectedSubfamily] = useState("");
+  const [ativo, setAtivo] = useState(true);
+  const [selectedIva, setSelectedIva] = useState("");
+  const [selectedTipo, setSelectedTipo] = useState("");
+
 
   const {
     isOpen: isAddModalOpen,
@@ -175,6 +179,18 @@ const DataProduct = () => {
       }
     };
 
+    const ivaList = [
+      { id: 1, taxa: 23, descricao: "IVA Padrão" },
+      { id: 2, taxa: 13, descricao: "IVA Intermediário" },
+      { id: 3, taxa: 6, descricao: "IVA Reduzido" },
+      { id: 4, taxa: 0, descricao: "Isento de IVA" },
+    ];
+
+    const tipoOperacaoList = [
+      { id: 1, tipo: "venda", descricao: "Venda" },
+      { id: 2, tipo: "compra", descricao: "Compra" },
+    ];
+
   return (
     <div className="p-4">
       {/* button */}
@@ -293,12 +309,20 @@ const DataProduct = () => {
     size="md"
     placement="center" // Centraliza o modal
     className="w-100 bg-white shadow-xl rounded-lg"
+    hideCloseButton={true}
   >
     <ModalContent>
       {(onClose) => (
         <>
-          <ModalHeader className="rounded bg-[#FC9D25] flex justify-left items-left">
-            <h3 className="text-xl flex justify-left items-left font-bold text-white">Edit product</h3>
+          <ModalHeader className="rounded bg-[#FC9D25] flex justify-between items-center">
+          <div className="text-xl font-bold text-white">Edit product</div>
+                <Button
+                  onClick={onClose}
+                  className="text-white bg-transparent border-0 text-2xl p-0"
+                  aria-label="Close"
+                >
+                  &times; {/* Unicode for "×" sign */}
+                </Button>
           </ModalHeader>
           <ModalBody className="py-5 px-6">
             {editProduct && (
@@ -315,11 +339,18 @@ const DataProduct = () => {
                       setEditProduct({ ...editProduct, product_name: e.target.value })
                     }
                     placeholder="Digite o nome do produto"
-                    className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                    className="w-60 p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
                     required
                   />
+                   <input
+                      type="checkbox"
+                      checked={ativo}
+                      className="w-15 "
+                      onChange={(e) => setAtivo(e.target.checked)}
+                    />
+                    {ativo ? "Ativo" : "Inativo"}
                 </div>
-                <div>
+                <div >
                   <label htmlFor="quantity" className="block text-sm font-medium text-gray-400 mb-1">
                     Quantity
                   </label>
@@ -338,6 +369,114 @@ const DataProduct = () => {
                     {quantityError && (
                       <p className="text-red-500 text-sm mt-1">{quantityError}</p>
                     )}
+                </div>
+                <div>
+                  <label htmlFor="abreviatura" className="block text-sm font-medium text-gray-400 mb-1">
+                     Abreviatura
+                  </label>
+                  <input
+                      id="newAbreviatura"
+                      type="text"   
+                      name="abreviatura"
+                 
+                      placeholder="Digite a abreviatura"
+                      className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                      required
+                    />
+                </div>
+                <div>
+                  <label htmlFor="descricao" className="block text-sm font-medium text-gray-400 mb-1">
+                     Descrição
+                  </label>
+                  <input
+                      id="newDescricao"
+                      type="text"   
+                      name="descricao"
+                 
+                      placeholder="Digite a descricao"
+                      className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                      required
+                    />
+                </div>
+                <div>
+                  <label htmlFor="CodProd" className="block text-sm font-medium text-gray-400 mb-1">
+                     Codigo do produto
+                  </label>
+                  <input
+                      id="newCodProd"
+                      type="text"   
+                      name="codProd"
+                      placeholder="Digite o Codigo do produto"
+                      className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                      required
+                    />
+                </div>
+                {/* <div>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={ativo}
+                      onChange={(e) => setAtivo(e.target.checked)}
+                    />
+                    {ativo ? "Ativo" : "Inativo"}
+                  </label>
+                </div> */}
+              
+                <div>
+                  <label htmlFor="Conta" className="block text-sm font-medium text-gray-400 mb-1">
+                     Conta CBL/ERP
+                  </label>
+                  <input
+                      id="newConta"
+                      type="text"   
+                      name="conta"
+                      placeholder="Digite a conta CBL/ERP"
+                      className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                      required
+                    />
+                </div>
+                <div>
+                  <label htmlFor="Artigo" className="block text-sm font-medium text-gray-400 mb-1">
+                     Tipo de Artigo
+                  </label>
+                  <input
+                      id="newArtigo"
+                      type="text"   
+                      name="Artigo"
+                      placeholder="Digite o Tipo de artigo"
+                      className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                      required
+                    />
+                </div>
+                <div>
+                   <select
+                    className="w-full p-1 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
+                    value={selectedIva}
+                    onChange={(e) => setSelectedIva(e.target.value)}
+                  >
+                    <option value="">Iva</option>
+                    {ivaList.map((iva) => (
+                      <option key={iva.id} value={iva.taxa}>
+                        {iva.taxa}% - {iva.descricao}
+                      </option>
+                    ))}
+                  </select>
+
+                </div>
+                <div>
+                <select
+                    className="w-full p-1 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
+                    value={selectedTipo}
+                    onChange={(e) => setSelectedTipo(e.target.value)}
+                  >
+                    <option value="">Produto de</option>
+                    {tipoOperacaoList.map((tipo) => (
+                      <option key={tipo.id} value={tipo.tipo}>
+                        {tipo.descricao}
+                      </option>
+                    ))}
+                  </select>
+
                 </div>
               </form>
             )}

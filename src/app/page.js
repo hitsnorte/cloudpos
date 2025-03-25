@@ -70,13 +70,13 @@ export default function App() {
 
   return (
       <div>
-        <h1 className="text-4xl font-semibold text-center my-6">Dashboard</h1>
+        <h1 className="text-3xl font-semibold px-4">Dashboard</h1>
 
-        <div className="flex flex-wrap gap-4 justify-center p-6">
+        <div className="px-4 flex flex-wrap gap-6 p-6 ">
           {cardPaths.map((card, index) => (
               <Card
                   key={index}
-                  className="w-65 h-64 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center p-4 cursor-pointer hover:bg-gray-100"
+                  className="w-90 h-60 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center p-4 cursor-pointer hover:bg-gray-100"
               >
                 <CardBody className="flex flex-col items-center w-full h-full relative">
                   <div

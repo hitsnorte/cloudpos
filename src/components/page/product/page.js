@@ -631,83 +631,72 @@ const DataProduct = () => {
                   <FaGear size={20} color='white'/>
                 </div>
               </th>
-              <th className="border-collapse border border-[#EDEBEB] w-1 px-1 sm:px-5 py-4 bg-[#FC9D25] text-[#FAFAFA]">
-                <div className="w-2 flex items-right justify-right"> 
-                  ID
+              <th className="border-collapse border border-[#EDEBEB] w-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA]">
+                <div className="w-20 flex items-right justify-center"> 
+                   Abreviatura
                 </div>
               </th>
-              <th className="border-collapse border border-[#EDEBEB] sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA]">
-               <div className="flex items-center justify-left "> 
-                  NAME
+              <th className="border-collapse border border-[#EDEBEB] w-50 sm:px-20 py-2 bg-[#FC9D25] text-[#FAFAFA]">
+               <div className="w-20 flex items-center justify-center"> 
+                  Descrição
               </div>
               </th>
-              <th className="border-collapse border border-[#EDEBEB] sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA]">
-               <div className="flex items-center justify-left "> 
-                  QUANTITY
+              <th className="border-collapse border border-[#EDEBEB] w-2 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA]">
+               <div className="w-15 flex items-center justify-center "> 
+                  Código Produto
               </div>
               </th>
+              <th className="border-collapse border border-[#EDEBEB] w-2 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA]">
+               <div className="w-5 flex items-center justify-center "> 
+                  Iva
+              </div>
+              </th>
+              <th className="border-collapse border border-[#EDEBEB] w-10 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA]">
+               <div className="w-20 flex items-center justify-center "> 
+                  Conta CBL/ERP
+              </div>
+              </th>
+              <th className="border-collapse border border-[#EDEBEB] w-50 sm:px-16 py-2 bg-[#FC9D25] text-[#FAFAFA]">
+               <div className="w-15 flex items-center justify-center "> 
+                  Tipo Artigo
+              </div>
+              </th>
+              <th className="border-collapse border border-[#EDEBEB] sm:px-75 py-2 bg-[#FC9D25] text-[#FAFAFA]">
+               <div className="w-20 flex items-center justify-center "> 
+                  Produto de
+              </div>
+              </th>
+
             </tr>
           </thead>
-      <tbody className="divide-y divide-gray-300">
-        {filteredProducts.map((product) => (
-          <tr key={product.id} className="hover:bg-gray-200">
-            <td className="border-collapse border border-[#EDEBEB] w-1 py-1 whitespace-nowrap text-sm text-[#191919] text-center">
+          <tbody className="divide-y divide-gray-300">
+          {products.map((product) => (
+            <tr key={product.VPRODUTO} className="hover:bg-gray-200">
+              {/* Ações */}
+              <td className="border border-[#EDEBEB] px-1 py-1 text-center">
                 <Dropdown>
-                    <DropdownTrigger>
-                      <Button variant="bordered">
-                        <HiDotsVertical size={18} />
-                      </Button>
-                    </DropdownTrigger>
-                    <DropdownMenu
-                      aria-label="Dynamic Actions"
-                      placement="bottom-end"
-                      className="bg-white shadow-lg rounded-md p-1"
-                      style={{ marginLeft: '80px' }}
-                    >
-                     {/* <DropdownItem
-                        key="add"
-                        onPress={onAddModalOpen}
-                        className="hover:bg-gray-100"
-                      >
-                        Adicionar
-                      </DropdownItem>*/}
-                      <DropdownItem
-                        key="edit"
-                        onPress={() => {
-                          handleEditProduct(product);
-                          onEditModalOpen();
-                        }}
-                        className="hover:bg-gray-100"
-                      >
-                        Edit
-                      </DropdownItem>
-                      {/*<DropdownItem
-                        key="delete"
-                        className="text-danger hover:bg-red-50"
-                        color="danger"
-                        onPress={() => {
-                          setGroupToDelete(group.id);
-                          onDeleteModalOpen();
-                        }}
-                      >
-                        Excluir
-                      </DropdownItem>*/}
-                    </DropdownMenu>
-                  </Dropdown>
-
-                  </td>
-            <td className="border-collapse border border-[#EDEBEB] px-3 py-2 whitespace-nowrap text-sm text-[#191919] text-right">
-              {product.id}
-            </td>
-            <td className="border-collapse border border-[#EDEBEB] px-4 py-2 whitespace-nowrap text-sm text-[#191919] text-left">
-              {product.product_name}
-            </td>
-            <td className="border-collapse border border-[#EDEBEB] px-4 py-2 whitespace-nowrap text-sm text-[#191919] text-left">
-              {product.quantity}
-            </td>
-          </tr>
-        ))}
-      </tbody>
+                  <DropdownTrigger>
+                    <Button variant="bordered">
+                      <HiDotsVertical size={18} />
+                    </Button>
+                  </DropdownTrigger>
+                  <DropdownMenu aria-label="Dynamic Actions" placement="bottom-end" className="bg-white shadow-lg rounded-md p-1">
+                    <DropdownItem key="edit" onPress={() => alert(`Editando ${product.VDESC1}`)}>Editar</DropdownItem>
+                  </DropdownMenu>
+                </Dropdown>
+              </td>
+              
+              {/* Dados do Produto */}
+              <td className="border border-[#EDEBEB] px-3 py-2 text-right">{product.Abreviatura}</td>
+              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.VDESC1}</td>
+              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.VPRODUTO}</td>
+              <td className="border border-[#EDEBEB] px-4 py-2 text-center">{product.VCodIva}</td>
+              <td className="border border-[#EDEBEB] px-4 py-2 text-center">{product.ID_CBLAnalitica}</td>
+              <td className="border border-[#EDEBEB] px-4 py-2 text-center">{product.vtipprod}</td>
+              <td className="border border-[#EDEBEB] px-4 py-2 text-center">{product.ProductType}</td>
+            </tr>
+          ))}
+        </tbody>
     </table>
       </div>
       {filteredProducts.length === 0 && !error && (

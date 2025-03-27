@@ -86,23 +86,24 @@ export default function SidebarMenu() {
                 id="selectProperty"
                 value={selectedProperty || ""}
                 onChange={(e) => {
-                    const newProperty = e.target.value;
+                    const newPropertyID = e.target.value; // Pegue o ID da propriedade selecionada
 
-                    if (newProperty !== selectedProperty) {
+                    if (newPropertyID !== selectedProperty) {
                         setIsConfirmed(false);
                     }
 
-                    setTempSelectedProperty(newProperty);
+                    setTempSelectedProperty(newPropertyID); // Atualiza o estado com o novo ID
                 }}
                 className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-[#FC9D25]"
             >
                 <option value="">Select a property</option>
                 {properties.map((property) => (
-                    <option key={property.id} value={property.tag}>
-                        {property.name}
+                    <option key={property.id} value={property.id}>
+                        {property.name} {/* Exibe o nome da propriedade, mas armazena o ID */}
                     </option>
                 ))}
             </select>
+
 
             {/* Show buttons when a property is selected but not confirmed */}
             {tempSelectedProperty && !isConfirmed && (

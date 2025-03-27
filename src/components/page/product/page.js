@@ -6,6 +6,7 @@ import { FaGear } from "react-icons/fa6";
 import { Plus } from "lucide-react";
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
 import { fetchProduct, createProduct, deleteProduct, updateProduct } from '@/src/lib/apiproduct';
+import { fetchSubfamily } from '@/src/lib/apisubfamily';
 import {
   Modal,
   ModalContent,
@@ -19,6 +20,7 @@ import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@
 
 const DataProduct = () => {
   const [products, setProducts] = useState([]);
+  const [subfamilies, setSubfamilies] = useState([]);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [newProduct, setNewProduct] = useState({ product_name: '', quantity: '' });
@@ -26,7 +28,11 @@ const DataProduct = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
   const [quantityError, setQuantityError] = useState(''); 
-  const [selectedProduct, setSelectedProduct] = useState("");
+  const [selectedSubfamily, setSelectedSubfamily] = useState("");
+  const [selectedIva, setSelectedIva] = useState("");
+  const [selectedTipo, setSelectedTipo] = useState("");
+  const [isActive, setIsActive] = useState(false);
+
 
   const {
     isOpen: isAddModalOpen,
@@ -46,6 +52,7 @@ const DataProduct = () => {
 
   useEffect(() => {
     loadProducts();
+    loadSubfamilies();
   }, []);
 
   const loadProducts = async () => {
@@ -57,75 +64,74 @@ const DataProduct = () => {
     }
   };
 
-  const handleSort = (field) => {
-    if (sortField === field) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortOrder('asc');
-    }
-    const sortedProducts = [...products].sort((a, b) => {
-      if (field === 'quantity' || field === 'id') {
-        return sortOrder === 'asc' ? a[field] - b[field] : b[field] - a[field];
+  const loadSubfamilies = async () => {
+      try {
+        const subfamilies = await fetchSubfamily();
+        setSubfamilies(subfamilies);
+      } catch (err) {
+        setError(err.message);
       }
-      return sortOrder === 'asc'
-        ? a[field].localeCompare(b[field])
-        : b[field].localeCompare(a[field]);
-    });
-    setProducts(sortedProducts);
-  };
-
-  const renderSortIcon = (field) => {
-    if (sortField !== field) return null;
-    return sortOrder === 'asc' ? (
-      <ArrowUpIcon className="w-4 h-4 ml-1" />
-    ) : (
-      <ArrowDownIcon className="w-4 h-4 ml-1" />
-    );
   };
 
   const filteredProducts = products.filter((product) => {
+    if (!product || !product.id || !product.product_name) {
+      return false; 
+    }
     const searchLower = searchTerm.toLowerCase();
     return (
       product.id.toString().includes(searchLower) ||
       product.product_name.toString().toLowerCase().includes(searchLower)
     );
   });
+  
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewProduct((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleAddProduct = async (e) => {
-    e.preventDefault();
-    if (!newProduct.product_name) {
-      setError('Preencha o nome do produto.');
-      return;
-    }
-  
-    const productExists = products.some(
-      (product) => product.product_name.toLowerCase() === newProduct.product_name.toLowerCase()
-    );
-    if (productExists) {
-      setQuantityError('Este produto já existe. Por favor, use um nome diferente.');
-      return;
-    }
-  
-    try {
-     setIsLoading(true);
-     const productData = { product_name: newProduct.product_name, quantity: newProduct.quantity };
-     const createdProduct = await createProduct(productData);
-     setProducts([...products, createdProduct]);
-     setNewProduct({ product_name: '' , quantity: ''});
-     setError(null); // Limpa o erro após sucesso
-     onAddModalClose();
+ const handleAddProduct = async (e) => {
+     e.preventDefault();
+     
+     if (!newProduct.product_name || !newProduct.quantity || !selectedSubfamily) {
+       setError('Preencha o nome do produto e selecione uma Subfamilia.');
+       return;
+     }
+   
+     const productExists = products.some(
+       (product) => product.product_name.toLowerCase() === newProduct.product_name.toLowerCase()
+      
+     );
+   
+     if (productExists) {
+       setError('Este produto ja existe. Por favor, use um nome diferente.');
+       return;
+     }
+   
+     try {
+       setIsLoading(true);
+       
+       const productData = {
+         product_name: newProduct.product_name,
+         quantity: newProduct.quantity,
+         selectedSubfamily: selectedSubfamily, // Certifique-se de que a chave no backend espera esse nome
+       };
+   
+       const createdProduct = await createProduct(productData);
+       setProducts([...products, createdProduct]);
+   
+       // Limpa os campos após sucesso
+       setNewProduct({ product_name: '' });
+       setSelectedSubfamily('');
+       setError(null);
+   
+       onAddModalClose();
      } catch (err) {
-        setError(err.message);
+       setError(err.message);
      } finally {
-        setIsLoading(false);
-  }
-};
+       setIsLoading(false);
+     }
+   };
 
   const handleDeleteProduct = async () => {
     if (productToDelete) {
@@ -173,30 +179,30 @@ const DataProduct = () => {
       }
     };
 
+    const ivaList = [
+      { id: 1, taxa: 23, descricao: "IVA Padrão" },
+      { id: 2, taxa: 13, descricao: "IVA Intermediário" },
+      { id: 3, taxa: 6, descricao: "IVA Reduzido" },
+      { id: 4, taxa: 0, descricao: "Isento de IVA" },
+    ];
+
+    const tipoOperacaoList = [
+      { id: 1, tipo: "venda", descricao: "Venda" },
+      { id: 2, tipo: "compra", descricao: "Compra" },
+    ];
+
   return (
     <div className="p-4">
       {/* button */}
             <Dropdown>
             <DropdownTrigger>
-            <button className="absolute top-4 right-10 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
-                < Plus size={25} />     
-            </button>
+            <button 
+                onClick={onAddModalOpen}
+                className="absolute top-4 right-10 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
+                < Plus size={25}  />     
+            </button> 
             </DropdownTrigger>
-             <DropdownMenu
-                aria-label="Dynamic Actions"
-
-                className="bg-white shadow-lg rounded-md p-1"
-
-                   >
-                    <DropdownItem
-                      type="text"
-                      key="add"
-                      onPress={onAddModalOpen}
-                      
-                    >
-                    Add        
-                </DropdownItem>
-              </DropdownMenu>
+      
             </Dropdown>
 
       {/* Modal para adicionar produto */}
@@ -205,70 +211,144 @@ const DataProduct = () => {
         onOpenChange={onAddModalClose}
         size="md"
         placement="center"
-        className="w-100  shadow-xl rounded-lg"
+        className="w-100 bg-white shadow-xl rounded-lg"
+        hideCloseButton={true}
       >
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="rounded bg-[#FC9D25] flex justify-left items-left">
-                <h3 className="text-xl flex justify-left items-left font-bold text-white">New Product</h3>
+              <ModalHeader className="rounded bg-[#FC9D25] flex justify-between items-center">
+                <div className="text-xl font-bold text-white">New product</div>
+                <Button
+                  onClick={onClose}
+                  className="text-white bg-transparent border-0 text-2xl p-0"
+                  aria-label="Close"
+                >
+                  &times; {/* Unicode for "×" sign */}
+                </Button>
               </ModalHeader>
-              <ModalBody className="py-6 px-8">
+              <ModalBody className="py-5 px-6">
                 <form id="addProductForm" onSubmit={handleAddProduct} className="space-y-6">
-                  <div>
-                    <label
-                      htmlFor="newProductName"
-                      className="block text-sm font-medium text-gray-400 mb-1"
+                <div>
+                  <label htmlFor="abreviatura" className="block text-sm font-medium text-gray-400 mb-1">
+                     Abreviatura
+                  </label>
+                  <input
+                      id="newAbreviatura"
+                      type="text"   
+                      name="abreviatura"
+                 
+                      placeholder="Digite a abreviatura"
+                      className="w-65 p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                      required
+                    />
+                    
+                    <button
+                      onClick={() => setIsActive(!isActive)}
+                      className={`relative w-12 h-6 rounded-full transition-all duration-300  p-1.5 
+                        ${isActive ? "bg-[#FC9D25]" : "bg-gray-300"}`}
                     >
-                      Name
-                    </label>
-                    <input
-                      id="newProductName"
-                      type="text"
-                      name="product_name"
-                      value={newProduct.product_name}
-                      onChange={handleInputChange}
+                      <span
+                        className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform duration-300
+                          ${isActive ? "translate-x-6" : "translate-x-0"}`}
+                      />
+                    </button>
+                    <span className="text-sm font-medium text-gray-400">
+                      {isActive ? "Ativo" : "Inativo"}
+                    </span>
+                </div>
+                <div>
+                  <label htmlFor="descricao" className="block text-sm font-medium text-gray-400 mb-1">
+                     Descrição
+                  </label>
+                  <input
+                      id="newDescricao"
+                      type="text"   
+                      name="descricao"
+                 
+                      placeholder="Digite a descricao"
                       className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
                       required
                     />
-                  </div>
-                  <div>
-                    <label
-                      htmlFor="newQuantity"
-                      className="block text-sm font-medium text-gray-400 mb-1"
-                    >
-                      Quantity
-                    </label>
-                    <input
-                      id="newQuantity"
-                      type="text" 
-                      name="quantity"
-                      value={newProduct.quantity}
-                      onChange={handleInputChange}
+                </div>
+                <div>
+                  <label htmlFor="CodProd" className="block text-sm font-medium text-gray-400 mb-1">
+                     Codigo do produto
+                  </label>
+                  <input
+                      id="newCodProd"
+                      type="text"   
+                      name="codProd"
+                      placeholder="Digite o Codigo do produto"
                       className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
                       required
                     />
-                    {quantityError && (
-                      <p className="text-red-500 text-sm mt-1">{quantityError}</p>
-                    )}
-                  </div>
-                  <div>
-                    <label htmlFor="selectProduct" className="block text-sm font-medium text-gray-400 mb-1">
-                      Select a Product
-                    </label>
-                    <select
-                      id="selectProduct"
-                      value={selectedProduct}
-                      onChange={(e) => setSelectedProduct(e.target.value)}
-                      className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-[#FC9D25]"
-                    >
-                      <option value="">Select one Product</option>
-                      {products.map((product) => (
-                        <option key={product.id} value={product.id}>
-                          {product.product_name}
-                        </option>
-                      ))}
-                    </select>
+                </div>
+                {/* <div>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={ativo}
+                      onChange={(e) => setAtivo(e.target.checked)}
+                    />
+                    {ativo ? "Ativo" : "Inativo"}
+                  </label>
+                </div> */}
+              
+                <div>
+                  <label htmlFor="Conta" className="block text-sm font-medium text-gray-400 mb-1">
+                     Conta CBL/ERP
+                  </label>
+                  <input
+                      id="newConta"
+                      type="text"   
+                      name="conta"
+                      placeholder="Digite a conta CBL/ERP"
+                      className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                      required
+                    />
+                </div>
+                <div>
+                  <label htmlFor="Artigo" className="block text-sm font-medium text-gray-400 mb-1">
+                     Tipo de Artigo
+                  </label>
+                  <input
+                      id="newArtigo"
+                      type="text"   
+                      name="Artigo"
+                      placeholder="Digite o Tipo de artigo"
+                      className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                      required
+                    />
+                </div>
+                <div>
+                   <select
+                    className="w-full p-1 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
+                    value={selectedIva}
+                    onChange={(e) => setSelectedIva(e.target.value)}
+                  >
+                    <option value="">Iva</option>
+                    {ivaList.map((iva) => (
+                      <option key={iva.id} value={iva.taxa}>
+                        {iva.taxa}% - {iva.descricao}
+                      </option>
+                    ))}
+                  </select>
+
+                </div>
+                <div>
+                <select
+                    className="w-full p-1 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
+                    value={selectedTipo}
+                    onChange={(e) => setSelectedTipo(e.target.value)}
+                  >
+                    <option value="">Produto de</option>
+                    {tipoOperacaoList.map((tipo) => (
+                      <option key={tipo.id} value={tipo.tipo}>
+                        {tipo.descricao}
+                      </option>
+                    ))}
+                  </select>
                   </div>
                 </form>
               </ModalBody>
@@ -278,6 +358,7 @@ const DataProduct = () => {
                   form="addProductForm"
                   className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
                   disabled={isLoading}
+                  onClick={() => window.location.reload()} // Recarrega a página ao clicar
                 >
                   {isLoading ? <Spinner size="sm" color="white" /> : 'Adicionar'}
                 </Button>
@@ -294,17 +375,25 @@ const DataProduct = () => {
     size="md"
     placement="center" // Centraliza o modal
     className="w-100 bg-white shadow-xl rounded-lg"
+    hideCloseButton={true}
   >
     <ModalContent>
       {(onClose) => (
         <>
-          <ModalHeader className="rounded bg-[#FC9D25] flex justify-left items-left">
-            <h3 className="text-xl flex justify-left items-left font-bold text-white">Edit product</h3>
+          <ModalHeader className="rounded bg-[#FC9D25] flex justify-between items-center">
+          <div className="text-xl font-bold text-white">Edit product</div>
+                <Button
+                  onClick={onClose}
+                  className="text-white bg-transparent border-0 text-2xl p-0"
+                  aria-label="Close"
+                >
+                  &times; {/* Unicode for "×" sign */}
+                </Button>
           </ModalHeader>
           <ModalBody className="py-5 px-6">
             {editProduct && (
               <form id="updateProductForm" onSubmit={handleUpdateProduct} className="space-y-6">
-                <div>
+                {/* <div>
                   <label htmlFor="productName" className="block text-sm font-medium text-gray-400 mb-1">
                     Name
                   </label>
@@ -316,11 +405,18 @@ const DataProduct = () => {
                       setEditProduct({ ...editProduct, product_name: e.target.value })
                     }
                     placeholder="Digite o nome do produto"
-                    className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                    className="w-60 p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
                     required
                   />
+                   <input
+                      type="checkbox"
+                      checked={ativo}
+                      className="w-15 "
+                      onChange={(e) => setAtivo(e.target.checked)}
+                    />
+                    {ativo ? "Ativo" : "Inativo"}
                 </div>
-                <div>
+                <div >
                   <label htmlFor="quantity" className="block text-sm font-medium text-gray-400 mb-1">
                     Quantity
                   </label>
@@ -339,6 +435,128 @@ const DataProduct = () => {
                     {quantityError && (
                       <p className="text-red-500 text-sm mt-1">{quantityError}</p>
                     )}
+                </div> */}
+                <div>
+                  <label htmlFor="abreviatura" className="block text-sm font-medium text-gray-400 mb-1">
+                     Abreviatura
+                  </label>
+                  <input
+                      id="newAbreviatura"
+                      type="text"   
+                      name="abreviatura"
+                 
+                      placeholder="Digite a abreviatura"
+                      className="w-65 p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                      required
+                    />
+                    
+                    <button
+                      onClick={() => setIsActive(!isActive)}
+                      className={`relative w-12 h-6 rounded-full transition-all duration-300  p-1.5 
+                        ${isActive ? "bg-[#FC9D25]" : "bg-gray-300"}`}
+                    >
+                      <span
+                        className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform duration-300
+                          ${isActive ? "translate-x-6" : "translate-x-0"}`}
+                      />
+                    </button>
+                    <span className="text-sm font-medium text-gray-400">
+                      {isActive ? "Ativo" : "Inativo"}
+                    </span>
+                </div>
+                <div>
+                  <label htmlFor="descricao" className="block text-sm font-medium text-gray-400 mb-1">
+                     Descrição
+                  </label>
+                  <input
+                      id="newDescricao"
+                      type="text"   
+                      name="descricao"
+                 
+                      placeholder="Digite a descricao"
+                      className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                      required
+                    />
+                </div>
+                <div>
+                  <label htmlFor="CodProd" className="block text-sm font-medium text-gray-400 mb-1">
+                     Codigo do produto
+                  </label>
+                  <input
+                      id="newCodProd"
+                      type="text"   
+                      name="codProd"
+                      placeholder="Digite o Codigo do produto"
+                      className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                      required
+                    />
+                </div>
+                {/* <div>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={ativo}
+                      onChange={(e) => setAtivo(e.target.checked)}
+                    />
+                    {ativo ? "Ativo" : "Inativo"}
+                  </label>
+                </div> */}
+              
+                <div>
+                  <label htmlFor="Conta" className="block text-sm font-medium text-gray-400 mb-1">
+                     Conta CBL/ERP
+                  </label>
+                  <input
+                      id="newConta"
+                      type="text"   
+                      name="conta"
+                      placeholder="Digite a conta CBL/ERP"
+                      className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                      required
+                    />
+                </div>
+                <div>
+                  <label htmlFor="Artigo" className="block text-sm font-medium text-gray-400 mb-1">
+                     Tipo de Artigo
+                  </label>
+                  <input
+                      id="newArtigo"
+                      type="text"   
+                      name="Artigo"
+                      placeholder="Digite o Tipo de artigo"
+                      className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                      required
+                    />
+                </div>
+                <div>
+                   <select
+                    className="w-full p-1 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
+                    value={selectedIva}
+                    onChange={(e) => setSelectedIva(e.target.value)}
+                  >
+                    <option value="">Iva</option>
+                    {ivaList.map((iva) => (
+                      <option key={iva.id} value={iva.taxa}>
+                        {iva.taxa}% - {iva.descricao}
+                      </option>
+                    ))}
+                  </select>
+
+                </div>
+                <div>
+                <select
+                    className="w-full p-1 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
+                    value={selectedTipo}
+                    onChange={(e) => setSelectedTipo(e.target.value)}
+                  >
+                    <option value="">Produto de</option>
+                    {tipoOperacaoList.map((tipo) => (
+                      <option key={tipo.id} value={tipo.tipo}>
+                        {tipo.descricao}
+                      </option>
+                    ))}
+                  </select>
+
                 </div>
               </form>
             )}
@@ -348,6 +566,7 @@ const DataProduct = () => {
               type="submit"
               form="updateProductForm"
               className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
+              onClick={() => window.location.reload()} // Recarrega a página ao clicar
             >
               Save
             </Button>
@@ -412,83 +631,72 @@ const DataProduct = () => {
                   <FaGear size={20} color='white'/>
                 </div>
               </th>
-              <th className="border-collapse border border-[#EDEBEB] w-1 px-1 sm:px-5 py-4 bg-[#FC9D25] text-[#FAFAFA]">
-                <div className="w-2 flex items-right justify-right"> 
-                  ID
+              <th className="border-collapse border border-[#EDEBEB] w-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA]">
+                <div className="w-90 flex items-left justify-center"> 
+                   Abreviatura
                 </div>
               </th>
-              <th className="border-collapse border border-[#EDEBEB] sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA]">
-               <div className="flex items-center justify-left "> 
-                  NAME
+              <th className="border-collapse border border-[#EDEBEB] w-50 sm:px-20 py-2 bg-[#FC9D25] text-[#FAFAFA]">
+               <div className="w-40 flex items-center justify-center"> 
+                  Descrição
               </div>
               </th>
-              <th className="border-collapse border border-[#EDEBEB] sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA]">
-               <div className="flex items-center justify-left "> 
-                  QUANTITY
+              <th className="border-collapse border border-[#EDEBEB] w-2 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA]">
+               <div className="w-17 flex items-center justify-center "> 
+                  Código Produto
               </div>
               </th>
+              <th className="border-collapse border border-[#EDEBEB] w-2 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA]">
+               <div className="w-3 flex items-center justify-center "> 
+                  Iva
+              </div>
+              </th>
+              <th className="border-collapse border border-[#EDEBEB] w-10 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA]">
+               <div className="w-12 flex items-center justify-center "> 
+                  Conta CBL/ERP
+              </div>
+              </th>
+              <th className="border-collapse border border-[#EDEBEB] w-50 sm:px-16 py-2 bg-[#FC9D25] text-[#FAFAFA]">
+               <div className="w-15 flex items-center justify-center "> 
+                  Tipo Artigo
+              </div>
+              </th>
+              <th className="border-collapse border border-[#EDEBEB] sm:px-35 py-2 bg-[#FC9D25] text-[#FAFAFA]">
+               <div className="w-26 flex items-center justify-center "> 
+                  Produto de
+              </div>
+              </th>
+
             </tr>
           </thead>
-      <tbody className="divide-y divide-gray-300">
-        {filteredProducts.map((product) => (
-          <tr key={product.id} className="hover:bg-gray-200">
-            <td className="border-collapse border border-[#EDEBEB] w-1 py-1 whitespace-nowrap text-sm text-[#191919] text-center">
+          <tbody className="divide-y divide-gray-300">
+          {products.map((product) => (
+            <tr key={product.VPRODUTO} className="hover:bg-gray-200">
+              {/* Ações */}
+              <td className="border border-[#EDEBEB] px-1 py-1 text-center">
                 <Dropdown>
-                    <DropdownTrigger>
-                      <Button variant="bordered">
-                        <HiDotsVertical size={18} />
-                      </Button>
-                    </DropdownTrigger>
-                    <DropdownMenu
-                      aria-label="Dynamic Actions"
-                      placement="bottom-end"
-                      className="bg-white shadow-lg rounded-md p-1"
-                      style={{ marginLeft: '80px' }}
-                    >
-                     {/* <DropdownItem
-                        key="add"
-                        onPress={onAddModalOpen}
-                        className="hover:bg-gray-100"
-                      >
-                        Adicionar
-                      </DropdownItem>*/}
-                      <DropdownItem
-                        key="edit"
-                        onPress={() => {
-                          handleEditProduct(product);
-                          onEditModalOpen();
-                        }}
-                        className="hover:bg-gray-100"
-                      >
-                        Edit
-                      </DropdownItem>
-                      {/*<DropdownItem
-                        key="delete"
-                        className="text-danger hover:bg-red-50"
-                        color="danger"
-                        onPress={() => {
-                          setGroupToDelete(group.id);
-                          onDeleteModalOpen();
-                        }}
-                      >
-                        Excluir
-                      </DropdownItem>*/}
-                    </DropdownMenu>
-                  </Dropdown>
-
-                  </td>
-            <td className="border-collapse border border-[#EDEBEB] px-3 py-2 whitespace-nowrap text-sm text-[#191919] text-right">
-              {product.id}
-            </td>
-            <td className="border-collapse border border-[#EDEBEB] px-4 py-2 whitespace-nowrap text-sm text-[#191919] text-left">
-              {product.product_name}
-            </td>
-            <td className="border-collapse border border-[#EDEBEB] px-4 py-2 whitespace-nowrap text-sm text-[#191919] text-left">
-              {product.quantity}
-            </td>
-          </tr>
-        ))}
-      </tbody>
+                  <DropdownTrigger>
+                    <Button variant="bordered">
+                      <HiDotsVertical size={18} />
+                    </Button>
+                  </DropdownTrigger>
+                  <DropdownMenu aria-label="Dynamic Actions" placement="bottom-end" className="bg-white shadow-lg rounded-md p-1">
+                    <DropdownItem key="edit" onPress={() => alert(`Editando ${product.VDESC1}`)}>Editar</DropdownItem>
+                  </DropdownMenu>
+                </Dropdown>
+              </td>
+              
+              {/* Dados do Produto */}
+              <td className="border border-[#EDEBEB] px-3 py-2 text-left">{product.Abreviatura}</td>
+              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.VDESC1}</td>
+              <td className="border border-[#EDEBEB] px-4 py-2 text-right">{product.VPRODUTO}</td>
+              <td className="border border-[#EDEBEB] px-4 py-2 text-right">{product.VCodIva}</td>
+              <td className="border border-[#EDEBEB] px-4 py-2 text-right">{product.ID_CBLAnalitica}</td>
+              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.vtipprod}</td>
+              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.ProductType}</td>
+            </tr>
+          ))}
+        </tbody>
     </table>
       </div>
       {filteredProducts.length === 0 && !error && (

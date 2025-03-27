@@ -1,7 +1,7 @@
 // src/lib/apigroup.js
 export const fetchGrup = async () => {
   try {
-    const response = await fetch('/api/group', {
+    const response = await fetch('http://213.146.218.25:5100/getgrfamiliar', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

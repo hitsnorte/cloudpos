@@ -632,27 +632,27 @@ const DataProduct = () => {
                 </div>
               </th>
               <th className="border-collapse border border-[#EDEBEB] w-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA]">
-                <div className="w-20 flex items-right justify-center"> 
+                <div className="w-90 flex items-left justify-center"> 
                    Abreviatura
                 </div>
               </th>
               <th className="border-collapse border border-[#EDEBEB] w-50 sm:px-20 py-2 bg-[#FC9D25] text-[#FAFAFA]">
-               <div className="w-20 flex items-center justify-center"> 
+               <div className="w-40 flex items-center justify-center"> 
                   Descrição
               </div>
               </th>
               <th className="border-collapse border border-[#EDEBEB] w-2 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA]">
-               <div className="w-15 flex items-center justify-center "> 
+               <div className="w-17 flex items-center justify-center "> 
                   Código Produto
               </div>
               </th>
               <th className="border-collapse border border-[#EDEBEB] w-2 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA]">
-               <div className="w-5 flex items-center justify-center "> 
+               <div className="w-3 flex items-center justify-center "> 
                   Iva
               </div>
               </th>
               <th className="border-collapse border border-[#EDEBEB] w-10 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA]">
-               <div className="w-20 flex items-center justify-center "> 
+               <div className="w-12 flex items-center justify-center "> 
                   Conta CBL/ERP
               </div>
               </th>
@@ -661,8 +661,8 @@ const DataProduct = () => {
                   Tipo Artigo
               </div>
               </th>
-              <th className="border-collapse border border-[#EDEBEB] sm:px-75 py-2 bg-[#FC9D25] text-[#FAFAFA]">
-               <div className="w-20 flex items-center justify-center "> 
+              <th className="border-collapse border border-[#EDEBEB] sm:px-35 py-2 bg-[#FC9D25] text-[#FAFAFA]">
+               <div className="w-26 flex items-center justify-center "> 
                   Produto de
               </div>
               </th>
@@ -687,13 +687,13 @@ const DataProduct = () => {
               </td>
               
               {/* Dados do Produto */}
-              <td className="border border-[#EDEBEB] px-3 py-2 text-right">{product.Abreviatura}</td>
+              <td className="border border-[#EDEBEB] px-3 py-2 text-left">{product.Abreviatura}</td>
               <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.VDESC1}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.VPRODUTO}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-center">{product.VCodIva}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-center">{product.ID_CBLAnalitica}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-center">{product.vtipprod}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-center">{product.ProductType}</td>
+              <td className="border border-[#EDEBEB] px-4 py-2 text-right">{product.VPRODUTO}</td>
+              <td className="border border-[#EDEBEB] px-4 py-2 text-right">{product.VCodIva}</td>
+              <td className="border border-[#EDEBEB] px-4 py-2 text-right">{product.ID_CBLAnalitica}</td>
+              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.vtipprod}</td>
+              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.ProductType}</td>
             </tr>
           ))}
         </tbody>

@@ -6,6 +6,8 @@ import { useSession } from "next-auth/react"; // Import useSession
 import { useEffect, useState } from "react";
 import { fetchDashboard } from '@/src/lib/apidashboard';
 
+
+
 export default function App() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -13,7 +15,7 @@ export default function App() {
 
   useEffect(() => {
     if (status === "unauthenticated") {
-      router.push("/login"); // Redirect if user is not logged in
+      router.push("/login"); // Redireciona se o utilizador não deu login
     }
   }, [status, router]);
   
@@ -43,11 +45,11 @@ export default function App() {
   }, [status]); // Recarrega quando o status de autenticação mudar
 
   if (status === "loading") {
-    return <p className="text-center text-lg">Loading...</p>; // Show loading while checking session
+    return <p className="text-center text-lg">Loading...</p>; // Mostra "Loading..." enquanto carrega
   }
 
   if (!session) {
-    return null; // Prevent rendering before redirect
+    return null; // Previne mostrar a página antes de dar redirect para o login
   }
 
   // Garantir que os dados estejam disponíveis antes de renderizar
@@ -65,7 +67,7 @@ export default function App() {
   // Define handleCardClick
   const handleCardClick = (path) => {
     console.log(`Navigating to: ${path}`);
-    router.push(path); // Navigate to the given path
+    router.push(path); // Navega para o caminho dado
   };
 
   return (
@@ -76,17 +78,17 @@ export default function App() {
           {cardPaths.map((card, index) => (
               <Card
                   key={index}
-                  className="w-90 h-60 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center p-4 cursor-pointer hover:bg-gray-100"
+                  className="w-70 h-45 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center cursor-pointer hover:bg-gray-100"
               >
                 <CardBody className="flex flex-col items-center w-full h-full relative">
                   <div
                       className="w-full h-full cursor-pointer hover:bg-gray-100"
                       onClick={() => handleCardClick(card.path)}
                   >
-                    <p className="text-8xl font-bold text-[#FC9D25] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                    <p className="text-5xl font-bold text-[#FC9D25] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                       {card.value}
                     </p>
-                    <p className="text-center text-lg text-gray-600 absolute bottom-4 left-1/2 transform -translate-x-1/2">
+                    <p className="text-center h-13 text-lg text-gray-600 absolute bottom-4 left-1/2 transform -translate-x-1/2">
                       {card.label}
                     </p>
                   </div>

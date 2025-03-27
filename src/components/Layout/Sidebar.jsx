@@ -1,16 +1,17 @@
 "use client";
 import { ChevronDown, ChevronUp, ChevronLast, ChevronFirst, X } from "lucide-react";
 import { createContext, useEffect, useState } from "react";
-import { useRouter } from "next/navigation"; // ✅ Import useRouter
+import { useRouter } from "next/navigation";
 import SidebarMenu from "./SidebarMenu";
 import { FaUser } from "react-icons/fa";
 import Image from "next/image";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 
 export const SidebarContext = createContext();
 
 export default function Sidebar({ mobileOpen, setMobileOpen, expanded, setExpanded }) {
-  const router = useRouter(); // ✅ Initialize router
+  const router = useRouter();
+  const { data: session } = useSession(); // ✅ Corrected placement of useSession()
   const [isMobile, setIsMobile] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
@@ -34,8 +35,8 @@ export default function Sidebar({ mobileOpen, setMobileOpen, expanded, setExpand
         {(isMobile && mobileOpen) || !isMobile ? (
             <aside
                 className={`h-screen fixed top-0 left-0 bg-white border-r border-gray-200 shadow-sm z-50 
-          transition-all duration-300 ease-in-out 
-          ${isMobile ? "w-screen" : expanded ? "w-[250px]" : "w-[80px]"}`}
+            transition-all duration-300 ease-in-out 
+            ${isMobile ? "w-screen" : expanded ? "w-[250px]" : "w-[80px]"}`}
             >
               <nav className="h-full flex flex-col relative w-full">
                 {/* Header */}
@@ -46,6 +47,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen, expanded, setExpand
                   </p>
                 </div>
 
+                {/* Sidebar Toggle Button */}
                 {!isMobile && (
                     <button
                         onClick={() => setExpanded((curr) => !curr)}
@@ -71,13 +73,20 @@ export default function Sidebar({ mobileOpen, setMobileOpen, expanded, setExpand
 
                 {/* Footer with User Info */}
                 <div className="border-t border-gray-200 shadow-sm flex p-3 w-full relative">
+                  {/* User Avatar */}
                   <div className="flex justify-center items-center bg-gray-200 p-3 rounded-lg">
-                    <FaUser size={20} color="gray" />
+                    {session?.user?.image ? (
+                        <Image src={session.user.image} alt="User Avatar" width={30} height={30} className="rounded-full" />
+                    ) : (
+                        <FaUser size={20} color="gray" />
+                    )}
                   </div>
+
+                  {/* User Info & Dropdown Toggle */}
                   <div className={`flex justify-between items-center overflow-hidden transition-all ${expanded || isMobile ? "w-full ml-3" : "w-0"}`}>
                     <div className="leading-4">
-                      <h4 className="font-semibold">User Teste</h4>
-                      <span className="text-xs text-gray-600">teste@gmail.com</span>
+                      <h4 className="font-semibold">{session?.user?.name || "Guest User"}</h4>
+                      <span className="text-xs text-gray-600">{session?.user?.email || "No email available"}</span>
                     </div>
                     <button onClick={() => setShowUserMenu((prev) => !prev)} className="ml-2 text-gray-600 hover:text-black">
                       {showUserMenu ? <ChevronUp size={20} /> : <ChevronDown size={20} />}

@@ -29,9 +29,9 @@ const DataProduct = () => {
   const [productToDelete, setProductToDelete] = useState(null);
   const [quantityError, setQuantityError] = useState(''); 
   const [selectedSubfamily, setSelectedSubfamily] = useState("");
-  const [ativo, setAtivo] = useState(true);
   const [selectedIva, setSelectedIva] = useState("");
   const [selectedTipo, setSelectedTipo] = useState("");
+  const [isActive, setIsActive] = useState(false);
 
 
   const {
@@ -229,60 +229,126 @@ const DataProduct = () => {
               </ModalHeader>
               <ModalBody className="py-5 px-6">
                 <form id="addProductForm" onSubmit={handleAddProduct} className="space-y-6">
-                  <div>
-                    <label
-                      htmlFor="newProductName"
-                      className="block text-sm font-medium text-gray-400 mb-1"
+                <div>
+                  <label htmlFor="abreviatura" className="block text-sm font-medium text-gray-400 mb-1">
+                     Abreviatura
+                  </label>
+                  <input
+                      id="newAbreviatura"
+                      type="text"   
+                      name="abreviatura"
+                 
+                      placeholder="Digite a abreviatura"
+                      className="w-65 p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                      required
+                    />
+                    
+                    <button
+                      onClick={() => setIsActive(!isActive)}
+                      className={`relative w-12 h-6 rounded-full transition-all duration-300  p-1.5 
+                        ${isActive ? "bg-[#FC9D25]" : "bg-gray-300"}`}
                     >
-                      Name
-                    </label>
-                    <input
-                      id="newProductName"
-                      type="text"
-                      name="product_name"
-                      value={newProduct.product_name}
-                      onChange={handleInputChange}
+                      <span
+                        className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform duration-300
+                          ${isActive ? "translate-x-6" : "translate-x-0"}`}
+                      />
+                    </button>
+                    <span className="text-sm font-medium text-gray-400">
+                      {isActive ? "Ativo" : "Inativo"}
+                    </span>
+                </div>
+                <div>
+                  <label htmlFor="descricao" className="block text-sm font-medium text-gray-400 mb-1">
+                     Descrição
+                  </label>
+                  <input
+                      id="newDescricao"
+                      type="text"   
+                      name="descricao"
+                 
+                      placeholder="Digite a descricao"
                       className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
                       required
                     />
-                  </div>
-                  <div>
-                    <label
-                      htmlFor="newQuantity"
-                      className="block text-sm font-medium text-gray-400 mb-1"
-                    >
-                      Quantity
-                    </label>
-                    <input
-                      id="newQuantity"
-                      type="text" 
-                      name="quantity"
-                      value={newProduct.quantity}
-                      onChange={handleInputChange}
+                </div>
+                <div>
+                  <label htmlFor="CodProd" className="block text-sm font-medium text-gray-400 mb-1">
+                     Codigo do produto
+                  </label>
+                  <input
+                      id="newCodProd"
+                      type="text"   
+                      name="codProd"
+                      placeholder="Digite o Codigo do produto"
                       className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
                       required
                     />
-                    {quantityError && (
-                      <p className="text-red-500 text-sm mt-1">{quantityError}</p>
-                    )}
-                  </div>
-                  <div>
-                    <label htmlFor="selectSubfamily" className="block text-sm font-medium text-gray-400 mb-1">
-                      Select a Sub Family
-                    </label>
-                    <select
-                      id="selectProduct"
-                      value={selectedSubfamily}
-                      onChange={(e) => setSelectedSubfamily(e.target.value)}
-                      className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-[#FC9D25]"
-                    >
-                      <option value="">Select...</option>
-                      {subfamilies.map((Subfamilia) => (
-                        <option key={Subfamilia.id} value={Subfamilia.id}>
-                          {Subfamilia.nome}
-                        </option>
-                      ))}
-                    </select>
+                </div>
+                {/* <div>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={ativo}
+                      onChange={(e) => setAtivo(e.target.checked)}
+                    />
+                    {ativo ? "Ativo" : "Inativo"}
+                  </label>
+                </div> */}
+              
+                <div>
+                  <label htmlFor="Conta" className="block text-sm font-medium text-gray-400 mb-1">
+                     Conta CBL/ERP
+                  </label>
+                  <input
+                      id="newConta"
+                      type="text"   
+                      name="conta"
+                      placeholder="Digite a conta CBL/ERP"
+                      className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                      required
+                    />
+                </div>
+                <div>
+                  <label htmlFor="Artigo" className="block text-sm font-medium text-gray-400 mb-1">
+                     Tipo de Artigo
+                  </label>
+                  <input
+                      id="newArtigo"
+                      type="text"   
+                      name="Artigo"
+                      placeholder="Digite o Tipo de artigo"
+                      className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                      required
+                    />
+                </div>
+                <div>
+                   <select
+                    className="w-full p-1 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
+                    value={selectedIva}
+                    onChange={(e) => setSelectedIva(e.target.value)}
+                  >
+                    <option value="">Iva</option>
+                    {ivaList.map((iva) => (
+                      <option key={iva.id} value={iva.taxa}>
+                        {iva.taxa}% - {iva.descricao}
+                      </option>
+                    ))}
+                  </select>
+
+                </div>
+                <div>
+                <select
+                    className="w-full p-1 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
+                    value={selectedTipo}
+                    onChange={(e) => setSelectedTipo(e.target.value)}
+                  >
+                    <option value="">Produto de</option>
+                    {tipoOperacaoList.map((tipo) => (
+                      <option key={tipo.id} value={tipo.tipo}>
+                        {tipo.descricao}
+                      </option>
+                    ))}
+                  </select>
                   </div>
                 </form>
               </ModalBody>
@@ -327,7 +393,7 @@ const DataProduct = () => {
           <ModalBody className="py-5 px-6">
             {editProduct && (
               <form id="updateProductForm" onSubmit={handleUpdateProduct} className="space-y-6">
-                <div>
+                {/* <div>
                   <label htmlFor="productName" className="block text-sm font-medium text-gray-400 mb-1">
                     Name
                   </label>
@@ -369,7 +435,7 @@ const DataProduct = () => {
                     {quantityError && (
                       <p className="text-red-500 text-sm mt-1">{quantityError}</p>
                     )}
-                </div>
+                </div> */}
                 <div>
                   <label htmlFor="abreviatura" className="block text-sm font-medium text-gray-400 mb-1">
                      Abreviatura
@@ -380,9 +446,23 @@ const DataProduct = () => {
                       name="abreviatura"
                  
                       placeholder="Digite a abreviatura"
-                      className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                      className="w-65 p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
                       required
                     />
+                    
+                    <button
+                      onClick={() => setIsActive(!isActive)}
+                      className={`relative w-12 h-6 rounded-full transition-all duration-300  p-1.5 
+                        ${isActive ? "bg-[#FC9D25]" : "bg-gray-300"}`}
+                    >
+                      <span
+                        className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform duration-300
+                          ${isActive ? "translate-x-6" : "translate-x-0"}`}
+                      />
+                    </button>
+                    <span className="text-sm font-medium text-gray-400">
+                      {isActive ? "Ativo" : "Inativo"}
+                    </span>
                 </div>
                 <div>
                   <label htmlFor="descricao" className="block text-sm font-medium text-gray-400 mb-1">

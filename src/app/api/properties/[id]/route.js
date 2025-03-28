@@ -4,7 +4,7 @@ import prisma from '@/src/lib/prisma';
 
 export async function GET(_, { params }) {  // ← Pega os parâmetros da URL
   try {
-    const { id: propertyID } = params;  // ← Captura o parâmetro de rota `[id]`
+    const { id: propertyID } = await params;  // ← Captura o parâmetro de rota `[id]`
 
     if (!propertyID) {
       return new Response(

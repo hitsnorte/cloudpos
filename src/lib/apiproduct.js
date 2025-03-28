@@ -2,7 +2,7 @@
 export const fetchProduct = async () => {
   try {
     // Obter o propertyID do localStorage
-    const selectedPropertyID = localStorage.getItem('selectedPropertyID');
+    const selectedPropertyID = localStorage.getItem('selectedProperty');
 
     if (!selectedPropertyID) {
       throw new Error('PropertyID não encontrado no localStorage');
@@ -28,7 +28,6 @@ export const fetchProduct = async () => {
     throw error;
   }
 };
-
 
 
   

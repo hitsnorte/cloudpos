@@ -198,7 +198,7 @@ const DataProduct = () => {
             <DropdownTrigger>
             <button 
                 onClick={onAddModalOpen}
-                className="absolute top-4 right-10 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
+                className="absolute top-4 right-14 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
                 < Plus size={25}  />     
             </button> 
             </DropdownTrigger>
@@ -626,43 +626,43 @@ const DataProduct = () => {
     <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB] mx-auto">
     <thead>
             <tr>
-              <th className="border-collapse border border-[#EDEBEB] !w-[1px] px-1 sm:px-5 py-4 bg-[#FC9D25]">
-                <div className=" flex items-left justify-left">
+              <th className="border-collapse border border-[#EDEBEB] !w-[1px] px-1 sm:px-5 py-2 bg-[#FC9D25]">
+                <div className=" flex items-center justify-center">
                   <FaGear size={20} color='white'/>
                 </div>
               </th>
-              <th className="border-collapse border border-[#EDEBEB] w-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA]">
-                <div className="w-90 flex items-left justify-center"> 
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-120 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className="flex items-center justify-center"> 
                    Abreviatura
                 </div>
               </th>
-              <th className="border-collapse border border-[#EDEBEB] w-50 sm:px-20 py-2 bg-[#FC9D25] text-[#FAFAFA]">
-               <div className="w-40 flex items-center justify-center"> 
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-120 sm:px-20 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+               <div className="flex items-center justify-center"> 
                   Descrição
               </div>
               </th>
-              <th className="border-collapse border border-[#EDEBEB] w-2 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA]">
-               <div className="w-17 flex items-center justify-center "> 
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-20 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+               <div className=" items-center justify-center "> 
                   Código Produto
               </div>
               </th>
-              <th className="border-collapse border border-[#EDEBEB] w-2 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA]">
-               <div className="w-3 flex items-center justify-center "> 
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-5 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+               <div className=" flex items-center justify-center "> 
                   Iva
               </div>
               </th>
-              <th className="border-collapse border border-[#EDEBEB] w-10 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA]">
-               <div className="w-12 flex items-center justify-center "> 
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-15 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+               <div className="flex items-center justify-center "> 
                   Conta CBL/ERP
               </div>
               </th>
-              <th className="border-collapse border border-[#EDEBEB] w-50 sm:px-16 py-2 bg-[#FC9D25] text-[#FAFAFA]">
-               <div className="w-15 flex items-center justify-center "> 
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-5 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+               <div className="flex items-center justify-center "> 
                   Tipo Artigo
               </div>
               </th>
-              <th className="border-collapse border border-[#EDEBEB] sm:px-35 py-2 bg-[#FC9D25] text-[#FAFAFA]">
-               <div className="w-26 flex items-center justify-center "> 
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-5 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+               <div className="flex items-center justify-center "> 
                   Produto de
               </div>
               </th>
@@ -691,7 +691,9 @@ const DataProduct = () => {
               <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.VDESC1}</td>
               <td className="border border-[#EDEBEB] px-4 py-2 text-right">{product.VPRODUTO}</td>
               <td className="border border-[#EDEBEB] px-4 py-2 text-right">{product.VCodIva}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-right">{product.ID_CBLAnalitica}</td>
+              <td className="border border-[#EDEBEB] px-4 py-2 text-right">
+                  {product.ID_CBLAnalitica === -1 ? "" : product.ID_CBLAnalitica}
+              </td>
               <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.vtipprod}</td>
               <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.ProductType}</td>
             </tr>

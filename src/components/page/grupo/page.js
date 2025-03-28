@@ -84,13 +84,13 @@ const DataGrupo = () => {
     );
   };
 
-  const filteredGroups = groups.filter((group) => {
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      group.id.toString().includes(searchLower) ||
-      group.group_name.toString().toLowerCase().includes(searchLower)
-    );
-  });
+  // const filteredGroups = groups.filter((group) => {
+  //   const searchLower = searchTerm.toLowerCase();
+  //   return (
+  //     group.id.toString().includes(searchLower) ||
+  //     group.group_name.toString().toLowerCase().includes(searchLower)
+  //   );
+  // });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -178,81 +178,75 @@ const DataGrupo = () => {
       {/* button */}
       <Dropdown>
       <DropdownTrigger>
-      <button className="absolute top-4 right-10 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
-          < Plus size={25} />     
+      <button 
+          onClick={onAddModalOpen}
+          className="absolute top-4 right-10 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
+          < Plus size={25}  />     
       </button>
       </DropdownTrigger>
-       <DropdownMenu
-          aria-label="Dynamic Actions"
-
-          className="bg-white shadow-lg rounded-md p-1"
-
-          
-             >
-              <DropdownItem
-                type="text"
-                key="add"
-                onPress={onAddModalOpen}
-                
-              >
-              Add       
-          </DropdownItem>
-        </DropdownMenu>
       </Dropdown>
-
-        {/* Modal para adicionar grupo */}
-      
+      {/* Modal para adicionar grupo */} 
       <Modal
-        isOpen={isAddModalOpen}
-        onOpenChange={onAddModalClose}
-        size="md"
-        placement="center"
-        className="w-100  shadow-xl rounded-lg"
-      >  
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader className="rounded bg-[#FC9D25] flex justify-left items-left">
-                <div className="text-xl flex justify-left items-left font-bold text-white">New Group</div>
-              </ModalHeader>
-              <ModalBody className="py-5 px-6">
-                <form id="addGroupForm" onSubmit={handleAddGroup} className="space-y-6">
-                  <div>
-                    <label
-                      htmlFor="newGroupName"
-                      className="block text-sm font-medium text-gray-400 mb-1"
-                    >
-                      Name
-                    </label>
-                    <input
-                      id="newGroupName"
-                      type="text"
-                      name="group_name"
-                      value={newGroup.group_name}
-                      onChange={handleInputChange}
-                      className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
-                      required
-                    />
-                    {error && (
-                      <p className="text-red-500 text-sm mt-1">{error}</p>
-                    )}
-                  </div>
-                </form>
-              </ModalBody>
-              <ModalFooter className="w-102 border-t border-gray-200 pt-2 px-8">
-                <Button
-                  type="submit"
-                  form="addGroupForm"
-                  className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
-                  disabled={isLoading}
-                >
-                  {isLoading ? <Spinner size="sm" color="white" /> : 'Save'}
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
+      isOpen={isAddModalOpen}
+      onOpenChange={onAddModalClose}
+      size="md"
+      placement="center"
+      className="w-100 bg-white shadow-xl rounded-lg"
+      hideCloseButton={true}
+    >
+      <ModalContent>
+        {(onClose) => (
+          <>
+            <ModalHeader className="rounded bg-[#FC9D25] flex justify-between items-center">
+              <div className="text-xl font-bold text-white">New Group</div>
+              <Button
+                onClick={onClose}
+                className="text-white bg-transparent border-0 text-2xl p-0"
+                aria-label="Close"
+              >
+                &times; {/* Unicode for "×" sign */}
+              </Button>
+            </ModalHeader>
+            <ModalBody className="py-5 px-6">
+              <form id="addGroupForm" onSubmit={handleAddGroup} className="space-y-6">
+                <div>
+                  <label
+                    htmlFor="newGroupName"
+                    className="block text-sm font-medium text-gray-400 mb-1"
+                  >
+                    Name
+                  </label>
+                  <input
+                    id="newGroupName"
+                    type="text"
+                    name="group_name"
+                    value={newGroup.group_name}
+                    onChange={handleInputChange}
+                    placeholder="Digite o nome do grupo"
+                    className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                    required
+                  />
+                  {error && (
+                    <p className="text-red-500 text-sm mt-1">{error}</p>
+                  )}
+                </div>
+              </form>
+            </ModalBody>
+            <ModalFooter className="w-102 border-t border-gray-200 pt-2 px-8">
+              <Button
+                type="submit"
+                form="addGroupForm"
+                className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
+                disabled={isLoading}
+                onClick={() => window.location.reload()} // Recarrega a página ao clicar
+              >
+                {isLoading ? <Spinner size="sm" color="white" /> : 'Save'}
+              </Button>
+            </ModalFooter>
+          </>
+        )}
+      </ModalContent>
+    </Modal>
 
       {/* Modal para editar grupo */}
       <Modal
@@ -298,6 +292,7 @@ const DataGrupo = () => {
                   type="submit"
                   form="updateGroupForm"
                   className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
+                  onClick={() => window.location.reload()} // Recarrega a página ao clicar
                 >
                   Save
                 </Button>
@@ -358,84 +353,65 @@ const DataGrupo = () => {
         <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB] mx-auto">
           <thead>
             <tr>
-              <th className="border-collapse border border-[#EDEBEB] !w-[1px] px-1 sm:px-5 py-4 bg-[#FC9D25]">
-                <div className=" flex items-left justify-left">
+              <th className="border-collapse border border-[#EDEBEB] !w-[1px] px-1 sm:px-5 py-2 bg-[#FC9D25]">
+                <div className=" flex items-center justify-center">
                   <FaGear size={20} color='white'/>
                 </div>
               </th>
-              <th className="border-collapse border border-[#EDEBEB] w-1 px-1 sm:px-5 py-4 bg-[#FC9D25] text-[#FAFAFA]">
-                <div className="w-2 flex items-right justify-right"> 
-                  ID
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-10 px-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className=" flex items-center justify-center"> 
+                  Cod Grp
                 </div>
               </th>
-              <th className="border-collapse border border-[#EDEBEB] sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA]">
-               <div className="flex items-center justify-left "> 
-                  NAME
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-170 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+               <div className="flex items-center justify-center "> 
+                  Descrição
+              </div>
+              </th>
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-30 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+               <div className="flex items-center justify-center "> 
+                  Criado Em
+              </div>
+              </th>
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-10 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+               <div className="flex items-center justify-center "> 
+                  ID Grp Conta
               </div>
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-300">
-            {filteredGroups.map((group) => (
-              <tr key={group.id} className="hover:bg-gray-100">
-                <td className="border-collapse border border-[#EDEBEB] w-1 py-1 whitespace-nowrap text-sm text-[#191919] text-center">
-                <Dropdown>
-                    <DropdownTrigger>
-                      <Button variant="bordered">
-                        <HiDotsVertical size={18} />
-                      </Button>
-                    </DropdownTrigger>
-                    <DropdownMenu
-                      aria-label="Dynamic Actions"
-                      placement="bottom-end"
-                      className="bg-white shadow-lg rounded-md p-1"
-                      style={{ marginLeft: '80px' }}
-                    >
-                     {/* <DropdownItem
-                        key="add"
-                        onPress={onAddModalOpen}
-                        className="hover:bg-gray-100"
-                      >
-                        Adicionar
-                      </DropdownItem>*/}
-                      <DropdownItem
-                        key="edit"
-                        onPress={() => {
-                          handleEditGroup(group);
-                          onEditModalOpen();
-                        }}
-                        className="hover:bg-gray-100"
-                      >
-                        Edit
-                      </DropdownItem>
-                      {/*<DropdownItem
-                        key="delete"
-                        className="text-danger hover:bg-red-50"
-                        color="danger"
-                        onPress={() => {
-                          setGroupToDelete(group.id);
-                          onDeleteModalOpen();
-                        }}
-                      >
-                        Excluir
-                      </DropdownItem>*/}
-                    </DropdownMenu>
-                  </Dropdown>
-
-                  </td>
-                  <td className="border-collapse border border-[#EDEBEB] px-3 py-2 whitespace-nowrap text-sm text-[#191919] text-right">
- 
-                  {group.id}
-                </td>
-                <td className="border-collapse border border-[#EDEBEB] px-4 py-2 whitespace-nowrap text-sm text-[#191919] text-left">
-                  {group.group_name}
-                </td>
-              </tr>
-            ))}
-          </tbody>
+           <tbody className="divide-y divide-gray-300">
+                    {groups.map((group) => (
+                      <tr key={group.VCodGrFam} className="hover:bg-gray-200">
+                        {/* Ações */}
+                        <td className="border border-[#EDEBEB] px-1 py-1 text-center">
+                          <Dropdown>
+                            <DropdownTrigger>
+                              <Button variant="bordered">
+                                <HiDotsVertical size={18} />
+                              </Button>
+                            </DropdownTrigger>
+                            <DropdownMenu aria-label="Dynamic Actions" placement="bottom-end" className="bg-white shadow-lg rounded-md p-1">
+                              <DropdownItem key="edit" onPress={() => alert(`Editando ${group.VDesc}`)}>Editar</DropdownItem>
+                            </DropdownMenu>
+                          </Dropdown>
+                        </td>
+                        
+                        {/* Dados do Produto */}
+                        <td className="border border-[#EDEBEB] px-3 py-2 text-right">{group.VCodGrFam}</td>
+                        <td className="border border-[#EDEBEB] px-4 py-2 text-left">{group.VDesc}</td>
+                        <td className="border border-[#EDEBEB] px-4 py-2 text-right">
+                          {new Date(group.DCriadoEm).toLocaleDateString('pt-BR')}
+                        </td>
+                        <td className="border border-[#EDEBEB] px-4 py-2 text-right">
+                          {group.ID_GrupoConta === -1 ? "" : group.ID_GrupoConta}
+                      </td>
+                      </tr>
+                    ))}
+                  </tbody>
         </table>
       </div>
-      {filteredGroups.length === 0 && !error && (
+      {groups.length === 0 && !error && (
         <p className="text-center py-4">No groups found.</p>
       )}
     </div>

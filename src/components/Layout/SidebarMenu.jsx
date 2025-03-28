@@ -58,25 +58,17 @@ export default function SidebarMenu() {
     const [properties, setProperties] = useState([]);
 
     const menuItems = {
-        "Dashboard": {
-            icon: <LuFolderCog size={20} />,
-            submenu: [{ ref: "/", label: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> }],
-        },
-        "Groups": {
-            icon: <LuFolderCog size={20} />,
-            submenu: [{ ref: "/homepage/grupos", label: "All Groups", icon: <FaTable size={18} /> }],
-        },
-        "Families": {
-            icon: <LuFolderDot size={20} />,
-            submenu: [{ ref: "/homepage/family", label: "All Families", icon: <FaTable size={18} /> }],
-        },
-        "Sub Families": {
-            icon: <LuFolderOpenDot size={20} />,
-            submenu: [{ ref: "/homepage/subfamilia", label: "All SubFamilies", icon: <FaTable size={18} /> }],
-        },
-        "Products": {
-            icon: <LuFolderOpen size={20} />,
-            submenu: [{ ref: "/homepage/product", label: "All Products", icon: <FaTable size={18} /> }],
+           "Store Settings": {
+      icon: <LuFolderCog  size={20} />, 
+      submenu: [
+        {  ref: "/", label: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> }, 
+        { ref: "/homepage/grupos", label: "Groups", icon: <FaTable size={18} /> }, 
+        { ref: "/homepage/family", label: "Families", icon: <FaTable size={18} /> },
+        { ref: "/homepage/subfamilia", label: "SubFamilies", icon: <FaTable size={18} /> },
+        { ref: "/homepage/product", label: "Products", icon: <FaTable size={18} /> },
+        { ref: "/homepage/Iva", label: "Iva", icon: <FaTable size={18} /> },
+        { ref: "/homepage/Unit", label: "Unit", icon: <FaTable size={18} /> },
+            ], 
         },
     };
 
@@ -108,25 +100,27 @@ export default function SidebarMenu() {
                 id="selectProperty"
                 value={selectedProperty}
                 onChange={(e) => {
-                    const newProperty = e.target.value;
+                    const newPropertyID = e.target.value; // Pegue o ID da propriedade selecionada
 
-                    if (newProperty !== selectedProperty) {
+                    if (newPropertyID !== selectedProperty) {
                         setIsConfirmed(false);
                     }
 
-                    setTempSelectedProperty(newProperty);
+                    setTempSelectedProperty(newPropertyID); // Atualiza o estado com o novo ID
                 }}
                 className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-[#FC9D25]"
             >
                 <option value="">Select a property</option>
                 {properties.map((property) => (
-                    <option key={property.id} value={property.tag}>
-                        {property.name}
+                    <option key={property.id} value={property.id}>
+                        {property.name} {/* Exibe o nome da propriedade, mas armazena o ID */}
                     </option>
                 ))}
             </select>
 
-            {/* Mostra botões quando uma propriedade é escolhida mas não é confirmada */}
+
+
+            {/* Show buttons when a property is selected but not confirmed */}
             {tempSelectedProperty && !isConfirmed && (
                 <div className="mt-4 flex flex-col gap-2">
                     <button

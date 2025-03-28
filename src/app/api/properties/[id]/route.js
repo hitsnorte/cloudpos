@@ -1,8 +1,5 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-
-const prisma = new PrismaClient();
+import prisma from '@/src/lib/prisma';
 
 export async function PUT(req, { params }) {
     const { id } = params; // Extrai propriedade através do URL

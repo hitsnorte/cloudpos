@@ -80,19 +80,33 @@ export default function SidebarMenu() {
         },
     };
 
-    // ✅ Corrected Effect: Only fetch properties from session
+    // Fetch properties from session
     useEffect(() => {
         if (session?.propertyNames) {
             setProperties(session.propertyNames);
         }
     }, [session?.propertyNames]);
 
+    // Ensure selected property and confirmation status are preserved in localStorage
+    useEffect(() => {
+        const savedSelectedProperty = localStorage.getItem("selectedProperty");
+        const savedIsConfirmed = JSON.parse(localStorage.getItem("isConfirmed"));
+
+        if (savedSelectedProperty && savedIsConfirmed !== null) {
+            setSelectedProperty(savedSelectedProperty);
+            setTempSelectedProperty(savedSelectedProperty); // Atualiza tempSelectedProperty
+            setIsConfirmed(savedIsConfirmed);
+        }
+    }, []);
+
+
+
     return (
         <div className="p-3">
-            {/* Property Selection */}
+            {/* Select de propriedade) */}
             <select
                 id="selectProperty"
-                value={selectedProperty || ""}
+                value={selectedProperty}
                 onChange={(e) => {
                     const newProperty = e.target.value;
 
@@ -112,7 +126,7 @@ export default function SidebarMenu() {
                 ))}
             </select>
 
-            {/* Show buttons when a property is selected but not confirmed */}
+            {/* Mostra botões quando uma propriedade é escolhida mas não é confirmada */}
             {tempSelectedProperty && !isConfirmed && (
                 <div className="mt-4 flex flex-col gap-2">
                     <button
@@ -122,6 +136,8 @@ export default function SidebarMenu() {
                             setIsConfirmed(false);
                             localStorage.removeItem("selectedProperty");
                             localStorage.removeItem("isConfirmed");
+
+                            window.history.back();
                         }}
                     >
                         Cancel
@@ -141,11 +157,13 @@ export default function SidebarMenu() {
                 </div>
             )}
 
-            {/* Sidebar only shows after confirmation */}
-            {selectedProperty && isConfirmed && (
+            {/* Menu da Sidebar , mostra botões quando uma propriedade é escolhida e confirmada */}
+            {(session && selectedProperty && isConfirmed) ? (
                 Object.entries(menuItems).map(([key, value]) => (
                     <SidebarItem key={key} text={key} icon={value.icon} submenu={value.submenu} />
                 ))
+            ) : (
+                <p className="mt-4 text-gray-500 text-center">Select a property to continue...</p>
             )}
         </div>
     );

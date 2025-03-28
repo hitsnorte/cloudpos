@@ -39,7 +39,7 @@ export const authOptions = {
                     throw new Error("Invalid email or password");
                 }
 
-                console.log("User ID:", user.userID);
+
 
                 // Fetch properties associated with the user
                 const userProperties = await prisma.cloud_userProperties.findMany({
@@ -49,7 +49,7 @@ export const authOptions = {
 
                 const propertyIDs = userProperties.map((p) => p.propertyID);
 
-                console.log("Property IDs:", propertyIDs);
+
 
                 // Fetch property details (name, tag)
                 const properties = await prisma.cloud_properties.findMany({
@@ -57,7 +57,7 @@ export const authOptions = {
                     select: { propertyID: true, propertyName: true, propertyTag: true },
                 });
 
-                console.log("Properties:", properties);
+
 
                 return {
                     id: user.userID.toString(),
@@ -68,7 +68,7 @@ export const authOptions = {
                         id: p.propertyID,
                         name: p.propertyName,
                         tag: p.propertyTag,
-                    })), // Store property names properly
+                    })),
                 };
             },
         }),

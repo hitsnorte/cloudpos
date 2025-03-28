@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 export async function POST(req) {
     try {
         const body = await req.json();
-        console.log("Received Data:", body);
+
 
         let { firstName, secondName, email, password, propertyIDs, propertyTags } = body;
 
@@ -46,7 +46,7 @@ export async function POST(req) {
             data: { firstName, secondName, email, password: hashedPassword },
         });
 
-        console.log("User created:", user);
+
 
         // Cria múltiplos registos na tabela cloud_userProperties
         const userPropertiesData = propertyIDs.map((propertyID, index) => ({

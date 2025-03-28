@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 export async function POST(req) {
     try {
         const body = await req.json();
-        console.log("Received Data:", body);
+
 
         let { chainTag, chainName } = body;
 

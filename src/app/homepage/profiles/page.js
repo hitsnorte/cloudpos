@@ -14,11 +14,13 @@ import {
     useDisclosure,
 } from '@nextui-org/react';
 
-
 const ProfilesTable = () => {
-    const { isOpen, onOpen, onClose } = useDisclosure();
+    const { isOpen: isAddProfileModalOpen, onOpen: onOpenAddProfileModal, onClose: onCloseAddProfileModal } = useDisclosure();
+    const { isOpen: isEditProfileModalOpen, onOpen: onOpenEditProfileModal, onClose: onCloseEditProfileModal } = useDisclosure();
+
     const [profiles, setProfiles] = useState([]);
     const [properties, setProperties] = useState([]);
+    const [currentProfile, setCurrentProfile] = useState(null); // Holds the profile to edit
     const [newProfile, setNewProfile] = useState({
         firstName: '',
         secondName: '',
@@ -43,7 +45,6 @@ const ProfilesTable = () => {
     const fetchProperties = async () => {
         try {
             const response = await fetch('/api/properties');
-
             const data = await response.json();
             setProperties(data || []);
         } catch (error) {
@@ -56,6 +57,7 @@ const ProfilesTable = () => {
         fetchProperties();
     }, []);
 
+    // Handle Input change para adicionar e editar perfis
     const handleInputChange = (e) => {
         setNewProfile({
             ...newProfile,
@@ -63,6 +65,7 @@ const ProfilesTable = () => {
         });
     };
 
+    // Ligar propriedades a novo perfil
     const handlePropertyChange = (e) => {
         const selectedOptions = Array.from(e.target.selectedOptions);
         const selectedIDs = selectedOptions.map(option => option.value);
@@ -75,7 +78,7 @@ const ProfilesTable = () => {
         }));
     };
 
-
+    // Guardar perfil
     const handleAddProfile = async (e) => {
         e.preventDefault();
         try {
@@ -90,40 +93,72 @@ const ProfilesTable = () => {
             setNewProfile({ firstName: '', secondName: '', email: '', password: '', propertyIDs: [], propertyTags: [] });
 
             fetchProfiles();
-            onClose();
+            onCloseAddProfileModal();
         } catch (error) {
             console.error("Error adding profile:", error);
         }
     };
 
-    useEffect(()=> {
-        console.log("Property IDs:" , newProfile.propertyIDs);
-    }, [newProfile.propertyIDs]);
+    // Editar perfil
+    const handleEditProfile = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await fetch(`/api/user/${currentProfile.userID}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newProfile),
+            });
+
+            if (!response.ok) throw new Error("Failed to edit profile");
+
+            fetchProfiles();
+            onCloseEditProfileModal();
+        } catch (error) {
+            console.error("Error editing profile:", error);
+        }
+    };
+
+    // Abrir modal de edição e mostrar os dados
+    const openEditModal = (profile) => {
+        setCurrentProfile(profile);
+        setNewProfile({
+            firstName: profile.firstName,
+            secondName: profile.secondName,
+            email: profile.email,
+            password: '',
+            propertyIDs: profile.propertyIDs || [],
+            propertyTags: profile.propertyTags || [],
+        });
+        onOpenEditProfileModal();
+    };
 
     return (
         <div className="p-4">
             {/* Header */}
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold">All Profiles</h2>
-                <Dropdown>
-                    <DropdownTrigger>
-                        <button className="bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
-                            <Plus size={25} />
-                        </button>
-                    </DropdownTrigger>
-                    <DropdownMenu aria-label="Actions" className="bg-white shadow-lg rounded-md p-1">
-                        <DropdownItem key="add" onPress={onOpen}>Add Profile</DropdownItem>
-                    </DropdownMenu>
-                </Dropdown>
+                <Button
+                    onClick={onOpenAddProfileModal}
+                    className="bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded"
+                >
+                    <Plus size={25} />
+                </Button>
             </div>
 
-            {/* Modal de adição de perfil */}
-            <Modal isOpen={isOpen} onOpenChange={onClose} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
+            {/* Modal de adição de perfil  */}
+            <Modal isOpen={isAddProfileModalOpen} onOpenChange={onCloseAddProfileModal} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
                 <ModalContent>
                     {(onClose) => (
                         <>
-                            <ModalHeader className="rounded bg-[#FC9D25] flex justify-start items-center">
-                                <div className="text-xl font-bold text-white">New Profile</div>
+                            <ModalHeader className="relative rounded bg-[#FC9D25] flex justify-between items-center px-6 py-3">
+                                <div className="text-xl font-bold text-white">New profile</div>
+                                <button
+                                    type="button"
+                                    onClick={onClose}
+                                    className="absolute right-4 top-3 text-white text-2xl font-bold hover:text-gray-200"
+                                >
+                                    &times;
+                                </button>
                             </ModalHeader>
                             <ModalBody className="py-5 px-6 bg-white">
                                 <form id="addProfileForm" onSubmit={handleAddProfile} className="space-y-6">
@@ -143,32 +178,6 @@ const ProfilesTable = () => {
                                             />
                                         </div>
                                     ))}
-
-                                    {/* Seleção de propriedades*/}
-                                    <div>
-                                        <label htmlFor="propertyIDs" className="block text-sm font-medium text-[#191919] mb-1">
-                                            Select Properties
-                                        </label>
-                                        <select
-                                            id="propertyIDs"
-                                            name="propertyIDs"
-                                            multiple
-                                            value={newProfile.propertyIDs}
-                                            onChange={handlePropertyChange}
-                                            required
-                                            className="w-full p-2 border rounded"
-                                        >
-                                            {properties.map((property, index) => (
-                                                <option
-                                                    key={property.propertyID || `property-${index}`}
-                                                    value={property.propertyID}
-                                                    data-tag={property.propertyTag}
-                                                >
-                                                    {property.propertyName} ({property.propertyTag})
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
                                 </form>
                             </ModalBody>
                             <ModalFooter className="border-t border-gray-200 pt-2 px-8">
@@ -176,6 +185,53 @@ const ProfilesTable = () => {
                                     Cancel
                                 </Button>
                                 <Button type="submit" form="addProfileForm" className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray-600 transition">
+                                    Save
+                                </Button>
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
+
+            {/* Modal de edição de perfil*/}
+            <Modal isOpen={isEditProfileModalOpen} onOpenChange={onCloseEditProfileModal} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader className="relative rounded bg-[#FC9D25] flex justify-between items-center px-6 py-3">
+                                <div className="text-xl font-bold text-white">Edit Profile</div>
+                                <button
+                                    type="button"
+                                    onClick={onClose}
+                                    className="absolute right-4 top-3 text-white text-2xl font-bold hover:text-gray-200"
+                                >
+                                    &times;
+                                </button>
+                            </ModalHeader>
+                            <ModalBody className="py-5 px-6 bg-white">
+                                <form id="editProfileForm" onSubmit={handleEditProfile} className="space-y-6">
+                                    {["firstName", "secondName", "email", "password"].map((field, index) => (
+                                        <div key={index}>
+                                            <label htmlFor={field} className="block text-sm font-medium text-[#191919] mb-1">
+                                                {field.charAt(0).toUpperCase() + field.slice(1)}
+                                            </label>
+                                            <input
+                                                id={field}
+                                                type={field === "password" ? "password" : "text"}
+                                                name={field}
+                                                value={newProfile[field]}
+                                                onChange={handleInputChange}
+                                                className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                                            />
+                                        </div>
+                                    ))}
+                                </form>
+                            </ModalBody>
+                            <ModalFooter className="border-t border-gray-200 pt-2 px-8">
+                                <Button onPress={onClose} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">
+                                    Cancel
+                                </Button>
+                                <Button type="submit" form="editProfileForm" className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray-600 transition">
                                     Save
                                 </Button>
                             </ModalFooter>
@@ -210,7 +266,7 @@ const ProfilesTable = () => {
                                             </Button>
                                         </DropdownTrigger>
                                         <DropdownMenu aria-label="Actions" className="bg-white shadow-lg rounded-md p-1">
-                                            <DropdownItem key="edit" onPress={() => console.log("Edit profile:", profile)}>
+                                            <DropdownItem key="edit" onPress={() => openEditModal(profile)}>
                                                 Edit
                                             </DropdownItem>
                                         </DropdownMenu>

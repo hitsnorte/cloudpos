@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 export async function POST(req) {
     try {
         const body = await req.json();
-        console.log("Received Property Data:", body);
+
 
         let { propertyTag, propertyName, propertyServer, propertyPort, mpeHotel, propertyChain } = body;
 
@@ -38,7 +38,7 @@ export async function POST(req) {
             data: { propertyTag, propertyName, propertyServer, propertyPort, mpeHotel }
         });
 
-        console.log("Property created:", property);
+
 
         // Map chainTags to their corresponding chainIDs
         const chains = await prisma.cloud_chain.findMany({
@@ -46,7 +46,7 @@ export async function POST(req) {
             select: { chainID: true, chainTag: true }
         });
 
-        console.log("Chains found:", chains);
+
 
         if (!chains.length) {
             return NextResponse.json({ error: "Invalid property chains selected" }, { status: 400 });
@@ -60,13 +60,13 @@ export async function POST(req) {
             propertyTag: property.propertyTag
         }));
 
-        console.log("Data to insert in cloud_chainProperties:", chainPropertyData);
+
 
         await prisma.cloud_chainProperties.createMany({
             data: chainPropertyData
         });
 
-        console.log("Property linked to chains successfully");
+
 
         return NextResponse.json({ message: "Property created and linked to chains successfully!", property }, { status: 201 });
     } catch (error) {

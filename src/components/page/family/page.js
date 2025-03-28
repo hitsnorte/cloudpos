@@ -176,24 +176,12 @@ const DataFamily = () => {
       {/* button */}
       <Dropdown>
       <DropdownTrigger>
-      <button className="absolute top-4 right-10 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
-          < Plus size={25} />     
+      <button 
+          onClick={onAddModalOpen}
+          className="absolute top-4 right-14 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
+          < Plus size={25}  />     
       </button>
       </DropdownTrigger>
-       <DropdownMenu
-          aria-label="Dynamic Actions"
-
-          className="bg-white shadow-lg rounded-md p-1"
-
-             >
-              <DropdownItem
-                type="text"
-                placeholder="Digite o nome"
-                key="add"
-                onPress={onAddModalOpen}
-              > Add        
-          </DropdownItem>
-        </DropdownMenu>
       </Dropdown>
 
       {/* Modal para adicionar grupo */}
@@ -202,13 +190,21 @@ const DataFamily = () => {
           onOpenChange={onAddModalClose}
           size="md"
           placement="center"
-          className="w-100  shadow-xl rounded-lg"
-      >
-        <ModalContent>
-          {(onClose) => (
+          className="w-100 bg-white shadow-xl rounded-lg"
+          hideCloseButton={true}
+        >
+          <ModalContent>
+            {(onClose) => (
               <>
-                <ModalHeader className="rounded bg-[#FC9D25] flex justify-left items-left">
-                  <div className="text-xl flex justify-left items-left font-bold text-white">New Family</div>
+                <ModalHeader className="rounded bg-[#FC9D25] flex justify-between items-center">
+                  <div className="text-xl font-bold text-white">New Family</div>
+                  <Button
+                    onClick={onClose}
+                    className="text-white bg-transparent border-0 text-2xl p-0"
+                    aria-label="Close"
+                  >
+                    &times; {/* Unicode for "×" sign */}
+                  </Button>
                 </ModalHeader>
                 <ModalBody className="py-5 px-6">
                   <form id="addFamilyForm" onSubmit={handleAddFamily} className="space-y-6">
@@ -260,6 +256,7 @@ const DataFamily = () => {
                       form="addFamilyForm"
                       className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
                       disabled={isLoading}
+                      onClick={() => window.location.reload()} // Recarrega a página ao clicar
                   >
                     {isLoading ? <Spinner size="sm" color="white" /> : 'Save'}
                   </Button>
@@ -313,6 +310,7 @@ const DataFamily = () => {
             type="submit"
             form="updateFamilyForm"
             className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
+            onClick={() => window.location.reload()} // Recarrega a página ao clicar
           >
             Save
           </Button>
@@ -373,78 +371,65 @@ const DataFamily = () => {
         <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB] mx-auto">
           <thead>
             <tr>
-              <th className="border-collapse border border-[#EDEBEB] !w-[2px] px-1 sm:px-5 py-4 bg-[#FC9D25]">
-                <div className=" flex items-left justify-left">
+              <th className="border-collapse border border-[#EDEBEB] !w-[1px] px-1 sm:px-5 py-2 bg-[#FC9D25]">
+                <div className=" flex items-center justify-center">
                   <FaGear size={20} color='white'/>
                 </div>
               </th>
-              <th className="border-collapse border border-[#EDEBEB] w-1 px-1 sm:px-5 py-4 bg-[#FC9D25] text-[#FAFAFA]">
-                <div className="w-2 flex items-right justify-right">
-                  ID
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-0.5 px-1 sm:px-2 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className="flex items-center justify-center">
+                  Cod Fam
                 </div>
               </th>
-              <th className="border-collapse border border-[#EDEBEB] sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA]">
-               <div className="flex items-center justify-left ">
-                  NAME
+             
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-30 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+               <div className="flex items-center justify-center ">
+                  Cod Grp Fam
+              </div>
+              </th>
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-110 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+               <div className="flex items-center justify-center ">
+                  Descrição
+              </div>
+              </th>
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-60 :px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+               <div className="flex items-center justify-center ">
+                  Criado em
+              </div>
+              </th>
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-30 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+               <div className=" flex items-center justify-center ">
+                  ID Grp conta
               </div>
               </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-300">
-            {filteredFamilies.map((family) => (
-              <tr key={family.id} className="hover:bg-gray-100">
-                <td className="border-collapse border border-[#EDEBEB] w-1 py-1 whitespace-nowrap text-sm text-[#191919] text-center">
+          {families.map((familia) => (
+            <tr key={familia.VCodFam} className="hover:bg-gray-200">
+              {/* Ações */}
+              <td className="border border-[#EDEBEB] px-1 py-1 text-center">
                 <Dropdown>
-                    <DropdownTrigger>
-                      <Button variant="bordered">
-                        <HiDotsVertical size={18} />
-                      </Button>
-                    </DropdownTrigger>
-                    <DropdownMenu
-                      aria-label="Dynamic Actions"
-                      placement="bottom-end"
-                      className="bg-white shadow-lg rounded-md p-1"
-                      style={{ marginLeft: '80px' }}
-                    >
-                    {/*  <DropdownItem
-                        key="add"
-                        onPress={onAddModalOpen}
-                        className="hover:bg-gray-100"
-                      >
-                        Adicionar
-                      </DropdownItem>*/}
-                    <DropdownItem
-                        key="edit"
-                        onPress={() => {
-                          handleEditFamily(family);
-                          onEditModalOpen();
-                        }}
-                        className="hover:bg-gray-100"
-                      >
-                        Editar
-                      </DropdownItem>
-                      {/*<DropdownItem
-                        key="delete"
-                        className="text-danger hover:bg-red-50"
-                        color="danger"
-                        onPress={() => {
-                          setGroupToDelete(group.id);
-                          onDeleteModalOpen();
-                        }}
-                      >
-                        Excluir
-                      </DropdownItem>*/}
-                    </DropdownMenu>
-                  </Dropdown>
-
-                  </td>
-                  <td className="border-collapse border border-[#EDEBEB] px-3 py-2 whitespace-nowrap text-sm text-[#191919] text-right">
-
-                  {family.id}
-                </td>
-                <td className="border-collapse border border-[#EDEBEB] px-4 py-2 whitespace-nowrap text-sm text-[#191919] text-left">
-                  {family.family_name}
-                </td>
+                  <DropdownTrigger>
+                    <Button variant="bordered">
+                      <HiDotsVertical size={18} />
+                    </Button>
+                  </DropdownTrigger>
+                  <DropdownMenu aria-label="Dynamic Actions" placement="bottom-end" className="bg-white shadow-lg rounded-md p-1">
+                    <DropdownItem key="edit" onPress={() => alert(`Editando ${familia.VDesc}`)}>Editar</DropdownItem>
+                  </DropdownMenu>
+                </Dropdown>
+              </td>
+              <td className="border border-[#EDEBEB] px-3 py-2 text-right">{familia.VCodFam}</td>
+              <td className="border border-[#EDEBEB] px-4 py-2 text-right">{familia.VCodGrFam}</td>
+              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{familia.VDesc}</td>
+              <td className="border border-[#EDEBEB] px-4 py-2 text-right">
+                {new Date(familia.DCriadoEm).toLocaleDateString('pt-BR')}
+              </td>
+              <td className="border border-[#EDEBEB] px-4 py-2 text-right">
+                  {familia.ID_GrupoConta === -1 ? "" : familia.ID_GrupoConta}
+              </td>
+  
               </tr>
             ))}
           </tbody>

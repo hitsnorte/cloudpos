@@ -833,7 +833,7 @@ const DataProduct = () => {
               <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.VDescIva}</td>
               <td className="border border-[#EDEBEB] px-4 py-2 text-right">{product.DefinicaoProduto}</td>
               <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.VDescUnit}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{}</td>
+            
             
 
               <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.ProductType}</td>

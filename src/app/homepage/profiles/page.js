@@ -65,6 +65,7 @@ const ProfilesTable = () => {
         });
     };
 
+
     // Ligar propriedades a novo perfil
     const handlePropertyChange = (e) => {
         const selectedOptions = Array.from(e.target.selectedOptions);
@@ -78,49 +79,47 @@ const ProfilesTable = () => {
         }));
     };
 
+
     // Guardar perfil
-    const handleAddProfile = async (e) => {
+    const handleSubmitProfile = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch('/api/user', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newProfile),
-            });
+            if (currentProfile) {
 
-            if (!response.ok) throw new Error("Failed to add profile");
+                const response = await fetch(`/api/user/${currentProfile.userID}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newProfile),
+                });
 
-            setNewProfile({ firstName: '', secondName: '', email: '', password: '', propertyIDs: [], propertyTags: [] });
+                if (!response.ok) throw new Error("Failed to edit profile");
 
-            fetchProfiles();
-            onCloseAddProfileModal();
+                onCloseEditProfileModal();
+            } else {
+
+                const response = await fetch('/api/user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newProfile),
+                });
+
+                if (!response.ok) throw new Error("Failed to add profile");
+                onCloseAddProfileModal();
+            }
+
+
+
+            fetchProfiles(); // Busca perfis depois de adicionar/editar perfis
         } catch (error) {
-            console.error("Error adding profile:", error);
+            console.error("Error with profile:", error);
         }
     };
 
-    // Editar perfil
-    const handleEditProfile = async (e) => {
-        e.preventDefault();
-        try {
-            const response = await fetch(`/api/user/${currentProfile.userID}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newProfile),
-            });
 
-            if (!response.ok) throw new Error("Failed to edit profile");
 
-            fetchProfiles();
-            onCloseEditProfileModal();
-        } catch (error) {
-            console.error("Error editing profile:", error);
-        }
-    };
-
-    // Abrir modal de edição e mostrar os dados
+    // Abre o modal e insere os dados do perfil escolhido
     const openEditModal = (profile) => {
-        setCurrentProfile(profile);
+        setCurrentProfile(profile); // Guarda o perfil a ser editado
         setNewProfile({
             firstName: profile.firstName,
             secondName: profile.secondName,
@@ -131,6 +130,21 @@ const ProfilesTable = () => {
         });
         onOpenEditProfileModal();
     };
+
+
+
+    const handleCloseAddProfileModal = () => {
+        setNewProfile({
+            firstName: '',
+            secondName: '',
+            email: '',
+            password: '',
+            propertyIDs: [],
+            propertyTags: [],
+        });
+        onCloseAddProfileModal();
+    };
+
 
     return (
         <div className="p-4">
@@ -145,23 +159,24 @@ const ProfilesTable = () => {
                 </Button>
             </div>
 
-            {/* Modal de adição de perfil  */}
-            <Modal isOpen={isAddProfileModalOpen} onOpenChange={onCloseAddProfileModal} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
+
+            {/* Modal de adição de perfil */}
+            <Modal isOpen={isAddProfileModalOpen} onOpenChange={handleCloseAddProfileModal} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
                 <ModalContent>
                     {(onClose) => (
                         <>
                             <ModalHeader className="relative rounded bg-[#FC9D25] flex justify-between items-center px-6 py-3">
-                                <div className="text-xl font-bold text-white">New profile</div>
+                                <div className="text-xl font-bold text-white">New Property</div>
                                 <button
                                     type="button"
-                                    onClick={onClose}
+                                    onClick={handleCloseAddProfileModal}
                                     className="absolute right-4 top-3 text-white text-2xl font-bold hover:text-gray-200"
                                 >
                                     &times;
                                 </button>
                             </ModalHeader>
                             <ModalBody className="py-5 px-6 bg-white">
-                                <form id="addProfileForm" onSubmit={handleAddProfile} className="space-y-6">
+                                <form id="addProfileForm" onSubmit={handleSubmitProfile} className="space-y-6">
                                     {["firstName", "secondName", "email", "password"].map((field, index) => (
                                         <div key={index}>
                                             <label htmlFor={field} className="block text-sm font-medium text-[#191919] mb-1">
@@ -178,10 +193,36 @@ const ProfilesTable = () => {
                                             />
                                         </div>
                                     ))}
+
+                                    {/* Seleção de propriedades*/}
+                                    <div>
+                                        <label htmlFor="propertyIDs" className="block text-sm font-medium text-[#191919] mb-1">
+                                            Select Properties
+                                        </label>
+                                        <select
+                                            id="propertyIDs"
+                                            name="propertyIDs"
+                                            multiple
+                                            value={newProfile.propertyIDs}
+                                            onChange={handlePropertyChange}
+                                            required
+                                            className="w-full p-2 border rounded"
+                                        >
+                                            {properties.map((property, index) => (
+                                                <option
+                                                    key={property.propertyID || `${property}-${index}`}
+                                                    value={property.propertyID}
+                                                    data-tag={property.propertyTag}
+                                                >
+                                                    {property.propertyName} ({property.propertyTag})
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
                                 </form>
                             </ModalBody>
-                            <ModalFooter className="border-t border-gray-200 pt-2 px-8">
-                                <Button onPress={onClose} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">
+                            <ModalFooter className="border-t border-gray-200 pt-2 px-8 bg-[#FAFAFA]">
+                                <Button onPress={handleCloseAddProfileModal} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">
                                     Cancel
                                 </Button>
                                 <Button type="submit" form="addProfileForm" className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray-600 transition">
@@ -193,7 +234,7 @@ const ProfilesTable = () => {
                 </ModalContent>
             </Modal>
 
-            {/* Modal de edição de perfil*/}
+            {/* Modal de edição de perfil */}
             <Modal isOpen={isEditProfileModalOpen} onOpenChange={onCloseEditProfileModal} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
                 <ModalContent>
                     {(onClose) => (
@@ -208,8 +249,8 @@ const ProfilesTable = () => {
                                     &times;
                                 </button>
                             </ModalHeader>
-                            <ModalBody className="py-5 px-6 bg-white">
-                                <form id="editProfileForm" onSubmit={handleEditProfile} className="space-y-6">
+                            <ModalBody className="py-5 px-6 bg-[#FAFAFA]">
+                                <form id="editProfileForm" onSubmit={handleSubmitProfile} className="space-y-6">
                                     {["firstName", "secondName", "email", "password"].map((field, index) => (
                                         <div key={index}>
                                             <label htmlFor={field} className="block text-sm font-medium text-[#191919] mb-1">
@@ -225,9 +266,34 @@ const ProfilesTable = () => {
                                             />
                                         </div>
                                     ))}
+
+                                    {/* Seleção de propriedades*/}
+                                    <div>
+                                        <label htmlFor="propertyIDs" className="block text-sm font-medium text-[#191919] mb-1">
+                                            Select Properties
+                                        </label>
+                                        <select
+                                            id="propertyIDs"
+                                            name="propertyIDs"
+                                            multiple
+                                            value={newProfile.propertyIDs}
+                                            onChange={handlePropertyChange}
+                                            className="w-full p-2 border rounded"
+                                        >
+                                            {properties.map((property, index) => (
+                                                <option
+                                                    key={property.propertyID || `${property}-${index}`}
+                                                    value={property.propertyID}
+                                                    data-tag={property.propertyTag}
+                                                >
+                                                    {property.propertyName} ({property.propertyTag})
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
                                 </form>
                             </ModalBody>
-                            <ModalFooter className="border-t border-gray-200 pt-2 px-8">
+                            <ModalFooter className="border-t border-[#EDEBEB] bg-[#FAFAFA] pt-2 px-8">
                                 <Button onPress={onClose} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">
                                     Cancel
                                 </Button>
@@ -240,6 +306,7 @@ const ProfilesTable = () => {
                 </ModalContent>
             </Modal>
 
+
             {/* Tabela */}
             <div className="overflow-x-auto bg-muted/40">
                 <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB] mx-auto">
@@ -248,10 +315,10 @@ const ProfilesTable = () => {
                         <th className="border border-[#EDEBEB] w-[50px] px-2 py-2 text-center">
                             <FaGear size={20} />
                         </th>
-                        <th className="border border-[#EDEBEB] px-4 py-2">ID</th>
-                        <th className="border border-[#EDEBEB] px-4 py-2">First Name</th>
-                        <th className="border border-[#EDEBEB] px-4 py-2">Last Name</th>
-                        <th className="border border-[#EDEBEB] px-4 py-2">Email</th>
+                        <th className="border border-[#EDEBEB] px-4 py-2 text-left">ID</th>
+                        <th className="border border-[#EDEBEB] px-4 py-2 text-left">First Name</th>
+                        <th className="border border-[#EDEBEB] px-4 py-2 text-left">Last Name</th>
+                        <th className="border border-[#EDEBEB] px-4 py-2 text-left">Email</th>
                     </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-300">

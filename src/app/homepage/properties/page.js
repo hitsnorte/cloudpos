@@ -133,9 +133,10 @@ const PropertiesTable = () => {
 
     const handleEditChange = (event) => {
         const { name, value } = event.target;
+
         setEditingProperty((prev) => ({
             ...prev,
-            [name]: value,
+            [name]: name === "chainID" ? parseInt(value,10):value ,
         }));
     };
 
@@ -156,6 +157,18 @@ const PropertiesTable = () => {
         } catch (error) {
             console.error("Error updating property:", error);
         }
+    };
+
+    const handleCloseModal = () => {
+        setNewProperty({
+            propertyTag: "",
+            propertyName: "",
+            propertyServer: "",
+            propertyPort: "",
+            mpeHotel: "",
+            propertyChain: "",
+        });
+        onClose();
     };
 
     return (
@@ -186,30 +199,43 @@ const PropertiesTable = () => {
                                 <div className="text-xl font-bold text-white">New Property</div>
                                 <button
                                     type="button"
-                                    onClick={onClose}
+                                    onClick={handleCloseModal}
                                     className="absolute right-4 top-3 text-white text-2xl font-bold hover:text-gray-200"
                                 >
                                     &times;
                                 </button>
                             </ModalHeader>
-                            <ModalBody className="py-5 px-6 bg-white">
+                            <ModalBody className="py-5 px-6 bg-[#FAFAFA]">
                                 <form id="addPropertyForm" onSubmit={handleAddProperty} className="space-y-6">
                                     {['propertyTag', 'propertyName', 'propertyServer', 'propertyPort', 'mpeHotel'].map((field, index) => (
                                         <div key={index}>
                                             <label htmlFor={field} className="block text-sm font-medium text-[#191919] mb-1">
                                                 {field.charAt(0).toUpperCase() + field.slice(1)}
                                             </label>
-                                            <input
-                                                id={field}
-                                                type="text"
-                                                name={field}
-                                                value={newProperty[field]}
-                                                onChange={handleInputChange}
-                                                className="w-full p-2 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
-                                                required
-                                            />
+
+                                            {field === 'propertyTag' ? (
+                                                <textarea
+                                                    id={field}
+                                                    name={field}
+                                                    value={newProperty[field]}
+                                                    onChange={handleInputChange}
+                                                    rows={3}
+                                                    className="w-full p-2 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500 resize-none"
+                                                />
+                                            ) : (
+                                                <input
+                                                    id={field}
+                                                    type="text"
+                                                    name={field}
+                                                    value={newProperty[field]}
+                                                    onChange={handleInputChange}
+                                                    className="w-full p-2 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                                                    required
+                                                />
+                                            )}
                                         </div>
                                     ))}
+
 
                                     {/* Seleção de cadeias */}
                                     <div>
@@ -219,7 +245,6 @@ const PropertiesTable = () => {
                                         <select
                                             id="propertyChain"
                                             name="propertyChain"
-                                            multiple
                                             value={Array.isArray(newProperty.propertyChain) ? newProperty.propertyChain : []}
                                             onChange={handleInputChange}
                                             required
@@ -234,8 +259,8 @@ const PropertiesTable = () => {
                                     </div>
                                 </form>
                             </ModalBody>
-                            <ModalFooter className="border-t border-gray-200 pt-2 px-8">
-                                <Button onPress={onClose} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">Cancel</Button>
+                            <ModalFooter className="border-t border-[#EDEBEB] bg-[#FAFAFA] pt-2 px-8">
+                                <Button onPress={handleCloseModal} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">Cancel</Button>
                                 <Button type="submit" form="addPropertyForm" className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray-600 transition">Save</Button>
                             </ModalFooter>
                         </>
@@ -251,9 +276,9 @@ const PropertiesTable = () => {
                     <thead>
                     <tr>
                         <th className="border border-[#EDEBEB] w-[50px] px-5 py-4 bg-[#FC9D25] text-white"><FaGear size={20} /></th>
-                        <th className="border border-[#EDEBEB] px-5 py-4 bg-[#FC9D25] text-white">ID</th>
-                        <th className="border border-[#EDEBEB] px-5 py-4 bg-[#FC9D25] text-white">Property Tag</th>
-                        <th className="border border-[#EDEBEB] px-5 py-4 bg-[#FC9D25] text-white">Name</th>
+                        <th className="border border-[#EDEBEB] px-5 py-4 bg-[#FC9D25] text-white text-left">ID</th>
+                        <th className="border border-[#EDEBEB] px-5 py-4 bg-[#FC9D25] text-white text-left">Property Tag</th>
+                        <th className="border border-[#EDEBEB] px-5 py-4 bg-[#FC9D25] text-white text-left">Name</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -297,7 +322,7 @@ const PropertiesTable = () => {
                                 </button>
                             </ModalHeader>
 
-                            <ModalBody className="py-5 px-6 bg-white">
+                            <ModalBody className="py-5 px-6 bg-[#FAFAFA]">
                                 {editingProperty && (
                                     <form id="editPropertyForm" onSubmit={handleUpdateProperty} className="space-y-6">
                                         {[ 'propertyName', 'propertyServer', 'propertyPort', 'mpeHotel'].map((field, index) => (
@@ -316,10 +341,31 @@ const PropertiesTable = () => {
                                                 />
                                             </div>
                                         ))}
+
+                                        <div>
+                                            <label htmlFor="propertyChain" className="block text-sm font-medium text-[#191919] mb-1">
+                                                Select Property Chain
+                                            </label>
+                                            <select
+                                                id="propertyChain"
+                                                name="chainID"
+                                                value={editingProperty?.chainID || ""}
+                                                onChange={handleEditChange}
+                                                required
+                                                className="w-full p-2 border rounded"
+                                            >
+                                                <option value="">Select a Chain</option>
+                                                {chains.map((chain) => (
+                                                    <option key={chain.chainID} value={chain.chainID}>
+                                                        {chain.chainName} ({chain.chainTag})
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
                                     </form>
                                 )}
                             </ModalBody>
-                            <ModalFooter className="border-t border-gray-200 pt-2 px-8">
+                            <ModalFooter className="border-t border-[#EDEBEB] bg-[#FAFAFA] pt-2 px-8">
                                 <Button onPress={onEditClose} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">Cancel</Button>
                                 <Button type="submit" form="editPropertyForm" className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray-600 transition">Save</Button>
                             </ModalFooter>

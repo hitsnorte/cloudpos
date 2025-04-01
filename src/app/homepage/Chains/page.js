@@ -93,7 +93,7 @@ const ChainsTable = () => {
         }
     };
 
-    // Function to update chain's name
+    //Função para atualizar o nome da cadeia
     const handleEditChain = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -109,16 +109,21 @@ const ChainsTable = () => {
 
             if (!res.ok) throw new Error("Failed to update chain");
 
-            // Refresh the list of chains
+            // Faz refresh á lista de cadeias existentes
             await fetchChains();
 
-            // Close the modal and reset the selected chain
+            //Fecha o modal e dá reset ao nome da cadeia
             onEditClose();
         } catch (error) {
             console.error("Error updating chain:", error);
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleCloseModal = () => {
+        setNewChain({ chainTag: "", chainName: "" });
+        onClose();
     };
 
     return (
@@ -145,7 +150,7 @@ const ChainsTable = () => {
                                 <div className="text-xl font-bold text-white">New Chain</div>
                                 <button
                                     type="button"
-                                    onClick={onClose}
+                                    onClick={handleCloseModal}
                                     className="absolute right-4 top-3 text-white text-2xl font-bold hover:text-gray-200"
                                 >
                                     &times;
@@ -153,7 +158,7 @@ const ChainsTable = () => {
                             </ModalHeader>
 
                             {/* Body */}
-                            <ModalBody className="py-5 px-6 bg-white">
+                            <ModalBody className="py-5 px-6 bg-[#FAFAFA]">
                                 <form id="addChainForm" onSubmit={handleAddChain} className="space-y-6">
                                     {['chainTag', 'chainName'].map((field, index) => (
                                         <div key={index}>
@@ -175,8 +180,8 @@ const ChainsTable = () => {
                             </ModalBody>
 
                             {/* Footer com os botões Cancel e Save  */}
-                            <ModalFooter className="border-t border-gray-200 pt-2 px-8">
-                                <Button onPress={onClose} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">
+                            <ModalFooter className="border-t border-[#EDEBEB] bg-[#FAFAFA] pt-2 px-8">
+                                <Button onPress={handleCloseModal} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">
                                     Cancel
                                 </Button>
                                 <Button type="submit" form="addChainForm" className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray-600 transition" disabled={loading}>
@@ -206,7 +211,7 @@ const ChainsTable = () => {
                             </ModalHeader>
 
                             {/* Body */}
-                            <ModalBody className="py-5 px-6 bg-white">
+                            <ModalBody className="py-5 px-6 bg-[#FAFAFA]">
                                 {selectedChain && (
                                     <form id="editChainForm" onSubmit={handleEditChain} className="space-y-6">
                                         {['chainName'].map((field, index) => (
@@ -230,7 +235,7 @@ const ChainsTable = () => {
                             </ModalBody>
 
                             {/* Footer com os botões Cancel e Save  */}
-                            <ModalFooter className="border-t border-gray-200 pt-2 px-8">
+                            <ModalFooter className="border-t border-[#EDEBEB] bg-[#FAFAFA] pt-2 px-8">
                                 <Button onPress={onEditClose} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">
                                     Cancel
                                 </Button>
@@ -251,9 +256,9 @@ const ChainsTable = () => {
                         <th className="border border-[#EDEBEB] w-[50px] px-2 py-2 text-center">
                             <FaGear size={20} />
                         </th>
-                        <th className="border border-[#EDEBEB] px-4 py-2">ID</th>
-                        <th className="border border-[#EDEBEB] px-4 py-2">Chain Tag</th>
-                        <th className="border border-[#EDEBEB] px-4 py-2">Chain Name</th>
+                        <th className="border border-[#EDEBEB] px-4 py-2 text-left">ID</th>
+                        <th className="border border-[#EDEBEB] px-4 py-2 text-left">Chain Tag</th>
+                        <th className="border border-[#EDEBEB] px-4 py-2 text-left">Chain Name</th>
                     </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-300">

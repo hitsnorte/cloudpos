@@ -5,13 +5,15 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 export async function PUT(req, { params }) {
-    const { id } = params; // Extrai user através do URL
+    const { id } = await params; // Extrai user através do URL
+    const formataUserID = id;
+
     try {
         const body = await req.json();
-        let { firstName, secondName, email, password } = body;
+        let { firstName, secondName, email, password, propertyIDs} = body;
 
         // Garante que pelo menos um campo é atualizado
-        if (!firstName && !secondName && !email && !password) {
+        if (!firstName && !secondName && !email && !password && !propertyIDs) {
             return NextResponse.json({ error: "At least one field must be updated" }, { status: 400 });
         }
 
@@ -32,6 +34,24 @@ export async function PUT(req, { params }) {
             where: { userID: parseInt(id) },
             data: updateData,
         });
+
+        if (propertyIDs && propertyIDs.length > 0) {
+            // Remove qualquer relação existente antes de criar uma nova
+            await prisma.cloud_userProperties.deleteMany({
+                where: { userID: parseInt(id) },
+            });
+
+            // Cria uma nova relação com a nova propertyID para múltiplos userID
+            const userPropertiesData = propertyIDs.map((id) => ({
+                propertyID: parseInt(id),
+                userID: parseInt(formataUserID),
+            }));
+
+            await prisma.cloud_userProperties.createMany({
+                data: userPropertiesData,
+            });
+        }
+
 
         return NextResponse.json({ message: "User updated successfully", updatedUser }, { status: 200 });
     } catch (error) {

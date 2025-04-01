@@ -76,14 +76,14 @@ model cloud_chain {
 }
 
 model cloud_chainProperties {
-  chainID                                                              Int
-  chainTag                                                             String?           @db.VarChar(100)
-  propertyID                                                           Int
-  propertyTag                                                          String?           @db.VarChar(100)
-  cloud_chain_cloud_chainProperties_chainIDTocloud_chain               cloud_chain       @relation("cloud_chainProperties_chainIDTocloud_chain", fields: [chainID], references: [chainID], onDelete: Cascade, onUpdate: NoAction, map: "cloud_chainProperties_ibfk_1")
-  cloud_chain_cloud_chainProperties_chainTagTocloud_chain              cloud_chain?      @relation("cloud_chainProperties_chainTagTocloud_chain", fields: [chainTag], references: [chainTag], onDelete: Cascade, onUpdate: NoAction, map: "cloud_chainProperties_ibfk_2")
-  cloud_properties_cloud_chainProperties_propertyIDTocloud_properties  cloud_properties  @relation("cloud_chainProperties_propertyIDTocloud_properties", fields: [propertyID], references: [propertyID], onDelete: Cascade, onUpdate: NoAction, map: "cloud_chainProperties_ibfk_3")
-  cloud_properties_cloud_chainProperties_propertyTagTocloud_properties cloud_properties? @relation("cloud_chainProperties_propertyTagTocloud_properties", fields: [propertyTag], references: [propertyTag], onDelete: Cascade, onUpdate: NoAction, map: "cloud_chainProperties_ibfk_4")
+  chainID                                                                Int
+  chainTag                                                               String?           @db.VarChar(100)
+  propertyID                                                             Int
+  propertyTag                                                            String?           @db.VarChar(100)
+  cloud_chain_cloud_chainProperties_chainIDTocloud_chain                 cloud_chain       @relation("cloud_chainProperties_chainIDTocloud_chain", fields: [chainID], references: [chainID], onDelete: Cascade, onUpdate: NoAction, map: "cloud_chainProperties_ibfk_1")
+  cloud_chain_cloud_chainProperties_chainTagTocloud_chain                cloud_chain?      @relation("cloud_chainProperties_chainTagTocloud_chain", fields: [chainTag], references: [chainTag], onDelete: Cascade, onUpdate: NoAction, map: "cloud_chainProperties_ibfk_2")
+  cloud_properties_cloud_chainProperties_propertyIDTocloud_properties    cloud_properties  @relation("cloud_chainProperties_propertyIDTocloud_properties", fields: [propertyID], references: [propertyID], onDelete: Cascade, onUpdate: NoAction, map: "cloud_chainProperties_ibfk_3")
+  cloud_properties_cloud_chainProperties_propertyTagTocloud_propertiesok cloud_properties? @relation("cloud_chainProperties_propertyTagTocloud_properties", fields: [propertyTag], references: [propertyTag], onDelete: Cascade, onUpdate: NoAction, map: "cloud_chainProperties_ibfk_4")
 
   @@id([chainID, propertyID])
   @@index([chainTag], map: "chainTag")

@@ -66,8 +66,8 @@ export default function SidebarMenu() {
         { ref: "/homepage/family", label: "Families", icon: <FaTable size={18} /> },
         { ref: "/homepage/subfamilia", label: "SubFamilies", icon: <FaTable size={18} /> },
         { ref: "/homepage/product", label: "Products", icon: <FaTable size={18} /> },
-        { ref: "/homepage/Iva", label: "Iva", icon: <FaTable size={18} /> },
-        { ref: "/homepage/Unit", label: "Unit", icon: <FaTable size={18} /> },
+        { ref: "/homepage/Iva", label: "VAT", icon: <FaTable size={18} /> },
+        { ref: "/homepage/unit", label: "Unit", icon: <FaTable size={18} /> },
             ], 
         },
     };

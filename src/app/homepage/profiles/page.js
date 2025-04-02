@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { HiDotsVertical } from "react-icons/hi";
 import { FaGear } from "react-icons/fa6";
 import { Plus } from "lucide-react";
+import Select from "react-select";
 import { Button, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/react";
 import {
     Modal,
@@ -66,15 +67,21 @@ const ProfilesTable = () => {
     };
 
 
-    // Ligar propriedades a novo perfil
-    const handlePropertyChange = (e) => {
-        const selectedOptions = Array.from(e.target.selectedOptions);
-        const selectedIDs = selectedOptions.map(option => option.value);
-        const selectedTags = selectedOptions.map(option => option.dataset.tag);
+    const propertyOptions = properties.map(property => ({
+        value: property.propertyID,
+        label: `${property.propertyName} (${property.propertyTag})`,
+        tag: property.propertyTag
+    }));
 
+    const handlePropertyChange = (selectedOptions) => {
+        // Extrair os IDs e tags das opções selecionadas
+        const selectedIDs = selectedOptions.map(option => option.value);
+        const selectedTags = selectedOptions.map(option => option.tag);
+
+        // Atualizar o estado do novo perfil, associando as propriedades ao perfil
         setNewProfile(prevProfile => ({
             ...prevProfile,
-            propertyIDs: [...new Set([...prevProfile.propertyIDs, ...selectedIDs])], // Avoid duplicates
+            propertyIDs: [...new Set([...prevProfile.propertyIDs, ...selectedIDs])], // Evitar duplicados
             propertyTags: [...new Set([...prevProfile.propertyTags, ...selectedTags])],
         }));
     };
@@ -114,7 +121,6 @@ const ProfilesTable = () => {
             console.error("Error with profile:", error);
         }
     };
-
 
 
     // Abre o modal e insere os dados do perfil escolhido
@@ -199,25 +205,15 @@ const ProfilesTable = () => {
                                         <label htmlFor="propertyIDs" className="block text-sm font-medium text-[#191919] mb-1">
                                             Select Properties
                                         </label>
-                                        <select
+                                        <Select
                                             id="propertyIDs"
                                             name="propertyIDs"
-                                            multiple
-                                            value={newProfile.propertyIDs}
+                                            options={propertyOptions}
+                                            value={propertyOptions.filter(option => newProfile.propertyIDs.includes(option.value))}
                                             onChange={handlePropertyChange}
-                                            required
-                                            className="w-full p-2 border rounded"
-                                        >
-                                            {properties.map((property, index) => (
-                                                <option
-                                                    key={property.propertyID || `${property}-${index}`}
-                                                    value={property.propertyID}
-                                                    data-tag={property.propertyTag}
-                                                >
-                                                    {property.propertyName} ({property.propertyTag})
-                                                </option>
-                                            ))}
-                                        </select>
+                                            isMulti
+                                            isSearchable
+                                        />
                                     </div>
                                 </form>
                             </ModalBody>
@@ -272,24 +268,15 @@ const ProfilesTable = () => {
                                         <label htmlFor="propertyIDs" className="block text-sm font-medium text-[#191919] mb-1">
                                             Select Properties
                                         </label>
-                                        <select
+                                        <Select
                                             id="propertyIDs"
                                             name="propertyIDs"
-                                            multiple
-                                            value={newProfile.propertyIDs}
+                                            options={propertyOptions}
+                                            value={propertyOptions.filter(option => newProfile.propertyIDs.includes(option.value))}
                                             onChange={handlePropertyChange}
-                                            className="w-full p-2 border rounded"
-                                        >
-                                            {properties.map((property, index) => (
-                                                <option
-                                                    key={property.propertyID || `${property}-${index}`}
-                                                    value={property.propertyID}
-                                                    data-tag={property.propertyTag}
-                                                >
-                                                    {property.propertyName} ({property.propertyTag})
-                                                </option>
-                                            ))}
-                                        </select>
+                                            isMulti
+                                            isSearchable
+                                        />
                                     </div>
                                 </form>
                             </ModalBody>

@@ -58,26 +58,13 @@ const PropertiesTable = () => {
     }, []);
 
     const handleInputChange = (event) => {
-        const { name, value, options } = event.target;
-
-        if (options) {
-            // Se existirem opções são um elemento do select
-            const selectedValues = Array.from(options)
-                .filter(option => option.selected)
-                .map(option => option.value);
-
-            setNewProperty((prev) => ({
-                ...prev,
-                propertyChain: selectedValues, // garante que a chain é guardada como um array
-            }));
-        } else {
-
-            setNewProperty((prev) => ({
-                ...prev,
-                [name]: value,
-            }));
-        }
+        const { name, value } = event.target;
+        setNewProperty((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
     };
+
 
     const chainOptions = chains.map (chain => ({
         value:chain.chainTag,
@@ -95,9 +82,13 @@ const PropertiesTable = () => {
             return;
         }
 
+        // Garante que propertyChain é sempre um array , mesmo que só uma chain possa ser escolhida
         const formattedProperty = {
             ...newProperty,
+            propertyChain: Array.isArray(newProperty.propertyChain) ? newProperty.propertyChain : [newProperty.propertyChain],
         };
+
+
 
         try {
             const response = await fetch("/api/properties", {
@@ -117,7 +108,7 @@ const PropertiesTable = () => {
                 propertyServer: '',
                 propertyPort: '',
                 mpeHotel: '',
-                propertyChain: '',
+                propertyChain: "",
             });
 
             onClose();
@@ -133,9 +124,18 @@ const PropertiesTable = () => {
     };
 
     const handleEditClick = (property) => {
-        setEditingProperty(property);
+        // Encontra o objeto correto da chain correspondente ao propertyChain
+        const chain = chains.find(chain => chain.chainTag === property.propertyChain?.[0]);
+
+        setEditingProperty({
+            ...property,
+            chainID: chain ? chain.chainID : "",
+        });
+
         onEditOpen();
     };
+
+
 
     const handleEditChange = (event) => {
         const { name, value } = event.target;
@@ -148,11 +148,19 @@ const PropertiesTable = () => {
 
     const handleUpdateProperty = async (e) => {
         e.preventDefault();
+
+        const formattedProperty = {
+            ...editingProperty,
+            propertyChain: editingProperty.propertyChain ? [editingProperty.propertyChain] : [],
+        };
+
+        console.log("Updating property with:", formattedProperty);
+
         try {
             const response = await fetch(`/api/properties/${editingProperty.propertyID}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(editingProperty),
+                body: JSON.stringify(formattedProperty),
             });
 
             if (!response.ok) throw new Error("Failed to update property");
@@ -164,6 +172,7 @@ const PropertiesTable = () => {
             console.error("Error updating property:", error);
         }
     };
+
 
     const handleCloseModal = () => {
         setNewProperty({
@@ -253,11 +262,12 @@ const PropertiesTable = () => {
                                             id="propertyChain"
                                             name="propertyChain"
                                             options={chainOptions}
-                                            value={chainOptions.filter(option => newProperty.propertyChain.includes(option.value))}
-                                            onChange={(selectedOptions) =>
-                                                handleInputChange({
-                                                    target: { name: 'propertyChain', value: selectedOptions.map(option => option.value) }
-                                                })
+                                            value={chainOptions.find(option => option.value === newProperty.propertyChain) || ""}
+                                            onChange={(selectedOption) =>
+                                                setNewProperty((prev) => ({
+                                                    ...prev,
+                                                    propertyChain: selectedOption ? selectedOption.value : "", //guarda apenas 1 valor
+                                                }))
                                             }
                                             isSearchable
                                             className="w-full"
@@ -355,13 +365,14 @@ const PropertiesTable = () => {
                                             </label>
                                             <Select
                                                 id="propertyChain"
-                                                name="chainTag"
+                                                name="propertyChain"
                                                 options={chainOptions}
-                                                value={chainOptions.find(option => option.value === editingProperty?.chainID) || null}
+                                                value={chainOptions.find(option => option.value === editingProperty?.propertyChain) || null}
                                                 onChange={(selectedOption) =>
-                                                    handleEditChange({
-                                                        target: { name: "chainTag", value: selectedOption ? selectedOption.value : "" }
-                                                    })
+                                                    setEditingProperty((prev) => ({
+                                                        ...prev,
+                                                        propertyChain: selectedOption ? selectedOption.value : null,
+                                                    }))
                                                 }
                                                 isSearchable
                                                 className="w-full"

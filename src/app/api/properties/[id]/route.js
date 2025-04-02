@@ -4,13 +4,13 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export async function PUT(req, { params }) {
-    const { id } = params; // Extrai a propriedade através do URL
+    const { id } = await params; // Extrai a propriedade através do URL
     try {
         const body = await req.json();
-        let { propertyName, propertyServer, propertyPort, mpeHotel, chainID } = body;
+        let { propertyName, propertyServer, propertyPort, mpeHotel, propertyChain } = body; // propertyChain é um array
 
-        // Garante que pelo menos um campo é atualizado
-        if (!propertyName && !propertyServer && !propertyPort && !mpeHotel && !chainID) {
+        // Garante que pelo menos um campo seja atualizado
+        if (!propertyName && !propertyServer && !propertyPort && !mpeHotel && (!propertyChain || propertyChain.length === 0)) {
             return NextResponse.json({ error: "At least one field must be updated" }, { status: 400 });
         }
 
@@ -28,21 +28,34 @@ export async function PUT(req, { params }) {
             data: updateData,
         });
 
-        // Se foi passado o novo chainID, atualiza a relação na tabela cloud_chainProperties
-        if (chainID) {
-            // Remove qualquer relação existente antes de criar uma nova
+        // Se houver uma atualização na relação de cadeias
+        if (propertyChain && propertyChain.length > 0) {
+            // Remove todas as relações existentes antes de buscar novas cadeias
             await prisma.cloud_chainProperties.deleteMany({
                 where: { propertyID: parseInt(id) },
             });
 
-            // Cria uma nova relação com a nova chainID
-            await prisma.cloud_chainProperties.create({
-                data: {
-                    propertyID: parseInt(id),
-                    chainID: parseInt(chainID),
-                },
+            // Buscar IDs das cadeias pelo chainTag
+            const chains = await prisma.cloud_chain.findMany({
+                where: { chainTag: { in: propertyChain } },
+                select: { chainID: true }
+            });
+
+            if (chains.length === 0) {
+                return NextResponse.json({ error: "Invalid property chains selected" }, { status: 400 });
+            }
+
+            // Criar novas relações
+            const chainPropertyData = chains.map(chain => ({
+                propertyID: parseInt(id),
+                chainID: chain.chainID,
+            }));
+
+            await prisma.cloud_chainProperties.createMany({
+                data: chainPropertyData,
             });
         }
+
 
         return NextResponse.json({ message: "Property updated successfully", updatedProperty }, { status: 200 });
     } catch (error) {

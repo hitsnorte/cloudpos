@@ -78,11 +78,11 @@ const ProfilesTable = () => {
         const selectedIDs = selectedOptions.map(option => option.value);
         const selectedTags = selectedOptions.map(option => option.tag);
 
-        // Atualizar o estado do novo perfil, associando as propriedades ao perfil
+
         setNewProfile(prevProfile => ({
             ...prevProfile,
-            propertyIDs: [...new Set([...prevProfile.propertyIDs, ...selectedIDs])], // Evitar duplicados
-            propertyTags: [...new Set([...prevProfile.propertyTags, ...selectedTags])],
+            propertyIDs: selectedIDs,
+            propertyTags: selectedTags,
         }));
     };
 

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { HiDotsVertical } from "react-icons/hi";
 import { FaGear } from "react-icons/fa6";
 import { Plus } from "lucide-react";
+import Select from "react-select";
 import { Button, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/react";
 import {
     Modal,
@@ -77,6 +78,11 @@ const PropertiesTable = () => {
             }));
         }
     };
+
+    const chainOptions = chains.map (chain => ({
+        value:chain.chainTag,
+        label: `${chain.chainName}(${chain.chainTag})`,
+    }));
 
     //adiciona propriedades
     const handleAddProperty = async (e) => {
@@ -171,6 +177,7 @@ const PropertiesTable = () => {
         onClose();
     };
 
+
     return (
         <div className="p-4">
             <div className="flex justify-between items-center mb-4">
@@ -242,20 +249,20 @@ const PropertiesTable = () => {
                                         <label htmlFor="propertyChain" className="block text-sm font-medium text-[#191919] mb-1">
                                             Select Property Chain
                                         </label>
-                                        <select
+                                        <Select
                                             id="propertyChain"
                                             name="propertyChain"
-                                            value={Array.isArray(newProperty.propertyChain) ? newProperty.propertyChain : []}
-                                            onChange={handleInputChange}
-                                            required
-                                            className="w-full p-2 border rounded"
-                                        >
-                                            {chains.map((chain, index) => (
-                                                <option key={chain.chainTag || `chain-${index}`} value={chain.chainTag}>
-                                                    {chain.chainName} ({chain.chainTag})
-                                                </option>
-                                            ))}
-                                        </select>
+                                            options={chainOptions}
+                                            value={chainOptions.filter(option => newProperty.propertyChain.includes(option.value))}
+                                            onChange={(selectedOptions) =>
+                                                handleInputChange({
+                                                    target: { name: 'propertyChain', value: selectedOptions.map(option => option.value) }
+                                                })
+                                            }
+                                            isSearchable
+                                            className="w-full"
+                                            classNamePrefix="select"
+                                        />
                                     </div>
                                 </form>
                             </ModalBody>
@@ -346,21 +353,20 @@ const PropertiesTable = () => {
                                             <label htmlFor="propertyChain" className="block text-sm font-medium text-[#191919] mb-1">
                                                 Select Property Chain
                                             </label>
-                                            <select
+                                            <Select
                                                 id="propertyChain"
-                                                name="chainID"
-                                                value={editingProperty?.chainID || ""}
-                                                onChange={handleEditChange}
-                                                required
-                                                className="w-full p-2 border rounded"
-                                            >
-                                                <option value="">Select a Chain</option>
-                                                {chains.map((chain) => (
-                                                    <option key={chain.chainID} value={chain.chainID}>
-                                                        {chain.chainName} ({chain.chainTag})
-                                                    </option>
-                                                ))}
-                                            </select>
+                                                name="chainTag"
+                                                options={chainOptions}
+                                                value={chainOptions.find(option => option.value === editingProperty?.chainID) || null}
+                                                onChange={(selectedOption) =>
+                                                    handleEditChange({
+                                                        target: { name: "chainTag", value: selectedOption ? selectedOption.value : "" }
+                                                    })
+                                                }
+                                                isSearchable
+                                                className="w-full"
+                                                classNamePrefix="select"
+                                            />
                                         </div>
                                     </form>
                                 )}

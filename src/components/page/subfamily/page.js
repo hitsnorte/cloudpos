@@ -7,6 +7,8 @@ import { FaGear } from "react-icons/fa6";
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
 import { fetchSubfamily, createSubfamily, deleteSubfamily, updateSubfamily } from '@/src/lib/apisubfamily';
 import { fetchFamily } from '@/src/lib/apifamily';
+import { fetchGrup } from '@/src/lib/apigroup';
+
 import {
   Modal,
   ModalContent,
@@ -18,6 +20,8 @@ import {
 } from '@nextui-org/react';
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@heroui/react";
 
+const PAGE_SIZES = [25, 50, 150, 250];
+
 const DataSubfamilia = () => {
   const [subfamilias, setSubfamilias] = useState([]);
   const [families, setFamilies] = useState([]);
@@ -28,6 +32,10 @@ const DataSubfamilia = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [subfamiliaToDelete, setSubfamiliaToDelete] = useState(null);
   const [selectedFamily, setSelectedFamily] = useState("");
+
+  const [itemsPerPage, setItemsPerPage] = useState(50);
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.ceil(subfamilias.length / itemsPerPage);
 
   const {
     isOpen: isAddModalOpen,
@@ -50,15 +58,55 @@ const DataSubfamilia = () => {
     loadFamilies();
   }, []);
 
+  const paginatedSubfamilias = subfamilias.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const loadSubfamilias = async () => {
-    try {
-      const subfamilias = await fetchSubfamily();
-      setSubfamilias(subfamilias);
-    } catch (err) {
-      setError(err.message);
-    }
-  };
+      try {
+        const subfamilias = await fetchSubfamily(); 
+        const familyMap = await fetchFamilyMap(); 
+        const groupMap = await fetchGroupMap();
+  
+        // Mapeamos os produtos, adicionando a descrição da subfamília e da família correspondente
+        const enrichedSubfamilias = subfamilias.map(subfamilia => ({
+          ...subfamilia,
+          VDescFamily: familyMap[subfamilia.VCodFam] || "N/A", // Se não houver correspondência, coloca "N/A"
+          VDescGroup: groupMap[subfamilia.VCodGrfam] || "N/A", // Se não houver correspondência, coloca "N/A"
+        }));
+    
+        setSubfamilias(enrichedSubfamilias);
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+    
+    const fetchFamilyMap = async () => {
+      try {
+        const families = await fetchFamily();
+        return families.reduce((map, family) => {
+          map[family.VCodFam] = family.VDesc;
+          return map;
+        }, {});
+      } catch (err) {
+        setError(err.message);
+        return {};
+      }
+    };
+
+    const fetchGroupMap = async () => {
+      try {
+        const groups = await fetchGrup();
+        return groups.reduce((map, group) => {
+          map[group.VCodGrFam] = group.VDesc;
+          return map;
+        }, {});
+      } catch (err) {
+        setError(err.message);
+        return {};
+      }
+    };
 
   const loadFamilies = async () => {
       try {
@@ -172,7 +220,7 @@ const DataSubfamilia = () => {
   
 
   return (
-    <div className="p-4">
+    <div className="p-4 pb-10">
       {/* button */}
       <Dropdown>
       <DropdownTrigger>
@@ -271,33 +319,41 @@ const DataSubfamilia = () => {
 
       {/* Modal para editar grupo */}
       <Modal
-  isOpen={isEditModalOpen}
-  onOpenChange={onEditModalClose}
-  size="md"
-  placement="center"
-  className="w-100 bg-white shadow-xl rounded-lg"
->
+        isOpen={isEditModalOpen}
+        onOpenChange={onEditModalClose}
+        size="md"
+        placement="center"
+        className="w-100 bg-white shadow-xl rounded-lg"
+        hideCloseButton={true}
+      >
   <ModalContent>
     {(onClose) => (
       <>
-        <ModalHeader className="rounded bg-[#FC9D25] flex justify-left items-left">
+        <ModalHeader className="rounded bg-[#FC9D25] flex justify-between items-center">
           <h3 className="text-xl flex justify-left items-left font-bold text-white">Edit Subfamily</h3>
+          <Button
+                onClick={onClose}
+                className="text-white bg-transparent border-0 text-2xl p-0"
+                aria-label="Close"
+               >
+                &times; {/* Unicode for "×" sign */}
+            </Button>
         </ModalHeader>
         <ModalBody className="py-5 px-6">
           {editSubfamilia && (
             <form id="updateSubfamiliaForm" onSubmit={handleUpdateSubfamilia} className="space-y-6">
               <div>
-                <label htmlFor="subfamiliaName" className="block text-sm font-medium text-gray-400 mb-1">
-                  Name
+                <label htmlFor="subfamiliaDescription" className="block text-sm font-medium text-gray-400 mb-1">
+                Description
                 </label>
                 <input
-                  id="subfamiliaName"
+                  id="subfamiliaVDesc"
                   type="text"
-                  value={editSubfamilia.nome || ''} // Garante que não seja undefined
+                  value={editSubfamilia ? editSubfamilia.VDesc : ''}// Garante que não seja undefined
                   onChange={(e) =>
-                    setEditSubfamilia({ ...editSubfamilia, nome: e.target.value })
+                    setEditSubfamilia({ ...editSubfamilia, VDesc: e.target.value })
                   }
-                  placeholder="Digite o nome da sub familia"
+                  placeholder="Digite a descriçao da sub familia"
                   className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
                   required
                 />
@@ -371,54 +427,59 @@ const DataSubfamilia = () => {
 
       {/* Tabela */}
       <div className="overflow-x-auto sm:flex sm:flex-col bg-muted/40">
-        <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB] mx-auto">
+        <table className="w-450 bg-[#FAFAFA] border-collapse border border-[#EDEBEB] mx-auto">
           <thead>
             <tr>
-              <th className="border-collapse border border-[#EDEBEB] !w-[2px] px-1 sm:px-5 py-2 bg-[#FC9D25]">
+              <th className="border-collapse border border-[#EDEBEB] !w-[2px] px-1 sm:px-5 py-3 bg-[#FC9D25]">
                 <div className=" flex items-center justify-center">
                   <FaGear size={20} color='white'/>
                 </div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-25 px-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-                <div className=" flex items-center justify-center"> 
-                  Cod Grp Fam
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-10 px-1 sm:px-5 py-3 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className=" flex items-left justify-left"> 
+                  Cod SubFam
                 </div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-5 px-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-                <div className=" flex items-center justify-center"> 
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-50 px-1 sm:px-5 py-3 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className=" flex items-left justify-left"> 
+                  Description
+                </div>
+              </th>
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-25 sm:px-4 py-3 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+               <div className="flex items-left justify-left "> 
+                  Created In
+              </div>
+              </th>
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-5 sm:px-4 py-3 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+               <div className="flex items-left justify-left "> 
+                  Made by
+              </div>
+              </th>
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-15 sm:px-4 py-3 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+               <div className="flex items-left justify-left "> 
                   Cod Fam
-                </div>
-              </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-25 px-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-                <div className=" flex items-center justify-center"> 
-                  Cod Sub Fam
-                </div>
-              </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-120 px-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-                <div className=" flex items-center justify-center"> 
-                  Descrição
-                </div>
-              </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-90 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-center justify-center "> 
-                  Criado em
               </div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-5 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-center justify-center "> 
-                  Criado por
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-50 px-1 sm:px-5 py-3 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className=" flex items-left justify-left"> 
+                  Desc Fam
+                </div>
+              </th>
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-15 sm:px-4 py-3 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+               <div className="flex items-left justify-left "> 
+                  Cod Grp
               </div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-15 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-center justify-center "> 
-                  ID Grp Conta
-              </div>
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-50 px-1 sm:px-5 py-3 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className=" flex items-left justify-left"> 
+                  Desc Grp
+                </div>
               </th>
             </tr>
           </thead>
 
           <tbody className="divide-y divide-gray-300">
-          {subfamilias.map((subfamilia) => (
+          {paginatedSubfamilias.map((subfamilia) => (
             <tr key={subfamilia.VCodSubFam} className="hover:bg-gray-200">
               {/* Ações */}
               <td className="border border-[#EDEBEB] px-1 py-1 text-center">
@@ -429,31 +490,65 @@ const DataSubfamilia = () => {
                     </Button>
                   </DropdownTrigger>
                   <DropdownMenu aria-label="Dynamic Actions" placement="bottom-end" className="bg-white shadow-lg rounded-md p-1">
-                    <DropdownItem key="edit" onPress={() => alert(`Editando ${subfamilia.VDesc}`)}>Editar</DropdownItem>
+                      <DropdownItem key="edit" onPress={() => handleEditSubfamilia(subfamilia)}>
+                          Edit
+                      </DropdownItem>
                   </DropdownMenu>
                 </Dropdown>
               </td>
               
               {/* Dados do Produto */}
-              <td className="border border-[#EDEBEB] px-3 py-2 text-right">{subfamilia.VCodGrfam}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-right">{subfamilia.VCodFam}</td>
               <td className="border border-[#EDEBEB] px-4 py-2 text-right">{subfamilia.VCodSubFam}</td>
               <td className="border border-[#EDEBEB] px-4 py-2 text-left">{subfamilia.VDesc}</td>
               <td className="border border-[#EDEBEB] px-4 py-2 text-right">
                 {new Date(subfamilia.dcriadoem).toLocaleDateString('pt-BR')}
               </td>
               <td className="border border-[#EDEBEB] px-4 py-2 text-left">{subfamilia.vcriadopor}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-right">
-                  {subfamilia.ID_GrupoConta === -1 ? "" : subfamilia.ID_GrupoConta}
-              </td>
+
+              <td className="border border-[#EDEBEB] px-3 py-2 text-right">{subfamilia.VCodFam}</td>
+              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{subfamilia.VDescFamily}</td>
+              <td className="border border-[#EDEBEB] px-3 py-2 text-right">{subfamilia.VCodGrfam}</td>
+              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{subfamilia.VDescGroup}</td>
+
+
             </tr>
           ))}
         </tbody>
         </table>
+        <div className="flex fixed bottom-0 left-0 items-center gap-2 w-full px-4 py-3 bg-gray-200 justify-end p-0">
+        <span className="px-4 py-2 ">Items per page</span>
+          <select
+            value={itemsPerPage}
+            onChange={(e) => {
+              setItemsPerPage(Number(e.target.value));
+              setCurrentPage(1);
+            }}
+            className="border p-2 rounded px-4 py-2 w-20 gray-200"
+          >
+            {PAGE_SIZES.map((size) => (
+              <option key={size} value={size}>{size}</option>
+            ))}
+          </select>
+          
+          <button 
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className={`px-4 py-2 rounded ${currentPage === 1 ? 'bg-gray-200 text-black cursor-not-allowed' : 'bg-gray-200 hover:bg-gray-200'}`}
+          >
+            &lt;  {/* Símbolo de "Anterior" */}
+          </button>
+  
+          <span className="px-4 py-2 rounded">{currentPage} / {totalPages}</span>
+
+          <button 
+            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            className={`px-4 py-2 rounded ${currentPage === totalPages ? 'bg-gray-200 text-black cursor-not-allowed' : 'bg-gray-200 hover:bg-gray-200'}`}
+          >
+            &gt;  {/* Símbolo de "Próximo" */}
+          </button>
+        </div> 
       </div>
-      {filteredSubfamilias.length === 0 && !error && (
-        <p className="text-center py-4">Nenhuma Sub familia encontrada.</p>
-      )}
     </div>
   );
 };

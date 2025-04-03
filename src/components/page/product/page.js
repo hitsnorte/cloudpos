@@ -288,13 +288,13 @@ const DataProduct = () => {
     ];
 
   return (
-    <div className="p-4">
+    <div className="p-4 pb-10">
       {/* button */}
             <Dropdown>
             <DropdownTrigger>
             <button 
                 onClick={onAddModalOpen}
-                className="absolute top-4 right-14 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
+                className="flex fixed absolute top-4 right-14 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
                 < Plus size={25}  />     
             </button> 
             </DropdownTrigger>
@@ -490,104 +490,42 @@ const DataProduct = () => {
           <ModalBody className="py-5 px-6">
             {editProduct && (
               <form id="updateProductForm" onSubmit={handleUpdateProduct} className="space-y-6">
-                {/* <div>
-                  <label htmlFor="productName" className="block text-sm font-medium text-gray-400 mb-1">
-                    Name
+                <div>
+                  <label htmlFor="productAbbreviation" className="block text-sm font-medium text-gray-400 mb-1">
+                    Abbreviation
                   </label>
                   <input
-                    id="productName"
+                    id="productAbreviatura"
                     type="text"
-                    value={editProduct.product_name}
+                    value={editProduct ? editProduct.Abreviatura : ''}
                     onChange={(e) =>
-                      setEditProduct({ ...editProduct, product_name: e.target.value })
+                      setEditProduct({ ...editProduct, Abreviatura: e.target.value })
                     }
-                    placeholder="Digite o nome do produto"
-                    className="w-60 p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                    placeholder="Digite a Abbreviation do produto"
+                    className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
                     required
                   />
-                   <input
-                      type="checkbox"
-                      checked={ativo}
-                      className="w-15 "
-                      onChange={(e) => setAtivo(e.target.checked)}
-                    />
-                    {ativo ? "Ativo" : "Inativo"}
                 </div>
-                <div >
-                  <label htmlFor="quantity" className="block text-sm font-medium text-gray-400 mb-1">
-                    Quantity
+                 <div >
+                  <label htmlFor="productDescription" className="block text-sm font-medium text-gray-400 mb-1">
+                      Description
                   </label>
                   <input
-                      id="newQuantity"
+                      id="product"
                       type="text"   
-                      name="quantity"
-                      value={editProduct.quantity}
+                      value={editProduct ? editProduct.VDESC1 : ''}
                       onChange={(e) =>
-                        setEditProduct({ ...editProduct, quantity: e.target.value })
+                        setEditProduct({ ...editProduct, VDESC1: e.target.value })
                       }
-                      placeholder="Digite a quantidade"
+                      placeholder="Digite a descriçao do produto"
                       className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
                       required
                     />
                     {quantityError && (
                       <p className="text-red-500 text-sm mt-1">{quantityError}</p>
                     )}
-                </div> */}
-                <div>
-                  <label htmlFor="abreviatura" className="block text-sm font-medium text-gray-400 mb-1">
-                     Abbreviation
-                  </label>
-                  <input
-                      id="newAbreviatura"
-                      type="text"   
-                      name="abreviatura"
-                 
-                      placeholder="Digite a abreviatura"
-                      className="w-65 p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
-                      required
-                    />
-                    
-                    <button
-                      onClick={() => setIsActive(!isActive)}
-                      className={`relative w-12 h-6 rounded-full transition-all duration-300  p-1.5 
-                        ${isActive ? "bg-[#FC9D25]" : "bg-gray-300"}`}
-                    >
-                      <span
-                        className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform duration-300
-                          ${isActive ? "translate-x-6" : "translate-x-0"}`}
-                      />
-                    </button>
-                    <span className="text-sm font-medium text-gray-400">
-                      {isActive ? "Ativo" : "Inativo"}
-                    </span>
                 </div>
-                <div>
-                  <label htmlFor="descricao" className="block text-sm font-medium text-gray-400 mb-1">
-                     Descrição
-                  </label>
-                  <input
-                      id="newDescricao"
-                      type="text"   
-                      name="descricao"
-                 
-                      placeholder="Digite a descricao"
-                      className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
-                      required
-                    />
-                </div>
-                <div>
-                  <label htmlFor="CodProd" className="block text-sm font-medium text-gray-400 mb-1">
-                     Cod Prod
-                  </label>
-                  <input
-                      id="newCodProd"
-                      type="text"   
-                      name="codProd"
-                      placeholder="Digite o Codigo do produto"
-                      className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
-                      required
-                    />
-                </div>
+               
                 {/* <div>
                   <label>
                     <input
@@ -599,62 +537,7 @@ const DataProduct = () => {
                   </label>
                 </div> */}
               
-                <div>
-                  <label htmlFor="Conta" className="block text-sm font-medium text-gray-400 mb-1">
-                     CBL/ERP
-                  </label>
-                  <input
-                      id="newConta"
-                      type="text"   
-                      name="conta"
-                      placeholder="Digite a conta CBL/ERP"
-                      className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
-                      required
-                    />
-                </div>
-                <div>
-                  <label htmlFor="Artigo" className="block text-sm font-medium text-gray-400 mb-1">
-                     Artigo
-                  </label>
-                  <input
-                      id="newArtigo"
-                      type="text"   
-                      name="Artigo"
-                      placeholder="Digite o Tipo de artigo"
-                      className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
-                      required
-                    />
-                </div>
-                <div>
-                   <select
-                    className="w-full p-1 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
-                    value={selectedIva}
-                    onChange={(e) => setSelectedIva(e.target.value)}
-                  >
-                    <option value="">Iva</option>
-                    {ivaList.map((iva) => (
-                      <option key={iva.id} value={iva.taxa}>
-                        {iva.taxa}% - {iva.descricao}
-                      </option>
-                    ))}
-                  </select>
-
-                </div>
-                <div>
-                <select
-                    className="w-full p-1 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
-                    value={selectedTipo}
-                    onChange={(e) => setSelectedTipo(e.target.value)}
-                  >
-                    <option value="">Produto de</option>
-                    {tipoOperacaoList.map((tipo) => (
-                      <option key={tipo.id} value={tipo.tipo}>
-                        {tipo.descricao}
-                      </option>
-                    ))}
-                  </select>
-
-                </div>
+        
               </form>
             )}
           </ModalBody>
@@ -741,7 +624,7 @@ const DataProduct = () => {
               </th>
               <th className="uppercase border-collapse border border-[#EDEBEB] w-150 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
                <div className="flex items-left justify-left"> 
-                Description
+                  Description
               </div>
               </th>
               <th className="uppercase border-collapse border border-[#EDEBEB] w-5 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
@@ -751,7 +634,7 @@ const DataProduct = () => {
               </th>
               <th className="uppercase border-collapse border border-[#EDEBEB] w-120 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
                <div className="flex items-left justify-left"> 
-                Desc Iva
+                  Desc Iva
               </div>
               </th>
              
@@ -765,11 +648,7 @@ const DataProduct = () => {
                  Desc Unit
               </div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-5 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-left justify-left "> 
-                  Article
-              </div>
-              </th>
+            
               <th className="uppercase border-collapse border border-[#EDEBEB] w-5 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
                <div className="flex items-left justify-left "> 
                   Product of
@@ -820,7 +699,9 @@ const DataProduct = () => {
                     </Button>
                   </DropdownTrigger>
                   <DropdownMenu aria-label="Dynamic Actions" placement="bottom-end" className="bg-white shadow-lg rounded-md p-1">
-                    <DropdownItem key="edit" onPress={() => alert(`Editando ${product.VDESC1}`)}>Editar</DropdownItem>
+                      <DropdownItem key="edit" onPress={() => handleEditProduct(product)}>
+                          Edit
+                      </DropdownItem>
                   </DropdownMenu>
                 </Dropdown>
               </td>
@@ -833,8 +714,6 @@ const DataProduct = () => {
               <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.VDescIva}</td>
               <td className="border border-[#EDEBEB] px-4 py-2 text-right">{product.DefinicaoProduto}</td>
               <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.VDescUnit}</td>
-            
-            
 
               <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.ProductType}</td>
               <td className="border border-[#EDEBEB] px-4 py-2 text-right">{product.VSUBFAM}</td>

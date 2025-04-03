@@ -24,7 +24,6 @@ const PAGE_SIZES = [25, 50, 150, 250];
 const DataUnit = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [newProduct, setNewProduct] = useState({ product_name: '', quantity: '' });
   const [editProduct, setEditProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);

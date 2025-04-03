@@ -151,6 +151,19 @@ const ProfilesTable = () => {
         onCloseAddProfileModal();
     };
 
+    const openAddModal = () => {
+        setNewProfile({
+            firstName: '',
+            secondName: '',
+            email: '',
+            password: '',
+            propertyIDs: [],
+            propertyTags: [],
+        });
+        onOpenAddProfileModal(); //  modal de adição abre com os campos vazios
+    };
+
+
 
     return (
         <div className="p-4">
@@ -158,7 +171,7 @@ const ProfilesTable = () => {
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold">All Profiles</h2>
                 <Button
-                    onClick={onOpenAddProfileModal}
+                    onClick={openAddModal}
                     className="bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded"
                 >
                     <Plus size={25} />

@@ -7,6 +7,7 @@ import { Plus } from "lucide-react";
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
 import { fetchFamily, createFamily, deleteFamily, updateFamily } from '@/src/lib/apifamily';
 import { fetchGrup } from '@/src/lib/apigroup';
+
 import {
   Modal,
   ModalContent,
@@ -18,6 +19,8 @@ import {
 } from '@nextui-org/react';
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@heroui/react";
 
+const PAGE_SIZES = [25, 50, 150, 250];
+
 const DataFamily = () => {
   const [families, setFamilies] = useState([]);
   const [groups, setGroups] = useState([]);
@@ -28,6 +31,10 @@ const DataFamily = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [familyToDelete, setFamilyToDelete] = useState(null);
   const [selectedGroup, setSelectedGroup] = useState("");
+
+  const [itemsPerPage, setItemsPerPage] = useState(50);
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.ceil(families.length / itemsPerPage);
 
   const {
     isOpen: isAddModalOpen,
@@ -47,27 +54,46 @@ const DataFamily = () => {
 
   useEffect(() => {
     loadFamilies();
-    loadGroups();
   }, []);
 
   
+  const paginatedFamilies = families.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   const loadFamilies = async () => {
     try {
       const families = await fetchFamily();
-      setFamilies(families);
-    } catch (err) {
-      setError(err.message);
-    }
-  };
+      const groupMap = await fetchGroupMap();
+  
+      console.log("Group Map Data:", groupMap);
 
-  const loadGroups = async () => {
-    try {
-      const groups = await fetchGrup();
-      setGroups(groups);
-    } catch (err) {
-      setError(err.message);
-    }
-  };
+   // Mapeamos os produtos, adicionando a descrição da subfamília e da família correspondente
+   const enrichedFamilies = families.map(family => ({
+    ...family,
+    VDescGroup: groupMap[family.VCodGrFam] || "N/A", // Se não houver correspondência, coloca "N/A"
+  }));
+
+  setFamilies(enrichedFamilies);
+} catch (err) {
+  setError(err.message);
+}
+};
+
+const fetchGroupMap = async () => {
+  try {
+    const groups = await fetchGrup();
+    return groups.reduce((map, group) => {
+      map[group.VCodGrFam] = group.VDesc;
+      return map;
+    }, {});
+  } catch (err) {
+    setError(err.message);
+    return {};
+  }
+};
+
 
   const filteredFamilies = (families || []).filter((family) => {
     if (!family || !family.family_name) return false; // Verifica se `family` e `family.family_name` existem
@@ -172,7 +198,7 @@ const DataFamily = () => {
   };
 
   return (
-    <div className="p-4">
+    <div className="p-4 pb-10">
       {/* button */}
       <Dropdown>
       <DropdownTrigger>
@@ -268,33 +294,41 @@ const DataFamily = () => {
 
       {/* Modal para editar grupo */}
       <Modal
-  isOpen={isEditModalOpen}
-  onOpenChange={onEditModalClose}
-  size="md"
-  placement="center"
-  className="w-100 bg-white shadow-xl rounded-lg"
+      isOpen={isEditModalOpen}
+      onOpenChange={onEditModalClose}
+      size="md"
+      placement="center"
+      className="w-100 bg-white shadow-xl rounded-lg"
+      hideCloseButton={true}
 >
   <ModalContent>
     {(onClose) => (
       <>
-        <ModalHeader className="rounded bg-[#FC9D25] flex justify-left items-left">
+        <ModalHeader className="rounded bg-[#FC9D25] flex justify-between items-center">
           <h3 className="text-xl flex justify-left items-left font-bold text-white">Edit Family</h3>
+          <Button
+            onClick={onClose}
+            className="text-white bg-transparent border-0 text-2xl p-0"
+            aria-label="Close"
+            >
+              &times; {/* Unicode for "×" sign */}
+          </Button>
         </ModalHeader>
         <ModalBody className="py-5 px-6">
           {editFamily && (
             <form id="updateFamilyForm" onSubmit={handleUpdateFamily} className="space-y-6">
               <div>
                 <label htmlFor="familyName" className="block text-sm font-medium text-gray-400 mb-1">
-                  Name
+                  Description
                 </label>
                 <input
                   id="familyName"
                   type="text"
-                  value={editFamily.family_name || ''} // Garante que não seja undefined
+                  value={editFamily ? editFamily.VDesc : ''} // Garante que não seja undefined
                   onChange={(e) =>
-                    setEditFamily({ ...editFamily, family_name: e.target.value })
+                    setEditFamily({ ...editFamily, VDesc: e.target.value })
                   }
-                  placeholder="Digite o nome da familia"
+                  placeholder="Digite a nova descrição"
                   className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
                   required
                 />
@@ -377,36 +411,35 @@ const DataFamily = () => {
                 </div>
               </th>
               <th className="uppercase border-collapse border border-[#EDEBEB] w-0.5 px-1 sm:px-2 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-                <div className="flex items-center justify-center">
+                <div className="flex items-left justify-left">
                   Cod Fam
                 </div>
               </th>
-             
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-30 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-center justify-center ">
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-110 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+               <div className="flex items-left justify-left ">
+                  Description
+              </div>
+              </th>
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-25 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+               <div className="flex items-left justify-left ">
+                Created In
+              </div>
+              </th>
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-20 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+               <div className="flex items-left justify-left ">
                   Cod Grp Fam
               </div>
               </th>
               <th className="uppercase border-collapse border border-[#EDEBEB] w-110 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-center justify-center ">
-                  Descrição
-              </div>
-              </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-60 :px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-center justify-center ">
-                  Criado em
-              </div>
-              </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-30 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className=" flex items-center justify-center ">
-                  ID Grp conta
+               <div className="flex items-left justify-left ">
+                  Desc Grp
               </div>
               </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-300">
-          {families.map((familia) => (
-            <tr key={familia.VCodFam} className="hover:bg-gray-200">
+          {paginatedFamilies.map((family) => (
+            <tr key={family.VCodFam} className="hover:bg-gray-200">
               {/* Ações */}
               <td className="border border-[#EDEBEB] px-1 py-1 text-center">
                 <Dropdown>
@@ -416,28 +449,59 @@ const DataFamily = () => {
                     </Button>
                   </DropdownTrigger>
                   <DropdownMenu aria-label="Dynamic Actions" placement="bottom-end" className="bg-white shadow-lg rounded-md p-1">
-                    <DropdownItem key="edit" onPress={() => alert(`Editando ${familia.VDesc}`)}>Editar</DropdownItem>
+                        <DropdownItem key="edit" onPress={() => handleEditFamily(family)}>
+                              Edit
+                            </DropdownItem>
                   </DropdownMenu>
                 </Dropdown>
               </td>
-              <td className="border border-[#EDEBEB] px-3 py-2 text-right">{familia.VCodFam}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-right">{familia.VCodGrFam}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{familia.VDesc}</td>
+              <td className="border border-[#EDEBEB] px-3 py-2 text-right">{family.VCodFam}</td>
+              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{family.VDesc}</td>
               <td className="border border-[#EDEBEB] px-4 py-2 text-right">
-                {new Date(familia.DCriadoEm).toLocaleDateString('pt-BR')}
+                {new Date(family.DCriadoEm).toLocaleDateString('pt-BR')}
               </td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-right">
-                  {familia.ID_GrupoConta === -1 ? "" : familia.ID_GrupoConta}
-              </td>
+
+              <td className="border border-[#EDEBEB] px-4 py-2 text-right">{family.VCodGrFam}</td>
+              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{family.VDescGroup}</td>
   
               </tr>
             ))}
           </tbody>
         </table>
+        <div className="flex fixed bottom-0 left-0 items-center gap-2 w-full px-4 py-3 bg-gray-200 justify-end p-0">
+    <span className="px-4 py-2 ">Items per page</span>
+          <select
+            value={itemsPerPage}
+            onChange={(e) => {
+              setItemsPerPage(Number(e.target.value));
+              setCurrentPage(1);
+            }}
+            className="border p-2 rounded px-4 py-2 w-20 gray-200"
+          >
+            {PAGE_SIZES.map((size) => (
+              <option key={size} value={size}>{size}</option>
+            ))}
+          </select>
+          
+          <button 
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className={`px-4 py-2 rounded ${currentPage === 1 ? 'bg-gray-200 text-black cursor-not-allowed' : 'bg-gray-200 hover:bg-gray-200'}`}
+          >
+            &lt;  {/* Símbolo de "Anterior" */}
+          </button>
+  
+          <span className="px-4 py-2 rounded">{currentPage} / {totalPages}</span>
+
+          <button 
+            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            className={`px-4 py-2 rounded ${currentPage === totalPages ? 'bg-gray-200 text-black cursor-not-allowed' : 'bg-gray-200 hover:bg-gray-200'}`}
+          >
+            &gt;  {/* Símbolo de "Próximo" */}
+          </button>
+        </div> 
       </div>
-      {filteredFamilies.length === 0 && !error && (
-        <p className="text-center py-4">Nenhuma familia encontrada.</p>
-      )}
     </div>
   );
 };

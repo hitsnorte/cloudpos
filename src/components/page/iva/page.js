@@ -6,11 +6,7 @@ import { FaGear } from "react-icons/fa6";
 import { Plus } from "lucide-react";
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
 import { fetchProduct, createProduct, deleteProduct, updateProduct } from '@/src/lib/apiproduct';
-import { fetchSubfamily } from '@/src/lib/apisubfamily';
-import { fetchFamily } from '@/src/lib/apifamily';
-import { fetchGrup } from '@/src/lib/apigroup';
 import { fetchIva } from '@/src/lib/apiiva';
-import { fetchUnit } from '@/src/lib/apiunit';
 
 import {
   Modal,
@@ -25,7 +21,7 @@ import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@
 
 const PAGE_SIZES = [25, 50, 150, 250];
 
-const DataProduct = () => {
+const DataIva = () => {
   const [products, setProducts] = useState([]);
   const [subfamilies, setSubfamilies] = useState([]);
   const [error, setError] = useState(null);
@@ -39,10 +35,11 @@ const DataProduct = () => {
   const [selectedIva, setSelectedIva] = useState("");
   const [selectedTipo, setSelectedTipo] = useState("");
   const [isActive, setIsActive] = useState(false);
+  const [ivas, setIvas] = useState([]);
 
   const [itemsPerPage, setItemsPerPage] = useState(50);
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = Math.ceil(products.length / itemsPerPage);
+  const totalPages = Math.ceil(ivas.length / itemsPerPage);
 
   const {
     isOpen: isAddModalOpen,
@@ -61,240 +58,128 @@ const DataProduct = () => {
   } = useDisclosure();
 
   useEffect(() => {
-    loadProducts();
-    loadSubfamilies();
+    loadIvas();
   }, []);
 
-  const loadProducts = async () => {
-    try {
-      const products = await fetchProduct();
-      const subfamilyMap = await fetchSubfamilyMap(); // Criamos um mapa de subfamílias
-      const familyMap = await fetchFamilyMap(); // Criamos um mapa de famílias
-      const groupMap = await fetchGroupMap();
-      const ivaMap = await fetchIvaMap();
-      const unitMap = await fetchUnitMap();
-
-      // Mapeamos os produtos, adicionando a descrição da subfamília e da família correspondente
-      const enrichedProducts = products.map(product => ({
-        ...product,
-        VDescSubfamily: subfamilyMap[product.VSUBFAM] || "N/A", // Se não houver correspondência, coloca "N/A"
-        VDescFamily: familyMap[product.VCodFam] || "N/A", // Se não houver correspondência, coloca "N/A"
-        VDescGroup: groupMap[product.VCodGrfam] || "N/A", // Se não houver correspondência, coloca "N/A"
-        VDescIva: ivaMap[product.VCodIva] || "N/A", // Se não houver correspondência, coloca "N/A"
-        VDescUnit: unitMap[product.DefinicaoProduto] || "N/A" // Se não houver correspondência, coloca "N/A"
-      }));
-  
-      setProducts(enrichedProducts);
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-  
-  const fetchSubfamilyMap = async () => {
-    try {
-      const subfamilies = await fetchSubfamily();
-      return subfamilies.reduce((map, subfamily) => {
-        map[subfamily.VCodSubFam] = subfamily.VDesc;
-        return map;
-      }, {});
-    } catch (err) {
-      setError(err.message);
-      return {};
-    }
-  };
-
-  const fetchFamilyMap = async () => {
-    try {
-      const families = await fetchFamily();
-      return families.reduce((map, family) => {
-        map[family.VCodFam] = family.VDesc;
-        return map;
-      }, {});
-    } catch (err) {
-      setError(err.message);
-      return {};
-    }
-  };
-
-  const fetchGroupMap = async () => {
-    try {
-      const groups = await fetchGrup();
-      return groups.reduce((map, group) => {
-        map[group.VCodGrFam] = group.VDesc;
-        return map;
-      }, {});
-    } catch (err) {
-      setError(err.message);
-      return {};
-    }
-  };
-
-  const fetchIvaMap = async () => {
+  const loadIvas = async () => {
     try {
       const ivas = await fetchIva();
-      return ivas.reduce((map, iva) => {
-        map[iva.VCODI] = iva.VDESC;
-        return map;
-      }, {});
+
+      // Mapeamos os produtos, adicionando a descrição da subfamília e da família correspondente
+      const enrichedIvas = ivas.map(iva => ({
+        ...iva,
+      }));
+  
+      setIvas(enrichedIvas);
     } catch (err) {
       setError(err.message);
-      return {};
-    }
-  };
-  
-  const fetchUnitMap = async () => {
-    try {
-      const units = await fetchUnit();
-      return units.reduce((map, unit) => {
-        map[unit.Id_interno] = unit.Descricao;
-        return map;
-      }, {});
-    } catch (err) {
-      setError(err.message);
-      return {};
     }
   };
 
-  const loadSubfamilies = async () => {
-      try {
-        const subfamilies = await fetchSubfamily();
-        setSubfamilies(subfamilies);
-      } catch (err) {
-        setError(err.message);
-      }
-  };
 
-  const filteredProducts = products.filter((product) => {
-    if (!product || !product.id || !product.product_name) {
-      return false; 
-    }
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      product.id.toString().includes(searchLower) ||
-      product.product_name.toString().toLowerCase().includes(searchLower)
-    );
-  });
-  
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewProduct((prev) => ({ ...prev, [name]: value }));
-  };
-
- const handleAddProduct = async (e) => {
-     e.preventDefault();
+//  const handleAddProduct = async (e) => {
+//      e.preventDefault();
      
-     if (!newProduct.product_name || !newProduct.quantity || !selectedSubfamily) {
-       setError('Preencha o nome do produto e selecione uma Subfamilia.');
-       return;
-     }
+//      if (!newProduct.product_name || !newProduct.quantity || !selectedSubfamily) {
+//        setError('Preencha o nome do produto e selecione uma Subfamilia.');
+//        return;
+//      }
    
-     const productExists = products.some(
-       (product) => product.product_name.toLowerCase() === newProduct.product_name.toLowerCase()
+//      const productExists = products.some(
+//        (product) => product.product_name.toLowerCase() === newProduct.product_name.toLowerCase()
       
-     );
+//      );
    
-     if (productExists) {
-       setError('Este produto ja existe. Por favor, use um nome diferente.');
-       return;
-     }
+//      if (productExists) {
+//        setError('Este produto ja existe. Por favor, use um nome diferente.');
+//        return;
+//      }
    
-     try {
-       setIsLoading(true);
+//      try {
+//        setIsLoading(true);
        
-       const productData = {
-         product_name: newProduct.product_name,
-         quantity: newProduct.quantity,
-         selectedSubfamily: selectedSubfamily, // Certifique-se de que a chave no backend espera esse nome
-       };
+//        const productData = {
+//          product_name: newProduct.product_name,
+//          quantity: newProduct.quantity,
+//          selectedSubfamily: selectedSubfamily, // Certifique-se de que a chave no backend espera esse nome
+//        };
    
-       const createdProduct = await createProduct(productData);
-       setProducts([...products, createdProduct]);
+//        const createdProduct = await createProduct(productData);
+//        setProducts([...products, createdProduct]);
    
-       // Limpa os campos após sucesso
-       setNewProduct({ product_name: '' });
-       setSelectedSubfamily('');
-       setError(null);
+//        // Limpa os campos após sucesso
+//        setNewProduct({ product_name: '' });
+//        setSelectedSubfamily('');
+//        setError(null);
    
-       onAddModalClose();
-     } catch (err) {
-       setError(err.message);
-     } finally {
-       setIsLoading(false);
-     }
-   };
+//        onAddModalClose();
+//      } catch (err) {
+//        setError(err.message);
+//      } finally {
+//        setIsLoading(false);
+//      }
+//    };
 
-  const handleDeleteProduct = async () => {
-    if (productToDelete) {
-      setIsLoading(true);
-      try {
-        await deleteProduct(productToDelete);
-        setProducts(products.filter((product) => product.id !== productToDelete));
-        setProductToDelete(null);
-        onDeleteModalClose();
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
+//   const handleDeleteProduct = async () => {
+//     if (productToDelete) {
+//       setIsLoading(true);
+//       try {
+//         await deleteProduct(productToDelete);
+//         setProducts(products.filter((product) => product.id !== productToDelete));
+//         setProductToDelete(null);
+//         onDeleteModalClose();
+//       } catch (err) {
+//         setError(err.message);
+//       } finally {
+//         setIsLoading(false);
+//       }
+//     }
+//   };
 
-  const paginatedProducts = products.slice(
+  const paginatedIva = ivas.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  const handleEditProduct = (product) => {
-    setEditProduct({ ...product });
-    onEditModalOpen();
-  };
+//   const handleEditProduct = (product) => {
+//     setEditProduct({ ...product });
+//     onEditModalOpen();
+//   };
 
-  const handleUpdateProduct = async (e) => {
-      e.preventDefault();
-      if (!editProduct || !editProduct.product_name) {
-        setError('Preencha o nome do produto.');
-        return;
-      }
+//   const handleUpdateProduct = async (e) => {
+//       e.preventDefault();
+//       if (!editProduct || !editProduct.product_name) {
+//         setError('Preencha o nome do produto.');
+//         return;
+//       }
     
-      try {
-        console.log('Enviando para API:', { id: editProduct.id, product_name: editProduct.product_name });
-        const updatedProduct = await updateProduct(editProduct.id, {
-          product_name: editProduct.product_name,
-          quantity: editProduct.quantity,
-        });
-        console.log('Resposta da API:', updatedProduct);
-        setProducts(products.map((product) => (product.id === updatedProduct.id ? updatedProduct : product)));
-        setEditProduct(null);
-        setError(null); // Limpa o erro após sucesso
-        onEditModalClose();
-      } catch (err) {
-        console.error('Erro ao atualizar produto:', err.message);
-        console.log('Erro ao atualizar produto:', err.message);
-        setError(err.message); // Define o erro para exibição no modal
-      }
-    };
-
-    const ivaList = [
-      { id: 1, taxa: 23, descricao: "IVA Padrão" },
-      { id: 2, taxa: 13, descricao: "IVA Intermediário" },
-      { id: 3, taxa: 6, descricao: "IVA Reduzido" },
-      { id: 4, taxa: 0, descricao: "Isento de IVA" },
-    ];
-
-    const tipoOperacaoList = [
-      { id: 1, tipo: "venda", descricao: "Venda" },
-      { id: 2, tipo: "compra", descricao: "Compra" },
-    ];
+//       try {
+//         console.log('Enviando para API:', { id: editProduct.id, product_name: editProduct.product_name });
+//         const updatedProduct = await updateProduct(editProduct.id, {
+//           product_name: editProduct.product_name,
+//           quantity: editProduct.quantity,
+//         });
+//         console.log('Resposta da API:', updatedProduct);
+//         setProducts(products.map((product) => (product.id === updatedProduct.id ? updatedProduct : product)));
+//         setEditProduct(null);
+//         setError(null); // Limpa o erro após sucesso
+//         onEditModalClose();
+//       } catch (err) {
+//         console.error('Erro ao atualizar produto:', err.message);
+//         console.log('Erro ao atualizar produto:', err.message);
+//         setError(err.message); // Define o erro para exibição no modal
+//       }
+//     };
+   
 
   return (
-    <div className="p-4 pb-10">
+    <div className="p-4">
       {/* button */}
             <Dropdown>
             <DropdownTrigger>
             <button 
                 onClick={onAddModalOpen}
-                className="flex fixed absolute top-4 right-14 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
+                className="absolute top-4 right-10 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
                 < Plus size={25}  />     
             </button> 
             </DropdownTrigger>
@@ -490,42 +375,104 @@ const DataProduct = () => {
           <ModalBody className="py-5 px-6">
             {editProduct && (
               <form id="updateProductForm" onSubmit={handleUpdateProduct} className="space-y-6">
-                <div>
-                  <label htmlFor="productAbbreviation" className="block text-sm font-medium text-gray-400 mb-1">
-                    Abbreviation
+                {/* <div>
+                  <label htmlFor="productName" className="block text-sm font-medium text-gray-400 mb-1">
+                    Name
                   </label>
                   <input
-                    id="productAbreviatura"
+                    id="productName"
                     type="text"
-                    value={editProduct ? editProduct.Abreviatura : ''}
+                    value={editProduct.product_name}
                     onChange={(e) =>
-                      setEditProduct({ ...editProduct, Abreviatura: e.target.value })
+                      setEditProduct({ ...editProduct, product_name: e.target.value })
                     }
-                    placeholder="Digite a Abbreviation do produto"
-                    className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                    placeholder="Digite o nome do produto"
+                    className="w-60 p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
                     required
                   />
+                   <input
+                      type="checkbox"
+                      checked={ativo}
+                      className="w-15 "
+                      onChange={(e) => setAtivo(e.target.checked)}
+                    />
+                    {ativo ? "Ativo" : "Inativo"}
                 </div>
-                 <div >
-                  <label htmlFor="productDescription" className="block text-sm font-medium text-gray-400 mb-1">
-                      Description
+                <div >
+                  <label htmlFor="quantity" className="block text-sm font-medium text-gray-400 mb-1">
+                    Quantity
                   </label>
                   <input
-                      id="product"
+                      id="newQuantity"
                       type="text"   
-                      value={editProduct ? editProduct.VDESC1 : ''}
+                      name="quantity"
+                      value={editProduct.quantity}
                       onChange={(e) =>
-                        setEditProduct({ ...editProduct, VDESC1: e.target.value })
+                        setEditProduct({ ...editProduct, quantity: e.target.value })
                       }
-                      placeholder="Digite a descriçao do produto"
+                      placeholder="Digite a quantidade"
                       className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
                       required
                     />
                     {quantityError && (
                       <p className="text-red-500 text-sm mt-1">{quantityError}</p>
                     )}
+                </div> */}
+                <div>
+                  <label htmlFor="abreviatura" className="block text-sm font-medium text-gray-400 mb-1">
+                     Abbreviation
+                  </label>
+                  <input
+                      id="newAbreviatura"
+                      type="text"   
+                      name="abreviatura"
+                 
+                      placeholder="Digite a abreviatura"
+                      className="w-65 p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                      required
+                    />
+                    
+                    <button
+                      onClick={() => setIsActive(!isActive)}
+                      className={`relative w-12 h-6 rounded-full transition-all duration-300  p-1.5 
+                        ${isActive ? "bg-[#FC9D25]" : "bg-gray-300"}`}
+                    >
+                      <span
+                        className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform duration-300
+                          ${isActive ? "translate-x-6" : "translate-x-0"}`}
+                      />
+                    </button>
+                    <span className="text-sm font-medium text-gray-400">
+                      {isActive ? "Ativo" : "Inativo"}
+                    </span>
                 </div>
-               
+                <div>
+                  <label htmlFor="descricao" className="block text-sm font-medium text-gray-400 mb-1">
+                     Descrição
+                  </label>
+                  <input
+                      id="newDescricao"
+                      type="text"   
+                      name="descricao"
+                 
+                      placeholder="Digite a descricao"
+                      className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                      required
+                    />
+                </div>
+                <div>
+                  <label htmlFor="CodProd" className="block text-sm font-medium text-gray-400 mb-1">
+                     Cod Prod
+                  </label>
+                  <input
+                      id="newCodProd"
+                      type="text"   
+                      name="codProd"
+                      placeholder="Digite o Codigo do produto"
+                      className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                      required
+                    />
+                </div>
                 {/* <div>
                   <label>
                     <input
@@ -537,7 +484,62 @@ const DataProduct = () => {
                   </label>
                 </div> */}
               
-        
+                <div>
+                  <label htmlFor="Conta" className="block text-sm font-medium text-gray-400 mb-1">
+                     CBL/ERP
+                  </label>
+                  <input
+                      id="newConta"
+                      type="text"   
+                      name="conta"
+                      placeholder="Digite a conta CBL/ERP"
+                      className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                      required
+                    />
+                </div>
+                <div>
+                  <label htmlFor="Artigo" className="block text-sm font-medium text-gray-400 mb-1">
+                     Artigo
+                  </label>
+                  <input
+                      id="newArtigo"
+                      type="text"   
+                      name="Artigo"
+                      placeholder="Digite o Tipo de artigo"
+                      className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                      required
+                    />
+                </div>
+                <div>
+                   <select
+                    className="w-full p-1 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
+                    value={selectedIva}
+                    onChange={(e) => setSelectedIva(e.target.value)}
+                  >
+                    <option value="">Iva</option>
+                    {ivaList.map((iva) => (
+                      <option key={iva.id} value={iva.taxa}>
+                        {iva.taxa}% - {iva.descricao}
+                      </option>
+                    ))}
+                  </select>
+
+                </div>
+                <div>
+                <select
+                    className="w-full p-1 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
+                    value={selectedTipo}
+                    onChange={(e) => setSelectedTipo(e.target.value)}
+                  >
+                    <option value="">Produto de</option>
+                    {tipoOperacaoList.map((tipo) => (
+                      <option key={tipo.id} value={tipo.tipo}>
+                        {tipo.descricao}
+                      </option>
+                    ))}
+                  </select>
+
+                </div>
               </form>
             )}
           </ModalBody>
@@ -603,7 +605,7 @@ const DataProduct = () => {
   </Modal>
           {/*---------------------------------------------------------------------------------------------------------------------------------- */}
     <div className="overflow-x-auto sm:flex sm:flex-col bg-muted/40">
-    <table className="w-700 bg-[#FAFAFA] border-collapse border border-[#EDEBEB] mx-auto">
+    <table className="w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB] mx-auto">
       
     <thead>
             <tr>
@@ -614,81 +616,24 @@ const DataProduct = () => {
               </th>
               <th className="uppercase border-collapse border border-[#EDEBEB] w-20 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
                <div className="flex items-left justify-left "> 
-                  Cod Prod
+                Cod Iva
               </div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-150 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-20 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
                 <div className="flex items-left justify-left"> 
-                  Abbreviation
+                Iva Per
                 </div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-150 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+              <th className="uppercase border-collapse border border-[#EDEBEB]  w-full sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
                <div className="flex items-left justify-left"> 
-                  Description
-              </div>
-              </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-5 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className=" flex items-left justify-left "> 
-                  Cod Iva
-              </div>
-              </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-120 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-left justify-left"> 
-                  Desc Iva
-              </div>
-              </th>
-             
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-15 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-left justify-left "> 
-                  ID Unit
-              </div>
-              </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-120 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-left justify-left"> 
-                 Desc Unit
-              </div>
-              </th>
-            
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-5 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-left justify-left "> 
-                  Product of
-              </div>
-              </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-5 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className=" items-left justify-left "> 
-                  Cod SubFam
-              </div>
-              </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-120 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className=" items-left justify-left"> 
-                  Desc SubFam
-              </div>
-              </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-5 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className=" items-left justify-left "> 
-                  Cod Fam
-              </div>
-              </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-120 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className=" items-left justify-left"> 
-                  Desc Fam
-              </div>
-              </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-5 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className=" items-left justify-left "> 
-                  Cod Grp
-              </div>
-              </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-120 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className=" items-left justify-left"> 
-                  Desc Grp
+                Description
               </div>
               </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-300">
-          {paginatedProducts.map((product)  => (
-            <tr key={product.VPRODUTO} className="hover:bg-gray-200">
+          {paginatedIva.map((iva)  => (
+            <tr key={iva.VCODI} className="hover:bg-gray-200">
               
               {/* Ações */}
               <td className="border border-[#EDEBEB] px-1 py-1 text-center">
@@ -699,29 +644,15 @@ const DataProduct = () => {
                     </Button>
                   </DropdownTrigger>
                   <DropdownMenu aria-label="Dynamic Actions" placement="bottom-end" className="bg-white shadow-lg rounded-md p-1">
-                      <DropdownItem key="edit" onPress={() => handleEditProduct(product)}>
-                          Edit
-                      </DropdownItem>
+                    <DropdownItem key="edit" onPress={() => alert(`Editando ${iva.VDESC}`)}>Editar</DropdownItem>
                   </DropdownMenu>
                 </Dropdown>
               </td>
               
               {/* Dados do Produto */}
-              <td className="border border-[#EDEBEB] px-4 py-2 text-right">{product.VPRODUTO}</td>
-              <td className="border border-[#EDEBEB] px-3 py-2 text-left">{product.Abreviatura}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.VDESC1}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-right">{product.VCodIva}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.VDescIva}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-right">{product.DefinicaoProduto}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.VDescUnit}</td>
-
-              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.ProductType}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-right">{product.VSUBFAM}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.VDescSubfamily}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-right">{product.VCodFam}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.VDescFamily}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-right">{product.VCodGrfam}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.VDescGroup}</td>
+              <td className="border border-[#EDEBEB] px-4 py-2 text-right">{iva.VCODI}</td>
+              <td className="border border-[#EDEBEB] px-3 py-2 text-right">{iva.NPERC}</td>
+              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{iva.VDESC}</td>
             </tr>
           ))}
         </tbody>
@@ -766,4 +697,4 @@ const DataProduct = () => {
   );
 };
 
-export default DataProduct;
+export default DataIva;

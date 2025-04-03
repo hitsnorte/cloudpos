@@ -17,6 +17,8 @@ import {
 } from '@nextui-org/react';
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@heroui/react";
 
+const PAGE_SIZES = [25, 50, 150, 250];
+
 const DataGrupo = () => {
   const [groups, setGroups] = useState([]);
   const [sortField, setSortField] = useState('id');
@@ -27,6 +29,11 @@ const DataGrupo = () => {
   const [editGroup, setEditGroup] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [groupToDelete, setGroupToDelete] = useState(null);
+  
+
+  const [itemsPerPage, setItemsPerPage] = useState(50);
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.ceil(groups.length / itemsPerPage);
 
   const {
     isOpen: isAddModalOpen,
@@ -43,6 +50,11 @@ const DataGrupo = () => {
     onOpen: onDeleteModalOpen,
     onClose: onDeleteModalClose,
   } = useDisclosure();
+
+  const paginatedGroups = groups.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   useEffect(() => {
     loadGroups();
@@ -148,29 +160,15 @@ const DataGrupo = () => {
     onEditModalOpen();
   };
 
-  const handleUpdateGroup = async (e) => {
-    e.preventDefault();
-    if (!editGroup || !editGroup.group_name) {
-      setError('Preencha o nome do grupo.');
-      return;
-    }
-  
-    try {
-      console.log('Enviando para API:', { id: editGroup.id, group_name: editGroup.group_name });
-      const updatedGroup = await updateGrupt(editGroup.id, {
-        group_name: editGroup.group_name,
-      });
-      console.log('Resposta da API:', updatedGroup);
-      setGroups(groups.map((group) => (group.id === updatedGroup.id ? updatedGroup : group)));
-      setEditGroup(null);
-      setError(null); // Limpa o erro após sucesso
-      onEditModalClose();
-    } catch (err) {
-      console.error('Erro ao atualizar grupo:', err.message);
-      console.log('Erro ao atualizar grupo:', err.message);
-      setError(err.message); // Define o erro para exibição no modal
-    }
-  };
+  const handleUpdateGroup = (id, newDesc) => {
+    setGroups(prevGroups => {
+        return prevGroups.map(group =>
+            group.VCodGrFam === id ? { ...group, VDesc: newDesc } : group
+        );
+    });
+    console.log(`Grupo ${id} atualizado para: ${newDesc}`);
+};
+
 
 
   return (
@@ -255,28 +253,36 @@ const DataGrupo = () => {
         size="md"
         placement="center"
         className="w-100 bg-white shadow-xl rounded-lg"
+        hideCloseButton={true}
       >
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="rounded bg-[#FC9D25] flex justify-left items-left">
+              <ModalHeader className="rounded bg-[#FC9D25] flex justify-between items-center">
                 <h3 className="text-xl flex justify-left items-left font-bold text-white">Edit group</h3>
+                <Button
+                  onClick={onClose}
+                  className="text-white bg-transparent border-0 text-2xl p-0"
+                  aria-label="Close"
+                >
+                  &times; {/* Unicode for "×" sign */}
+                </Button>
               </ModalHeader>
               <ModalBody className="py-5 px-6">
                 {editGroup && (
                   <form id="updateGroupForm" onSubmit={handleUpdateGroup} className="space-y-6">
                     <div>
-                      <label htmlFor="groupName" className="block text-sm font-medium text-gray-400 mb-1">
-                        Name
+                      <label htmlFor="groupDescription" className="block text-sm font-medium text-gray-400 mb-1">
+                        Description
                       </label>
                       <input
-                        id="groupName"
+                        id="groupDesc"
                         type="text"
-                        value={editGroup.group_name || ''} // Garante que não seja undefined
+                        value={editGroup ? editGroup.VDesc : ''}
                         onChange={(e) =>
-                          setEditGroup({ ...editGroup, group_name: e.target.value })
+                          setEditGroup({ ...editGroup, VDesc: e.target.value })
                         }
-                        placeholder="Digite o nome do grupo"
+                        placeholder="Digite a nova descrição"
                         className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
                         required
                       />
@@ -288,14 +294,14 @@ const DataGrupo = () => {
                 )}
               </ModalBody>
               <ModalFooter className="w-102 border-t border-gray-200 pt-2 px-8">
-                <Button
-                  type="submit"
-                  form="updateGroupForm"
-                  className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
-                  onClick={() => window.location.reload()} // Recarrega a página ao clicar
-                >
-                  Save
-                </Button>
+              <Button
+                type="submit"
+                form="updateGroupForm"
+                className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
+                onClick={() => handleUpdateGroup(editGroup.VCodGrFam, editGroup.VDesc)}
+              >
+                Save
+              </Button>
               </ModalFooter>
             </>
           )}
@@ -359,42 +365,39 @@ const DataGrupo = () => {
                 </div>
               </th>
               <th className="uppercase border-collapse border border-[#EDEBEB] w-10 px-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-                <div className=" flex items-center justify-center"> 
+                <div className=" flex items-left justify-left"> 
                   Cod Grp
                 </div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-170 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-center justify-center "> 
-                  Descrição
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-400 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+               <div className="flex items-left justify-left "> 
+                  Description
               </div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-30 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-center justify-center "> 
-                  Criado Em
-              </div>
-              </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-10 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-center justify-center "> 
-                  ID Grp Conta
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-20 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+               <div className="flex items-left justify-left "> 
+                 Created In
               </div>
               </th>
             </tr>
           </thead>
            <tbody className="divide-y divide-gray-300">
-                    {groups.map((group) => (
+                    {paginatedGroups.map((group) => (
                       <tr key={group.VCodGrFam} className="hover:bg-gray-200">
                         {/* Ações */}
                         <td className="border border-[#EDEBEB] px-1 py-1 text-center">
                           <Dropdown>
-                            <DropdownTrigger>
-                              <Button variant="bordered">
-                                <HiDotsVertical size={18} />
-                              </Button>
-                            </DropdownTrigger>
-                            <DropdownMenu aria-label="Dynamic Actions" placement="bottom-end" className="bg-white shadow-lg rounded-md p-1">
-                              <DropdownItem key="edit" onPress={() => alert(`Editando ${group.VDesc}`)}>Editar</DropdownItem>
-                            </DropdownMenu>
-                          </Dropdown>
+                          <DropdownTrigger>
+                            <Button variant="bordered">
+                              <HiDotsVertical size={18} />
+                            </Button>
+                          </DropdownTrigger>
+                          <DropdownMenu aria-label="Dynamic Actions" placement="bottom-end" className="bg-white shadow-lg rounded-md p-1">
+                            <DropdownItem key="edit" onPress={() => handleEditGroup(group)}>
+                              Edit
+                            </DropdownItem>
+                          </DropdownMenu>
+                        </Dropdown>
                         </td>
                         
                         {/* Dados do Produto */}
@@ -403,17 +406,46 @@ const DataGrupo = () => {
                         <td className="border border-[#EDEBEB] px-4 py-2 text-right">
                           {new Date(group.DCriadoEm).toLocaleDateString('pt-BR')}
                         </td>
-                        <td className="border border-[#EDEBEB] px-4 py-2 text-right">
-                          {group.ID_GrupoConta === -1 ? "" : group.ID_GrupoConta}
-                      </td>
+                        
+                        
                       </tr>
                     ))}
                   </tbody>
         </table>
+        <div className="flex fixed bottom-0 left-0 items-center gap-2 w-full px-4 py-3 bg-gray-200 justify-end p-0">
+        <span className="px-4 py-2 ">Items per page</span>
+          <select
+            value={itemsPerPage}
+            onChange={(e) => {
+              setItemsPerPage(Number(e.target.value));
+              setCurrentPage(1);
+            }}
+            className="border p-2 rounded px-4 py-2 w-20 gray-200"
+          >
+            {PAGE_SIZES.map((size) => (
+              <option key={size} value={size}>{size}</option>
+            ))}
+          </select>
+          
+          <button 
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className={`px-4 py-2 rounded ${currentPage === 1 ? 'bg-gray-200 text-black cursor-not-allowed' : 'bg-gray-200 hover:bg-gray-200'}`}
+          >
+            &lt;  {/* Símbolo de "Anterior" */}
+          </button>
+  
+          <span className="px-4 py-2 rounded">{currentPage} / {totalPages}</span>
+
+          <button 
+            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            className={`px-4 py-2 rounded ${currentPage === totalPages ? 'bg-gray-200 text-black cursor-not-allowed' : 'bg-gray-200 hover:bg-gray-200'}`}
+          >
+            &gt;  {/* Símbolo de "Próximo" */}
+          </button>
+        </div> 
       </div>
-      {groups.length === 0 && !error && (
-        <p className="text-center py-4">No groups found.</p>
-      )}
     </div>
   );
 };

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { HiDotsVertical } from "react-icons/hi";
 import { FaGear } from "react-icons/fa6";
+import { FaCheckCircle } from "react-icons/fa";
 import { Plus } from "lucide-react";
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
 import { fetchProduct, createProduct, deleteProduct, updateProduct } from '@/src/lib/apiproduct';
@@ -341,18 +342,21 @@ const DataProduct = () => {
                     />
                     
                     <button
-                      onClick={() => setIsActive(!isActive)}
-                      className={`relative w-12 h-6 rounded-full transition-all duration-300  p-1.5 
-                        ${isActive ? "bg-[#FC9D25]" : "bg-gray-300"}`}
-                    >
-                      <span
-                        className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform duration-300
-                          ${isActive ? "translate-x-6" : "translate-x-0"}`}
-                      />
-                    </button>
-                    <span className="text-sm font-medium text-gray-400">
-                      {isActive ? "Ativo" : "Inativo"}
-                    </span>
+                        onClick={() => setIsActive(!isActive)}
+                        className={`relative w-12 h-6 duration-300 p-1.5 
+                          ${isActive ? "bg-[#FC9D25]" : "bg-gray-300"}`}
+                      >
+                        <span
+                          className={`absolute top-1 left-1 w-4 h-4 bg-white
+                            ${isActive ? "translate-x-6" : "translate-x-0"}`}
+                        />
+                        {/* Mostrar o "X" quando estiver ativo */}
+                        {isActive && (
+                          <span className="absolute top-0 left-1 text-xl text-white">X</span>
+                        )}
+                      </button>
+
+                 
                 </div>
                 <div>
                   <label htmlFor="descricao" className="block text-sm font-medium text-gray-400 mb-1">
@@ -657,7 +661,7 @@ const DataProduct = () => {
               </th>
               <th className="uppercase border-collapse border border-[#EDEBEB] w-10 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
                 <div className="flex items-left justify-left"> 
-                  Active
+                Active
                 </div>
               </th>
 
@@ -723,9 +727,13 @@ const DataProduct = () => {
               <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.VDescUnit}</td>
               <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.ProductType}</td>
 
-              <td className="border border-[#EDEBEB] px-4 py-2 text-center">
-                {product.activo ? "X" : ""}
-              </td>
+              <td className=" px-4 py-2 flex items-center justify-center">
+              {product.activo ? (
+                <FaCheckCircle size={20} color="#4CAF50" />  // Aqui você pode ajustar o tamanho e a cor do ícone
+              ) : (
+                ""
+              )}
+            </td>
 
               <td className="border border-[#EDEBEB] px-4 py-2 text-right">{product.VSUBFAM}</td>
               <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.VDescSubfamily}</td>

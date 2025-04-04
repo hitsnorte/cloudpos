@@ -352,13 +352,13 @@ const DataProduct = () => {
                   <div
                     onClick={toggleCheck}
                     className={`w-6 h-6 border rounded-md flex items-center justify-center cursor-pointer 
-                      ${isChecked ? 'bg-[#FC9D25]' : 'bg-gray-200'}`}
+                      ${isChecked ? 'bg-[#FC9D25]' : 'bg-gray-200'} mt-6 `}
                   >
                     {isChecked && <span className="text-white text-xl">X</span>}
                   </div>
 
                   {/* Texto opcional ao lado da checkbox */}
-                  <span className="text-sm">{isChecked ? 'Ativo' : 'Inativo'}</span>
+                  <span className="text-sm h-0">{isChecked ? 'Ativo' : 'Inativo' }</span>
                 </div>
 
                 <div>
@@ -600,7 +600,7 @@ const DataProduct = () => {
   </Modal>
           {/*---------------------------------------------------------------------------------------------------------------------------------- */}
     <div className="overflow-x-auto sm:flex sm:flex-col bg-muted/40">
-    <table className="w-700 bg-[#FAFAFA] border-collapse border border-[#EDEBEB] mx-auto">
+    <table className="w-800 bg-[#FAFAFA] border-collapse border border-[#EDEBEB] mx-auto">
       
     <thead>
             <tr>
@@ -629,7 +629,7 @@ const DataProduct = () => {
                   Cod Iva
               </div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-120 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-180 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
                <div className="flex items-left justify-left"> 
                   Desc Iva
               </div>
@@ -640,7 +640,7 @@ const DataProduct = () => {
                   ID Unit
               </div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-120 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-130 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
                <div className="flex items-left justify-left"> 
                  Desc Unit
               </div>
@@ -663,7 +663,7 @@ const DataProduct = () => {
                   Cod SubFam
               </div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-120 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-130 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
                <div className=" items-left justify-left"> 
                   Desc SubFam
               </div>
@@ -673,7 +673,7 @@ const DataProduct = () => {
                   Cod Fam
               </div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-120 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-130 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
                <div className=" items-left justify-left"> 
                   Desc Fam
               </div>
@@ -683,7 +683,7 @@ const DataProduct = () => {
                   Cod Grp
               </div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-120 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-130 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
                <div className=" items-left justify-left"> 
                   Desc Grp
               </div>
@@ -720,13 +720,13 @@ const DataProduct = () => {
               <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.VDescUnit}</td>
               <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.ProductType}</td>
 
-              <td className=" px-4 py-2 flex items-center justify-center">
-              {product.activo ? (
-                <FaCheckCircle size={20} color="#4CAF50" />  // Aqui você pode ajustar o tamanho e a cor do ícone
-              ) : (
-                ""
-              )}
-            </td>
+              <td className="py-4 px-2 flex items-center justify-center">
+                {product.activo ? (
+                  <FaCheckCircle size={20} color="#4CAF50" className="self-center" />  // Aqui você pode ajustar o tamanho e a cor do ícone
+                ) : (
+                  ""
+                )}
+              </td>
 
               <td className="border border-[#EDEBEB] px-4 py-2 text-right">{product.VSUBFAM}</td>
               <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.VDescSubfamily}</td>

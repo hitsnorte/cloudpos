@@ -45,6 +45,8 @@ const DataProduct = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = Math.ceil(products.length / itemsPerPage);
 
+  const [isChecked, setIsChecked] = useState(false);
+
   const {
     isOpen: isAddModalOpen,
     onOpen: onAddModalOpen,
@@ -66,6 +68,10 @@ const DataProduct = () => {
     loadSubfamilies();
   }, []);
 
+  const toggleCheck = () => {
+    setIsChecked(!isChecked); // Alterna o estado da checkbox
+  };
+  
   const loadProducts = async () => {
     try {
       const products = await fetchProduct();
@@ -327,37 +333,34 @@ const DataProduct = () => {
               </ModalHeader>
               <ModalBody className="py-5 px-6">
                 <form id="addProductForm" onSubmit={handleAddProduct} className="space-y-6">
-                <div>
-                  <label htmlFor="abreviatura" className="block text-sm font-medium text-gray-400 mb-1">
-                     Abreviatura
-                  </label>
-                  <input
+                <div className="flex items-center space-x-3"> {/* Usando 'flex' para alinhar os itens na mesma linha */}
+                  <div className="flex flex-col">
+                    <label htmlFor="abreviatura" className="block text-sm font-medium text-gray-400 mb-1">
+                      Abreviatura
+                    </label>
+                    <input
                       id="newAbreviatura"
                       type="text"   
                       name="abreviatura"
-                 
                       placeholder="Digite a abreviatura"
                       className="w-65 p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
                       required
                     />
-                    
-                    <button
-                        onClick={() => setIsActive(!isActive)}
-                        className={`relative w-12 h-6 duration-300 p-1.5 
-                          ${isActive ? "bg-[#FC9D25]" : "bg-gray-300"}`}
-                      >
-                        <span
-                          className={`absolute top-1 left-1 w-4 h-4 bg-white
-                            ${isActive ? "translate-x-6" : "translate-x-0"}`}
-                        />
-                        {/* Mostrar o "X" quando estiver ativo */}
-                        {isActive && (
-                          <span className="absolute top-0 left-1 text-xl text-white">X</span>
-                        )}
-                      </button>
+                  </div>
 
-                 
+                  {/* Checkbox estilizado */}
+                  <div
+                    onClick={toggleCheck}
+                    className={`w-6 h-6 border rounded-md flex items-center justify-center cursor-pointer 
+                      ${isChecked ? 'bg-[#FC9D25]' : 'bg-gray-200'}`}
+                  >
+                    {isChecked && <span className="text-white text-xl">X</span>}
+                  </div>
+
+                  {/* Texto opcional ao lado da checkbox */}
+                  <span className="text-sm">{isChecked ? 'Ativo' : 'Inativo'}</span>
                 </div>
+
                 <div>
                   <label htmlFor="descricao" className="block text-sm font-medium text-gray-400 mb-1">
                      Descrição
@@ -385,16 +388,6 @@ const DataProduct = () => {
                       required
                     />
                 </div>
-                {/* <div>
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={ativo}
-                      onChange={(e) => setAtivo(e.target.checked)}
-                    />
-                    {ativo ? "Ativo" : "Inativo"}
-                  </label>
-                </div> */}
               
                 <div>
                   <label htmlFor="Conta" className="block text-sm font-medium text-gray-400 mb-1">

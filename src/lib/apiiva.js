@@ -18,7 +18,7 @@ export const fetchIva = async () => {
       });
   
       if (!response.ok) {
-        throw new Error('Erro ao buscar produtos');
+        throw new Error('Erro ao buscar iva');
       }
   
       const data = await response.json();

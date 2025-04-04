@@ -209,10 +209,10 @@ const DataGrupo = () => {
               <form id="addGroupForm" onSubmit={handleAddGroup} className="space-y-6">
                 <div>
                   <label
-                    htmlFor="newGroupName"
+                    htmlFor="newGroupDescription"
                     className="block text-sm font-medium text-gray-400 mb-1"
                   >
-                    Name
+                    Description
                   </label>
                   <input
                     id="newGroupName"
@@ -220,7 +220,7 @@ const DataGrupo = () => {
                     name="group_name"
                     value={newGroup.group_name}
                     onChange={handleInputChange}
-                    placeholder="Digite o nome do grupo"
+                    placeholder="Digite o nome da descriçao"
                     className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
                     required
                   />

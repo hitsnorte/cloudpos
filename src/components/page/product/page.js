@@ -653,7 +653,14 @@ const DataProduct = () => {
                <div className="flex items-left justify-left "> 
                   Product of
               </div>
+
               </th>
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-10 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className="flex items-left justify-left"> 
+                  Active
+                </div>
+              </th>
+
               <th className="uppercase border-collapse border border-[#EDEBEB] w-5 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
                <div className=" items-left justify-left "> 
                   Cod SubFam
@@ -714,14 +721,20 @@ const DataProduct = () => {
               <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.VDescIva}</td>
               <td className="border border-[#EDEBEB] px-4 py-2 text-right">{product.DefinicaoProduto}</td>
               <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.VDescUnit}</td>
-
               <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.ProductType}</td>
+
+              <td className="border border-[#EDEBEB] px-4 py-2 text-center">
+                {product.activo ? "X" : ""}
+              </td>
+
               <td className="border border-[#EDEBEB] px-4 py-2 text-right">{product.VSUBFAM}</td>
               <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.VDescSubfamily}</td>
               <td className="border border-[#EDEBEB] px-4 py-2 text-right">{product.VCodFam}</td>
               <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.VDescFamily}</td>
               <td className="border border-[#EDEBEB] px-4 py-2 text-right">{product.VCodGrfam}</td>
               <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.VDescGroup}</td>
+
+             
             </tr>
           ))}
         </tbody>

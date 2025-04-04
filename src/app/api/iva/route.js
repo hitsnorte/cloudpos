@@ -14,7 +14,7 @@ export async function GET(request) {
     const API_BASE_URL = process.env.API_BASE_URL;
 
     // Faz a requisição para a API de propriedades para obter server e port
-    const propertyResponse = await fetch(`${API_BASE_URL}/api/properties/${propertyID}`);
+    const propertyResponse = await fetch(`${API_BASE_URL}/api/properties/get_properties/${propertyID}`);
     if (!propertyResponse.ok) {
       return new Response(
         JSON.stringify({ error: "Erro ao acessar informações da propriedade." }),

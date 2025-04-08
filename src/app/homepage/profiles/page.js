@@ -19,6 +19,8 @@ const ProfilesTable = () => {
     const { isOpen: isAddProfileModalOpen, onOpen: onOpenAddProfileModal, onClose: onCloseAddProfileModal } = useDisclosure();
     const { isOpen: isEditProfileModalOpen, onOpen: onOpenEditProfileModal, onClose: onCloseEditProfileModal } = useDisclosure();
 
+    const [itemsPerPage, setItemsPerPage] = useState(15);
+    const [currentPage , setCurrentPage] = useState(1);
     const [profiles, setProfiles] = useState([]);
     const [properties, setProperties] = useState([]);
     const [currentProfile, setCurrentProfile] = useState(null); // Holds the profile to edit
@@ -30,6 +32,8 @@ const ProfilesTable = () => {
         propertyIDs: [],
         propertyTags: [],
     });
+
+    const totalPages = Math.ceil(profiles.length/itemsPerPage);
 
     // Busca todos os perfis
     const fetchProfiles = async () => {
@@ -163,6 +167,10 @@ const ProfilesTable = () => {
         onOpenAddProfileModal(); //  modal de adição abre com os campos vazios
     };
 
+    const paginatedProfiles = profiles.slice (
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage,
+    );
 
 
     return (
@@ -323,7 +331,7 @@ const ProfilesTable = () => {
                     </thead>
                     <tbody className="divide-y divide-gray-300">
                     {profiles.length > 0 ? (
-                        profiles.map((profile, index) => (
+                        paginatedProfiles.map((profile, index) => (
                             <tr key={profile.id || `profile-${index}`} className="hover:bg-gray-100">
                                 <td className="border border-[#EDEBEB] w-[50px] px-2 py-2 text-center">
                                     <Dropdown>
@@ -353,7 +361,44 @@ const ProfilesTable = () => {
                     </tbody>
                 </table>
             </div>
+
+            {/*Paginação*/}
+            <div className="flex fixed bottom-0 left-0 items-center gap-2 w-full px-4 py-3 bg-gray-200 justify-end">
+                <span className="px-4 py-2">Items per page</span>
+                <select
+                    value={itemsPerPage}
+                    onChange={(e) => {
+                        setItemsPerPage(Number(e.target.value));
+                        setCurrentPage(1); // Reset para a primeira página
+                    }}
+                    className="border p-2 rounded px-4 py-2 w-20 bg-white"
+                >
+                    {[5, 10, 20, 50].map((size) => (
+                        <option key={size} value={size}>{size}</option>
+                    ))}
+                </select>
+
+                <button
+                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className={`px-4 py-2 rounded ${currentPage === 1 ? 'bg-gray-200 text-black cursor-not-allowed' : 'bg-white hover:bg-gray-300'}`}
+                >
+                    &lt;
+                </button>
+
+                <span className="px-4 py-2 rounded">{currentPage} / {totalPages}</span>
+
+                <button
+                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className={`px-4 py-2 rounded ${currentPage === totalPages ? 'bg-gray-200 text-black cursor-not-allowed' : 'bg-white hover:bg-gray-300'}`}
+                >
+                    &gt;
+                </button>
+            </div>
+
         </div>
+
     );
 };
 

@@ -19,6 +19,8 @@ const PropertiesTable = () => {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const { isOpen: isEditOpen, onOpen: onEditOpen, onClose: onEditClose } = useDisclosure();
 
+    const [itemsPerPage, setItemsPerPage] = useState(15);
+    const [currentPage , setCurrentPage] = useState(1);
     const [properties, setProperties] = useState([]);
     const [chains, setChains] = useState([]);
     const [newProperty, setNewProperty] = useState({
@@ -29,6 +31,8 @@ const PropertiesTable = () => {
         mpeHotel: "",
         propertyChain: "",
     });
+
+    const totalPages = Math.ceil(properties.length / itemsPerPage);
 
     const [editingProperty, setEditingProperty] = useState(null);
 
@@ -186,6 +190,10 @@ const PropertiesTable = () => {
         onClose();
     };
 
+    const paginatedProperties=properties.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage,
+    );
 
     return (
         <div className="p-4">
@@ -299,7 +307,7 @@ const PropertiesTable = () => {
                     </tr>
                     </thead>
                     <tbody>
-                    {properties.map((property, index) => (
+                    {paginatedProperties.map((property, index) => (
                         <tr key={property.id ?? `property-${index}`} className="hover:bg-gray-100">
                             <td className="border border-[#EDEBEB] px-3 py-2 text-center">
                                 <Dropdown>
@@ -322,6 +330,41 @@ const PropertiesTable = () => {
                     </tbody>
                 </table>
             </div>
+            {/* Paginação */}
+            <div className="flex fixed bottom-0 left-0 items-center gap-2 w-full px-4 py-3 bg-gray-200 justify-end">
+                <span className="px-4 py-2">Items per page</span>
+                <select
+                    value={itemsPerPage}
+                    onChange={(e) => {
+                        setItemsPerPage(Number(e.target.value));
+                        setCurrentPage(1); // Reset para a primeira página
+                    }}
+                    className="border p-2 rounded px-4 py-2 w-20 bg-white"
+                >
+                    {[5, 10, 20, 50].map((size) => (
+                        <option key={size} value={size}>{size}</option>
+                    ))}
+                </select>
+
+                <button
+                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className={`px-4 py-2 rounded ${currentPage === 1 ? 'bg-gray-200 text-black cursor-not-allowed' : 'bg-white hover:bg-gray-300'}`}
+                >
+                    &lt;
+                </button>
+
+                <span className="px-4 py-2 rounded">{currentPage} / {totalPages}</span>
+
+                <button
+                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className={`px-4 py-2 rounded ${currentPage === totalPages ? 'bg-gray-200 text-black cursor-not-allowed' : 'bg-white hover:bg-gray-300'}`}
+                >
+                    &gt;
+                </button>
+            </div>
+
 
             {/* Modal de edição de propriedade */}
             <Modal isOpen={isEditOpen} onOpenChange={onEditClose} size="md" placement="center" className="w-100 shadow-xl rounded-lg">

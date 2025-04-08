@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { HiDotsVertical } from "react-icons/hi";
+import { FaSearch } from "react-icons/fa";
 import { FaGear } from "react-icons/fa6";
 import { Plus } from "lucide-react";
 import Select from "react-select";
@@ -19,6 +20,8 @@ const ProfilesTable = () => {
     const { isOpen: isAddProfileModalOpen, onOpen: onOpenAddProfileModal, onClose: onCloseAddProfileModal } = useDisclosure();
     const { isOpen: isEditProfileModalOpen, onOpen: onOpenEditProfileModal, onClose: onCloseEditProfileModal } = useDisclosure();
 
+    const [searchTerm , setSearchTerm] = useState('');
+    const [showSearchBar , setShowSearchBar] = useState(false);
     const [itemsPerPage, setItemsPerPage] = useState(15);
     const [currentPage , setCurrentPage] = useState(1);
     const [profiles, setProfiles] = useState([]);
@@ -159,12 +162,17 @@ const ProfilesTable = () => {
         onOpenAddProfileModal(); //  modal de adição abre com os campos vazios
     };
 
-    // Sort profiles alphabetically by firstName and secondName
-    const sortedProfiles = [...profiles].sort((a, b) => {
+    const filteredProfiles = profiles.filter((profile) => {
+        const fullName = `${profile.firstName} ${profile.secondName}`.toLowerCase();
+        return fullName.includes(searchTerm.toLowerCase());
+    });
+
+    const sortedProfiles = [...filteredProfiles].sort((a, b) => {
         const fullNameA = `${a.firstName} ${a.secondName}`.toLowerCase();
         const fullNameB = `${b.firstName} ${b.secondName}`.toLowerCase();
         return fullNameA.localeCompare(fullNameB);
     });
+
 
     const paginatedProfiles = sortedProfiles.slice(
         (currentPage - 1) * itemsPerPage,
@@ -175,7 +183,30 @@ const ProfilesTable = () => {
         <div className="p-4">
             {/* Header */}
             <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold">All Profiles</h2>
+                <div className="flex items-center gap-2">
+                    <h2 className="text-xl font-bold">All Profiles</h2>
+                    <button
+                        onClick={() => setShowSearchBar(prev => !prev)}
+                        className="p-1 text-gray-600 hover:bg-gray-200 transition"
+                        aria-label="Toggle search"
+                    >
+                        <FaSearch size = {18} />
+                    </button>
+                </div>
+                {showSearchBar && (
+                    <input
+                        type="text"
+                        placeholder="Search by name..."
+                        value={searchTerm}
+                        onChange={(e) => {
+                            setSearchTerm(e.target.value);
+                            setCurrentPage(1); // faz reset para a primeira página
+                        }}
+                        className="mb-4 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-[#FC9D25]"
+                    />
+                )}
+
+
                 <Button
                     onClick={openAddModal}
                     className="bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded"

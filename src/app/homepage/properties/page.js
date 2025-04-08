@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { HiDotsVertical } from "react-icons/hi";
 import { FaGear } from "react-icons/fa6";
+import { FaSearch } from "react-icons/fa";
 import { Plus } from "lucide-react";
 import Select from "react-select";
 import { Button, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/react";
@@ -19,6 +20,8 @@ const PropertiesTable = () => {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const { isOpen: isEditOpen, onOpen: onEditOpen, onClose: onEditClose } = useDisclosure();
 
+    const  [searchTerm, setSearchTerm] = useState('');
+    const [showSearchBar , setShowSearchBar] = useState(false);
     const [itemsPerPage, setItemsPerPage] = useState(15);
     const [currentPage , setCurrentPage] = useState(1);
     const [properties, setProperties] = useState([]);
@@ -190,7 +193,14 @@ const PropertiesTable = () => {
         onClose();
     };
 
-    const sortedProperties = properties.sort((a, b) => a.propertyName.localeCompare(b.propertyName)); // Sort alphabetically by name
+    const filteredProperties = properties.filter((property) =>
+        property.propertyName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const sortedProperties = filteredProperties.sort((a, b) =>
+        a.propertyName.localeCompare(b.propertyName)
+    );
+
 
     const paginatedProperties = sortedProperties.slice(
         (currentPage - 1) * itemsPerPage,
@@ -201,20 +211,44 @@ const PropertiesTable = () => {
         <div className="p-4">
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold">ALL PROPERTIES</h2>
-                <Dropdown>
-                    <DropdownTrigger>
-                        <button
-                            onClick={onOpen}
-                            className="bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded"
-                        >
-                            <Plus size={25} />
-                        </button>
-                    </DropdownTrigger>
-                    <DropdownMenu aria-label="Actions" className="bg-white shadow-lg rounded-md p-1">
-                        <DropdownItem key="add" onPress={onOpen}>Add Property</DropdownItem>
-                    </DropdownMenu>
-                </Dropdown>
+
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => setShowSearchBar(prev => !prev)}
+                        className="p-2 rounded hover:bg-gray-200 transition"
+                        aria-label="Toggle Search"
+                    >
+                        <FaSearch size={18} />
+                    </button>
+                    <Dropdown>
+                        <DropdownTrigger>
+                            <button
+                                onClick={onOpen}
+                                className="bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded"
+                            >
+                                <Plus size={25} />
+                            </button>
+                        </DropdownTrigger>
+                        <DropdownMenu aria-label="Actions" className="bg-white shadow-lg rounded-md p-1">
+                            <DropdownItem key="add" onPress={onOpen}>Add Property</DropdownItem>
+                        </DropdownMenu>
+                    </Dropdown>
+                </div>
             </div>
+
+            {showSearchBar && (
+                <input
+                    type="text"
+                    placeholder="Search by property name..."
+                    value={searchTerm}
+                    onChange={(e) => {
+                        setSearchTerm(e.target.value);
+                        setCurrentPage(1); // Reset para a primeira página ao fazer pesquisa
+                    }}
+                    className="mb-4 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-[#FC9D25]"
+                />
+            )}
+
 
             {/* Modal de adição de propriedades*/}
             <Modal isOpen={isOpen} onOpenChange={onClose} size="md" placement="center" className="w-100 shadow-xl rounded-lg">

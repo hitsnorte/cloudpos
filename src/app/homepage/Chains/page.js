@@ -9,11 +9,11 @@ import { Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from
 const ChainsTable = () => {
     // Controla visibilidade do modal
     const [isOpen, setIsOpen] = useState(false);
-    const [editIsOpen, setEditIsOpen] = useState(false);  // New state for edit modal
+    const [editIsOpen, setEditIsOpen] = useState(false);  // Novo estado para modal de edição
 
     // Guarda lista de cadeias
     const [chains, setChains] = useState([]);
-    const [selectedChain, setSelectedChain] = useState(null);  // Store the chain being edited
+    const [selectedChain, setSelectedChain] = useState(null);  // Guarda a chaina ser editada
 
     const [newChain, setNewChain] = useState({ chainTag: "", chainName: "" });
 
@@ -125,6 +125,17 @@ const ChainsTable = () => {
         setNewChain({ chainTag: "", chainName: "" });
         onClose();
     };
+
+    const [itemsPerPage, setItemsPerPage] = useState(15);
+    const [currentPage , setCurrentPage] = useState(1);
+
+    const totalPages= Math.ceil(chains.length/itemsPerPage);
+
+    const paginatedChains = chains.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
 
     return (
         <div className="p-4">
@@ -262,8 +273,8 @@ const ChainsTable = () => {
                     </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-300">
-                    {chains.length > 0 ? (
-                        chains.map((chain) => (
+                    {paginatedChains.length > 0 ? (
+                        paginatedChains.map((chain) => (
                             <tr key={chain.id || chain.chainTag} className="hover:bg-gray-100">
                                 <td className="border border-[#EDEBEB] w-[50px] px-2 py-2 text-center">
                                     <HiDotsVertical size={18} onClick={() => onEditOpen(chain)} />
@@ -283,6 +294,41 @@ const ChainsTable = () => {
                     </tbody>
                 </table>
             </div>
+
+            <div className="flex fixed bottom-0 left-0 items-center gap-2 w-full px-4 py-3 bg-gray-200 justify-end p-0 z-10 border-t">
+                <span className="px-4 py-2">Items per page</span>
+                <select
+                    value={itemsPerPage}
+                    onChange={(e) => {
+                        setItemsPerPage(Number(e.target.value));
+                        setCurrentPage(1); // volta para a primeira página quando mudar
+                    }}
+                    className="border p-2 rounded px-4 py-2 w-20"
+                >
+                    {[5, 10, 15, 20, 50].map((size) => (
+                        <option key={size} value={size}>{size}</option>
+                    ))}
+                </select>
+
+                <button
+                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className={`px-4 py-2 rounded ${currentPage === 1 ? 'text-black cursor-not-allowed' : 'hover:bg-gray-300'}`}
+                >
+                    &lt;
+                </button>
+
+                <span className="px-4 py-2">{currentPage} / {totalPages || 1}</span>
+
+                <button
+                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className={`px-4 py-2 rounded ${currentPage === totalPages ? 'text-black cursor-not-allowed' : 'hover:bg-gray-300'}`}
+                >
+                    &gt;
+                </button>
+            </div>
+
         </div>
     );
 };

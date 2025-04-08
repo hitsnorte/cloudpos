@@ -30,7 +30,9 @@ const ChainsTable = () => {
             const res = await fetch("/api/chains");
             if (!res.ok) throw new Error("Failed to fetch chains");
             const data = await res.json();
-            setChains(data);
+            // Sort chains alphabetically by chainName
+            const sortedChains = data.sort((a, b) => a.chainName.localeCompare(b.chainName));
+            setChains(sortedChains);
         } catch (error) {
             console.error("Error fetching chains:", error);
         }

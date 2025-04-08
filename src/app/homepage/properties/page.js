@@ -190,7 +190,9 @@ const PropertiesTable = () => {
         onClose();
     };
 
-    const paginatedProperties=properties.slice(
+    const sortedProperties = properties.sort((a, b) => a.propertyName.localeCompare(b.propertyName)); // Sort alphabetically by name
+
+    const paginatedProperties = sortedProperties.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage,
     );
@@ -427,7 +429,7 @@ const PropertiesTable = () => {
                             </ModalBody>
                             <ModalFooter className="border-t border-[#EDEBEB] bg-[#FAFAFA] pt-2 px-8">
                                 <Button onPress={onEditClose} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">Cancel</Button>
-                                <Button type="submit" form="editPropertyForm" className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray-600 transition">Save</Button>
+                                <Button type="submit" form="editPropertyForm" className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray-600 transition">Update</Button>
                             </ModalFooter>
                         </>
                     )}

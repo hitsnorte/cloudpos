@@ -70,7 +70,6 @@ const ProfilesTable = () => {
         });
     };
 
-
     const propertyOptions = properties.map(property => ({
         value: property.propertyID,
         label: `${property.propertyName} (${property.propertyTag})`,
@@ -82,14 +81,12 @@ const ProfilesTable = () => {
         const selectedIDs = selectedOptions.map(option => option.value);
         const selectedTags = selectedOptions.map(option => option.tag);
 
-
         setNewProfile(prevProfile => ({
             ...prevProfile,
             propertyIDs: selectedIDs,
             propertyTags: selectedTags,
         }));
     };
-
 
     // Guardar perfil
     const handleSubmitProfile = async (e) => {
@@ -118,14 +115,11 @@ const ProfilesTable = () => {
                 onCloseAddProfileModal();
             }
 
-
-
             fetchProfiles(); // Busca perfis depois de adicionar/editar perfis
         } catch (error) {
             console.error("Error with profile:", error);
         }
     };
-
 
     // Abre o modal e insere os dados do perfil escolhido
     const openEditModal = (profile) => {
@@ -140,8 +134,6 @@ const ProfilesTable = () => {
         });
         onOpenEditProfileModal();
     };
-
-
 
     const handleCloseAddProfileModal = () => {
         setNewProfile({
@@ -167,11 +159,17 @@ const ProfilesTable = () => {
         onOpenAddProfileModal(); //  modal de adição abre com os campos vazios
     };
 
-    const paginatedProfiles = profiles.slice (
+    // Sort profiles alphabetically by firstName and secondName
+    const sortedProfiles = [...profiles].sort((a, b) => {
+        const fullNameA = `${a.firstName} ${a.secondName}`.toLowerCase();
+        const fullNameB = `${b.firstName} ${b.secondName}`.toLowerCase();
+        return fullNameA.localeCompare(fullNameB);
+    });
+
+    const paginatedProfiles = sortedProfiles.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage,
     );
-
 
     return (
         <div className="p-4">
@@ -185,7 +183,6 @@ const ProfilesTable = () => {
                     <Plus size={25} />
                 </Button>
             </div>
-
 
             {/* Modal de adição de perfil */}
             <Modal isOpen={isAddProfileModalOpen} onOpenChange={handleCloseAddProfileModal} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
@@ -314,7 +311,6 @@ const ProfilesTable = () => {
                 </ModalContent>
             </Modal>
 
-
             {/* Tabela */}
             <div className="overflow-x-auto bg-muted/40">
                 <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB] mx-auto">
@@ -398,7 +394,6 @@ const ProfilesTable = () => {
             </div>
 
         </div>
-
     );
 };
 

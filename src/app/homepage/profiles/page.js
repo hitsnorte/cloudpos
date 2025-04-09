@@ -19,11 +19,14 @@ import {
 const ProfilesTable = () => {
     const { isOpen: isAddProfileModalOpen, onOpen: onOpenAddProfileModal, onClose: onCloseAddProfileModal } = useDisclosure();
     const { isOpen: isEditProfileModalOpen, onOpen: onOpenEditProfileModal, onClose: onCloseEditProfileModal } = useDisclosure();
+    const { isOpen: isDeleteUserModalOpen, onOpen: onOpenDeleteUserModal, onClose: onCloseDeleteUserModal } = useDisclosure();
 
-    const [searchTerm , setSearchTerm] = useState('');
-    const [searchInput , setSearchInput] = useState(''); // Added state for search input value
+    const [searchTerm, setSearchTerm] = useState('');
+    const [searchInput, setSearchInput] = useState(''); // Added state for search input value
     const [itemsPerPage, setItemsPerPage] = useState(15);
-    const [currentPage , setCurrentPage] = useState(1);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [deleteConfirmationEmail, setDeleteConfirmationEmail] = useState('');
+    const [userToDelete, setUserToDelete] = useState(null);
     const [profiles, setProfiles] = useState([]);
     const [properties, setProperties] = useState([]);
     const [currentProfile, setCurrentProfile] = useState(null); // Holds the profile to edit
@@ -36,7 +39,7 @@ const ProfilesTable = () => {
         propertyTags: [],
     });
 
-    const totalPages = Math.ceil(profiles.length/itemsPerPage);
+    const totalPages = Math.ceil(profiles.length / itemsPerPage);
 
     // Fetch all profiles
     const fetchProfiles = async () => {
@@ -174,9 +177,36 @@ const ProfilesTable = () => {
         currentPage * itemsPerPage,
     );
 
+    const openDeleteModal = (user) => {
+        setUserToDelete(user);
+        onOpenDeleteUserModal();
+    };
+
+    const handleDeleteConfirmation = async () => {
+        if (deleteConfirmationEmail !== userToDelete.email) {
+            alert("The email does not match. Please enter the correct email.");
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/user/${userToDelete.userID}`, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete user');
+            }
+
+            alert('User deleted successfully');
+            onCloseDeleteUserModal();
+            fetchProfiles(); // Re-fetch profiles after deletion
+        } catch (error) {
+            console.error('Error deleting user:', error);
+        }
+    };
+
     return (
         <div className="p-4">
-            {/* Header */}
             {/* Header */}
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold">All Profiles</h2>
@@ -225,7 +255,7 @@ const ProfilesTable = () => {
                     {(onClose) => (
                         <>
                             <ModalHeader className="relative rounded bg-[#FC9D25] flex justify-between items-center px-6 py-3">
-                                <div className="text-xl font-bold text-white">New Property</div>
+                                <div className="text-xl font-bold text-white">New Profile</div>
                                 <button
                                     type="button"
                                     onClick={handleCloseAddProfileModal}
@@ -283,6 +313,40 @@ const ProfilesTable = () => {
                 </ModalContent>
             </Modal>
 
+            {/* Modal for Deleting User */}
+            <Modal isOpen={isDeleteUserModalOpen} onOpenChange={onCloseDeleteUserModal} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
+                <ModalContent>
+                    <ModalHeader className="relative rounded bg-[#FC9D25] flex justify-between items-center px-6 py-3">
+                        <div className="text-xl font-bold text-white">Confirm Delete User</div>
+                        <button
+                            type="button"
+                            onClick={onCloseDeleteUserModal}
+                            className="absolute right-4 top-3 text-white text-2xl font-bold hover:text-gray-200"
+                        >
+                            &times;
+                        </button>
+                    </ModalHeader>
+                    <ModalBody className="py-5 px-6 bg-[#FAFAFA]">
+                        <p className="text-[#191919]">To confirm the deletion of this user, please type their email:</p>
+                        <input
+                            type="email"
+                            value={deleteConfirmationEmail}
+                            onChange={(e) => setDeleteConfirmationEmail(e.target.value)}
+                            placeholder="User email"
+                            className="w-full p-2 bg-gray-200 rounded mt-2"
+                        />
+                    </ModalBody>
+                    <ModalFooter className="border-t border-[#EDEBEB] bg-[#FAFAFA] pt-2 px-8">
+                        <Button onPress={onCloseDeleteUserModal} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">
+                            Cancel
+                        </Button>
+                        <Button onPress={handleDeleteConfirmation} className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray-600 transition">
+                            Delete
+                        </Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+
             {/* Table */}
             <div className="overflow-x-auto bg-muted/40">
                 <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB] mx-auto">
@@ -312,6 +376,9 @@ const ProfilesTable = () => {
                                             <DropdownItem key="edit" onPress={() => openEditModal(profile)}>
                                                 Edit
                                             </DropdownItem>
+                                            <DropdownItem key="delete" onPress={() => openDeleteModal(profile)}>
+                                                Delete
+                                            </DropdownItem>
                                         </DropdownMenu>
                                     </Dropdown>
                                 </td>
@@ -323,48 +390,14 @@ const ProfilesTable = () => {
                         ))
                     ) : (
                         <tr>
-                            <td colSpan="5" className="text-center py-4 text-gray-500">No profiles found.</td>
+                            <td colSpan="5" className="text-center py-4 text-gray-500">
+                                No profiles found.
+                            </td>
                         </tr>
                     )}
                     </tbody>
                 </table>
             </div>
-
-            {/* Pagination */}
-            <div className="flex fixed bottom-0 left-0 items-center gap-2 w-full px-4 py-3 bg-gray-200 justify-end">
-                <span className="px-4 py-2">Items per page</span>
-                <select
-                    value={itemsPerPage}
-                    onChange={(e) => {
-                        setItemsPerPage(Number(e.target.value));
-                        setCurrentPage(1); // Reset to first page
-                    }}
-                    className="border p-2 rounded px-4 py-2 w-20 bg-white"
-                >
-                    {[5, 10, 20, 50].map((size) => (
-                        <option key={size} value={size}>{size}</option>
-                    ))}
-                </select>
-
-                <button
-                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                    disabled={currentPage === 1}
-                    className={`px-4 py-2 rounded ${currentPage === 1 ? 'bg-gray-200 text-black cursor-not-allowed' : 'bg-white hover:bg-gray-300'}`}
-                >
-                    &lt;
-                </button>
-
-                <span className="px-4 py-2 rounded">{currentPage} / {totalPages}</span>
-
-                <button
-                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                    disabled={currentPage === totalPages}
-                    className={`px-4 py-2 rounded ${currentPage === totalPages ? 'bg-gray-200 text-black cursor-not-allowed' : 'bg-white hover:bg-gray-300'}`}
-                >
-                    &gt;
-                </button>
-            </div>
-
         </div>
     );
 };

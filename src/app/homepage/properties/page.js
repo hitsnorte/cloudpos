@@ -20,6 +20,8 @@ const PropertiesTable = () => {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const { isOpen: isEditOpen, onOpen: onEditOpen, onClose: onEditClose } = useDisclosure();
 
+    const [deleteConfirmationName, setDeleteConfirmationName] = useState('');
+    const [propertyToDelete, setPropertyToDelete] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [searchInput , setSearchInput] = useState('');
     const [itemsPerPage, setItemsPerPage] = useState(15);
@@ -207,6 +209,36 @@ const PropertiesTable = () => {
         currentPage * itemsPerPage,
     );
 
+    const handleDeleteClick = (property) => {
+        setPropertyToDelete(property);
+        onDeleteOpen(); // Abre o modal para confirmação do delete da propriedade
+    };
+
+    const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose } = useDisclosure();
+
+    const handleDeleteConfirmation = async () => {
+        if (deleteConfirmationName !== propertyToDelete.propertyName) {
+            alert("The property name doesn't match!");
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/properties/${propertyToDelete.propertyID}`, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) throw new Error('Failed to delete property');
+
+            // Remove deleted property from the state
+            setProperties(properties.filter((property) => property.propertyID !== propertyToDelete.propertyID));
+
+            // Close the modal
+            onDeleteClose();
+        } catch (error) {
+            console.error('Error deleting property:', error);
+        }
+    };
+
     return (
         <div className="p-4">
             <div className="flex justify-between items-center mb-4">
@@ -335,6 +367,35 @@ const PropertiesTable = () => {
                 </ModalContent>
             </Modal>
 
+            {/* Modal de delete */}
+            <Modal isOpen={isDeleteOpen} onOpenChange={onDeleteClose} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
+                <ModalContent>
+                    <ModalHeader className="relative rounded bg-[#FC9D25] flex justify-between items-center px-6 py-3">
+                        <div className="text-xl font-bold text-white">Confirm Delete</div>
+                        <button
+                            type="button"
+                            onClick={onDeleteClose}
+                            className="absolute right-4 top-3 text-white text-2xl font-bold hover:text-gray-200"
+                        >
+                            &times;
+                        </button>
+                    </ModalHeader>
+                    <ModalBody className="py-5 px-6 bg-[#FAFAFA]">
+                        <p className="text-[#191919]">To confirm the deletion of this property, please type its name:</p>
+                        <input
+                            type="text"
+                            value={deleteConfirmationName}
+                            onChange={(e) => setDeleteConfirmationName(e.target.value)}
+                            placeholder="Property name"
+                            className="w-full p-2 bg-gray-200 rounded mt-2"
+                        />
+                    </ModalBody>
+                    <ModalFooter className="border-t border-[#EDEBEB] bg-[#FAFAFA] pt-2 px-8">
+                        <Button onPress={onDeleteClose} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">Cancel</Button>
+                        <Button onPress={handleDeleteConfirmation} className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray-600 transition">Delete</Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
 
 
             {/* Tabela */}
@@ -360,7 +421,7 @@ const PropertiesTable = () => {
                                     </DropdownTrigger>
                                     <DropdownMenu aria-label="Actions" className="bg-white shadow-lg rounded-md p-1">
                                         <DropdownItem key="edit" onPress={() => handleEditClick(property)}>Edit</DropdownItem>
-                                        <DropdownItem key="delete" className="text-danger">Delete</DropdownItem>
+                                        <DropdownItem key="delete" className="text-danger" onClick={()=> handleDeleteClick(property)}>Delete</DropdownItem>
                                     </DropdownMenu>
                                 </Dropdown>
                             </td>

@@ -59,3 +59,27 @@ export async function PUT(req, { params }) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
+
+export async function DELETE(req, { params }) {
+    const { id } = params;
+
+    try {
+        const user = await prisma.cloud_users.findUnique({
+            where: { userID: parseInt(id) },
+        });
+
+        if (!user) {
+            return NextResponse.json({ error: "User not found" }, { status: 404 });
+        }
+
+        await prisma.cloud_users.delete({
+            where: { userID: parseInt(id) },
+        });
+
+        return NextResponse.json({ message: "User and associated properties deleted successfully" }, { status: 200 });
+
+    } catch (error) {
+        console.error("Error deleting user:", error);
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+}

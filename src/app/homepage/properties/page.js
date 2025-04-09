@@ -433,6 +433,7 @@ const PropertiesTable = () => {
                     </tbody>
                 </table>
             </div>
+
             {/* Paginação */}
             <div className="flex fixed bottom-0 left-0 items-center gap-2 w-full px-4 py-3 bg-gray-200 justify-end">
                 <span className="px-4 py-2">Items per page</span>

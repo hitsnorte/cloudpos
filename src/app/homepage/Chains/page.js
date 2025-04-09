@@ -364,41 +364,6 @@ const ChainsTable = () => {
                 </ModalContent>
             </Modal>
 
-            {/* Tabela */}
-            <div className="overflow-x-auto bg-muted/40">
-                <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB] mx-auto">
-                    <thead>
-                    <tr className="bg-[#FC9D25] text-white">
-                        <th className="border border-[#EDEBEB] w-[50px] px-2 py-2 text-center">
-                            <FaGear size={20} />
-                        </th>
-                        <th className="border border-[#EDEBEB] px-4 py-2 text-left">ID</th>
-                        <th className="border border-[#EDEBEB] px-4 py-2 text-left">Chain Tag</th>
-                        <th className="border border-[#EDEBEB] px-4 py-2 text-left">Chain Name</th>
-                    </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-300">
-                    {paginatedChains.length > 0 ? (
-                        paginatedChains.map((chain) => (
-                            <tr key={chain.id || chain.chainTag} className="hover:bg-gray-100">
-                                <td className="border border-[#EDEBEB] w-[50px] px-2 py-2 text-center">
-                                    <HiDotsVertical size={18} onClick={() => onEditOpen(chain)} />
-                                </td>
-                                <td className="border border-[#EDEBEB] px-4 py-2">{chain.chainID}</td>
-                                <td className="border border-[#EDEBEB] px-4 py-2">{chain.chainTag}</td>
-                                <td className="border border-[#EDEBEB] px-4 py-2">{chain.chainName}</td>
-                            </tr>
-                        ))
-                    ) : (
-                        <tr>
-                            <td colSpan="4" className="border border-[#EDEBEB] px-4 py-4 text-center text-gray-500">
-                                No chains available
-                            </td>
-                        </tr>
-                    )}
-                    </tbody>
-                </table>
-            </div>
 
             <div className="flex fixed bottom-0 left-0 items-center gap-2 w-full px-4 py-3 bg-gray-200 justify-end p-0 z-10 border-t">
                 <span className="px-4 py-2">Items per page</span>

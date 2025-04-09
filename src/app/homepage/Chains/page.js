@@ -2,36 +2,47 @@
 
 import { useState, useEffect } from "react";
 import { HiDotsVertical } from "react-icons/hi";
-import { FaGear } from "react-icons/fa6";
 import { FaSearch } from "react-icons/fa";
+import { FaGear } from "react-icons/fa6";
 import { Plus } from "lucide-react";
-import { Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@nextui-org/react";
+import {
+    Button,
+    Modal,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+    Dropdown,
+    DropdownTrigger,
+    DropdownMenu,
+    DropdownItem
+} from "@nextui-org/react";
 
 const ChainsTable = () => {
-    // Controla visibilidade do modal
     const [isOpen, setIsOpen] = useState(false);
-    const [editIsOpen, setEditIsOpen] = useState(false);  // Novo estado para modal de edição
+    const [editIsOpen, setEditIsOpen] = useState(false);
 
-    // Guarda lista de cadeias
     const [chains, setChains] = useState([]);
-    const [selectedChain, setSelectedChain] = useState(null);  // Guarda a chaina ser editada
+    const [selectedChain, setSelectedChain] = useState(null);
 
     const [newChain, setNewChain] = useState({ chainTag: "", chainName: "" });
 
-    // Indica o loading enquanto carrega cadeias
     const [loading, setLoading] = useState(false);
+
+    const [itemsPerPage, setItemsPerPage] = useState(15);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [searchInput, setSearchInput] = useState('');
 
     useEffect(() => {
         fetchChains();
     }, []);
 
-    // Função para buscar cadeias á API
     const fetchChains = async () => {
         try {
             const res = await fetch("/api/chains");
             if (!res.ok) throw new Error("Failed to fetch chains");
             const data = await res.json();
-            // Sort chains alphabetically by chainName
             const sortedChains = data.sort((a, b) => a.chainName.localeCompare(b.chainName));
             setChains(sortedChains);
         } catch (error) {
@@ -39,41 +50,32 @@ const ChainsTable = () => {
         }
     };
 
-    // Função para abrir o modal de adicionar cadeia
     const onOpen = () => setIsOpen(true);
-
-    // Função para fechar o modal de adicionar cadeia
     const onClose = () => setIsOpen(false);
 
-    // Function to open the edit modal and set the selected chain
     const onEditOpen = (chain) => {
         setSelectedChain(chain);
         setEditIsOpen(true);
     };
 
-    // Função para fechar o modal de edição
     const onEditClose = () => {
         setSelectedChain(null);
         setEditIsOpen(false);
     };
 
-    // HandleInputChange para o form de criação de cadeias
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setNewChain((prev) => ({ ...prev, [name]: value }));
     };
 
-    // Handle input change for editing chain name
     const handleEditInputChange = (e) => {
         const { name, value } = e.target;
         setSelectedChain((prev) => ({ ...prev, [name]: value }));
     };
 
-    // adição de uma cadeia nova
     const handleAddChain = async (e) => {
         e.preventDefault();
         setLoading(true);
-
         try {
             const res = await fetch("/api/chains", {
                 method: "POST",
@@ -83,10 +85,7 @@ const ChainsTable = () => {
 
             if (!res.ok) throw new Error("Failed to add chain");
 
-            // Busca cadeias na API
             await fetchChains();
-
-            // Fecha modal e faz reset ao Form depois de adicionar uma nova chain
             setNewChain({ chainTag: "", chainName: "" });
             onClose();
         } catch (error) {
@@ -96,7 +95,6 @@ const ChainsTable = () => {
         }
     };
 
-    //Função para atualizar o nome da cadeia
     const handleEditChain = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -112,10 +110,7 @@ const ChainsTable = () => {
 
             if (!res.ok) throw new Error("Failed to update chain");
 
-            // Faz refresh á lista de cadeias existentes
             await fetchChains();
-
-            //Fecha o modal e dá reset ao nome da cadeia
             onEditClose();
         } catch (error) {
             console.error("Error updating chain:", error);
@@ -129,17 +124,10 @@ const ChainsTable = () => {
         onClose();
     };
 
-    const [itemsPerPage, setItemsPerPage] = useState(15);
-    const [currentPage , setCurrentPage] = useState(1);
-    const [searchTerm , setSearchTerm] = useState('')
-    const [showSearchBar, setShowSearchBar] = useState(false);
-
-    // Filtra as chains com base na pesquisa
     const filteredChains = chains.filter((chain) =>
         chain.chainName.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // Paginação aplicada sobre o array filtrado
     const paginatedChains = filteredChains.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
@@ -147,45 +135,126 @@ const ChainsTable = () => {
 
     const totalPages = Math.ceil(filteredChains.length / itemsPerPage);
 
-
-
-
     return (
         <div className="p-4">
-            {/* Header c/ botão de adicionar */}
-            <div className="flex justify-between items-center mb-6">
+            {/* Header com Search e Add */}
+            <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold">All Chains</h2>
                 <div className="flex items-center gap-2">
                     <button
-                        onClick={() => setShowSearchBar(prev => !prev)}
+                        onClick={() => {
+                            setSearchTerm(searchInput);
+                            setCurrentPage(1);
+                        }}
                         className="p-2 rounded hover:bg-gray-200 transition"
-                        aria-label="Toggle Search"
+                        aria-label="Search"
                     >
-                        <FaSearch size ={25} />
+                        <FaSearch size={18} />
                     </button>
-                    <button
-                        className="bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded"
-                        onClick={onOpen}
-                    >
-                        <Plus size={25} />
-                    </button>
+
+                    <Dropdown>
+                        <DropdownTrigger>
+                            <button
+                                onClick={onOpen}
+                                className="bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded"
+                            >
+                                <Plus size={25} />
+                            </button>
+                        </DropdownTrigger>
+                        <DropdownMenu aria-label="Actions" className="bg-white shadow-lg rounded-md p-1">
+                            <DropdownItem key="add" onPress={onOpen}>Add Chain</DropdownItem>
+                        </DropdownMenu>
+                    </Dropdown>
                 </div>
             </div>
 
-            {/* Barra de pesquisa, visível se showSearchBar for true */}
-            {showSearchBar && (
+            {/* SearchBar permanente */}
+            <div className="flex mb-4 items-center gap-2">
                 <input
                     type="text"
                     placeholder="Search by chain name..."
-                    value={searchTerm}
-                    onChange={(e) => {
-                        setSearchTerm(e.target.value);
-                        setCurrentPage(1); // reset página ao pesquisar
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                            setSearchTerm(searchInput);
+                            setCurrentPage(1);
+                        }
                     }}
-                    className="mb-4 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-[#FC9D25]"
+                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-[#FC9D25]"
                 />
-            )}
+            </div>
 
+            {/* Tabela */}
+            <div className="overflow-x-auto bg-muted/40">
+                <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB] mx-auto">
+                    <thead>
+                    <tr className="bg-[#FC9D25] text-white">
+                        <th className="border border-[#EDEBEB] w-[50px] px-2 py-2 text-center">
+                            <FaGear size={20} />
+                        </th>
+                        <th className="border border-[#EDEBEB] px-4 py-2 text-left">ID</th>
+                        <th className="border border-[#EDEBEB] px-4 py-2 text-left">Chain Tag</th>
+                        <th className="border border-[#EDEBEB] px-4 py-2 text-left">Chain Name</th>
+                    </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-300">
+                    {paginatedChains.length > 0 ? (
+                        paginatedChains.map((chain) => (
+                            <tr key={chain.id || chain.chainTag} className="hover:bg-gray-100">
+                                <td className="border border-[#EDEBEB] w-[50px] px-2 py-2 text-center">
+                                    <HiDotsVertical size={18} onClick={() => onEditOpen(chain)} />
+                                </td>
+                                <td className="border border-[#EDEBEB] px-4 py-2">{chain.chainID}</td>
+                                <td className="border border-[#EDEBEB] px-4 py-2">{chain.chainTag}</td>
+                                <td className="border border-[#EDEBEB] px-4 py-2">{chain.chainName}</td>
+                            </tr>
+                        ))
+                    ) : (
+                        <tr>
+                            <td colSpan="4" className="border border-[#EDEBEB] px-4 py-4 text-center text-gray-500">
+                                No chains available
+                            </td>
+                        </tr>
+                    )}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Paginação */}
+            <div className="flex fixed bottom-0 left-0 items-center gap-2 w-full px-4 py-3 bg-gray-200 justify-end z-10 border-t">
+                <span className="px-4 py-2">Items per page</span>
+                <select
+                    value={itemsPerPage}
+                    onChange={(e) => {
+                        setItemsPerPage(Number(e.target.value));
+                        setCurrentPage(1);
+                    }}
+                    className="border p-2 rounded px-4 py-2 w-20"
+                >
+                    {[5, 10, 15, 20, 50].map((size) => (
+                        <option key={size} value={size}>{size}</option>
+                    ))}
+                </select>
+
+                <button
+                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className={`px-4 py-2 rounded ${currentPage === 1 ? 'text-black cursor-not-allowed' : 'hover:bg-gray-300'}`}
+                >
+                    &lt;
+                </button>
+
+                <span className="px-4 py-2">{currentPage} / {totalPages || 1}</span>
+
+                <button
+                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className={`px-4 py-2 rounded ${currentPage === totalPages ? 'text-black cursor-not-allowed' : 'hover:bg-gray-300'}`}
+                >
+                    &gt;
+                </button>
+            </div>
 
             {/* Modal de adição de cadeias novas */}
             <Modal isOpen={isOpen} onOpenChange={onClose} size="md" placement="center" className="w-100 shadow-xl rounded-lg">

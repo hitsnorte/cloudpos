@@ -221,41 +221,6 @@ const ChainsTable = () => {
                 </table>
             </div>
 
-            {/* Paginação */}
-            <div className="flex fixed bottom-0 left-0 items-center gap-2 w-full px-4 py-3 bg-gray-200 justify-end z-10 border-t">
-                <span className="px-4 py-2">Items per page</span>
-                <select
-                    value={itemsPerPage}
-                    onChange={(e) => {
-                        setItemsPerPage(Number(e.target.value));
-                        setCurrentPage(1);
-                    }}
-                    className="border p-2 rounded px-4 py-2 w-20"
-                >
-                    {[5, 10, 15, 20, 50].map((size) => (
-                        <option key={size} value={size}>{size}</option>
-                    ))}
-                </select>
-
-                <button
-                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                    disabled={currentPage === 1}
-                    className={`px-4 py-2 rounded ${currentPage === 1 ? 'text-black cursor-not-allowed' : 'hover:bg-gray-300'}`}
-                >
-                    &lt;
-                </button>
-
-                <span className="px-4 py-2">{currentPage} / {totalPages || 1}</span>
-
-                <button
-                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                    disabled={currentPage === totalPages}
-                    className={`px-4 py-2 rounded ${currentPage === totalPages ? 'text-black cursor-not-allowed' : 'hover:bg-gray-300'}`}
-                >
-                    &gt;
-                </button>
-            </div>
-
             {/* Modal de adição de cadeias novas */}
             <Modal isOpen={isOpen} onOpenChange={onClose} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
                 <ModalContent>
@@ -365,40 +330,45 @@ const ChainsTable = () => {
             </Modal>
 
 
-            <div className="flex fixed bottom-0 left-0 items-center gap-2 w-full px-4 py-3 bg-gray-200 justify-end p-0 z-10 border-t">
-                <span className="px-4 py-2">Items per page</span>
+            {/* Paginação*/}
+            <div className="flex fixed bottom-0 left-0 items-center gap-2 w-full px-4 py-3 bg-gray-200 justify-end">
+                <span className="px-2 py-1">Items per page</span>
+
                 <select
                     value={itemsPerPage}
                     onChange={(e) => {
                         setItemsPerPage(Number(e.target.value));
-                        setCurrentPage(1); // volta para a primeira página quando mudar
+                        setCurrentPage(1);
                     }}
-                    className="border p-2 rounded px-4 py-2 w-20"
+                    className="border p-2 rounded px-2 py-1 w-16"
                 >
-                    {[5, 10, 15, 20, 50].map((size) => (
+                    {[5, 10, 20, 50].map((size) => (
                         <option key={size} value={size}>{size}</option>
                     ))}
                 </select>
 
-                <button
-                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                    disabled={currentPage === 1}
-                    className={`px-4 py-2 rounded ${currentPage === 1 ? 'text-black cursor-not-allowed' : 'hover:bg-gray-300'}`}
-                >
-                    &lt;
-                </button>
+                <div className="flex items-center border rounded-lg overflow-hidden ml-4">
+                    <button
+                        onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                        className={`px-3 py-0.5 ${currentPage === 1 ? 'bg-white text-black cursor-not-allowed' : 'bg-white hover:bg-gray-100'}`}
+                    >
+                        &lt;
+                    </button>
 
-                <span className="px-4 py-2">{currentPage} / {totalPages || 1}</span>
+                    <span className="px-3 py-0.5 bg-white">
+            {currentPage}
+        </span>
 
-                <button
-                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                    disabled={currentPage === totalPages}
-                    className={`px-4 py-2 rounded ${currentPage === totalPages ? 'text-black cursor-not-allowed' : 'hover:bg-gray-300'}`}
-                >
-                    &gt;
-                </button>
+                    <button
+                        onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                        disabled={currentPage === totalPages}
+                        className={`px-3 py-0.5 ${currentPage === totalPages ? 'bg-white text-black cursor-not-allowed' : 'bg-white hover:bg-gray-100'}`}
+                    >
+                        &gt;
+                    </button>
+                </div>
             </div>
-
         </div>
     );
 };

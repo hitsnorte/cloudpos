@@ -21,7 +21,7 @@ const ProfilesTable = () => {
     const { isOpen: isEditProfileModalOpen, onOpen: onOpenEditProfileModal, onClose: onCloseEditProfileModal } = useDisclosure();
 
     const [searchTerm , setSearchTerm] = useState('');
-    const [showSearchBar , setShowSearchBar] = useState(false);
+    const [searchInput , setSearchInput] = useState(''); // Added state for search input value
     const [itemsPerPage, setItemsPerPage] = useState(15);
     const [currentPage , setCurrentPage] = useState(1);
     const [profiles, setProfiles] = useState([]);
@@ -38,7 +38,7 @@ const ProfilesTable = () => {
 
     const totalPages = Math.ceil(profiles.length/itemsPerPage);
 
-    // Busca todos os perfis
+    // Fetch all profiles
     const fetchProfiles = async () => {
         try {
             const response = await fetch('/api/user');
@@ -49,7 +49,7 @@ const ProfilesTable = () => {
         }
     };
 
-    // Busca todas as propriedades
+    // Fetch all properties
     const fetchProperties = async () => {
         try {
             const response = await fetch('/api/properties');
@@ -65,7 +65,7 @@ const ProfilesTable = () => {
         fetchProperties();
     }, []);
 
-    // Handle Input change para adicionar e editar perfis
+    // Handle input changes to add/edit profiles
     const handleInputChange = (e) => {
         setNewProfile({
             ...newProfile,
@@ -80,7 +80,6 @@ const ProfilesTable = () => {
     }));
 
     const handlePropertyChange = (selectedOptions) => {
-        // Extrair os IDs e tags das opções selecionadas
         const selectedIDs = selectedOptions.map(option => option.value);
         const selectedTags = selectedOptions.map(option => option.tag);
 
@@ -91,12 +90,11 @@ const ProfilesTable = () => {
         }));
     };
 
-    // Guardar perfil
+    // Save profile (Add or Edit)
     const handleSubmitProfile = async (e) => {
         e.preventDefault();
         try {
             if (currentProfile) {
-
                 const response = await fetch(`/api/user/${currentProfile.userID}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
@@ -107,7 +105,6 @@ const ProfilesTable = () => {
 
                 onCloseEditProfileModal();
             } else {
-
                 const response = await fetch('/api/user', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -118,15 +115,14 @@ const ProfilesTable = () => {
                 onCloseAddProfileModal();
             }
 
-            fetchProfiles(); // Busca perfis depois de adicionar/editar perfis
+            fetchProfiles(); // Re-fetch profiles after adding/editing
         } catch (error) {
             console.error("Error with profile:", error);
         }
     };
 
-    // Abre o modal e insere os dados do perfil escolhido
     const openEditModal = (profile) => {
-        setCurrentProfile(profile); // Guarda o perfil a ser editado
+        setCurrentProfile(profile); // Store profile to be edited
         setNewProfile({
             firstName: profile.firstName,
             secondName: profile.secondName,
@@ -159,7 +155,7 @@ const ProfilesTable = () => {
             propertyIDs: [],
             propertyTags: [],
         });
-        onOpenAddProfileModal(); //  modal de adição abre com os campos vazios
+        onOpenAddProfileModal();
     };
 
     const filteredProfiles = profiles.filter((profile) => {
@@ -173,7 +169,6 @@ const ProfilesTable = () => {
         return fullNameA.localeCompare(fullNameB);
     });
 
-
     const paginatedProfiles = sortedProfiles.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage,
@@ -182,40 +177,49 @@ const ProfilesTable = () => {
     return (
         <div className="p-4">
             {/* Header */}
+            {/* Header */}
             <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold">All Profiles</h2>
                 <div className="flex items-center gap-2">
-                    <h2 className="text-xl font-bold">All Profiles</h2>
                     <button
-                        onClick={() => setShowSearchBar(prev => !prev)}
-                        className="p-1 text-gray-600 hover:bg-gray-200 transition"
-                        aria-label="Toggle search"
-                    >
-                        <FaSearch size = {18} />
-                    </button>
-                </div>
-                {showSearchBar && (
-                    <input
-                        type="text"
-                        placeholder="Search by name..."
-                        value={searchTerm}
-                        onChange={(e) => {
-                            setSearchTerm(e.target.value);
-                            setCurrentPage(1); // faz reset para a primeira página
+                        onClick={() => {
+                            setSearchTerm(searchInput);
+                            setCurrentPage(1);
                         }}
-                        className="mb-4 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-[#FC9D25]"
-                    />
-                )}
+                        className="p-2 bg-[#FAFAFA] text-[#191919] rounded hover:bg-[#EDEBEB] transition"
+                        aria-label="Search"
+                    >
+                        <FaSearch size={25} />
+                    </button>
 
-
-                <Button
-                    onClick={openAddModal}
-                    className="bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded"
-                >
-                    <Plus size={25} />
-                </Button>
+                    <Dropdown>
+                        <DropdownTrigger>
+                            <button
+                                onClick={onOpenAddProfileModal}
+                                className="bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded"
+                            >
+                                <Plus size={25} />
+                            </button>
+                        </DropdownTrigger>
+                        <DropdownMenu aria-label="Actions" className="bg-white shadow-lg rounded-md p-1">
+                            <DropdownItem key="add" onPress={onOpenAddProfileModal}>Add Profile</DropdownItem>
+                        </DropdownMenu>
+                    </Dropdown>
+                </div>
             </div>
 
-            {/* Modal de adição de perfil */}
+            {/* Search Section */}
+            <div className="mb-6 flex flex-col items-start gap-2">
+                <input
+                    type="text"
+                    placeholder="Search by name..."
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-[#FC9D25]"
+                />
+            </div>
+
+            {/* Modal for Adding Profile */}
             <Modal isOpen={isAddProfileModalOpen} onOpenChange={handleCloseAddProfileModal} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
                 <ModalContent>
                     {(onClose) => (
@@ -249,7 +253,7 @@ const ProfilesTable = () => {
                                         </div>
                                     ))}
 
-                                    {/* Seleção de propriedades*/}
+                                    {/* Property Selection */}
                                     <div>
                                         <label htmlFor="propertyIDs" className="block text-sm font-medium text-[#191919] mb-1">
                                             Select Properties
@@ -279,70 +283,7 @@ const ProfilesTable = () => {
                 </ModalContent>
             </Modal>
 
-            {/* Modal de edição de perfil */}
-            <Modal isOpen={isEditProfileModalOpen} onOpenChange={onCloseEditProfileModal} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
-                <ModalContent>
-                    {(onClose) => (
-                        <>
-                            <ModalHeader className="relative rounded bg-[#FC9D25] flex justify-between items-center px-6 py-3">
-                                <div className="text-xl font-bold text-white">Edit Profile</div>
-                                <button
-                                    type="button"
-                                    onClick={onClose}
-                                    className="absolute right-4 top-3 text-white text-2xl font-bold hover:text-gray-200"
-                                >
-                                    &times;
-                                </button>
-                            </ModalHeader>
-                            <ModalBody className="py-5 px-6 bg-[#FAFAFA]">
-                                <form id="editProfileForm" onSubmit={handleSubmitProfile} className="space-y-6">
-                                    {["firstName", "secondName", "email", "password"].map((field, index) => (
-                                        <div key={index}>
-                                            <label htmlFor={field} className="block text-sm font-medium text-[#191919] mb-1">
-                                                {field.charAt(0).toUpperCase() + field.slice(1)}
-                                            </label>
-                                            <input
-                                                id={field}
-                                                type={field === "password" ? "password" : "text"}
-                                                name={field}
-                                                value={newProfile[field]}
-                                                onChange={handleInputChange}
-                                                className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
-                                            />
-                                        </div>
-                                    ))}
-
-                                    {/* Seleção de propriedades*/}
-                                    <div>
-                                        <label htmlFor="propertyIDs" className="block text-sm font-medium text-[#191919] mb-1">
-                                            Select Properties
-                                        </label>
-                                        <Select
-                                            id="propertyIDs"
-                                            name="propertyIDs"
-                                            options={propertyOptions}
-                                            value={propertyOptions.filter(option => newProfile.propertyIDs.includes(option.value))}
-                                            onChange={handlePropertyChange}
-                                            isMulti
-                                            isSearchable
-                                        />
-                                    </div>
-                                </form>
-                            </ModalBody>
-                            <ModalFooter className="border-t border-[#EDEBEB] bg-[#FAFAFA] pt-2 px-8">
-                                <Button onPress={onClose} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">
-                                    Cancel
-                                </Button>
-                                <Button type="submit" form="editProfileForm" className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray-600 transition">
-                                    Save
-                                </Button>
-                            </ModalFooter>
-                        </>
-                    )}
-                </ModalContent>
-            </Modal>
-
-            {/* Tabela */}
+            {/* Table */}
             <div className="overflow-x-auto bg-muted/40">
                 <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB] mx-auto">
                     <thead>
@@ -389,14 +330,14 @@ const ProfilesTable = () => {
                 </table>
             </div>
 
-            {/*Paginação*/}
+            {/* Pagination */}
             <div className="flex fixed bottom-0 left-0 items-center gap-2 w-full px-4 py-3 bg-gray-200 justify-end">
                 <span className="px-4 py-2">Items per page</span>
                 <select
                     value={itemsPerPage}
                     onChange={(e) => {
                         setItemsPerPage(Number(e.target.value));
-                        setCurrentPage(1); // Reset para a primeira página
+                        setCurrentPage(1); // Reset to first page
                     }}
                     className="border p-2 rounded px-4 py-2 w-20 bg-white"
                 >

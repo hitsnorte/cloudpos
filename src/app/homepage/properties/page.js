@@ -20,8 +20,8 @@ const PropertiesTable = () => {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const { isOpen: isEditOpen, onOpen: onEditOpen, onClose: onEditClose } = useDisclosure();
 
-    const  [searchTerm, setSearchTerm] = useState('');
-    const [showSearchBar , setShowSearchBar] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [searchInput , setSearchInput] = useState('');
     const [itemsPerPage, setItemsPerPage] = useState(15);
     const [currentPage , setCurrentPage] = useState(1);
     const [properties, setProperties] = useState([]);
@@ -214,13 +214,17 @@ const PropertiesTable = () => {
 
                 <div className="flex items-center gap-2">
                     <button
-                        onClick={() => setShowSearchBar(prev => !prev)}
+                        onClick={() => {
+                        setSearchTerm(searchInput);
+                        setCurrentPage(1);
+                    }}
                         className="p-2 rounded hover:bg-gray-200 transition"
-                        aria-label="Toggle Search"
-                    >
-                        <FaSearch size={18} />
+                        aria-label="Search"
+                        >
+                    <FaSearch size={18} />
                     </button>
-                    <Dropdown>
+
+                <Dropdown>
                         <DropdownTrigger>
                             <button
                                 onClick={onOpen}
@@ -236,19 +240,21 @@ const PropertiesTable = () => {
                 </div>
             </div>
 
-            {showSearchBar && (
+            <div className="flex mb-4 items-center gap-2">
                 <input
                     type="text"
                     placeholder="Search by property name..."
-                    value={searchTerm}
-                    onChange={(e) => {
-                        setSearchTerm(e.target.value);
-                        setCurrentPage(1); // Reset para a primeira página ao fazer pesquisa
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                            setSearchTerm(searchInput);
+                            setCurrentPage(1);
+                        }
                     }}
-                    className="mb-4 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-[#FC9D25]"
+                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-[#FC9D25]"
                 />
-            )}
-
+            </div>
 
             {/* Modal de adição de propriedades*/}
             <Modal isOpen={isOpen} onOpenChange={onClose} size="md" placement="center" className="w-100 shadow-xl rounded-lg">

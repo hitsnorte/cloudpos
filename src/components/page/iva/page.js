@@ -659,39 +659,45 @@ const DataIva = () => {
         
     </table>
     
-    <div className="flex fixed bottom-0 left-0 items-center gap-2 w-full px-4 py-3 bg-gray-200 justify-end p-0">
-    <span className="px-4 py-2 ">Items per page</span>
+    <div className="flex fixed bottom-0 left-0 items-center gap-2 w-full px-4 py-3 bg-gray-200 justify-end">
+          <span className="px-2 py-1">Items per page</span>
+
           <select
             value={itemsPerPage}
             onChange={(e) => {
               setItemsPerPage(Number(e.target.value));
               setCurrentPage(1);
             }}
-            className="border p-2 rounded px-4 py-2 w-20 gray-200"
+            className="border p-2 rounded px-2 py-1 w-16"
           >
             {PAGE_SIZES.map((size) => (
               <option key={size} value={size}>{size}</option>
             ))}
           </select>
-          
-          <button 
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-            className={`px-4 py-2 rounded ${currentPage === 1 ? 'bg-gray-200 text-black cursor-not-allowed' : 'bg-gray-200 hover:bg-gray-200'}`}
-          >
-            &lt;  {/* Símbolo de "Anterior" */}
-          </button>
-  
-          <span className="px-4 py-2 rounded">{currentPage} / {totalPages}</span>
 
-          <button 
-            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-            disabled={currentPage === totalPages}
-            className={`px-4 py-2 rounded ${currentPage === totalPages ? 'bg-gray-200 text-black cursor-not-allowed' : 'bg-gray-200 hover:bg-gray-200'}`}
-          >
-            &gt;  {/* Símbolo de "Próximo" */}
-          </button>
-        </div> 
+          {/* Agrupamento do controle de paginação */}
+          <div className="flex items-center border rounded-lg overflow-hidden ml-4">
+            <button 
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className={`px-3 py-0.5 ${currentPage === 1 ? 'bg-white text-black cursor-not-allowed' : 'bg-white hover:bg-gray-100'}`}
+            >
+              &lt;
+            </button>
+
+            <span className="px-3 py-0.5 bg-white">
+              {currentPage}
+            </span>
+
+            <button 
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-0.5 ${currentPage === totalPages ? 'bg-white text-black cursor-not-allowed' : 'bg-white hover:bg-gray-100'}`}
+            >
+              &gt;
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

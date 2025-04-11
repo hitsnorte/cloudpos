@@ -37,12 +37,12 @@ function SidebarItem({ icon, text, submenu }) {
     );
 }
 
-function SidebarSubItem({ ref, label, icon, expanded }) {
+function SidebarSubItem({ href, text, icon, expanded }) {
     return (
         <li className="flex items-center py-2 px-3 my-1 text-gray-600 hover:bg-indigo-50 rounded-md cursor-pointer">
             {icon && <span>{icon}</span>}
-            <a href={ref} className={`transition-all ${expanded ? "ml-3 opacity-100" : "w-0 opacity-0 overflow-hidden"}`}>
-                {label}
+            <a href={href} className={`transition-all ${expanded ? "ml-3 opacity-100" : "w-0 opacity-0 overflow-hidden"}`}>
+                {text}
             </a>
         </li>
     );
@@ -52,108 +52,88 @@ export default function SidebarMenu() {
     const { data: session } = useSession();
     const { expanded } = useContext(SidebarContext);
 
-    const [selectedProperty, setSelectedProperty] = useState(() => {
-        return localStorage.getItem("selectedProperty") || null;
-    });
+    const [selectedProperty, setSelectedProperty] = useState(() => localStorage.getItem("selectedProperty") || "");
     const [tempSelectedProperty, setTempSelectedProperty] = useState(null);
-    const [isConfirmed, setIsConfirmed] = useState(() => {
-        return JSON.parse(localStorage.getItem("isConfirmed")) || false;
-    });
+    const [isConfirmed, setIsConfirmed] = useState(() => JSON.parse(localStorage.getItem("isConfirmed")) || false);
     const [properties, setProperties] = useState([]);
 
     const menuItems = {
-           "Store Settings": {
-      icon: <LuFolderCog  size={20} />, 
-      submenu: [
-        {  ref: "/", label: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> }, 
-        { ref: "/homepage/grupos", label: "Groups", icon: <FaLayerGroup  size={18} /> }, 
-        { ref: "/homepage/family", label: "Families", icon: <MdFamilyRestroom size={18} /> },
-        { ref: "/homepage/subfamilia", label: "SubFamilies", icon: <GiFamilyTree size={18} /> },
-        { ref: "/homepage/product", label: "Products", icon: <FaProductHunt size={18} /> },
-        { ref: "/homepage/Iva", label: "VAT", icon: <IoPricetags size={18} /> },
-        { ref: "/homepage/unit", label: "unit", icon: <FaUnity  size={18} /> },
-            ], 
-        },
 
-      "Store Price": {
-      icon: <LuFolderCog  size={20} />, 
-      submenu: [
-        { ref: "/homepage/price classes", label: "price classes", icon: <MdClass  size={18} /> }, 
-        { ref: "/homepage/periods", label: "periods", icon: <CiViewTimeline  size={18} /> }, 
-        // { ref: "/homepage/exploration center", label: "exploration center", icon: <MdFamilyRestroom size={18} /> },
-        { ref: "/homepage/hours", label: "hours", icon: <FaHourglassEnd size={18} /> },
-            ], 
+        "Store Settings": {
+            icon: <LuFolderCog size={20} />,
+            submenu: [
+                { href: "/", text: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> },
+                { href: "/homepage/grupos", text: "Groups", icon: <FaTable size={18} /> },
+                { href: "/homepage/family", text: "Families", icon: <FaTable size={18} /> },
+                { href: "/homepage/subfamilia", text: "SubFamilies", icon: <FaTable size={18} /> },
+                { href: "/homepage/product", text: "Products", icon: <FaTable size={18} /> },
+                { href: "/homepage/Iva", text: "VAT", icon: <FaTable size={18} /> },
+                { href: "/homepage/unit", text: "Unit", icon: <FaTable size={18} /> },
+            ],
         },
     };
 
-    
     // Fetch properties from session
+
     useEffect(() => {
         if (session?.propertyNames) {
             setProperties(session.propertyNames);
         }
     }, [session?.propertyNames]);
 
-    // Ensure selected property and confirmation status are preserved in localStorage
     useEffect(() => {
         const savedSelectedProperty = localStorage.getItem("selectedProperty");
         const savedIsConfirmed = JSON.parse(localStorage.getItem("isConfirmed"));
-    
-        if (savedSelectedProperty && savedIsConfirmed === true) {
-            setSelectedProperty(savedSelectedProperty);
-            setTempSelectedProperty(savedSelectedProperty);
-            setIsConfirmed(true);
-        } else {
-            // Reset everything if not confirmed
-            setSelectedProperty("");
-            setTempSelectedProperty("");
-            setIsConfirmed(false);
+
+        if (savedSelectedProperty && savedIsConfirmed !== null) {
+            setSelectedProperty(savedSelectedProperty || "");
+            setTempSelectedProperty(savedSelectedProperty || "");
+            setIsConfirmed(savedIsConfirmed);
+
         }
     }, []);
 
+    useEffect(() => {
+        if (selectedProperty && isConfirmed) {
+            localStorage.setItem("selectedProperty", selectedProperty);
+        }
+    }, [selectedProperty, isConfirmed]);
 
 
     return (
         <div className="p-3">
-            {/* Select de propriedade) */}
             <select
-            id="selectProperty"
-            value={tempSelectedProperty || ""}
-            onChange={(e) => {
-                const newPropertyID = e.target.value;
 
-                if (newPropertyID !== selectedProperty) {
-                    setIsConfirmed(false);
-                }
+                id="selectProperty"
+                value={selectedProperty}
+                onChange={(e) => {
+                    const newPropertyID = e.target.value;
 
-                setTempSelectedProperty(newPropertyID);
-            }}
-            required
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-[#FC9D25]"
-        >
-            <option value="" >
-                Select a property
-            </option>
-            {properties.map((property) => (
-                <option key={property.id} value={property.id}>
-                    {property.name}
-                </option>
-            ))}
-        </select>
+                    if (newPropertyID !== selectedProperty) {
+                        setIsConfirmed(false);
+                    }
 
+                    setTempSelectedProperty(newPropertyID);
+                }}
+                className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-[#FC9D25]"
+            >
+                <option value="">Select a property</option>
+                {properties.map((property) => (
+                    <option key={property.id} value={property.id}>
+                        {property.name}
+                    </option>
+                ))}
+            </select>
 
-
-            {/* Show buttons when a property is selected but not confirmed */}
             {tempSelectedProperty && !isConfirmed && (
                 <div className="mt-4 flex flex-col gap-2">
                     <button
                         className="bg-red-500 text-white p-2 rounded"
                         onClick={() => {
-                            setSelectedProperty(null);
+                            setSelectedProperty("");
                             setIsConfirmed(false);
                             localStorage.removeItem("selectedProperty");
                             localStorage.removeItem("isConfirmed");
-
                             window.history.back();
                         }}
                     >
@@ -174,7 +154,6 @@ export default function SidebarMenu() {
                 </div>
             )}
 
-            {/* Menu da Sidebar , mostra botões quando uma propriedade é escolhida e confirmada */}
             {(session && selectedProperty && isConfirmed) ? (
                 Object.entries(menuItems).map(([key, value]) => (
                     <SidebarItem key={key} text={key} icon={value.icon} submenu={value.submenu} />

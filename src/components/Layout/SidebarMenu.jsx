@@ -2,8 +2,12 @@ import { useContext, useState, useEffect } from "react";
 import { SidebarContext } from "./Sidebar";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { TbLayoutDashboardFilled } from "react-icons/tb";
-import { FaTable } from "react-icons/fa";
-import { LuFolderCog } from "react-icons/lu";
+import { FaLayerGroup, FaUnity, FaProductHunt, FaHourglassEnd    } from "react-icons/fa";
+import { MdFamilyRestroom, MdClass } from "react-icons/md";
+import { GiFamilyTree } from "react-icons/gi";
+import { IoPricetags } from "react-icons/io5";
+import { CiViewTimeline } from "react-icons/ci";
+import { LuFolderOpenDot, LuFolderOpen, LuFolderCog, LuFolderDot } from "react-icons/lu";
 import { useSession } from "next-auth/react";
 
 function SidebarItem({ icon, text, submenu }) {
@@ -54,6 +58,7 @@ export default function SidebarMenu() {
     const [properties, setProperties] = useState([]);
 
     const menuItems = {
+
         "Store Settings": {
             icon: <LuFolderCog size={20} />,
             submenu: [
@@ -67,6 +72,8 @@ export default function SidebarMenu() {
             ],
         },
     };
+
+    // Fetch properties from session
 
     useEffect(() => {
         if (session?.propertyNames) {
@@ -82,6 +89,7 @@ export default function SidebarMenu() {
             setSelectedProperty(savedSelectedProperty || "");
             setTempSelectedProperty(savedSelectedProperty || "");
             setIsConfirmed(savedIsConfirmed);
+
         }
     }, []);
 
@@ -95,6 +103,7 @@ export default function SidebarMenu() {
     return (
         <div className="p-3">
             <select
+
                 id="selectProperty"
                 value={selectedProperty}
                 onChange={(e) => {

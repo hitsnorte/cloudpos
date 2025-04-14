@@ -1,10 +1,12 @@
 'use client'; // Necessário para componentes client-side no App Router
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { HiDotsVertical } from "react-icons/hi";
 import { FaGear } from "react-icons/fa6";
 import { Plus } from "lucide-react";
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
+import { HiAdjustmentsHorizontal } from "react-icons/hi2";
+import { FaMagnifyingGlass } from "react-icons/fa6";
 import { fetchFamily, createFamily, deleteFamily, updateFamily } from '@/src/lib/apifamily';
 import { fetchGrup } from '@/src/lib/apigroup';
 
@@ -34,7 +36,9 @@ const DataFamily = () => {
 
   const [itemsPerPage, setItemsPerPage] = useState(50);
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = Math.ceil(families.length / itemsPerPage);
+
+
+  const [sortConfig, setSortConfig] = useState({ key: 'VDesc', direction: 'asc' });
 
   const {
     isOpen: isAddModalOpen,
@@ -51,16 +55,97 @@ const DataFamily = () => {
     onOpen: onDeleteModalOpen,
     onClose: onDeleteModalClose,
   } = useDisclosure();
+  const {
+    isOpen: isSelectModalOpen,
+    onOpen: onSelectModalOpen,
+    onClose: onSelectModalClose,
+  } = useDisclosure();
 
   useEffect(() => {
     loadFamilies();
   }, []);
 
+  const loadColumnVisibility = () => {
+    const savedVisibility = localStorage.getItem('columnVisibility');
+    if (savedVisibility) {
+      return JSON.parse(savedVisibility);
+    }
+    return {
+      codFam: true, // estado padrão
+      description: true,
+      createdIn: true,
+      codGrpFam: true,
+      descGrp: true,
+    };
+  };
   
-  const paginatedFamilies = families.slice(
+  const saveColumnVisibility = () => {
+    localStorage.setItem('columnVisibility', JSON.stringify(columnVisibility));
+  };
+  
+  const toggleColumn = (column) => {
+    setColumnVisibility((prev) => {
+      const newVisibility = { ...prev, [column]: !prev[column] };
+      localStorage.setItem('columnVisibility', JSON.stringify(newVisibility)); // Atualiza no localStorage
+      return newVisibility;
+    });
+  };
+
+  const filteredFamilies = families.filter((familia) =>
+    Object.values(familia).some((value) =>
+      String(value).toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+
+  // Agora você pode usar a loadColumnVisibility ao inicializar o state
+  const [columnVisibility, setColumnVisibility] = useState(loadColumnVisibility());
+  
+  const columns = [
+    { key: 'codFam', label: 'Cod Fam' },
+    { key: 'description', label: 'Description' },
+    { key: 'createdIn', label: 'Created In' },
+    { key: 'codGrpFam', label: 'cod Grp' },
+    { key: 'descGrp', label: 'Description Grp' },
+  ];
+
+  const [columnSearchTerm, setColumnSearchTerm] = useState('');
+
+  const filteredColumns = columns.filter((col) =>
+    col.label.toLowerCase().includes(columnSearchTerm.toLowerCase())
+  );
+  
+  const totalPages = Math.ceil(filteredFamilies.length / itemsPerPage);
+
+  const paginatedFamilies = filteredFamilies.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+   const sortedFamilies = useMemo(() => {
+      if (!paginatedFamilies || !Array.isArray(paginatedFamilies)) return [];
+    
+      const sorted = [...paginatedFamilies].sort((a, b) => {
+        if (!sortConfig.key) return 0;
+    
+        let aValue = a[sortConfig.key];
+        let bValue = b[sortConfig.key];
+    
+        if (sortConfig.key === 'DCriadoEm') {
+          aValue = new Date(aValue);
+          bValue = new Date(bValue);
+        } else {
+          aValue = aValue?.toString().toLowerCase();
+          bValue = bValue?.toString().toLowerCase();
+        }
+    
+        if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+    
+      return sorted;
+    }, [paginatedFamilies, sortConfig]);
 
   const loadFamilies = async () => {
     try {
@@ -93,16 +178,6 @@ const fetchGroupMap = async () => {
     return {};
   }
 };
-
-
-  const filteredFamilies = (families || []).filter((family) => {
-    if (!family || !family.family_name) return false; // Verifica se `family` e `family.family_name` existem
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      (family.id && family.id.toString().includes(searchLower)) || 
-      (family.family_name && family.family_name.toLowerCase().includes(searchLower))
-    );
-  });
   
 
   const handleInputChange = (e) => {
@@ -112,6 +187,8 @@ const fetchGroupMap = async () => {
 
 
   const handleAddFamily = async (e) => {
+    await createFamily(familyData);
+    await loadFamilies();
     e.preventDefault();
     
     if (!newFamily.family_name || !selectedGroup) {
@@ -175,6 +252,8 @@ const fetchGroupMap = async () => {
   };
 
   const handleUpdateFamily = async (e) => {
+    await updateFamily();
+    await loadFamilies();
     e.preventDefault();
     if (!editFamily || !editFamily.family_name) {
       setError('Preencha o nome da familia.');
@@ -197,18 +276,123 @@ const fetchGroupMap = async () => {
     }
   };
 
+  const handleSort = (key) => {
+    setSortConfig((prevConfig) => ({
+      key,
+      direction: prevConfig.key === key && prevConfig.direction === 'asc' ? 'desc' : 'asc',
+    }));
+  };
+
   return (
     <div className="p-4 pb-10">
+
+      <div className="w-1/3">
+              {/* Campo de pesquisa */}
+              <div className="mb-4 relative">
+              <FaMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+              <input
+                type="text"
+                placeholder="Pesquisar..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full max-w-md pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+              />
+            </div>
+          </div>
+
       {/* button */}
       <Dropdown>
       <DropdownTrigger>
       <button 
           onClick={onAddModalOpen}
-          className="absolute top-4 right-14 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
+          className="absolute top-4 right-25 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
           < Plus size={25}  />     
       </button>
       </DropdownTrigger>
       </Dropdown>
+
+      {/* button adjustments*/}  
+        <Dropdown>
+          <DropdownTrigger>
+             <button 
+               onClick={onSelectModalOpen}
+               className="absolute top-4 right-10 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
+               <HiAdjustmentsHorizontal size={25} />
+             </button>
+        </DropdownTrigger>
+        </Dropdown>
+
+
+       {/* Modal para adjustments do grupo */} 
+       <Modal 
+      isOpen={isSelectModalOpen}
+      onOpenChange={onSelectModalClose}
+      size="sm" 
+      placement="center" 
+      className="w-100 bg-white shadow-xl rounded-lg" 
+      hideCloseButton={true}
+      >
+
+      <ModalContent>
+      {(onClose) => (
+          <>
+            <ModalHeader className="rounded bg-[#FC9D25] flex justify-between items-center">
+              <div className="text-xl font-bold text-white">Select Column</div>
+              <Button
+                  onClick={onClose}
+                  className="text-white bg-transparent border-0 text-2xl p-0"
+                  aria-label="Close"
+                >
+                  &times; {/* Unicode for "×" sign */}
+                </Button>
+              </ModalHeader>
+            <ModalBody className="py-5 px-6">
+            <div className="w-88">
+                 {/* Campo de pesquisa  */}
+                <div className="mb-4 relative">
+                <FaMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+                <input
+                  type="text"
+                  placeholder="Pesquisar..."
+                  value={columnSearchTerm}
+                  onChange={(e) => setColumnSearchTerm(e.target.value)}
+                  className="w-full max-w-md pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                />
+              </div>
+            </div>
+            <div className="space-y-4">
+            {filteredColumns.map((col) => (
+              <div key={col.key} className="flex items-center rounded border border-black p-1">
+                <input
+                  type="checkbox"
+                  checked={columnVisibility[col.key]}
+                  onChange={() => toggleColumn(col.key)}
+                  className="mr-2"
+                />
+                <label className="text-sm">{col.label}</label>
+              </div>
+            ))}
+          </div>
+          </ModalBody>
+
+        <ModalFooter className="w-102 border-t border-gray-200 pt-2 px-8">
+              <Button
+              type="submit"
+              form="selectGroupForm"
+              className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
+              disabled={isLoading}
+              onClick={() => {
+                saveColumnVisibility(); // Salvar as configurações
+                window.location.reload(); // Recarregar a página
+              }}
+            >
+              {isLoading ? <Spinner size="sm" color="white" /> : 'Save'}
+            </Button>
+            </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
 
       {/* Modal para adicionar grupo */}
       <Modal
@@ -402,43 +586,65 @@ const fetchGroupMap = async () => {
 
       {/* Tabela */}
       <div className="overflow-x-auto sm:flex sm:flex-col bg-muted/40">
-        <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB] mx-auto">
+        <table className="w-394 bg-[#FAFAFA] border-collapse border border-[#EDEBEB] mx-auto">
           <thead>
             <tr>
-              <th className="border-collapse border border-[#EDEBEB] !w-[1px] px-1 sm:px-5 py-2 bg-[#FC9D25]">
+              <th className="border-collapse border border-[#EDEBEB] w-10 px-1 sm:px-5 py-2 bg-[#FC9D25]">
                 <div className=" flex items-center justify-center">
                   <FaGear size={20} color='white'/>
                 </div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-0.5 px-1 sm:px-2 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+              {columnVisibility.codFam && (
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-10 px-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className="flex items-left justify-left">Cod Fam</div>
+              </th>
+              )}
+              {columnVisibility.description && (
+              <th onClick={() => handleSort('VDesc')} className="uppercase border-collapse border border-[#EDEBEB] w-100 sm:px-4 py-4 bg-[#FC9D25] text-[#FAFAFA] text-sm">
                 <div className="flex items-left justify-left">
-                  Cod Fam
+                  Description
+                  {sortConfig.key === 'VDesc' && (
+                    <span className="ml-auto">
+                      {sortConfig.direction === 'asc' ? (
+                        <ArrowUpIcon className="inline-block w-4 h-4 text-white" />
+                      ) : (
+                        <ArrowDownIcon className="inline-block w-4 h-4 text-white" />
+                      )}
+                    </span>
+                  )}
                 </div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-110 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-left justify-left ">
+              )}
+               {columnVisibility.createdIn && (
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-10 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className="flex items-left justify-left">Created In</div>
+              </th>
+              )}
+              {columnVisibility.codGrpFam && (
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-10 px-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className="flex items-left justify-left">Cod Grp Fam</div>
+              </th>
+              )}
+               {columnVisibility.descGrp && (
+              <th onClick={() => handleSort('VDescGroup')} className="uppercase border-collapse border border-[#EDEBEB] w-90 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className="flex items-left justify-left">
                   Description
-              </div>
+                  {sortConfig.key === 'VDescGroup' && (
+                    <span className="ml-auto">
+                      {sortConfig.direction === 'asc' ? (
+                        <ArrowUpIcon className="inline-block w-4 h-4 text-white" />
+                      ) : (
+                        <ArrowDownIcon className="inline-block w-4 h-4 text-white" />
+                      )}
+                    </span>
+                  )}
+                </div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-25 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-left justify-left ">
-                Created In
-              </div>
-              </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-20 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-left justify-left ">
-                  Cod Grp Fam
-              </div>
-              </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-110 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-left justify-left ">
-                  Desc Grp
-              </div>
-              </th>
+              )}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-300">
-          {paginatedFamilies.map((family) => (
+          {sortedFamilies.map((family) => (
             <tr key={family.VCodFam} className="hover:bg-gray-200">
               {/* Ações */}
               <td className="border border-[#EDEBEB] px-1 py-1 text-center">
@@ -455,14 +661,24 @@ const fetchGroupMap = async () => {
                   </DropdownMenu>
                 </Dropdown>
               </td>
-              <td className="border border-[#EDEBEB] px-3 py-2 text-right">{family.VCodFam}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{family.VDesc}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-right">
+              {columnVisibility.codFam && (
+                 <td className="border border-[#EDEBEB] px-3 py-2 text-right">{family.VCodFam}</td>
+               )}
+               {columnVisibility.description && (
+                  <td className="border border-[#EDEBEB] px-3 py-2 text-left">{family.VDesc}</td>
+                )}
+                {columnVisibility.createdIn && (
+                  <td className="border border-[#EDEBEB] px-4 py-2 text-right">
                 {new Date(family.DCriadoEm).toLocaleDateString('pt-BR')}
-              </td>
-
-              <td className="border border-[#EDEBEB] px-4 py-2 text-right">{family.VCodGrFam}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{family.VDescGroup}</td>
+                  </td>
+                )}
+                {columnVisibility.codGrpFam && (
+                 <td className="border border-[#EDEBEB] px-3 py-2 text-right">{family.VCodGrFam}</td>
+               )}
+               {columnVisibility.descGrp && (
+                  <td className="border border-[#EDEBEB] px-3 py-2 text-left">{family.VDescGroup}</td>
+                )}
+              
   
               </tr>
             ))}

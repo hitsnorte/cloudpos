@@ -31,6 +31,7 @@ const DataGrupo = () => {
   const [editGroup, setEditGroup] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [groupToDelete, setGroupToDelete] = useState(null);
+
   
 
   const [itemsPerPage, setItemsPerPage] = useState(50);
@@ -90,6 +91,20 @@ const DataGrupo = () => {
     Object.values(group).some((value) =>
       String(value).toLowerCase().includes(searchTerm.toLowerCase())
     )
+  );
+
+  
+
+  const columns = [
+    { key: 'codGrp', label: 'Cod Grp' },
+    { key: 'description', label: 'Description' },
+    { key: 'createdIn', label: 'Created In' },
+  ];
+
+  const [columnSearchTerm, setColumnSearchTerm] = useState('');
+
+  const filteredColumns = columns.filter((col) =>
+    col.label.toLowerCase().includes(columnSearchTerm.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredGroups.length / itemsPerPage);
@@ -288,48 +303,32 @@ const DataGrupo = () => {
                 </Button>
               </ModalHeader>
             <ModalBody className="py-5 px-6">
-            {/* <div className="w-88">
-                {/* Campo de pesquisa 
+            <div className="w-88">
+                 {/* Campo de pesquisa  */}
                 <div className="mb-4 relative">
                 <FaMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
                 <input
                   type="text"
                   placeholder="Pesquisar..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  value={columnSearchTerm}
+                  onChange={(e) => setColumnSearchTerm(e.target.value)}
                   className="w-full max-w-md pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
                 />
               </div>
-            </div> */}
-            <div className="space-y-4">
-              <div className="flex items-center rounded border border-black p-1">
-                <input
-                  type="checkbox"
-                  checked={columnVisibility.codGrp}
-                  onChange={() => toggleColumn('codGrp')}
-                  className="mr-2"
-                />
-                <label className="text-sm">Cod Grp</label>
-              </div>
-              <div className="flex items-center rounded border border-black p-1">
-                <input
-                  type="checkbox"
-                  checked={columnVisibility.description}
-                  onChange={() => toggleColumn('description')}
-                  className="mr-2"
-                />
-                <label className="text-sm">Description</label>
-              </div>
-              <div className="flex items-center rounded border border-black p-1">
-                <input
-                  type="checkbox"
-                  checked={columnVisibility.createdIn}
-                  onChange={() => toggleColumn('createdIn')}
-                  className="mr-2"
-                />
-                <label className="text-sm">Created In</label>
-              </div>
             </div>
+            <div className="space-y-4">
+            {filteredColumns.map((col) => (
+              <div key={col.key} className="flex items-center rounded border border-black p-1">
+                <input
+                  type="checkbox"
+                  checked={columnVisibility[col.key]}
+                  onChange={() => toggleColumn(col.key)}
+                  className="mr-2"
+                />
+                <label className="text-sm">{col.label}</label>
+              </div>
+            ))}
+          </div>
           </ModalBody>
 
         <ModalFooter className="w-102 border-t border-gray-200 pt-2 px-8">

@@ -4,6 +4,7 @@ import { ChevronDown, ChevronRight } from "lucide-react";
 import { TbLayoutDashboardFilled } from "react-icons/tb";
 import { FaTable } from "react-icons/fa";
 import { LuFolderCog } from "react-icons/lu";
+import { TiShoppingCart } from "react-icons/ti";
 import { useSession } from "next-auth/react";
 
 function SidebarItem({ icon, text, submenu }) {
@@ -46,7 +47,7 @@ function SidebarSubItem({ href, text, icon, expanded }) {
 
 export default function SidebarMenu() {
     const { data: session } = useSession();
-    const { expanded } = useContext(SidebarContext);
+    const { expanded, isMobile } = useContext(SidebarContext); // ✅ Pulling isMobile from context
 
     const [selectedProperty, setSelectedProperty] = useState(() => localStorage.getItem("selectedProperty") || "");
     const [tempSelectedProperty, setTempSelectedProperty] = useState(null);
@@ -64,6 +65,15 @@ export default function SidebarMenu() {
                 { href: "/homepage/product", text: "Products", icon: <FaTable size={18} /> },
                 { href: "/homepage/Iva", text: "VAT", icon: <FaTable size={18} /> },
                 { href: "/homepage/unit", text: "Unit", icon: <FaTable size={18} /> },
+            ],
+        },
+    };
+
+    const shoppingCartItems = {
+        "Shopping cart": {
+            icon: <TiShoppingCart size={20} />,
+            submenu: [
+                { href: "/homepage/Cart", text: "Shopping cart", icon: <TiShoppingCart size={18} /> },
             ],
         },
     };
@@ -90,7 +100,6 @@ export default function SidebarMenu() {
             localStorage.setItem("selectedProperty", selectedProperty);
         }
     }, [selectedProperty, isConfirmed]);
-
 
     return (
         <div className="p-3">
@@ -146,9 +155,14 @@ export default function SidebarMenu() {
             )}
 
             {(session && selectedProperty && isConfirmed) ? (
-                Object.entries(menuItems).map(([key, value]) => (
-                    <SidebarItem key={key} text={key} icon={value.icon} submenu={value.submenu} />
-                ))
+                <>
+                    {Object.entries(menuItems).map(([key, value]) => (
+                        <SidebarItem key={key} text={key} icon={value.icon} submenu={value.submenu} />
+                    ))}
+                    {isMobile && Object.entries(shoppingCartItems).map(([key, value]) => (
+                        <SidebarItem key={key} text={key} icon={value.icon} submenu={value.submenu} />
+                    ))}
+                </>
             ) : (
                 <p className="mt-4 text-gray-500 text-center">Select a property to continue...</p>
             )}

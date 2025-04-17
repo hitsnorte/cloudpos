@@ -469,7 +469,7 @@ const DataProduct = () => {
                 />
               </div>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-4 max-h-60 overflow-y-auto pr-2">
             {filteredColumns.map((col) => (
               <div key={col.key} className="flex items-center rounded border border-black p-1">
                 <input

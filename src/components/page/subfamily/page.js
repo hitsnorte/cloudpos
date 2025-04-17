@@ -382,7 +382,7 @@ const DataSubfamilia = () => {
                 />
               </div>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-4 max-h-60 overflow-y-auto pr-2">
             {filteredColumns.map((col) => (
               <div key={col.key} className="flex items-center rounded border border-black p-1">
                 <input
@@ -657,7 +657,7 @@ const DataSubfamilia = () => {
               {columnVisibility.descFam && (
               <th onClick={() => handleSort('VDescFamily')} className="uppercase border-collapse border border-[#EDEBEB] w-400 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
                 <div className="flex items-left justify-left">
-                  Description
+                  Desc Fam
                   {sortConfig.key === 'VDesc' && (
                     <span className="ml-auto">
                       {sortConfig.direction === 'asc' ? (
@@ -678,7 +678,7 @@ const DataSubfamilia = () => {
               {columnVisibility.descGrp && (
               <th onClick={() => handleSort('VDescGroup')} className="uppercase border-collapse border border-[#EDEBEB] w-400 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
                 <div className="flex items-left justify-left">
-                  Description
+                  Desc Grp
                   {sortConfig.key === 'VDesc' && (
                     <span className="ml-auto">
                       {sortConfig.direction === 'asc' ? (

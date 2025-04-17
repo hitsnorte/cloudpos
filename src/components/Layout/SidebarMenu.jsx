@@ -90,7 +90,7 @@ export default function SidebarMenu() {
         if (session?.propertyNames) {
             setProperties(session.propertyNames);
         }
-    }, [session?.propertyNames]);
+    }, [session]);
 
     useEffect(() => {
         const savedSelectedProperty = localStorage.getItem("selectedProperty");

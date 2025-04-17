@@ -628,7 +628,7 @@ const fetchGroupMap = async () => {
                {columnVisibility.descGrp && (
               <th onClick={() => handleSort('VDescGroup')} className="uppercase border-collapse border border-[#EDEBEB] w-90 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
                 <div className="flex items-left justify-left">
-                  Description
+                  Desc Grp
                   {sortConfig.key === 'VDescGroup' && (
                     <span className="ml-auto">
                       {sortConfig.direction === 'asc' ? (

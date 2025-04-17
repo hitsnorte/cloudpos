@@ -2,13 +2,16 @@ import { useContext, useState, useEffect } from "react";
 import { SidebarContext } from "./Sidebar";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { TbLayoutDashboardFilled } from "react-icons/tb";
-import { FaLayerGroup, FaUnity, FaProductHunt, FaHourglassEnd    } from "react-icons/fa";
+import { FaLayerGroup, FaUnity, FaProductHunt, FaHourglassEnd , FaTable } from "react-icons/fa";
 import { MdFamilyRestroom, MdClass } from "react-icons/md";
 import { GiFamilyTree } from "react-icons/gi";
 import { IoPricetags } from "react-icons/io5";
 import { CiViewTimeline } from "react-icons/ci";
 import { LuFolderOpenDot, LuFolderOpen, LuFolderCog, LuFolderDot } from "react-icons/lu";
 import { useSession } from "next-auth/react";
+import {TiShoppingCart} from "react-icons/ti";
+
+
 
 function SidebarItem({ icon, text, submenu }) {
     const { expanded } = useContext(SidebarContext);
@@ -50,7 +53,7 @@ function SidebarSubItem({ href, text, icon, expanded }) {
 
 export default function SidebarMenu() {
     const { data: session } = useSession();
-    const { expanded } = useContext(SidebarContext);
+    const { expanded, isMobile } = useContext(SidebarContext); // ✅ Pulling isMobile from context
 
     const [selectedProperty, setSelectedProperty] = useState(() => localStorage.getItem("selectedProperty") || "");
     const [tempSelectedProperty, setTempSelectedProperty] = useState(null);
@@ -73,7 +76,15 @@ export default function SidebarMenu() {
         },
     };
 
-    // Fetch properties from session
+
+    const shoppingCartItems = {
+        "Shopping cart": {
+            icon: <TiShoppingCart size={20} />,
+            submenu: [
+                { href: "/homepage/Cart", text: "Shopping cart", icon: <TiShoppingCart size={18} /> },
+            ],
+        },
+    };
 
     useEffect(() => {
         if (session?.propertyNames) {
@@ -98,7 +109,6 @@ export default function SidebarMenu() {
             localStorage.setItem("selectedProperty", selectedProperty);
         }
     }, [selectedProperty, isConfirmed]);
-
 
     return (
         <div className="p-3">
@@ -155,9 +165,14 @@ export default function SidebarMenu() {
             )}
 
             {(session && selectedProperty && isConfirmed) ? (
-                Object.entries(menuItems).map(([key, value]) => (
-                    <SidebarItem key={key} text={key} icon={value.icon} submenu={value.submenu} />
-                ))
+                <>
+                    {Object.entries(menuItems).map(([key, value]) => (
+                        <SidebarItem key={key} text={key} icon={value.icon} submenu={value.submenu} />
+                    ))}
+                    {isMobile && Object.entries(shoppingCartItems).map(([key, value]) => (
+                        <SidebarItem key={key} text={key} icon={value.icon} submenu={value.submenu} />
+                    ))}
+                </>
             ) : (
                 <p className="mt-4 text-gray-500 text-center">Select a property to continue...</p>
             )}

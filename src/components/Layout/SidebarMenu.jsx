@@ -92,7 +92,7 @@ export default function SidebarMenu() {
         if (session?.propertyNames) {
             setProperties(session.propertyNames);
         }
-    }, [session?.propertyNames]);
+    }, [session]);
 
     // Ensure selected property and confirmation status are preserved in localStorage
     useEffect(() => {

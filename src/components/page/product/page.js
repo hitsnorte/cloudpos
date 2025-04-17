@@ -1,11 +1,13 @@
 'use client'; // Necessário para componentes client-side no App Router
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { HiDotsVertical } from "react-icons/hi";
 import { FaGear } from "react-icons/fa6";
 import { FaCheckCircle } from "react-icons/fa";
 import { Plus } from "lucide-react";
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
+import { FaMagnifyingGlass } from "react-icons/fa6";
+import { HiAdjustmentsHorizontal } from "react-icons/hi2";
 import { fetchProduct, createProduct, deleteProduct, updateProduct } from '@/src/lib/apiproduct';
 import { fetchSubfamily } from '@/src/lib/apisubfamily';
 import { fetchFamily } from '@/src/lib/apifamily';
@@ -43,9 +45,10 @@ const DataProduct = () => {
 
   const [itemsPerPage, setItemsPerPage] = useState(50);
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = Math.ceil(products.length / itemsPerPage);
 
   const [isChecked, setIsChecked] = useState(false);
+
+  const [sortConfig, setSortConfig] = useState({ key: 'VDesc', direction: 'asc' });
 
   const {
     isOpen: isAddModalOpen,
@@ -62,6 +65,11 @@ const DataProduct = () => {
     onOpen: onDeleteModalOpen,
     onClose: onDeleteModalClose,
   } = useDisclosure();
+  const {
+      isOpen: isSelectModalOpen,
+      onOpen: onSelectModalOpen,
+      onClose: onSelectModalClose,
+    } = useDisclosure();
 
   useEffect(() => {
     loadProducts();
@@ -171,18 +179,6 @@ const DataProduct = () => {
       }
   };
 
-  const filteredProducts = products.filter((product) => {
-    if (!product || !product.id || !product.product_name) {
-      return false; 
-    }
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      product.id.toString().includes(searchLower) ||
-      product.product_name.toString().toLowerCase().includes(searchLower)
-    );
-  });
-  
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewProduct((prev) => ({ ...prev, [name]: value }));
@@ -247,10 +243,106 @@ const DataProduct = () => {
     }
   };
 
-  const paginatedProducts = products.slice(
+  const loadColumnVisibility = () => {
+      const savedVisibility = localStorage.getItem('columnVisibility');
+      if (savedVisibility) {
+        return JSON.parse(savedVisibility);
+      }
+      return {
+        codProd: true, // estado padrão
+        abbreviation: true,
+        description: true,
+        codIva: true,
+        descIva: true,
+        IDunit: true,
+        descUnit: true,
+        productOf: true,
+        active: true,
+        codSubfam: true,
+        descSubFam: true,
+        codFam: true,
+        descFam: true,
+        codGrpFam: true,
+        descGrp: true,
+      };
+    };
+    
+    const saveColumnVisibility = () => {
+      localStorage.setItem('columnVisibility', JSON.stringify(columnVisibility));
+    };
+    
+    const toggleColumn = (column) => {
+      setColumnVisibility((prev) => {
+        const newVisibility = { ...prev, [column]: !prev[column] };
+        localStorage.setItem('columnVisibility', JSON.stringify(newVisibility)); // Atualiza no localStorage
+        return newVisibility;
+      });
+    };
+  
+    // Agora você pode usar a loadColumnVisibility ao inicializar o state
+    const [columnVisibility, setColumnVisibility] = useState(loadColumnVisibility());
+  
+    const filteredProducts = products.filter((product) =>
+      Object.values(product).some((value) =>
+        String(value).toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+  
+  const columns = [
+      { key: 'codProd', label: 'Cod Grp' },
+      { key: 'abbreviation', label: 'Abbreviation' },
+      { key: 'description', label: 'Description' },
+      { key: 'codIva', label: 'Cod IVA' },
+      { key: 'descIva', label: 'Desc IVA' },
+      { key: 'IDunit', label: 'ID Unit' },
+      { key: 'descUnit', label: 'Desc Unit' },
+      { key: 'productOf', label: 'Product Of' },
+      { key: 'active', label: 'Active' },
+      { key: 'codSubfam', label: 'Cod SubFam' },
+      { key: 'descSubFam', label: 'Desc SubFam' },
+      { key: 'codFam', label: 'Cod Fam' },
+      { key: 'descFam', label: 'Desc Fam' },
+      { key: 'codGrpFam', label: 'Cod Grp' },
+      { key: 'descGrp', label: 'Desc Grp' },
+    ];
+  
+  const [columnSearchTerm, setColumnSearchTerm] = useState('');
+  
+  const filteredColumns = columns.filter((col) =>
+      col.label.toLowerCase().includes(columnSearchTerm.toLowerCase())
+    );
+  
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+
+  const paginatedProducts = filteredProducts.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+   const sortedProducts = useMemo(() => {
+      if (!paginatedProducts || !Array.isArray(paginatedProducts)) return [];
+    
+      const sorted = [...paginatedProducts].sort((a, b) => {
+        if (!sortConfig.key) return 0;
+    
+        let aValue = a[sortConfig.key];
+        let bValue = b[sortConfig.key];
+    
+        if (sortConfig.key === 'DCriadoEm') {
+          aValue = new Date(aValue);
+          bValue = new Date(bValue);
+        } else {
+          aValue = aValue?.toString().toLowerCase();
+          bValue = bValue?.toString().toLowerCase();
+        }
+    
+        if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+    
+      return sorted;
+    }, [paginatedProducts, sortConfig]);
 
   const handleEditProduct = (product) => {
     setEditProduct({ ...product });
@@ -294,20 +386,122 @@ const DataProduct = () => {
       { id: 2, tipo: "compra", descricao: "Compra" },
     ];
 
+    const handleSort = (key) => {
+      setSortConfig((prevConfig) => ({
+        key,
+        direction: prevConfig.key === key && prevConfig.direction === 'asc' ? 'desc' : 'asc',
+      }));
+    };
+
   return (
     <div className="p-4 pb-10">
+      <div className="w-1/3">
+           {/* Campo de pesquisa */}
+          <div className="mb-4 relative">
+          <FaMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+          <input
+              type="text"
+              placeholder="Pesquisar..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full max-w-md pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+            />
+          </div>
+        </div>
+
+
       {/* button */}
             <Dropdown>
             <DropdownTrigger>
             <button 
                 onClick={onAddModalOpen}
-                className="flex fixed absolute top-4 right-14 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
+                className="flex fixed absolute top-4 right-25 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
                 < Plus size={25}  />     
             </button> 
             </DropdownTrigger>
-      
             </Dropdown>
           
+        {/* button adjustments*/}  
+        <Dropdown>
+        <DropdownTrigger>
+          <button 
+            onClick={onSelectModalOpen}
+            className="absolute top-4 right-10 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
+            <HiAdjustmentsHorizontal size={25} />
+          </button>
+      </DropdownTrigger>
+      </Dropdown>
+
+       {/* Modal para adjustments do grupo */} 
+       <Modal 
+      isOpen={isSelectModalOpen}
+      onOpenChange={onSelectModalClose}
+      size="sm" 
+      placement="center" 
+      className="w-100 bg-white shadow-xl rounded-lg" 
+      hideCloseButton={true}
+      >
+
+      <ModalContent>
+      {(onClose) => (
+          <>
+            <ModalHeader className="rounded bg-[#FC9D25] flex justify-between items-center">
+              <div className="text-xl font-bold text-white">Select Column</div>
+              <Button
+                  onClick={onClose}
+                  className="text-white bg-transparent border-0 text-2xl p-0"
+                  aria-label="Close"
+                >
+                  &times; {/* Unicode for "×" sign */}
+                </Button>
+              </ModalHeader>
+            <ModalBody className="py-5 px-6">
+            <div className="w-88">
+                 {/* Campo de pesquisa  */}
+                <div className="mb-4 relative">
+                <FaMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+                <input
+                  type="text"
+                  placeholder="Pesquisar..."
+                  value={columnSearchTerm}
+                  onChange={(e) => setColumnSearchTerm(e.target.value)}
+                  className="w-full max-w-md pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                />
+              </div>
+            </div>
+            <div className="space-y-4">
+            {filteredColumns.map((col) => (
+              <div key={col.key} className="flex items-center rounded border border-black p-1">
+                <input
+                  type="checkbox"
+                  checked={columnVisibility[col.key]}
+                  onChange={() => toggleColumn(col.key)}
+                  className="mr-2"
+                />
+                <label className="text-sm">{col.label}</label>
+              </div>
+            ))}
+          </div>
+          </ModalBody>
+
+        <ModalFooter className="w-102 border-t border-gray-200 pt-2 px-8">
+              <Button
+              type="submit"
+              form="selectGroupForm"
+              className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
+              disabled={isLoading}
+              onClick={() => {
+                saveColumnVisibility(); // Salvar as configurações
+                window.location.reload(); // Recarregar a página
+              }}
+            >
+              {isLoading ? <Spinner size="sm" color="white" /> : 'Save'}
+            </Button>
+            </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
 
       {/* Modal para adicionar produto */}
       <Modal 
@@ -609,89 +803,141 @@ const DataProduct = () => {
                   <FaGear size={20} color='white'/>
                 </div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-20 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-left justify-left "> 
-                  Cod Prod
-              </div>
+              {columnVisibility.codProd && (
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-10 px-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className="flex items-left justify-left">Cod Prod</div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-150 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-                <div className="flex items-left justify-left"> 
-                  Abbreviation
-                </div>
-              </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-150 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-left justify-left"> 
+              )}
+              {columnVisibility.abbreviation && (
+                <th onClick={() => handleSort('Abreviatura')} className="uppercase border-collapse border border-[#EDEBEB] w-200 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                  <div className="flex items-left justify-left">
+                    Abbreviation
+                    {sortConfig.key === 'Abreviatura' && (
+                      <span className="ml-auto">
+                        {sortConfig.direction === 'asc' ? (
+                          <ArrowUpIcon className="inline-block w-4 h-4 text-white" />
+                        ) : (
+                          <ArrowDownIcon className="inline-block w-4 h-4 text-white" />
+                        )}
+                      </span>
+                    )}
+                  </div>
+                </th>
+              )}
+
+              {columnVisibility.description && (
+              <th onClick={() => handleSort('VDESC1')} className="uppercase border-collapse border border-[#EDEBEB] w-200 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className="flex items-left justify-left">
                   Description
-              </div>
-              </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-5 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className=" flex items-left justify-left "> 
-                  Cod Iva
-              </div>
-              </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-120 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-left justify-left"> 
-                  Desc Iva
-              </div>
-              </th>
-             
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-15 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-left justify-left "> 
-                  ID Unit
-              </div>
-              </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-120 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-left justify-left"> 
-                 Desc Unit
-              </div>
-              </th>
-            
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-5 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-left justify-left "> 
-                  Product of
-              </div>
-
-              </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-10 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-                <div className="flex items-left justify-left"> 
-                Active
+                  {sortConfig.key === 'VDesc' && (
+                    <span className="ml-auto">
+                      {sortConfig.direction === 'asc' ? (
+                        <ArrowUpIcon className="inline-block w-4 h-4 text-white" />
+                      ) : (
+                        <ArrowDownIcon className="inline-block w-4 h-4 text-white" />
+                      )}
+                    </span>
+                  )}
                 </div>
               </th>
-
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-5 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className=" items-left justify-left "> 
-                  Cod SubFam
-              </div>
+              )}
+              {columnVisibility.codIva && (
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-20 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className="flex items-left justify-left">Cod IVA</div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-120 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className=" items-left justify-left"> 
+              )}
+              {columnVisibility.descIva && (
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-200 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className="flex items-left justify-left">Desc IVA</div>
+              </th>
+              )}
+              {columnVisibility.IDunit && (
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-10 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className="flex items-left justify-left">ID Unit</div>
+              </th>
+              )}
+              {columnVisibility.descUnit && (
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-200 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className="flex items-left justify-left">Desc Unit</div>
+              </th>
+              )}
+              {columnVisibility.productOf && (
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-10 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className="flex items-left justify-left">Prod Of</div>
+              </th>
+              )}
+              {columnVisibility.active && (
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-10 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className="flex items-left justify-left">Active</div>
+              </th>
+              )}
+              {columnVisibility.codSubfam && (
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-10 px-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className="flex items-left justify-left">Cod SubFam</div>
+              </th>
+              )}
+              {columnVisibility.descSubFam && (
+              <th onClick={() => handleSort('VDescSubfamily')} className="uppercase border-collapse border border-[#EDEBEB] w-200 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className="flex items-left justify-left">
                   Desc SubFam
-              </div>
+                  {sortConfig.key === 'VDesc' && (
+                    <span className="ml-auto">
+                      {sortConfig.direction === 'asc' ? (
+                        <ArrowUpIcon className="inline-block w-4 h-4 text-white" />
+                      ) : (
+                        <ArrowDownIcon className="inline-block w-4 h-4 text-white" />
+                      )}
+                    </span>
+                  )}
+                </div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-5 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className=" items-left justify-left "> 
-                  Cod Fam
-              </div>
+              )}
+              {columnVisibility.codFam && (
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-10 px-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className="flex items-left justify-left">Cod Fam</div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-120 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className=" items-left justify-left"> 
+              )}
+              {columnVisibility.descFam && (
+              <th onClick={() => handleSort('VDescFamily')} className="uppercase border-collapse border border-[#EDEBEB] w-200 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className="flex items-left justify-left">
                   Desc Fam
-              </div>
+                  {sortConfig.key === 'VDesc' && (
+                    <span className="ml-auto">
+                      {sortConfig.direction === 'asc' ? (
+                        <ArrowUpIcon className="inline-block w-4 h-4 text-white" />
+                      ) : (
+                        <ArrowDownIcon className="inline-block w-4 h-4 text-white" />
+                      )}
+                    </span>
+                  )}
+                </div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-5 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className=" items-left justify-left "> 
-                  Cod Grp
-              </div>
+              )}
+              {columnVisibility.codGrpFam && (
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-10 px-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className="flex items-left justify-left">Cod Grp</div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-120 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className=" items-left justify-left"> 
+              )}
+              {columnVisibility.descFam && (
+              <th onClick={() => handleSort('VDescGroup')} className="uppercase border-collapse border border-[#EDEBEB] w-200 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className="flex items-left justify-left">
                   Desc Grp
-              </div>
+                  {sortConfig.key === 'VDesc' && (
+                    <span className="ml-auto">
+                      {sortConfig.direction === 'asc' ? (
+                        <ArrowUpIcon className="inline-block w-4 h-4 text-white" />
+                      ) : (
+                        <ArrowDownIcon className="inline-block w-4 h-4 text-white" />
+                      )}
+                    </span>
+                  )}
+                </div>
               </th>
+              )}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-300">
-          {paginatedProducts.map((product)  => (
+          {sortedProducts.map((product)  => (
             <tr key={product.VPRODUTO} className="hover:bg-gray-200">
               
               {/* Ações */}
@@ -711,70 +957,102 @@ const DataProduct = () => {
               </td>
               
               {/* Dados do Produto */}
-              <td className="border border-[#EDEBEB] px-4 py-2 text-right">{product.VPRODUTO}</td>
-              <td className="border border-[#EDEBEB] px-3 py-2 text-left">{product.Abreviatura}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.VDESC1}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-right">{product.VCodIva}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.VDescIva}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-right">{product.DefinicaoProduto}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.VDescUnit}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.ProductType}</td>
-
-              <td className=" px-4 py-2 flex items-center justify-center">
-              {product.activo ? (
-                <FaCheckCircle size={20} color="#4CAF50" />  // Aqui você pode ajustar o tamanho e a cor do ícone
-              ) : (
-                ""
+               {columnVisibility.codProd && (
+                  <td className="border border-[#EDEBEB] px-3 py-2 text-right">{product.VPRODUTO}</td>
+               )}
+               {columnVisibility.abbreviation && (
+                   <td className="border border-[#EDEBEB] px-3 py-2 text-left">{product.Abreviatura}</td>
+               )}
+               {columnVisibility.description && (
+                   <td className="border border-[#EDEBEB] px-3 py-2 text-left">{product.VDESC1}</td>
+               )}
+              {columnVisibility.codIva && (
+                   <td className="border border-[#EDEBEB] px-3 py-2 text-left">{product.VCodIva}</td>
+               )}
+               {columnVisibility.descIva && (
+                   <td className="border border-[#EDEBEB] px-3 py-2 text-left">{product.VDescIva}</td>
+               )}
+               {columnVisibility.IDunit && (
+                   <td className="border border-[#EDEBEB] px-3 py-2 text-left">{product.DefinicaoProduto}</td>
+               )}
+               {columnVisibility.descUnit && (
+                   <td className="border border-[#EDEBEB] px-3 py-2 text-left">{product.VDescUnit}</td>
+               )}
+                {columnVisibility.productOf && (
+                   <td className="border border-[#EDEBEB] px-3 py-2 text-left">{product.ProductType}</td>
+               )}
+              {columnVisibility.active && (
+                    <td className=" px-4 py-2 flex items-center justify-center">
+                    {product.activo ? (
+                      <FaCheckCircle size={20} color="#4CAF50" />  // Aqui você pode ajustar o tamanho e a cor do ícone
+                    ) : (
+                      ""
+                    )}
+                  </td>
               )}
-            </td>
-
-              <td className="border border-[#EDEBEB] px-4 py-2 text-right">{product.VSUBFAM}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.VDescSubfamily}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-right">{product.VCodFam}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.VDescFamily}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-right">{product.VCodGrfam}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.VDescGroup}</td>
-
-             
+               {columnVisibility.codSubfam && (
+                  <td className="border border-[#EDEBEB] px-3 py-2 text-right">{product.VSUBFAM}</td>
+               )}
+               {columnVisibility.descSubFam && (
+                  <td className="border border-[#EDEBEB] px-3 py-2 text-left">{product.VDescSubfamily}</td>
+               )}
+               {columnVisibility.codFam && (
+                  <td className="border border-[#EDEBEB] px-3 py-2 text-right">{product.VCodFam}</td>
+               )}
+               {columnVisibility.descFam && (
+                  <td className="border border-[#EDEBEB] px-3 py-2 text-left">{product.VDescFamily}</td>
+               )}
+                {columnVisibility.codGrpFam && (
+                  <td className="border border-[#EDEBEB] px-3 py-2 text-right">{product.VCodGrfam}</td>
+               )}
+               {columnVisibility.descGrp && (
+                  <td className="border border-[#EDEBEB] px-3 py-2 text-left">{product.VDescGroup}</td>
+               )}  
             </tr>
           ))}
         </tbody>
         
     </table>
     
-    <div className="flex fixed bottom-0 left-0 items-center gap-2 w-full px-4 py-3 bg-gray-200 justify-end p-0">
-    <span className="px-4 py-2 ">Items per page</span>
+    <div className="flex fixed bottom-0 left-0 items-center gap-2 w-full px-4 py-3 bg-gray-200 justify-end">
+          <span className="px-2 py-1">Items per page</span>
+
           <select
             value={itemsPerPage}
             onChange={(e) => {
               setItemsPerPage(Number(e.target.value));
               setCurrentPage(1);
             }}
-            className="border p-2 rounded px-4 py-2 w-20 gray-200"
+            className="border p-2 rounded px-2 py-1 w-16"
           >
             {PAGE_SIZES.map((size) => (
               <option key={size} value={size}>{size}</option>
             ))}
           </select>
-          
-          <button 
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-            className={`px-4 py-2 rounded ${currentPage === 1 ? 'bg-gray-200 text-black cursor-not-allowed' : 'bg-gray-200 hover:bg-gray-200'}`}
-          >
-            &lt;  {/* Símbolo de "Anterior" */}
-          </button>
-  
-          <span className="px-4 py-2 rounded">{currentPage} / {totalPages}</span>
 
-          <button 
-            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-            disabled={currentPage === totalPages}
-            className={`px-4 py-2 rounded ${currentPage === totalPages ? 'bg-gray-200 text-black cursor-not-allowed' : 'bg-gray-200 hover:bg-gray-200'}`}
-          >
-            &gt;  {/* Símbolo de "Próximo" */}
-          </button>
-        </div> 
+          {/* Agrupamento do controle de paginação */}
+          <div className="flex items-center border rounded-lg overflow-hidden ml-4">
+            <button 
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className={`px-3 py-0.5 ${currentPage === 1 ? 'bg-white text-black cursor-not-allowed' : 'bg-white hover:bg-gray-100'}`}
+            >
+              &lt;
+            </button>
+
+            <span className="px-3 py-0.5 bg-white">
+              {currentPage}
+            </span>
+
+            <button 
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-0.5 ${currentPage === totalPages ? 'bg-white text-black cursor-not-allowed' : 'bg-white hover:bg-gray-100'}`}
+            >
+              &gt;
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

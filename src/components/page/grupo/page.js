@@ -1,10 +1,12 @@
 'use client'; // Necessário para componentes client-side no App Router
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { HiDotsVertical } from "react-icons/hi";
 import { FaGear } from "react-icons/fa6";
 import { Plus } from "lucide-react";
+import { HiAdjustmentsHorizontal } from "react-icons/hi2";
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
+import { FaMagnifyingGlass } from "react-icons/fa6";
 import { fetchGrup, createGrup, deleteGrup, updateGrupt } from '@/src/lib/apigroup';
 import {
   Modal,
@@ -24,16 +26,18 @@ const DataGrupo = () => {
   const [sortField, setSortField] = useState('id');
   const [sortOrder, setSortOrder] = useState('asc');
   const [error, setError] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [newGroup, setNewGroup] = useState({ group_name: '' });
   const [editGroup, setEditGroup] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [groupToDelete, setGroupToDelete] = useState(null);
+
   
 
   const [itemsPerPage, setItemsPerPage] = useState(50);
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = Math.ceil(groups.length / itemsPerPage);
+
+  const [sortConfig, setSortConfig] = useState({ key: 'VDesc', direction: 'asc' });
 
   const {
     isOpen: isAddModalOpen,
@@ -50,11 +54,93 @@ const DataGrupo = () => {
     onOpen: onDeleteModalOpen,
     onClose: onDeleteModalClose,
   } = useDisclosure();
+  const {
+    isOpen: isSelectModalOpen,
+    onOpen: onSelectModalOpen,
+    onClose: onSelectModalClose,
+  } = useDisclosure();
 
-  const paginatedGroups = groups.slice(
+  const loadColumnVisibility = () => {
+    const savedVisibility = localStorage.getItem('columnVisibility');
+    if (savedVisibility) {
+      return JSON.parse(savedVisibility);
+    }
+    return {
+      codGrp: true, // estado padrão
+      description: true,
+      createdIn: true,
+    };
+  };
+  
+  const saveColumnVisibility = () => {
+    localStorage.setItem('columnVisibility', JSON.stringify(columnVisibility));
+  };
+  
+  const toggleColumn = (column) => {
+    setColumnVisibility((prev) => {
+      const newVisibility = { ...prev, [column]: !prev[column] };
+      localStorage.setItem('columnVisibility', JSON.stringify(newVisibility)); // Atualiza no localStorage
+      return newVisibility;
+    });
+  };
+
+  // Agora você pode usar a loadColumnVisibility ao inicializar o state
+  const [columnVisibility, setColumnVisibility] = useState(loadColumnVisibility());
+
+  const filteredGroups = groups.filter((group) =>
+    Object.values(group).some((value) =>
+      String(value).toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  
+
+  const columns = [
+    { key: 'codGrp', label: 'Cod Grp' },
+    { key: 'description', label: 'Description' },
+    { key: 'createdIn', label: 'Created In' },
+  ];
+
+  const [columnSearchTerm, setColumnSearchTerm] = useState('');
+
+  const filteredColumns = columns.filter((col) =>
+    col.label.toLowerCase().includes(columnSearchTerm.toLowerCase())
+  );
+
+  const totalPages = Math.ceil(filteredGroups.length / itemsPerPage);
+  
+  const paginatedGroups = filteredGroups.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+  
+  const sortedGroups = useMemo(() => {
+    if (!paginatedGroups || !Array.isArray(paginatedGroups)) return [];
+  
+    const sorted = [...paginatedGroups].sort((a, b) => {
+      if (!sortConfig.key) return 0;
+  
+      let aValue = a[sortConfig.key];
+      let bValue = b[sortConfig.key];
+  
+      if (sortConfig.key === 'DCriadoEm') {
+        aValue = new Date(aValue);
+        bValue = new Date(bValue);
+      } else {
+        aValue = aValue?.toString().toLowerCase();
+        bValue = bValue?.toString().toLowerCase();
+      }
+  
+      if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+  
+    return sorted;
+  }, [paginatedGroups, sortConfig]);
+  
+
+  
 
   useEffect(() => {
     loadGroups();
@@ -69,32 +155,13 @@ const DataGrupo = () => {
     }
   };
 
-  const handleSort = (field) => {
-    if (sortField === field) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortOrder('asc');
-    }
-    const sortedGroups = [...groups].sort((a, b) => {
-      if (field === 'id') {
-        return sortOrder === 'asc' ? a[field] - b[field] : b[field] - a[field];
-      }
-      return sortOrder === 'asc'
-        ? a[field].localeCompare(b[field])
-        : b[field].localeCompare(a[field]);
-    });
-    setGroups(sortedGroups);
+  const handleSort = (key) => {
+    setSortConfig((prevConfig) => ({
+      key,
+      direction: prevConfig.key === key && prevConfig.direction === 'asc' ? 'desc' : 'asc',
+    }));
   };
 
-  const renderSortIcon = (field) => {
-    if (sortField !== field) return null;
-    return sortOrder === 'asc' ? (
-      <ArrowUpIcon className="w-4 h-4 ml-1" />
-    ) : (
-      <ArrowDownIcon className="w-4 h-4 ml-1" />
-    );
-  };
 
   // const filteredGroups = groups.filter((group) => {
   //   const searchLower = searchTerm.toLowerCase();
@@ -173,16 +240,116 @@ const DataGrupo = () => {
 
   return (
     <div className="p-4">
-      {/* button */}
+      <div className="w-1/3">
+        {/* Campo de pesquisa */}
+        <div className="mb-4 relative">
+        <FaMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+        <input
+          type="text"
+          placeholder="Pesquisar..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full max-w-md pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+        />
+      </div>
+    </div>
+
+      {/* button add*/}
       <Dropdown>
       <DropdownTrigger>
       <button 
           onClick={onAddModalOpen}
-          className="absolute top-4 right-10 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
+          className="absolute top-4 right-25 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
           < Plus size={25}  />     
       </button>
       </DropdownTrigger>
       </Dropdown>
+
+      {/* button adjustments*/}  
+      <Dropdown>
+        <DropdownTrigger>
+          <button 
+            onClick={onSelectModalOpen}
+            className="absolute top-4 right-10 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
+            <HiAdjustmentsHorizontal size={25} />
+          </button>
+      </DropdownTrigger>
+      </Dropdown>
+
+
+
+
+      {/* Modal para adjustments do grupo */} 
+      <Modal 
+      isOpen={isSelectModalOpen}
+      onOpenChange={onSelectModalClose}
+      size="sm" 
+      placement="center" 
+      className="w-100 bg-white shadow-xl rounded-lg" 
+      hideCloseButton={true}
+      >
+
+      <ModalContent>
+      {(onClose) => (
+          <>
+            <ModalHeader className="rounded bg-[#FC9D25] flex justify-between items-center">
+              <div className="text-xl font-bold text-white">Select Column</div>
+              <Button
+                  onClick={onClose}
+                  className="text-white bg-transparent border-0 text-2xl p-0"
+                  aria-label="Close"
+                >
+                  &times; {/* Unicode for "×" sign */}
+                </Button>
+              </ModalHeader>
+            <ModalBody className="py-5 px-6">
+            <div className="w-88">
+                 {/* Campo de pesquisa  */}
+                <div className="mb-4 relative">
+                <FaMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+                <input
+                  type="text"
+                  placeholder="Pesquisar..."
+                  value={columnSearchTerm}
+                  onChange={(e) => setColumnSearchTerm(e.target.value)}
+                  className="w-full max-w-md pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                />
+              </div>
+            </div>
+            <div className="space-y-4">
+            {filteredColumns.map((col) => (
+              <div key={col.key} className="flex items-center rounded border border-black p-1">
+                <input
+                  type="checkbox"
+                  checked={columnVisibility[col.key]}
+                  onChange={() => toggleColumn(col.key)}
+                  className="mr-2"
+                />
+                <label className="text-sm">{col.label}</label>
+              </div>
+            ))}
+          </div>
+          </ModalBody>
+
+        <ModalFooter className="w-102 border-t border-gray-200 pt-2 px-8">
+              <Button
+              type="submit"
+              form="selectGroupForm"
+              className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
+              disabled={isLoading}
+              onClick={() => {
+                saveColumnVisibility(); // Salvar as configurações
+                window.location.reload(); // Recarregar a página
+              }}
+            >
+              {isLoading ? <Spinner size="sm" color="white" /> : 'Save'}
+            </Button>
+            </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+
       {/* Modal para adicionar grupo */} 
       <Modal
       isOpen={isAddModalOpen}
@@ -356,33 +523,45 @@ const DataGrupo = () => {
 
       {/* Tabela */}
       <div className="overflow-x-auto sm:flex sm:flex-col bg-muted/40">
+        
         <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB] mx-auto">
           <thead>
-            <tr>
-              <th className="border-collapse border border-[#EDEBEB] !w-[1px] px-1 sm:px-5 py-2 bg-[#FC9D25]">
-                <div className=" flex items-center justify-center">
-                  <FaGear size={20} color='white'/>
-                </div>
-              </th>
+          <tr>
+            <th className="border-collapse border border-[#EDEBEB] !w-[1px] px-1 sm:px-5 py-2 bg-[#FC9D25]">
+              <div className="flex items-center justify-center">
+                <FaGear size={20} color="white" />
+              </div>
+            </th>
+            {columnVisibility.codGrp && (
               <th className="uppercase border-collapse border border-[#EDEBEB] w-10 px-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-                <div className=" flex items-left justify-left"> 
-                  Cod Grp
+                <div className="flex items-left justify-left">Cod Grp</div>
+              </th>
+            )}
+            {columnVisibility.description && (
+              <th onClick={() => handleSort('VDesc')} className="uppercase border-collapse border border-[#EDEBEB] w-400 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className="flex items-left justify-left">
+                  Description
+                  {sortConfig.key === 'VDesc' && (
+                    <span className="ml-auto">
+                      {sortConfig.direction === 'asc' ? (
+                        <ArrowUpIcon className="inline-block w-4 h-4 text-white" />
+                      ) : (
+                        <ArrowDownIcon className="inline-block w-4 h-4 text-white" />
+                      )}
+                    </span>
+                  )}
                 </div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-400 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-left justify-left "> 
-                  Description
-              </div>
-              </th>
+            )}
+            {columnVisibility.createdIn && (
               <th className="uppercase border-collapse border border-[#EDEBEB] w-20 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-left justify-left "> 
-                 Created In
-              </div>
+                <div className="flex items-left justify-left">Created In</div>
               </th>
-            </tr>
+            )}
+          </tr>
           </thead>
            <tbody className="divide-y divide-gray-300">
-                    {paginatedGroups.map((group) => (
+                    {sortedGroups.map((group) => (
                       <tr key={group.VCodGrFam} className="hover:bg-gray-200">
                         {/* Ações */}
                         <td className="border border-[#EDEBEB] px-1 py-1 text-center">
@@ -401,50 +580,62 @@ const DataGrupo = () => {
                         </td>
                         
                         {/* Dados do Produto */}
-                        <td className="border border-[#EDEBEB] px-3 py-2 text-right">{group.VCodGrFam}</td>
-                        <td className="border border-[#EDEBEB] px-4 py-2 text-left">{group.VDesc}</td>
-                        <td className="border border-[#EDEBEB] px-4 py-2 text-right">
-                          {new Date(group.DCriadoEm).toLocaleDateString('pt-BR')}
-                        </td>
+                        {columnVisibility.codGrp && (
+                          <td className="border border-[#EDEBEB] px-3 py-2 text-right">{group.VCodGrFam}</td>
+                        )}
+                        {columnVisibility.description && (
+                          <td className="border border-[#EDEBEB] px-3 py-2 text-left">{group.VDesc}</td>
+                        )}
+                        {columnVisibility.createdIn && (
+                          <td className="border border-[#EDEBEB] px-4 py-2 text-right">
+                            {new Date(group.DCriadoEm).toLocaleDateString('pt-BR')}
+                          </td>
+                        )}
                         
                         
                       </tr>
                     ))}
                   </tbody>
         </table>
-        <div className="flex fixed bottom-0 left-0 items-center gap-2 w-full px-4 py-3 bg-gray-200 justify-end p-0">
-        <span className="px-4 py-2 ">Items per page</span>
+        <div className="flex fixed bottom-0 left-0 items-center gap-2 w-full px-4 py-3 bg-gray-200 justify-end">
+          <span className="px-2 py-1">Items per page</span>
+
           <select
             value={itemsPerPage}
             onChange={(e) => {
               setItemsPerPage(Number(e.target.value));
               setCurrentPage(1);
             }}
-            className="border p-2 rounded px-4 py-2 w-20 gray-200"
+            className="border p-2 rounded px-2 py-1 w-16"
           >
             {PAGE_SIZES.map((size) => (
               <option key={size} value={size}>{size}</option>
             ))}
           </select>
-          
-          <button 
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-            className={`px-4 py-2 rounded ${currentPage === 1 ? 'bg-gray-200 text-black cursor-not-allowed' : 'bg-gray-200 hover:bg-gray-200'}`}
-          >
-            &lt;  {/* Símbolo de "Anterior" */}
-          </button>
-  
-          <span className="px-4 py-2 rounded">{currentPage} / {totalPages}</span>
 
-          <button 
-            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-            disabled={currentPage === totalPages}
-            className={`px-4 py-2 rounded ${currentPage === totalPages ? 'bg-gray-200 text-black cursor-not-allowed' : 'bg-gray-200 hover:bg-gray-200'}`}
-          >
-            &gt;  {/* Símbolo de "Próximo" */}
-          </button>
-        </div> 
+          {/* Agrupamento do controle de paginação */}
+          <div className="flex items-center border rounded-lg overflow-hidden ml-4">
+            <button 
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className={`px-3 py-0.5 ${currentPage === 1 ? 'bg-white text-black cursor-not-allowed' : 'bg-white hover:bg-gray-100'}`}
+            >
+              &lt;
+            </button>
+
+            <span className="px-3 py-0.5 bg-white">
+              {currentPage}
+            </span>
+
+            <button 
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-0.5 ${currentPage === totalPages ? 'bg-white text-black cursor-not-allowed' : 'bg-white hover:bg-gray-100'}`}
+            >
+              &gt;
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

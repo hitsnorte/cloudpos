@@ -61,6 +61,7 @@ export default function SidebarMenu() {
     const [properties, setProperties] = useState([]);
 
     const menuItems = {
+
         "Store Settings": {
             icon: <LuFolderCog size={20} />,
             submenu: [
@@ -74,6 +75,7 @@ export default function SidebarMenu() {
             ],
         },
     };
+
 
     const shoppingCartItems = {
         "Shopping cart": {
@@ -98,6 +100,7 @@ export default function SidebarMenu() {
             setSelectedProperty(savedSelectedProperty || "");
             setTempSelectedProperty(savedSelectedProperty || "");
             setIsConfirmed(savedIsConfirmed);
+
         }
     }, []);
 
@@ -110,6 +113,7 @@ export default function SidebarMenu() {
     return (
         <div className="p-3">
             <select
+
                 id="selectProperty"
                 value={selectedProperty}
                 onChange={(e) => {

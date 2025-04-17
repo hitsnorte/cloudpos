@@ -28,7 +28,6 @@ export async function GET(request) {
 
     // Agora faz a requisição para o servidor do grupo usando a URL da propriedade
     const groupUrl = `http://${propertyServer}:${propertyPort}/getgrfamiliar`;
-    console.log("URL do request:", groupUrl);
     const groupResponse = await fetch(groupUrl);
     if (!groupResponse.ok) {
       return new Response(

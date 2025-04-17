@@ -1,16 +1,17 @@
-
+import { useContext, useState, useEffect } from "react";
+import { SidebarContext } from "./Sidebar";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { TbLayoutDashboardFilled } from "react-icons/tb";
-import { FaTable } from "react-icons/fa";
-import { LuFolderCog } from "react-icons/lu";
-import { FaLayerGroup, FaUnity, FaProductHunt, FaHourglassEnd    } from "react-icons/fa";
+import { FaLayerGroup, FaUnity, FaProductHunt, FaHourglassEnd , FaTable } from "react-icons/fa";
 import { MdFamilyRestroom, MdClass } from "react-icons/md";
 import { GiFamilyTree } from "react-icons/gi";
 import { IoPricetags } from "react-icons/io5";
 import { CiViewTimeline } from "react-icons/ci";
 import { LuFolderOpenDot, LuFolderOpen, LuFolderCog, LuFolderDot } from "react-icons/lu";
-import { TiShoppingCart} from "react-icons/ti";
 import { useSession } from "next-auth/react";
+import {TiShoppingCart} from "react-icons/ti";
+
+
 
 function SidebarItem({ icon, text, submenu }) {
     const { expanded } = useContext(SidebarContext);

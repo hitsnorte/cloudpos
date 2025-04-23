@@ -76,7 +76,7 @@ export default function SidebarMenu() {
         },
     };
 
-
+    const menuStorePrice = {
       "Store Price": {
       icon: <LuFolderCog  size={20} />, 
       submenu: [
@@ -85,7 +85,8 @@ export default function SidebarMenu() {
         // { ref: "/homepage/exploration center", label: "exploration center", icon: <MdFamilyRestroom size={18} /> },
         { ref: "/homepage/hour", label: "Hours", icon: <FaHourglassEnd size={18} /> },
             ], 
-      };
+      },
+    };
 
     const shoppingCartItems = {
         "Shopping cart": {

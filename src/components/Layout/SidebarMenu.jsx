@@ -61,21 +61,32 @@ export default function SidebarMenu() {
     const [properties, setProperties] = useState([]);
 
     const menuItems = {
+           "Store Settings": {
+      icon: <LuFolderCog  size={20} />, 
+      submenu: [
+        {  ref: "/", label: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> }, 
+        { ref: "/homepage/grupos", label: "Groups", icon: <FaLayerGroup  size={18} /> }, 
+        { ref: "/homepage/family", label: "Families", icon: <MdFamilyRestroom size={18} /> },
+        { ref: "/homepage/subfamilia", label: "SubFamilies", icon: <GiFamilyTree size={18} /> },
+        { ref: "/homepage/product", label: "Products", icon: <FaProductHunt size={18} /> },
+        { ref: "/homepage/Iva", label: "VAT", icon: <IoPricetags size={18} /> },
+        { ref: "/homepage/unit", label: "Unit", icon: <FaUnity  size={18} /> },
+            ], 
 
-        "Store Settings": {
-            icon: <LuFolderCog size={20} />,
-            submenu: [
-                { href: "/", text: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> },
-                { href: "/homepage/grupos", text: "Groups", icon: <FaTable size={18} /> },
-                { href: "/homepage/family", text: "Families", icon: <FaTable size={18} /> },
-                { href: "/homepage/subfamilia", text: "SubFamilies", icon: <FaTable size={18} /> },
-                { href: "/homepage/product", text: "Products", icon: <FaTable size={18} /> },
-                { href: "/homepage/Iva", text: "VAT", icon: <FaTable size={18} /> },
-                { href: "/homepage/unit", text: "Unit", icon: <FaTable size={18} /> },
-            ],
         },
     };
 
+    const menuStorePrice = {
+      "Store Price": {
+      icon: <LuFolderCog  size={20} />, 
+      submenu: [
+        { ref: "/homepage/classepreco", label: "Price classes", icon: <MdClass  size={18} /> }, 
+        { ref: "/homepage/period", label: "Periods", icon: <CiViewTimeline  size={18} /> }, 
+        // { ref: "/homepage/exploration center", label: "exploration center", icon: <MdFamilyRestroom size={18} /> },
+        { ref: "/homepage/hour", label: "Hours", icon: <FaHourglassEnd size={18} /> },
+            ], 
+      },
+    };
 
     const shoppingCartItems = {
         "Shopping cart": {
@@ -83,6 +94,7 @@ export default function SidebarMenu() {
             submenu: [
                 { href: "/homepage/Cart", text: "Shopping cart", icon: <TiShoppingCart size={18} /> },
             ],
+
         },
     };
 
@@ -113,28 +125,34 @@ export default function SidebarMenu() {
     return (
         <div className="p-3">
             <select
+            id="selectProperty"
+            value={tempSelectedProperty || ""}
+            onChange={(e) => {
+                const newPropertyID = e.target.value;
 
-                id="selectProperty"
-                value={selectedProperty}
-                onChange={(e) => {
-                    const newPropertyID = e.target.value;
+                if (newPropertyID !== selectedProperty) {
+                    setIsConfirmed(false);
+                }
 
-                    if (newPropertyID !== selectedProperty) {
-                        setIsConfirmed(false);
-                    }
+                setTempSelectedProperty(newPropertyID);
 
-                    setTempSelectedProperty(newPropertyID);
-                }}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-[#FC9D25]"
-            >
-                <option value="">Select a property</option>
-                {properties.map((property) => (
-                    <option key={property.id} value={property.id}>
-                        {property.name}
-                    </option>
-                ))}
-            </select>
+            }}
+            required
+            className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-[#FC9D25]"
+        >
+            <option value="" >
+                Select a property
+            </option>
+            {properties.map((property) => (
+                <option key={property.id} value={property.id}>
+                    {property.name}
+                </option>
+            ))}
+        </select>
 
+
+
+            {/* Show buttons when a property is selected but not confirmed */}
             {tempSelectedProperty && !isConfirmed && (
                 <div className="mt-4 flex flex-col gap-2">
                     <button

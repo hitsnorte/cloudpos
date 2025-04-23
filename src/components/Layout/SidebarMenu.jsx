@@ -71,17 +71,17 @@ export default function SidebarMenu() {
         { ref: "/homepage/subfamilia", label: "SubFamilies", icon: <GiFamilyTree size={18} /> },
         { ref: "/homepage/product", label: "Products", icon: <FaProductHunt size={18} /> },
         { ref: "/homepage/Iva", label: "VAT", icon: <IoPricetags size={18} /> },
-        { ref: "/homepage/unit", label: "unit", icon: <FaUnity  size={18} /> },
+        { ref: "/homepage/unit", label: "Unit", icon: <FaUnity  size={18} /> },
             ], 
         },
 
       "Store Price": {
       icon: <LuFolderCog  size={20} />, 
       submenu: [
-        { ref: "/homepage/price classes", label: "price classes", icon: <MdClass  size={18} /> }, 
-        { ref: "/homepage/periods", label: "periods", icon: <CiViewTimeline  size={18} /> }, 
+        { ref: "/homepage/classepreco", label: "Price classes", icon: <MdClass  size={18} /> }, 
+        { ref: "/homepage/period", label: "Periods", icon: <CiViewTimeline  size={18} /> }, 
         // { ref: "/homepage/exploration center", label: "exploration center", icon: <MdFamilyRestroom size={18} /> },
-        { ref: "/homepage/hours", label: "hours", icon: <FaHourglassEnd size={18} /> },
+        { ref: "/homepage/hour", label: "Hours", icon: <FaHourglassEnd size={18} /> },
             ], 
         },
     };
@@ -127,6 +127,7 @@ export default function SidebarMenu() {
                 }
 
                 setTempSelectedProperty(newPropertyID);
+
             }}
             required
             className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-[#FC9D25]"

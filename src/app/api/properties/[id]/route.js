@@ -63,3 +63,24 @@ export async function PUT(req, { params }) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
+
+export async function GET(req, { params }) {
+    const { id } = params; // Extrai o ID da URL
+    try {
+        // Busca os dados da propriedade
+        const property = await prisma.cloud_properties.findUnique({
+            where: { propertyID: parseInt(id) },
+        });
+
+        // Verifica se a propriedade foi encontrada
+        if (!property) {
+            return NextResponse.json({ error: "Property not found" }, { status: 404 });
+        }
+
+        // Retorna os dados da propriedade
+        return NextResponse.json({ property }, { status: 200 });
+    } catch (error) {
+        console.error("Error fetching property:", error);
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+}

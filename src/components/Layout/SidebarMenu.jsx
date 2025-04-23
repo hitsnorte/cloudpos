@@ -64,31 +64,29 @@ export default function SidebarMenu() {
            "Store Settings": {
       icon: <LuFolderCog  size={20} />, 
       submenu: [
-        {  ref: "/", label: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> }, 
-        { ref: "/homepage/grupos", label: "Groups", icon: <FaLayerGroup  size={18} /> }, 
-        { ref: "/homepage/family", label: "Families", icon: <MdFamilyRestroom size={18} /> },
-        { ref: "/homepage/subfamilia", label: "SubFamilies", icon: <GiFamilyTree size={18} /> },
-        { ref: "/homepage/product", label: "Products", icon: <FaProductHunt size={18} /> },
-        { ref: "/homepage/Iva", label: "VAT", icon: <IoPricetags size={18} /> },
-        { ref: "/homepage/unit", label: "Unit", icon: <FaUnity  size={18} /> },
+        { href: "/", text: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> }, 
+        { href: "/homepage/grupos", text: "Groups", icon: <FaLayerGroup  size={18} /> }, 
+        { href: "/homepage/family", text: "Families", icon: <MdFamilyRestroom size={18} /> },
+        { href: "/homepage/subfamilia", text: "SubFamilies", icon: <GiFamilyTree size={18} /> },
+        { href: "/homepage/product", text: "Products", icon: <FaProductHunt size={18} /> },
+        { href: "/homepage/Iva", text: "VAT", icon: <IoPricetags size={18} /> },
+        { href: "/homepage/unit", text: "Unit", icon: <FaUnity  size={18} /> },
             ], 
 
         },
-    };
 
-    const menuStorePrice = {
+    
       "Store Price": {
       icon: <LuFolderCog  size={20} />, 
       submenu: [
-        { ref: "/homepage/classepreco", label: "Price classes", icon: <MdClass  size={18} /> }, 
-        { ref: "/homepage/period", label: "Periods", icon: <CiViewTimeline  size={18} /> }, 
+        { href: "/homepage/classepreco", text: "Price classes", icon: <MdClass  size={18} /> }, 
+        { href: "/homepage/period", text: "Periods", icon: <CiViewTimeline  size={18} /> }, 
         // { ref: "/homepage/exploration center", label: "exploration center", icon: <MdFamilyRestroom size={18} /> },
-        { ref: "/homepage/hour", label: "Hours", icon: <FaHourglassEnd size={18} /> },
+        { href: "/homepage/hour", text: "Hours", icon: <FaHourglassEnd size={18} /> },
             ], 
       },
-    };
+    
 
-    const shoppingCartItems = {
         "Shopping cart": {
             icon: <TiShoppingCart size={20} />,
             submenu: [

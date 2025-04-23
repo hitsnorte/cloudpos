@@ -85,6 +85,7 @@ export async function GET(req, { params }) {
     }
 }
 
+
 export async function DELETE(req, { params }) {
     const { id } = params;
 
@@ -108,4 +109,8 @@ export async function DELETE(req, { params }) {
         console.error("Error deleting property:", error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
+
 }
+
+
+

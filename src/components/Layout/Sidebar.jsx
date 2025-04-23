@@ -31,8 +31,9 @@ export default function Sidebar({ mobileOpen, setMobileOpen, expanded, setExpand
   }, []);
 
   return (
-      <SidebarContext.Provider value={{ expanded: isMobile ? true : expanded }}>
-        {(isMobile && mobileOpen) || !isMobile ? (
+      <SidebarContext.Provider value={{ expanded: isMobile ? true : expanded, isMobile }}>
+
+      {(isMobile && mobileOpen) || !isMobile ? (
             <aside
                 className={`h-screen fixed top-0 left-0 bg-white border-r border-gray-200 shadow-sm z-50 
             transition-all duration-300 ease-in-out 

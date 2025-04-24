@@ -1,12 +1,12 @@
-import { PrismaClient } from '@prisma/client';
+// /src/app/api/subfamily/get_subfamily/[id]/route.js
 
-const prisma = new PrismaClient();
+import { fetchSubfamily} from "@/src/lib/apisubfamily";
 
 export async function GET(req, { params }) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
-    // Verifica se o ID é um número válido
+    // Check if the ID is valid (this can stay the same)
     if (isNaN(id)) {
       return new Response(JSON.stringify({ error: 'ID inválido.' }), {
         status: 400,
@@ -14,14 +14,14 @@ export async function GET(req, { params }) {
       });
     }
 
-    // Busca a sub familia pelo ID
-    const subfamilia = await prisma.subfamilia.findUnique({
-      where: { id: parseInt(id) },
-    });
+    // Use `fetchSubfamily` to get the list of subfamilies from the API
+    const subfamilias = await fetchSubfamily();
 
-    // Se não encontrar a sub familia
+    // Find the subfamily that matches the given ID
+    const subfamilia = subfamilias.find((subfam) => subfam.id === parseInt(id));
+
     if (!subfamilia) {
-      return new Response(JSON.stringify({ error: 'Grupo não encontrado.' }), {
+      return new Response(JSON.stringify({ error: 'Subfamilia não encontrada.' }), {
         status: 404,
         headers: { 'Content-Type': 'application/json' },
       });
@@ -33,7 +33,7 @@ export async function GET(req, { params }) {
     });
   } catch (error) {
     console.error(error);
-    return new Response(JSON.stringify({ error: 'Erro ao buscar grupo.' }), {
+    return new Response(JSON.stringify({ error: 'Erro ao buscar subfamilia.' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });

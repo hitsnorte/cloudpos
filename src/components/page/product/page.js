@@ -393,6 +393,50 @@ const DataProduct = () => {
       }));
     };
 
+    const [subfam , setSubFam] = useState('');
+    const [loadingsubfam , setLoadingSubFam] = useState(true);
+
+    console.log('ID da subfamília:', editProduct?.VSUBFAM);
+
+    const fetchSubFamilia = async (subFamiliaId) => {
+        try {
+            const response = await fetch(`/api/subfamily/get_subfamily/${subFamiliaId}`);
+            const data = await response.json();
+            const contentType = response.headers.get('Content-Type');
+            console.log('Response status:', response.status);
+            console.log('Content-Type:', contentType);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            if (!contentType || !contentType.includes('application/json')) {
+                const text = await response.text();
+                console.error('Unexpected response (not JSON):', text);
+                setSubFam('Erro no formato da resposta');
+                return;
+            }
+
+            if (data && data.VDESC) {
+                setSubFam(data.VDESC);
+            } else {
+                setSubFam('Não encontrado');
+            }
+        } catch (error) {
+            console.error('Erro ao buscar sub-família:', error);
+            setSubFam('Erro ao carregar');
+        } finally {
+            setLoadingSubFam(false);
+        }
+    };
+
+// Efeito para carregar a sub-família quando o produto for editado
+    useEffect(() => {
+        if (editProduct?.VSUBFAM) {
+            fetchSubFamilia(editProduct?.VSUBFAM);
+        }
+    }, [editProduct?.VSUBFAM]);
+
   return (
     <div className="p-4 pb-10">
       <div className="w-full">
@@ -657,97 +701,169 @@ const DataProduct = () => {
   </Modal>
 
   {/* Modal para editar produto */}
-  <Modal
-    isOpen={isEditModalOpen}
-    onOpenChange={onEditModalClose}
-    size="md"
-    placement="center" // Centraliza o modal
-    className="w-100 bg-white shadow-xl rounded-lg"
-    hideCloseButton={true}
-  >
-    <ModalContent>
-      {(onClose) => (
-        <>
-          <ModalHeader className="rounded bg-[#FC9D25] flex justify-between items-center">
-          <div className="text-xl font-bold text-white">Edit product</div>
-                <Button
-                  onClick={onClose}
-                  className="text-white bg-transparent border-0 text-2xl p-0"
-                  aria-label="Close"
-                >
-                  &times; {/* Unicode for "×" sign */}
-                </Button>
-          </ModalHeader>
-          <ModalBody className="py-5 px-6">
-            {editProduct && (
-              <form id="updateProductForm" onSubmit={handleUpdateProduct} className="space-y-6">
-                <div>
-                  <label htmlFor="productAbbreviation" className="block text-sm font-medium text-gray-400 mb-1">
-                    Abbreviation
-                  </label>
-                  <input
-                    id="productAbreviatura"
-                    type="text"
-                    value={editProduct ? editProduct.Abreviatura : ''}
-                    onChange={(e) =>
-                      setEditProduct({ ...editProduct, Abreviatura: e.target.value })
-                    }
-                    placeholder="Digite a Abbreviation do produto"
-                    className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
-                    required
-                  />
-                </div>
-                 <div >
-                  <label htmlFor="productDescription" className="block text-sm font-medium text-gray-400 mb-1">
-                      Description
-                  </label>
-                  <input
-                      id="product"
-                      type="text"   
-                      value={editProduct ? editProduct.VDESC1 : ''}
-                      onChange={(e) =>
-                        setEditProduct({ ...editProduct, VDESC1: e.target.value })
-                      }
-                      placeholder="Digite a descriçao do produto"
-                      className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
-                      required
-                    />
-                    {quantityError && (
-                      <p className="text-red-500 text-sm mt-1">{quantityError}</p>
-                    )}
-                </div>
-               
-                {/* <div>
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={ativo}
-                      onChange={(e) => setAtivo(e.target.checked)}
-                    />
-                    {ativo ? "Ativo" : "Inativo"}
-                  </label>
-                </div> */}
-              
-        
-              </form>
-            )}
-          </ModalBody>
-          <ModalFooter className="w-102 border-t border-gray-200 pt-2 px-8">
-            <Button
-              type="submit"
-              form="updateProductForm"
-              className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
-              onClick={() => window.location.reload()} // Recarrega a página ao clicar
-            >
-              Save
-            </Button>
-          </ModalFooter>
-        </>
-      )}
-    </ModalContent>
-  </Modal>  
+        <Modal
+            isOpen={isEditModalOpen}
+            onOpenChange={onEditModalClose}
+            size="3xl"
+            placement="center" // Centraliza o modal
+            className="w-[95vw] max-w-[1000px] min-w-[800px] bg-white shadow-xl rounded-lg"
+            hideCloseButton={true}
+        >
+            <ModalContent>
+                {(onClose) => (
+                    <>
+                        <ModalHeader className="rounded bg-[#FC9D25] flex justify-between items-center">
+                            <div className="text-xl font-bold text-white">Edit product</div>
+                            <Button
+                                onClick={onClose}
+                                className="text-white bg-transparent border-0 text-2xl p-0"
+                                aria-label="Close"
+                            >
+                                &times; {/* Unicode for "×" sign */}
+                            </Button>
+                        </ModalHeader>
 
-  {/* Modal para excluir produto */}
+                        <ModalBody className="py-5 px-6">
+                            {editProduct && (
+                                <form id="updateProductForm" onSubmit={handleUpdateProduct} className="space-y-6">
+                                    {/* Abbreviation and Product Type - Grouped Horizontally */}
+                                    <div className="flex gap-4">
+                                        {/* Abbreviation - Half Width */}
+                                        <div className="w-1/2">
+                                            <label htmlFor="productAbbreviation" className="block text-sm font-medium text-gray-400 mb-1">
+                                                Abbreviation
+                                            </label>
+                                            <input
+                                                id="productAbreviatura"
+                                                type="text"
+                                                value={editProduct?.Abreviatura || ''}
+                                                onChange={(e) => setEditProduct({ ...editProduct, Abreviatura: e.target.value })}
+                                                placeholder="Digite a Abbreviation do produto"
+                                                className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                                                required
+                                            />
+                                        </div>
+
+                                        {/* Detalhes do tipo de produto */}
+                                        <div className="w-1/2 flex gap-2 items-end">
+                                            {/* Grupo (VCodGrfam) */}
+                                            <div className="flex flex-col w-1/3">
+                                                <label className="text-sm font-medium text-gray-400 mb-1">Group</label>
+                                                <div className="bg-gray-100 p-1 rounded text-sm text-gray-700">
+                                                    {editProduct?.VCodGrfam || '—'}
+                                                </div>
+                                            </div>
+
+                                            {/* Tipo de produto */}
+                                            <div className="flex flex-col w-1/3">
+                                                <label className="text-sm font-medium text-gray-400 mb-1">Type</label>
+                                                <div className="bg-gray-100 p-1 rounded text-sm text-gray-700">
+                                                    {editProduct?.ProductType || '—'}
+                                                </div>
+                                            </div>
+
+                                            {/* Status*/}
+                                            <div className="flex flex-col w-1/3 items-center">
+                                                <label className="text-sm font-medium text-gray-400 mb-1">Status</label>
+                                                <label className="flex items-center gap-1 text-sm text-gray-700">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={editProduct?.activo || false}
+                                                        onChange={(e) => setEditProduct({ ...editProduct, activo: e.target.checked })}
+                                                    />
+                                                    {editProduct?.activo ? 'Active' : 'Inactive'}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Descrição */}
+                                    <div className="w-full">
+                                        <label htmlFor="productDescription" className="block text-sm font-medium text-gray-400 mb-1">
+                                            Description
+                                        </label>
+                                        <textarea
+                                            id="productDescription"
+                                            value={editProduct?.VDESC1 || ''}
+                                            onChange={(e) => setEditProduct({ ...editProduct, VDESC1: e.target.value })}
+                                            placeholder="Insert product description"
+                                            className="w-full p-2 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                                        />
+                                    </div>
+
+                                    <div className="flex gap-4">
+                                    {/* Sub-Família  */}
+                                    <div className="w-1/2">
+                                        <label htmlFor="subFamilia" className="block text-sm font-medium text-gray-400 mb-1">
+                                            SubFamily
+                                        </label>
+                                        <div className="w-full p-1 bg-gray-100 rounded text-sm text-gray-700">
+                                            {loadingsubfam ? 'Loading...' : subfam || 'Not associated'}
+                                        </div>
+                                    </div>
+
+                                    {/* VREFERENCIA */}
+                                    <div className="w-1/3">
+                                        <label htmlFor="referencia" className="block text-sm font-medium text-gray-400 mb-1">
+                                            Reference
+                                        </label>
+                                        <input
+                                            id="referencia"
+                                            type="text"
+                                            value={editProduct?.VREFERENCIA || ''}
+                                            onChange={(e) => setEditProduct({ ...editProduct, VREFERENCIA: e.target.value })}
+                                            placeholder="Insert reference"
+                                            className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                                        />
+                                    </div>
+
+                                        {/* IVA */}
+                                        <div className="w-1/6">
+                                            <label htmlFor="iva" className="block text-sm font-medium text-gray-400 mb-1">
+                                                VAT
+                                            </label>
+                                            <select
+                                                id="iva"
+                                                className="w-full p-1 rounded bg-gray-200 focus:outline-none focus:ring-1 focus:ring-gray-500"
+                                                value={selectedIva}
+                                                onChange={(e) => setSelectedIva(e.target.value)}
+                                            >
+                                                <option value="">Select</option>
+                                                {ivaList.map((iva) => (
+                                                    <option key={iva.id} value={iva.taxa}>
+                                                        {iva.taxa}% - {iva.descricao}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+
+                                    </div>
+                                </form>
+                            )}
+                        </ModalBody>
+
+                        <ModalFooter className="w-102 border-t border-gray-200 pt-2 px-8 flex justify-end gap-4">
+                            <Button
+                                onClick={onEditModalClose}
+                                className="px-6 py-2 bg-[#EDEBEB] text-[#191919] rounded-md hover:bg-gray-300 font-medium transition duration-200"
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                type="submit"
+                                form="updateProductForm"
+                                className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
+                                onClick={() => window.location.reload()} // still here for now
+                            >
+                                Save
+                            </Button>
+                        </ModalFooter>
+                    </>
+                )}
+            </ModalContent>
+        </Modal>
+
+        {/* Modal para excluir produto */}
   <Modal
     isOpen={isDeleteModalOpen}
     onOpenChange={onDeleteModalClose}

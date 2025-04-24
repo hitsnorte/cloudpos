@@ -435,7 +435,7 @@ const PropertiesTable = () => {
             </div>
 
             {/* Paginação*/}
-            <div className="flex fixed bottom-0 left-0 items-center gap-2 w-full px-4 py-3 bg-gray-200 justify-end">
+            <div className="flex fixed bottom-0 left-0 items-center gap-2 w-full px-4 py-3 bg-[#EDEBEB] justify-end">
                 <span className="px-2 py-1">Items per page</span>
 
                 <select

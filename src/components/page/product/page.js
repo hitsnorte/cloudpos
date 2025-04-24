@@ -400,25 +400,29 @@ const DataProduct = () => {
 
     const fetchSubFamilia = async (subFamiliaId) => {
         try {
-            const response = await fetch(`/api/subfamily/get_subfamily/${subFamiliaId}`);
+            const response = await fetch('/api/cloudproducts/subfamilia', {
+                headers: {
+                    'X-Property-ID': localStorage.getItem('selectedProperty'),
+                    'X-Subfam-ID': subFamiliaId.toString(),
+                }
+            });
+
+            const contentType = response.headers.get("content-type");
             const data = await response.json();
-            const contentType = response.headers.get('Content-Type');
-            console.log('Response status:', response.status);
-            console.log('Content-Type:', contentType);
+            console.log('Subfamília encontrada:', data);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             if (!contentType || !contentType.includes('application/json')) {
-                const text = await response.text();
-                console.error('Unexpected response (not JSON):', text);
+                console.error('Unexpected response (not JSON):', data);
                 setSubFam('Erro no formato da resposta');
                 return;
             }
 
-            if (data && data.VDESC) {
-                setSubFam(data.VDESC);
+            if (data?.data?.VDesc) {
+                setSubFam(data.data.VDesc); // <- Corrigido: `data.data.VDesc`, não `data.VDESC`
             } else {
                 setSubFam('Não encontrado');
             }
@@ -433,11 +437,12 @@ const DataProduct = () => {
 // Efeito para carregar a sub-família quando o produto for editado
     useEffect(() => {
         if (editProduct?.VSUBFAM) {
-            fetchSubFamilia(editProduct?.VSUBFAM);
+            fetchSubFamilia(editProduct.VSUBFAM);
         }
     }, [editProduct?.VSUBFAM]);
 
-  return (
+
+    return (
     <div className="p-4 pb-10">
       <div className="w-full">
            {/* Campo de pesquisa */}
@@ -459,7 +464,7 @@ const DataProduct = () => {
             <DropdownTrigger>
             <button 
                 onClick={onAddModalOpen}
-                className="flex fixed absolute top-4 right-25 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
+                className="flex fixed absolute top-4 right-25 bg-[#FC9D25] w-14 text-white p-2 shadow-lg items-center justify-center rounded">
                 < Plus size={25}  />     
             </button> 
             </DropdownTrigger>
@@ -730,7 +735,7 @@ const DataProduct = () => {
                                     <div className="flex gap-4">
                                         {/* Abbreviation - Half Width */}
                                         <div className="w-1/2">
-                                            <label htmlFor="productAbbreviation" className="block text-sm font-medium text-gray-400 mb-1">
+                                            <label htmlFor="productAbbreviation" className="block text-sm font-medium text-[#191919] mb-1">
                                                 Abbreviation
                                             </label>
                                             <input
@@ -748,7 +753,7 @@ const DataProduct = () => {
                                         <div className="w-1/2 flex gap-2 items-end">
                                             {/* Grupo (VCodGrfam) */}
                                             <div className="flex flex-col w-1/3">
-                                                <label className="text-sm font-medium text-gray-400 mb-1">Group</label>
+                                                <label className="text-sm font-medium text-[#191919] mb-1">Group</label>
                                                 <div className="bg-gray-100 p-1 rounded text-sm text-gray-700">
                                                     {editProduct?.VCodGrfam || '—'}
                                                 </div>
@@ -756,7 +761,7 @@ const DataProduct = () => {
 
                                             {/* Tipo de produto */}
                                             <div className="flex flex-col w-1/3">
-                                                <label className="text-sm font-medium text-gray-400 mb-1">Type</label>
+                                                <label className="text-sm font-medium text-[#191919] mb-1">Type</label>
                                                 <div className="bg-gray-100 p-1 rounded text-sm text-gray-700">
                                                     {editProduct?.ProductType || '—'}
                                                 </div>
@@ -764,7 +769,7 @@ const DataProduct = () => {
 
                                             {/* Status*/}
                                             <div className="flex flex-col w-1/3 items-center">
-                                                <label className="text-sm font-medium text-gray-400 mb-1">Status</label>
+                                                <label className="text-sm font-medium text-[#191919] mb-1">Status</label>
                                                 <label className="flex items-center gap-1 text-sm text-gray-700">
                                                     <input
                                                         type="checkbox"
@@ -779,7 +784,7 @@ const DataProduct = () => {
 
                                     {/* Descrição */}
                                     <div className="w-full">
-                                        <label htmlFor="productDescription" className="block text-sm font-medium text-gray-400 mb-1">
+                                        <label htmlFor="productDescription" className="block text-sm font-medium text-[#191919] mb-1">
                                             Description
                                         </label>
                                         <textarea
@@ -791,35 +796,39 @@ const DataProduct = () => {
                                         />
                                     </div>
 
-                                    <div className="flex gap-4">
-                                    {/* Sub-Família  */}
-                                    <div className="w-1/2">
-                                        <label htmlFor="subFamilia" className="block text-sm font-medium text-gray-400 mb-1">
-                                            SubFamily
-                                        </label>
-                                        <div className="w-full p-1 bg-gray-100 rounded text-sm text-gray-700">
-                                            {loadingsubfam ? 'Loading...' : subfam || 'Not associated'}
+                                    {/* Sub-Família, Referência e IVA - Alinhados à direita */}
+                                    <div className="flex justify-end gap-4">
+                                        {/* Sub-Família */}
+                                        <div className="w-1/3">
+                                            <label htmlFor="subFamilia" className="block text-sm font-medium text-[#191919] mb-1">
+                                                Sub-Família
+                                            </label>
+                                            <div
+                                                id="subFamilia"
+                                                className="w-full p-1 bg-gray-100 rounded text-sm text-gray-700"
+                                            >
+                                                {loadingsubfam ? 'Loading...' : subfam || 'Not associated'}
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    {/* VREFERENCIA */}
-                                    <div className="w-1/3">
-                                        <label htmlFor="referencia" className="block text-sm font-medium text-gray-400 mb-1">
-                                            Reference
-                                        </label>
-                                        <input
-                                            id="referencia"
-                                            type="text"
-                                            value={editProduct?.VREFERENCIA || ''}
-                                            onChange={(e) => setEditProduct({ ...editProduct, VREFERENCIA: e.target.value })}
-                                            placeholder="Insert reference"
-                                            className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
-                                        />
-                                    </div>
+                                        {/* VREFERENCIA */}
+                                        <div className="w-1/3">
+                                            <label htmlFor="referencia" className="block text-sm font-medium text-[#191919] mb-1">
+                                                Reference
+                                            </label>
+                                            <input
+                                                id="referencia"
+                                                type="text"
+                                                value={editProduct?.VREFERENCIA || ''}
+                                                onChange={(e) => setEditProduct({ ...editProduct, VREFERENCIA: e.target.value })}
+                                                placeholder="Insert reference"
+                                                className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                                            />
+                                        </div>
 
                                         {/* IVA */}
-                                        <div className="w-1/6">
-                                            <label htmlFor="iva" className="block text-sm font-medium text-gray-400 mb-1">
+                                        <div className="w-1/3">
+                                            <label htmlFor="iva" className="block text-sm font-medium text-[#191919] mb-1">
                                                 VAT
                                             </label>
                                             <select
@@ -836,7 +845,6 @@ const DataProduct = () => {
                                                 ))}
                                             </select>
                                         </div>
-
                                     </div>
                                 </form>
                             )}
@@ -862,6 +870,7 @@ const DataProduct = () => {
                 )}
             </ModalContent>
         </Modal>
+
 
         {/* Modal para excluir produto */}
   <Modal

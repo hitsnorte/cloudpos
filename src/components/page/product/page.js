@@ -53,6 +53,8 @@ const DataProduct = () => {
 
     const [sortConfig, setSortConfig] = useState({ key: 'VDesc', direction: 'asc' });
 
+
+
     const {
         isOpen: isAddModalOpen,
         onOpen: onAddModalOpen,
@@ -81,6 +83,18 @@ const DataProduct = () => {
 
     const toggleCheck = () => {
         setIsChecked(!isChecked); // Alterna o estado da checkbox
+    };
+
+    const handleEditModalClose = () => {
+        // Reset tooltip when modal is closed
+        setShowFamilyTooltip(false); // Close tooltip
+        setFamilyName(''); // Reset family name
+        setSubFam(''); // Reset subfamily name
+        setLoadingFamily(false); // Reset loading state for family
+        setLoadingSubFam(true); // Reset loading state for subfamily
+
+        // Call original modal onClose (from useDisclosure)
+        onEditModalClose();
     };
 
     const loadProducts = async () => {
@@ -527,22 +541,20 @@ const DataProduct = () => {
     const [showFamilyTooltip, setShowFamilyTooltip] = useState(false);
 
     const handleButtonClick = async () => {
-        // Carregar a subfamília
-        const subfamilyData = await fetchSubFamilia(editProduct.VCodFam);
-        const familyId = subfamilyData?.VCodFam;
+        const familyId = editProduct?.VCodFam;
 
-        // Se a família for encontrada, carregar e exibir na tooltip
         if (familyId) {
             await fetchFamilia(familyId);
         }
 
-        setShowFamilyTooltip(true);  // Mostrar a tooltip da família
+        setShowFamilyTooltip(true);
     };
+
 
     // Simulação do carregamento da subfamília ao renderizar
     useEffect(() => {
         const loadSubfam = async () => {
-            await fetchSubFamilia(editProduct.VCodFam);
+            await fetchSubFamilia(editProduct.VSUBFAM);
         };
 
         loadSubfam();
@@ -811,10 +823,10 @@ const DataProduct = () => {
     </ModalContent>
   </Modal>
 
-        {/* Modal para editar produto */}
+        {/* Modal para editar produtos */}
         <Modal
             isOpen={isEditModalOpen}
-            onOpenChange={onEditModalClose}
+            onOpenChange={handleEditModalClose}
             size="3xl"
             placement="center" // Centraliza o modal
             className="w-[95vw] max-w-[1000px] min-w-[800px] bg-white shadow-xl rounded-lg"

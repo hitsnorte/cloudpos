@@ -66,6 +66,8 @@ const PropertiesTable = () => {
         fetchChains();
     }, []);
 
+
+
     const handleInputChange = (event) => {
         const { name, value } = event.target;
         setNewProperty((prev) => ({
@@ -136,22 +138,30 @@ const PropertiesTable = () => {
         // Encontra o objeto correto da chain correspondente ao propertyChain
         const chain = chains.find(chain => chain.chainTag === property.propertyChain?.[0]);
 
+        console.log("Selected property:", property);
+        console.log("Associated chain:", chain);
+
         setEditingProperty({
+            ...property,
+            chainID: chain ? chain.chainID : "",  // Set the chainID if found, otherwise an empty string
+        });
+
+        // Define a propriedade e o chainID para editar
+        console.log("Editing property set:", {
             ...property,
             chainID: chain ? chain.chainID : "",
         });
 
+        // Abre o modal
         onEditOpen();
     };
-
-
 
     const handleEditChange = (event) => {
         const { name, value } = event.target;
 
         setEditingProperty((prev) => ({
             ...prev,
-            [name]: name === "chainID" ? parseInt(value,10):value ,
+            [name]: name === "chainID" ? parseInt(value, 10) : value,
         }));
     };
 
@@ -181,7 +191,6 @@ const PropertiesTable = () => {
             console.error("Error updating property:", error);
         }
     };
-
 
     const handleCloseModal = () => {
         setNewProperty({
@@ -493,7 +502,7 @@ const PropertiesTable = () => {
                             <ModalBody className="py-5 px-6 bg-[#FAFAFA]">
                                 {editingProperty && (
                                     <form id="editPropertyForm" onSubmit={handleUpdateProperty} className="space-y-6">
-                                        {[ 'propertyName', 'propertyServer', 'propertyPort', 'mpeHotel'].map((field, index) => (
+                                        {['propertyName', 'propertyServer', 'propertyPort', 'mpeHotel'].map((field, index) => (
                                             <div key={index}>
                                                 <label htmlFor={field} className="block text-sm font-medium text-[#191919] mb-1">
                                                     {field.charAt(0).toUpperCase() + field.slice(1)}
@@ -511,18 +520,22 @@ const PropertiesTable = () => {
                                         ))}
 
                                         <div>
-                                            <label htmlFor="propertyChain" className="block text-sm font-medium text-[#191919] mb-1">
+                                            <label htmlFor="chainID" className="block text-sm font-medium text-[#191919] mb-1">
                                                 Select Property Chain
                                             </label>
                                             <Select
-                                                id="propertyChain"
-                                                name="propertyChain"
-                                                options={chainOptions}
-                                                value={chainOptions.find(option => option.value === editingProperty?.propertyChain) || null}
+                                                id="chainID"
+                                                name="chainID"
+                                                options={chains.map((chain) => ({
+                                                    value: chain.chainID,
+                                                    label: chain.chainName, // Adjust this if necessary
+                                                }))}
+                                                // Ensure the selected value matches the chainID in editingProperty
+                                                value={chains.find(chain => chain.chainID === editingProperty.chainID) || null}
                                                 onChange={(selectedOption) =>
                                                     setEditingProperty((prev) => ({
                                                         ...prev,
-                                                        propertyChain: selectedOption ? selectedOption.value : null,
+                                                        chainID: selectedOption ? selectedOption.value : "",
                                                     }))
                                                 }
                                                 isSearchable
@@ -533,6 +546,7 @@ const PropertiesTable = () => {
                                     </form>
                                 )}
                             </ModalBody>
+
                             <ModalFooter className="border-t border-[#EDEBEB] bg-[#FAFAFA] pt-2 px-8">
                                 <Button onPress={onEditClose} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">Cancel</Button>
                                 <Button type="submit" form="editPropertyForm" className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray-600 transition">Update</Button>

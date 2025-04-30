@@ -14,389 +14,417 @@ import { fetchFamily } from '@/src/lib/apifamily';
 import { fetchGrup } from '@/src/lib/apigroup';
 import { fetchIva } from '@/src/lib/apiiva';
 import { fetchUnit } from '@/src/lib/apiunit';
+import { fetchClassepreco} from "@/src/lib/apiclassepreco";
+import { fetchPreco} from "@/src/lib/apipreco";
+import { IoInformationSharp } from "react-icons/io5";
 
 import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  useDisclosure,
-  Spinner,
+    Modal,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+    useDisclosure,
+    Spinner,
 } from '@nextui-org/react';
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@heroui/react";
 
 const PAGE_SIZES = [25, 50, 150, 250];
 
 const DataProduct = () => {
-  const [products, setProducts] = useState([]);
-  const [subfamilies, setSubfamilies] = useState([]);
-  const [error, setError] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [newProduct, setNewProduct] = useState({ product_name: '', quantity: '' });
-  const [editProduct, setEditProduct] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [productToDelete, setProductToDelete] = useState(null);
-  const [quantityError, setQuantityError] = useState(''); 
-  const [selectedSubfamily, setSelectedSubfamily] = useState("");
-  const [selectedIva, setSelectedIva] = useState("");
-  const [selectedTipo, setSelectedTipo] = useState("");
-  const [isActive, setIsActive] = useState(false);
+    const [products, setProducts] = useState([]);
+    const [subfamilies, setSubfamilies] = useState([]);
+    const [error, setError] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [newProduct, setNewProduct] = useState({ product_name: '', quantity: '' });
+    const [editProduct, setEditProduct] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [productToDelete, setProductToDelete] = useState(null);
+    const [quantityError, setQuantityError] = useState('');
+    const [selectedSubfamily, setSelectedSubfamily] = useState("");
+    const [selectedIva, setSelectedIva] = useState("");
+    const [selectedTipo, setSelectedTipo] = useState("");
+    const [isActive, setIsActive] = useState(false);
 
-  const [itemsPerPage, setItemsPerPage] = useState(50);
-  const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(50);
+    const [currentPage, setCurrentPage] = useState(1);
 
-  const [isChecked, setIsChecked] = useState(false);
+    const [isChecked, setIsChecked] = useState(false);
 
-  const [sortConfig, setSortConfig] = useState({ key: 'VDesc', direction: 'asc' });
+    const [sortConfig, setSortConfig] = useState({ key: 'VDesc', direction: 'asc' });
 
-  const {
-    isOpen: isAddModalOpen,
-    onOpen: onAddModalOpen,
-    onClose: onAddModalClose,
-  } = useDisclosure();
-  const {
-    isOpen: isEditModalOpen,
-    onOpen: onEditModalOpen,
-    onClose: onEditModalClose,
-  } = useDisclosure();
-  const {
-    isOpen: isDeleteModalOpen,
-    onOpen: onDeleteModalOpen,
-    onClose: onDeleteModalClose,
-  } = useDisclosure();
-  const {
-      isOpen: isSelectModalOpen,
-      onOpen: onSelectModalOpen,
-      onClose: onSelectModalClose,
+    const {
+        isOpen: isAddModalOpen,
+        onOpen: onAddModalOpen,
+        onClose: onAddModalClose,
+    } = useDisclosure();
+    const {
+        isOpen: isEditModalOpen,
+        onOpen: onEditModalOpen,
+        onClose: onEditModalClose,
+    } = useDisclosure();
+    const {
+        isOpen: isDeleteModalOpen,
+        onOpen: onDeleteModalOpen,
+        onClose: onDeleteModalClose,
+    } = useDisclosure();
+    const {
+        isOpen: isSelectModalOpen,
+        onOpen: onSelectModalOpen,
+        onClose: onSelectModalClose,
     } = useDisclosure();
 
-  useEffect(() => {
-    loadProducts();
-    loadSubfamilies();
-  }, []);
+    useEffect(() => {
+        loadProducts();
+        loadSubfamilies();
+    }, []);
 
-  const toggleCheck = () => {
-    setIsChecked(!isChecked); // Alterna o estado da checkbox
-  };
-  
-  const loadProducts = async () => {
-    try {
-      const products = await fetchProduct();
-      const subfamilyMap = await fetchSubfamilyMap(); // Criamos um mapa de subfamílias
-      const familyMap = await fetchFamilyMap(); // Criamos um mapa de famílias
-      const groupMap = await fetchGroupMap();
-      const ivaMap = await fetchIvaMap();
-      const unitMap = await fetchUnitMap();
-
-      // Mapeamos os produtos, adicionando a descrição da subfamília e da família correspondente
-      const enrichedProducts = products.map(product => ({
-        ...product,
-        VDescSubfamily: subfamilyMap[product.VSUBFAM] || "N/A", // Se não houver correspondência, coloca "N/A"
-        VDescFamily: familyMap[product.VCodFam] || "N/A", // Se não houver correspondência, coloca "N/A"
-        VDescGroup: groupMap[product.VCodGrfam] || "N/A", // Se não houver correspondência, coloca "N/A"
-        VDescIva: ivaMap[product.VCodIva] || "N/A", // Se não houver correspondência, coloca "N/A"
-        VDescUnit: unitMap[product.DefinicaoProduto] || "N/A" // Se não houver correspondência, coloca "N/A"
-      }));
-  
-      setProducts(enrichedProducts);
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-  
-  const fetchSubfamilyMap = async () => {
-    try {
-      const subfamilies = await fetchSubfamily();
-      return subfamilies.reduce((map, subfamily) => {
-        map[subfamily.VCodSubFam] = subfamily.VDesc;
-        return map;
-      }, {});
-    } catch (err) {
-      setError(err.message);
-      return {};
-    }
-  };
-
-  const fetchFamilyMap = async () => {
-    try {
-      const families = await fetchFamily();
-      return families.reduce((map, family) => {
-        map[family.VCodFam] = family.VDesc;
-        return map;
-      }, {});
-    } catch (err) {
-      setError(err.message);
-      return {};
-    }
-  };
-
-  const fetchGroupMap = async () => {
-    try {
-      const groups = await fetchGrup();
-      return groups.reduce((map, group) => {
-        map[group.VCodGrFam] = group.VDesc;
-        return map;
-      }, {});
-    } catch (err) {
-      setError(err.message);
-      return {};
-    }
-  };
-
-  const fetchIvaMap = async () => {
-    try {
-      const ivas = await fetchIva();
-      return ivas.reduce((map, iva) => {
-        map[iva.VCODI] = iva.VDESC;
-        return map;
-      }, {});
-    } catch (err) {
-      setError(err.message);
-      return {};
-    }
-  };
-  
-  const fetchUnitMap = async () => {
-    try {
-      const units = await fetchUnit();
-      return units.reduce((map, unit) => {
-        map[unit.Id_interno] = unit.Descricao;
-        return map;
-      }, {});
-    } catch (err) {
-      setError(err.message);
-      return {};
-    }
-  };
-
-  const loadSubfamilies = async () => {
-      try {
-        const subfamilies = await fetchSubfamily();
-        setSubfamilies(subfamilies);
-      } catch (err) {
-        setError(err.message);
-      }
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewProduct((prev) => ({ ...prev, [name]: value }));
-  };
-
- const handleAddProduct = async (e) => {
-     e.preventDefault();
-     
-     if (!newProduct.product_name || !newProduct.quantity || !selectedSubfamily) {
-       setError('Preencha o nome do produto e selecione uma Subfamilia.');
-       return;
-     }
-   
-     const productExists = products.some(
-       (product) => product.product_name.toLowerCase() === newProduct.product_name.toLowerCase()
-      
-     );
-   
-     if (productExists) {
-       setError('Este produto ja existe. Por favor, use um nome diferente.');
-       return;
-     }
-   
-     try {
-       setIsLoading(true);
-       
-       const productData = {
-         product_name: newProduct.product_name,
-         quantity: newProduct.quantity,
-         selectedSubfamily: selectedSubfamily, // Certifique-se de que a chave no backend espera esse nome
-       };
-   
-       const createdProduct = await createProduct(productData);
-       setProducts([...products, createdProduct]);
-   
-       // Limpa os campos após sucesso
-       setNewProduct({ product_name: '' });
-       setSelectedSubfamily('');
-       setError(null);
-   
-       onAddModalClose();
-     } catch (err) {
-       setError(err.message);
-     } finally {
-       setIsLoading(false);
-     }
-   };
-
-  const handleDeleteProduct = async () => {
-    if (productToDelete) {
-      setIsLoading(true);
-      try {
-        await deleteProduct(productToDelete);
-        setProducts(products.filter((product) => product.id !== productToDelete));
-        setProductToDelete(null);
-        onDeleteModalClose();
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
-
-  const loadColumnVisibility = () => {
-      const savedVisibility = localStorage.getItem('columnVisibility');
-      if (savedVisibility) {
-        return JSON.parse(savedVisibility);
-      }
-      return {
-        codProd: true, // estado padrão
-        abbreviation: true,
-        description: true,
-        codIva: true,
-        descIva: true,
-        IDunit: true,
-        descUnit: true,
-        productOf: true,
-        active: true,
-        codSubfam: true,
-        descSubFam: true,
-        codFam: true,
-        descFam: true,
-        codGrpFam: true,
-        descGrp: true,
-      };
+    const toggleCheck = () => {
+        setIsChecked(!isChecked); // Alterna o estado da checkbox
     };
-    
+
+    const loadProducts = async () => {
+        try {
+            const products = await fetchProduct();
+            const subfamilyMap = await fetchSubfamilyMap(); // Criamos um mapa de subfamílias
+            const familyMap = await fetchFamilyMap(); // Criamos um mapa de famílias
+            const groupMap = await fetchGroupMap();
+            const ivaMap = await fetchIvaMap();
+            const unitMap = await fetchUnitMap();
+
+            // Mapeamos os produtos, adicionando a descrição da subfamília e da família correspondente
+            const enrichedProducts = products.map(product => ({
+                ...product,
+                VDescSubfamily: subfamilyMap[product.VSUBFAM] || "N/A", // Se não houver correspondência, coloca "N/A"
+                VDescFamily: familyMap[product.VCodFam] || "N/A", // Se não houver correspondência, coloca "N/A"
+                VDescGroup: groupMap[product.VCodGrfam] || "N/A", // Se não houver correspondência, coloca "N/A"
+                VDescIva: ivaMap[product.VCodIva] || "N/A", // Se não houver correspondência, coloca "N/A"
+                VDescUnit: unitMap[product.DefinicaoProduto] || "N/A" // Se não houver correspondência, coloca "N/A"
+            }));
+
+            setProducts(enrichedProducts);
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
+    const fetchSubfamilyMap = async () => {
+        try {
+            const subfamilies = await fetchSubfamily();
+            return subfamilies.reduce((map, subfamily) => {
+                map[subfamily.VCodSubFam] = subfamily.VDesc;
+                return map;
+            }, {});
+        } catch (err) {
+            setError(err.message);
+            return {};
+        }
+    };
+
+    const fetchFamilyMap = async () => {
+        try {
+            const families = await fetchFamily();
+            return families.reduce((map, family) => {
+                map[family.VCodFam] = family.VDesc;
+                return map;
+            }, {});
+        } catch (err) {
+            setError(err.message);
+            return {};
+        }
+    };
+
+    const fetchGroupMap = async () => {
+        try {
+            const groups = await fetchGrup();
+            return groups.reduce((map, group) => {
+                map[group.VCodGrFam] = group.VDesc;
+                return map;
+            }, {});
+        } catch (err) {
+            setError(err.message);
+            return {};
+        }
+    };
+
+    const fetchIvaMap = async () => {
+        try {
+            const ivas = await fetchIva();
+            return ivas.reduce((map, iva) => {
+                map[iva.VCODI] = iva.VDESC;
+                return map;
+            }, {});
+        } catch (err) {
+            setError(err.message);
+            return {};
+        }
+    };
+
+    const fetchUnitMap = async () => {
+        try {
+            const units = await fetchUnit();
+            return units.reduce((map, unit) => {
+                map[unit.Id_interno] = unit.Descricao;
+                return map;
+            }, {});
+        } catch (err) {
+            setError(err.message);
+            return {};
+        }
+    };
+
+    const loadSubfamilies = async () => {
+        try {
+            const subfamilies = await fetchSubfamily();
+            setSubfamilies(subfamilies);
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setNewProduct((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleAddProduct = async (e) => {
+        e.preventDefault();
+
+        if (!newProduct.product_name || !newProduct.quantity || !selectedSubfamily) {
+            setError('Preencha o nome do produto e selecione uma Subfamilia.');
+            return;
+        }
+
+        const productExists = products.some(
+            (product) => product.product_name.toLowerCase() === newProduct.product_name.toLowerCase()
+
+        );
+
+        if (productExists) {
+            setError('Este produto ja existe. Por favor, use um nome diferente.');
+            return;
+        }
+
+        try {
+            setIsLoading(true);
+
+            const productData = {
+                product_name: newProduct.product_name,
+                quantity: newProduct.quantity,
+                selectedSubfamily: selectedSubfamily, // Certifique-se de que a chave no backend espera esse nome
+            };
+
+            const createdProduct = await createProduct(productData);
+            setProducts([...products, createdProduct]);
+
+            // Limpa os campos após sucesso
+            setNewProduct({ product_name: '' });
+            setSelectedSubfamily('');
+            setError(null);
+
+            onAddModalClose();
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleDeleteProduct = async () => {
+        if (productToDelete) {
+            setIsLoading(true);
+            try {
+                await deleteProduct(productToDelete);
+                setProducts(products.filter((product) => product.id !== productToDelete));
+                setProductToDelete(null);
+                onDeleteModalClose();
+            } catch (err) {
+                setError(err.message);
+            } finally {
+                setIsLoading(false);
+            }
+        }
+    };
+
+    const loadColumnVisibility = () => {
+        const savedVisibility = localStorage.getItem('columnVisibility');
+        if (savedVisibility) {
+            return JSON.parse(savedVisibility);
+        }
+        return {
+            codProd: true, // estado padrão
+            abbreviation: true,
+            description: true,
+            codIva: true,
+            descIva: true,
+            IDunit: true,
+            descUnit: true,
+            productOf: true,
+            active: true,
+            codSubfam: true,
+            descSubFam: true,
+            codFam: true,
+            descFam: true,
+            codGrpFam: true,
+            descGrp: true,
+        };
+    };
+
     const saveColumnVisibility = () => {
-      localStorage.setItem('columnVisibility', JSON.stringify(columnVisibility));
+        localStorage.setItem('columnVisibility', JSON.stringify(columnVisibility));
     };
-    
+
     const toggleColumn = (column) => {
-      setColumnVisibility((prev) => {
-        const newVisibility = { ...prev, [column]: !prev[column] };
-        localStorage.setItem('columnVisibility', JSON.stringify(newVisibility)); // Atualiza no localStorage
-        return newVisibility;
-      });
+        setColumnVisibility((prev) => {
+            const newVisibility = { ...prev, [column]: !prev[column] };
+            localStorage.setItem('columnVisibility', JSON.stringify(newVisibility)); // Atualiza no localStorage
+            return newVisibility;
+        });
     };
-  
+
     // Agora você pode usar a loadColumnVisibility ao inicializar o state
     const [columnVisibility, setColumnVisibility] = useState(loadColumnVisibility());
-  
+
     const filteredProducts = products.filter((product) =>
-      Object.values(product).some((value) =>
-        String(value).toLowerCase().includes(searchTerm.toLowerCase())
-      )
+        Object.values(product).some((value) =>
+            String(value).toLowerCase().includes(searchTerm.toLowerCase())
+        )
     );
-  
-  const columns = [
-      { key: 'codProd', label: 'Cod Grp' },
-      { key: 'abbreviation', label: 'Abbreviation' },
-      { key: 'description', label: 'Description' },
-      { key: 'codIva', label: 'Cod IVA' },
-      { key: 'descIva', label: 'Desc IVA' },
-      { key: 'IDunit', label: 'ID Unit' },
-      { key: 'descUnit', label: 'Desc Unit' },
-      { key: 'productOf', label: 'Product Of' },
-      { key: 'active', label: 'Active' },
-      { key: 'codSubfam', label: 'Cod SubFam' },
-      { key: 'descSubFam', label: 'Desc SubFam' },
-      { key: 'codFam', label: 'Cod Fam' },
-      { key: 'descFam', label: 'Desc Fam' },
-      { key: 'codGrpFam', label: 'Cod Grp' },
-      { key: 'descGrp', label: 'Desc Grp' },
+
+    const columns = [
+        { key: 'codProd', label: 'Cod Grp' },
+        { key: 'abbreviation', label: 'Abbreviation' },
+        { key: 'description', label: 'Description' },
+        { key: 'codIva', label: 'Cod IVA' },
+        { key: 'descIva', label: 'Desc IVA' },
+        { key: 'IDunit', label: 'ID Unit' },
+        { key: 'descUnit', label: 'Desc Unit' },
+        { key: 'productOf', label: 'Product Of' },
+        { key: 'active', label: 'Active' },
+        { key: 'codSubfam', label: 'Cod SubFam' },
+        { key: 'descSubFam', label: 'Desc SubFam' },
+        { key: 'codFam', label: 'Cod Fam' },
+        { key: 'descFam', label: 'Desc Fam' },
+        { key: 'codGrpFam', label: 'Cod Grp' },
+        { key: 'descGrp', label: 'Desc Grp' },
     ];
-  
-  const [columnSearchTerm, setColumnSearchTerm] = useState('');
-  
-  const filteredColumns = columns.filter((col) =>
-      col.label.toLowerCase().includes(columnSearchTerm.toLowerCase())
+
+    const [columnSearchTerm, setColumnSearchTerm] = useState('');
+
+    const filteredColumns = columns.filter((col) =>
+        col.label.toLowerCase().includes(columnSearchTerm.toLowerCase())
     );
-  
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
-  const paginatedProducts = filteredProducts.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
-   const sortedProducts = useMemo(() => {
-      if (!paginatedProducts || !Array.isArray(paginatedProducts)) return [];
-    
-      const sorted = [...paginatedProducts].sort((a, b) => {
-        if (!sortConfig.key) return 0;
-    
-        let aValue = a[sortConfig.key];
-        let bValue = b[sortConfig.key];
-    
-        if (sortConfig.key === 'DCriadoEm') {
-          aValue = new Date(aValue);
-          bValue = new Date(bValue);
-        } else {
-          aValue = aValue?.toString().toLowerCase();
-          bValue = bValue?.toString().toLowerCase();
-        }
-    
-        if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
-        if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
-        return 0;
-      });
-    
-      return sorted;
+    const paginatedProducts = filteredProducts.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
+    const sortedProducts = useMemo(() => {
+        if (!paginatedProducts || !Array.isArray(paginatedProducts)) return [];
+
+        const sorted = [...paginatedProducts].sort((a, b) => {
+            if (!sortConfig.key) return 0;
+
+            let aValue = a[sortConfig.key];
+            let bValue = b[sortConfig.key];
+
+            if (sortConfig.key === 'DCriadoEm') {
+                aValue = new Date(aValue);
+                bValue = new Date(bValue);
+            } else {
+                aValue = aValue?.toString().toLowerCase();
+                bValue = bValue?.toString().toLowerCase();
+            }
+
+            if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+            if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+            return 0;
+        });
+
+        return sorted;
     }, [paginatedProducts, sortConfig]);
 
-  const handleEditProduct = (product) => {
-    setEditProduct({ ...product });
-    onEditModalOpen();
-  };
-
-  const handleUpdateProduct = async (e) => {
-      e.preventDefault();
-      if (!editProduct || !editProduct.product_name) {
-        setError('Preencha o nome do produto.');
-        return;
-      }
-    
-      try {
-        console.log('Enviando para API:', { id: editProduct.id, product_name: editProduct.product_name });
-        const updatedProduct = await updateProduct(editProduct.id, {
-          product_name: editProduct.product_name,
-          quantity: editProduct.quantity,
-        });
-        console.log('Resposta da API:', updatedProduct);
-        setProducts(products.map((product) => (product.id === updatedProduct.id ? updatedProduct : product)));
-        setEditProduct(null);
-        setError(null); // Limpa o erro após sucesso
-        onEditModalClose();
-      } catch (err) {
-        console.error('Erro ao atualizar produto:', err.message);
-        console.log('Erro ao atualizar produto:', err.message);
-        setError(err.message); // Define o erro para exibição no modal
-      }
+    const handleEditProduct = (product) => {
+        setEditProduct({ ...product });
+        onEditModalOpen();
     };
 
+    const handleUpdateProduct = async (e) => {
+        e.preventDefault();
+
+        // Verificar se os dados essenciais estão preenchidos
+        if (!editProduct || !editProduct.product_name) {
+            setError('Preencha o nome do produto.');
+            return;
+        }
+
+        try {
+            // Preparar o objeto com todos os campos que devem ser atualizados
+            const updatedProductData = {
+                id: editProduct.id,
+                product_name: editProduct.product_name,
+                quantity: editProduct.quantity,
+                Abreviatura: editProduct.Abreviatura,
+                VCodGrfam: editProduct.VCodGrfam,
+                ProductType: editProduct.ProductType,
+                VDESC1: editProduct.VDESC1,
+                VREFERENCIA: editProduct.VREFERENCIA,
+                activo: editProduct.activo,
+                IVA: selectedIva,
+                vultaltpor: editProduct.vultaltpor,
+                dultaltem: editProduct.dultaltem
+            };
+
+            console.log('Enviando para API:', updatedProductData);
+
+            // Enviar os dados para a API
+            const updatedProduct = await updateProduct(editProduct.id, updatedProductData);
+
+            console.log('Resposta da API:', updatedProduct);
+
+            // Atualizar o estado local com o produto atualizado
+            setProducts(products.map((product) => (product.id === updatedProduct.id ? updatedProduct : product)));
+
+            // Limpar os campos de edição e o erro após o sucesso
+            setEditProduct(null);
+            setError(null);
+
+            // Fechar o modal
+            onEditModalClose();
+        } catch (err) {
+            console.error('Erro ao atualizar produto:', err.message);
+            setError(err.message); // Exibir erro no modal
+        }
+    };
+
+
     const ivaList = [
-      { id: 1, taxa: 23, descricao: "IVA Padrão" },
-      { id: 2, taxa: 13, descricao: "IVA Intermediário" },
-      { id: 3, taxa: 6, descricao: "IVA Reduzido" },
-      { id: 4, taxa: 0, descricao: "Isento de IVA" },
+        { id: 1, taxa: 23, descricao: "IVA Padrão" },
+        { id: 2, taxa: 13, descricao: "IVA Intermediário" },
+        { id: 3, taxa: 6, descricao: "IVA Reduzido" },
+        { id: 4, taxa: 0, descricao: "Isento de IVA" },
     ];
 
     const tipoOperacaoList = [
-      { id: 1, tipo: "venda", descricao: "Venda" },
-      { id: 2, tipo: "compra", descricao: "Compra" },
+        { id: 1, tipo: "venda", descricao: "Venda" },
+        { id: 2, tipo: "compra", descricao: "Compra" },
     ];
 
     const handleSort = (key) => {
-      setSortConfig((prevConfig) => ({
-        key,
-        direction: prevConfig.key === key && prevConfig.direction === 'asc' ? 'desc' : 'asc',
-      }));
+        setSortConfig((prevConfig) => ({
+            key,
+            direction: prevConfig.key === key && prevConfig.direction === 'asc' ? 'desc' : 'asc',
+        }));
     };
 
     const [subfam , setSubFam] = useState('');
+    const [fam , setFam] = useState('');
     const [loadingsubfam , setLoadingSubFam] = useState(true);
 
-    console.log('ID da subfamília:', editProduct?.VSUBFAM);
+
 
     const fetchSubFamilia = async (subFamiliaId) => {
         try {
@@ -409,7 +437,6 @@ const DataProduct = () => {
 
             const contentType = response.headers.get("content-type");
             const data = await response.json();
-            console.log('Subfamília encontrada:', data);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -422,10 +449,12 @@ const DataProduct = () => {
             }
 
             if (data?.data?.VDesc) {
-                setSubFam(data.data.VDesc); // <- Corrigido: `data.data.VDesc`, não `data.VDESC`
+                setSubFam(data.data.VDesc);
             } else {
                 setSubFam('Não encontrado');
             }
+
+            return data.data;
         } catch (error) {
             console.error('Erro ao buscar sub-família:', error);
             setSubFam('Erro ao carregar');
@@ -434,13 +463,90 @@ const DataProduct = () => {
         }
     };
 
-// Efeito para carregar a sub-família quando o produto for editado
+    // useEffect para carregar a sub-família quando o produto for editado
     useEffect(() => {
         if (editProduct?.VSUBFAM) {
             fetchSubFamilia(editProduct.VSUBFAM);
         }
     }, [editProduct?.VSUBFAM]);
 
+    const [classePrecos, setClassePrecos]= useState([]);
+    const [prices, setPrices] = useState([]);
+
+    useEffect(() => {
+        const loadPrices = async () => {
+            const data = await fetchPreco();
+            setPrices(data);
+        };
+
+        if (isEditModalOpen) {
+            loadPrices();
+        }
+    }, [isEditModalOpen]);
+
+    useEffect(() => {
+        console.log('Preços:' , prices);
+    }, [prices]);
+
+    const [FamilyName , setFamilyName]= useState('');
+    const [loadingFamily, setLoadingFamily] = useState(false);
+
+    const fetchFamilia = async(famID) => {
+        try {
+            setLoadingFamily(true);
+            const response = await fetch('/api/cloudproducts/familia', {
+                headers: {
+                    'X-Property-ID': localStorage.getItem('selectedProperty'),
+                    'X-Fam-ID': famID.toString(),
+                }
+            });
+
+            const contentType = response.headers.get("content-type");
+            const data = await response.json();
+            console.log(data);
+            if(!response.ok) throw new Error (`HTTP error! status: ${response.status}`);
+            if(!contentType || !contentType.includes('application/json')) {
+                console.error('Unexpected response (not JSON):', data);
+                setFamilyName('Error in the response format');
+                return;
+            }
+            if(data?.data?.VDesc){
+                setFamilyName(data?.data?.VDesc);
+            }
+            else {
+                setFamilyName('Não Encontrado');
+            }
+        } catch (error) {
+            console.error('Erro ao buscar familia:', error);
+            setFamilyName('Erro ao carregar');
+        } finally {
+            setLoadingFamily(false);
+        }
+    }
+
+    const [showFamilyTooltip, setShowFamilyTooltip] = useState(false);
+
+    const handleButtonClick = async () => {
+        // Carregar a subfamília
+        const subfamilyData = await fetchSubFamilia(editProduct.VCodFam);
+        const familyId = subfamilyData?.VCodFam;
+
+        // Se a família for encontrada, carregar e exibir na tooltip
+        if (familyId) {
+            await fetchFamilia(familyId);
+        }
+
+        setShowFamilyTooltip(true);  // Mostrar a tooltip da família
+    };
+
+    // Simulação do carregamento da subfamília ao renderizar
+    useEffect(() => {
+        const loadSubfam = async () => {
+            await fetchSubFamilia(editProduct.VCodFam);
+        };
+
+        loadSubfam();
+    }, []);
 
     return (
     <div className="p-4 pb-10">
@@ -705,7 +811,7 @@ const DataProduct = () => {
     </ModalContent>
   </Modal>
 
-  {/* Modal para editar produto */}
+        {/* Modal para editar produto */}
         <Modal
             isOpen={isEditModalOpen}
             onOpenChange={onEditModalClose}
@@ -731,9 +837,9 @@ const DataProduct = () => {
                         <ModalBody className="py-5 px-6">
                             {editProduct && (
                                 <form id="updateProductForm" onSubmit={handleUpdateProduct} className="space-y-6">
-                                    {/* Abbreviation and Product Type - Grouped Horizontally */}
+                                    {/* Abreviatura e tipo de produto */}
                                     <div className="flex gap-4">
-                                        {/* Abbreviation - Half Width */}
+                                        {/* Abreviatura*/}
                                         <div className="w-1/2">
                                             <label htmlFor="productAbbreviation" className="block text-sm font-medium text-[#191919] mb-1">
                                                 Abbreviation
@@ -751,11 +857,11 @@ const DataProduct = () => {
 
                                         {/* Detalhes do tipo de produto */}
                                         <div className="w-1/2 flex gap-2 items-end">
-                                            {/* Grupo (VCodGrfam) */}
+                                            {/* Tipo de produto */}
                                             <div className="flex flex-col w-1/3">
-                                                <label className="text-sm font-medium text-[#191919] mb-1">Group</label>
+                                                <label className="text-sm font-medium text-[#191919] mb-1">Prod. Type</label>
                                                 <div className="bg-gray-100 p-1 rounded text-sm text-gray-700">
-                                                    {editProduct?.VCodGrfam || '—'}
+                                                    {editProduct?.vtipprod || '—'}
                                                 </div>
                                             </div>
 
@@ -800,9 +906,27 @@ const DataProduct = () => {
                                     <div className="flex justify-end gap-4">
                                         {/* Sub-Família */}
                                         <div className="w-1/3">
-                                            <label htmlFor="subFamilia" className="block text-sm font-medium text-[#191919] mb-1">
-                                                Sub-Família
-                                            </label>
+                                            <div className="flex items-center gap-1 mb-1">
+                                                <label htmlFor="subFamilia" className="text-sm font-medium text-[#191919]">
+                                                    Sub-Família
+                                                </label>
+                                                <button
+                                                    type="button"
+                                                    className="text-[#191919] relative"
+                                                    onClick={handleButtonClick}
+                                                >
+                                                    <IoInformationSharp size={16} />
+
+                                                    {/* Tooltip de Família */}
+                                                    {showFamilyTooltip && (
+                                                        <div className="absolute top-full left-0 z-50 mt-1 w-max bg-white border border-gray-300 shadow-md rounded px-3 py-2 text-sm text-gray-800">
+                                                            The family associated with this subfamily is {loadingFamily ? 'loading...' : FamilyName || 'Unknown'}
+                                                        </div>
+                                                    )}
+                                                </button>
+                                            </div>
+
+                                            {/* Exibir a Subfamília sem ser afetada pela Tooltip */}
                                             <div
                                                 id="subFamilia"
                                                 className="w-full p-1 bg-gray-100 rounded text-sm text-gray-700"
@@ -846,11 +970,96 @@ const DataProduct = () => {
                                             </select>
                                         </div>
                                     </div>
+
+                                    {/* Tabela */}
+                                    <div className="overflow-x-auto border border-gray-300 rounded">
+                                        <table className="min-w-full text-sm text-left text-gray-700">
+                                            <thead className="bg-[#FC9D25] text-white">
+                                            <tr>
+                                                <th className="px-4 py-2">Class</th>
+                                                <th className="px-4 py-2">C.Exp.</th>
+                                                <th className="px-4 py-2">Period</th>
+                                                <th className="px-4 py-2">Hours</th>
+                                                <th className="px-4 py-2">Unitary Value</th>
+                                                <th className="px-4 py-2">Final Value</th>
+                                                <th className="px-4 py-2">VAT</th>
+                                                <th className="px-4 py-2 text-center">✓</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr className="bg-gray-100">
+                                                <td className="px-4 py-2">a</td>
+                                                <td className="px-4 py-2">a</td>
+                                                <td className="px-4 py-2">a</td>
+                                                <td className="px-4 py-2">a</td>
+                                                <td className="px-4 py-2">€</td>
+                                                <td className="px-4 py-2">€</td>
+                                                <td className="px-4 py-2">%</td>
+                                                <td className="px-4 py-2 text-center">
+                                                    <input type="checkbox" />
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+
+                                    {/*Criado por , em: , Ultima vez alterado por: , Em:*/}
+                                    <div className="flex justify-end gap-4">
+                                        {/* Criado por: */}
+                                        <div className="w-1/4">
+                                            <label className="block text-sm font-medium text-[#191919] mb-1">
+                                                Created by:
+                                            </label>
+                                            <div className="w-full p-1 bg-gray-100 rounded text-sm text-gray-700">
+                                                {editProduct?.vcriadopor || '—'}
+                                            </div>
+                                        </div>
+
+                                        {/* Criado em: */}
+                                        <div className="w-1/4">
+                                            <label className="block text-sm font-medium text-[#191919] mb-1">
+                                                Created on:
+                                            </label>
+                                            <div className="w-full p-1 bg-gray-100 rounded text-sm text-gray-700">
+                                                {editProduct?.dcriadoem || '—'}
+                                            </div>
+                                        </div>
+
+                                        {/* ultima vez alterado por:*/}
+                                        <div className="w-1/4">
+                                            <label htmlFor="vUltalpor" className="block text-sm font-medium text-[#191919] mb-1">
+                                                Last changed by:
+                                            </label>
+                                            <input
+                                                id="vUltalpor"
+                                                type="text"
+                                                value={editProduct?.vultaltpor || ''}
+                                                onChange={(e) => setEditProduct({ ...editProduct, vultaltpor: e.target.value })}
+                                                placeholder="Last changed by"
+                                                className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                                            />
+                                        </div>
+
+                                        {/* ultima vez alterado em: */}
+                                        <div className="w-1/4">
+                                            <label htmlFor="dAlteradoem" className="block text-sm font-medium text-[#191919] mb-1">
+                                                Changed on:
+                                            </label>
+                                            <input
+                                                id="dAlteradoem"
+                                                type="date"
+                                                value={editProduct?.dultaltem || ''}
+                                                onChange={(e) => setEditProduct({ ...editProduct, dultaltem: e.target.value })}
+                                                className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                                            />
+                                        </div>
+                                    </div>
                                 </form>
                             )}
                         </ModalBody>
 
-                        <ModalFooter className="w-102 border-t border-gray-200 pt-2 px-8 flex justify-end gap-4">
+                        <ModalFooter className="w-full border-t border-gray-200 pt-4 px-6 flex justify-end gap-4">
                             <Button
                                 onClick={onEditModalClose}
                                 className="px-6 py-2 bg-[#EDEBEB] text-[#191919] rounded-md hover:bg-gray-300 font-medium transition duration-200"
@@ -870,7 +1079,6 @@ const DataProduct = () => {
                 )}
             </ModalContent>
         </Modal>
-
 
         {/* Modal para excluir produto */}
   <Modal

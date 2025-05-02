@@ -999,18 +999,20 @@ const DataProduct = () => {
                                             </tr>
                                             </thead>
                                             <tbody>
-                                            <tr className="bg-gray-100">
-                                                <td className="px-4 py-2">a</td>
-                                                <td className="px-4 py-2">a</td>
-                                                <td className="px-4 py-2">a</td>
-                                                <td className="px-4 py-2">a</td>
-                                                <td className="px-4 py-2">€</td>
-                                                <td className="px-4 py-2">€</td>
-                                                <td className="px-4 py-2">%</td>
-                                                <td className="px-4 py-2 text-center">
-                                                    <input type="checkbox" />
-                                                </td>
-                                            </tr>
+                                            {prices.map((price, index) => (
+                                                <tr key={index} className="bg-gray-100">
+                                                    <td className="px-4 py-2">{prices.VCodClas || '—'}</td>
+                                                    <td className="px-4 py-2">{prices.cexpName || '-'}</td>
+                                                    <td className="px-4 py-2">{prices.VCodPeri || '—'}</td>
+                                                    <td className="px-4 py-2">{prices.VCodInthoras || '—'}</td>
+                                                    <td className="px-4 py-2">€{prices.nValUnit?.toFixed(2) || '—'}</td>
+                                                    <td className="px-4 py-2">€</td>
+                                                    <td className="px-4 py-2">{prices.VCodIva || '—'}%</td>
+                                                    <td className="px-4 py-2 text-center">
+                                                        <input type="checkbox" />
+                                                    </td>
+                                                </tr>
+                                            ))}
                                             </tbody>
                                         </table>
                                     </div>

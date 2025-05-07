@@ -646,6 +646,27 @@ const DataProduct = () => {
         return hour ? hour.Vdesc : code || '—';
     };
 
+    //Carrega os IVAS para o dropdown
+    const [ivaOptions, setIvaOptions] = useState([]);
+
+    useEffect(() => {
+        const loadVat = async () => {
+            try {
+                const data = await fetchIva();
+                setIvaOptions(data);
+            } catch (err) {
+                console.error('Failed to load VAT options:', err);
+            }
+        };
+
+        loadVat();
+    }, []);
+
+    const handleVatChange = (index, newVatCode) => {
+        const updatedPrices = [...prices];
+        updatedPrices[index].VCodIva = newVatCode;
+        setPrices(updatedPrices);
+    };
 
     return (
     <div className="p-4 pb-10">
@@ -1095,8 +1116,33 @@ const DataProduct = () => {
                                                     <td className="px-4 py-2">{getPeriodDescription(price.VCodPeri)}</td>
                                                     <td className="px-4 py-2">{getHourDescription(price.VCodInthoras)}</td>
                                                     <td className="px-4 py-2">€{price.nValUnit?.toFixed(2) || '—'}</td>
-                                                    <td className="px-4 py-2">€</td>
-                                                    <td className="px-4 py-2">{price.VCodIva || '—'}</td>
+                                                    <td className="px-4 py-2">
+                                                        €{
+                                                        (() => {
+                                                            const iva = ivaOptions.find(v => v.VCodIva === price.VCodIva);
+                                                            const ivaRate = iva?.NPERC ?? 0; // fallback para 0% se não encontrar o NPERC
+                                                            const base = price.nValUnit ?? 0;
+                                                            const valorFinal = base + (base * ivaRate / 100);
+                                                            return valorFinal.toFixed(2);
+                                                        })()
+                                                    }
+                                                    </td>
+
+                                                    <td className="px-4 py-2">
+                                                        <select
+                                                            value={price.VCodIva || ''}
+                                                            onChange={(e) => handleVatChange(index, e.target.value)}
+                                                            className="border rounded px-2 py-1 w-full"
+                                                        >
+                                                            <option value="">—</option>
+                                                            {ivaOptions.map((vat) => (
+                                                                <option key={vat.VCODI} value={vat.VCodIva}>
+                                                                    {vat.VDESC}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                    </td>
+
                                                     <td className="px-4 py-2 text-center">
                                                         <input type="checkbox" />
                                                     </td>
@@ -1172,7 +1218,7 @@ const DataProduct = () => {
                                 type="submit"
                                 form="updateProductForm"
                                 className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
-                                onClick={() => window.location.reload()} // still here for now
+                                onClick={() => window.location.reload()}
                             >
                                 Save
                             </Button>

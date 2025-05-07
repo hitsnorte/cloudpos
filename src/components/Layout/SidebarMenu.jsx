@@ -2,11 +2,7 @@ import { useContext, useState, useEffect } from "react";
 import { SidebarContext } from "./Sidebar";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { TbLayoutDashboardFilled } from "react-icons/tb";
-<<<<<<< HEAD
-import { FaLayerGroup, FaUnity, FaProductHunt, FaHourglassEnd    } from "react-icons/fa";
-=======
 import { FaLayerGroup, FaUnity, FaProductHunt, FaHourglassEnd , FaTable } from "react-icons/fa";
->>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
 import { MdFamilyRestroom, MdClass } from "react-icons/md";
 import { GiFamilyTree } from "react-icons/gi";
 import { IoPricetags } from "react-icons/io5";
@@ -68,25 +64,6 @@ export default function SidebarMenu() {
            "Store Settings": {
       icon: <LuFolderCog  size={20} />, 
       submenu: [
-<<<<<<< HEAD
-        {  ref: "/", label: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> }, 
-        { ref: "/homepage/grupos", label: "Groups", icon: <FaLayerGroup  size={18} /> }, 
-        { ref: "/homepage/family", label: "Families", icon: <MdFamilyRestroom size={18} /> },
-        { ref: "/homepage/subfamilia", label: "SubFamilies", icon: <GiFamilyTree size={18} /> },
-        { ref: "/homepage/product", label: "Products", icon: <FaProductHunt size={18} /> },
-        { ref: "/homepage/Iva", label: "VAT", icon: <IoPricetags size={18} /> },
-        { ref: "/homepage/unit", label: "unit", icon: <FaUnity  size={18} /> },
-            ], 
-        },
-
-      "Store Price": {
-      icon: <LuFolderCog  size={20} />, 
-      submenu: [
-        { ref: "/homepage/price classes", label: "price classes", icon: <MdClass  size={18} /> }, 
-        { ref: "/homepage/periods", label: "periods", icon: <CiViewTimeline  size={18} /> }, 
-        // { ref: "/homepage/exploration center", label: "exploration center", icon: <MdFamilyRestroom size={18} /> },
-        { ref: "/homepage/hours", label: "hours", icon: <FaHourglassEnd size={18} /> },
-=======
         { href: "/", text: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> }, 
         { href: "/homepage/grupos", text: "Groups", icon: <FaLayerGroup  size={18} /> }, 
         { href: "/homepage/family", text: "Families", icon: <MdFamilyRestroom size={18} /> },
@@ -94,7 +71,6 @@ export default function SidebarMenu() {
         { href: "/homepage/product", text: "Products", icon: <FaProductHunt size={18} /> },
         { href: "/homepage/Iva", text: "VAT", icon: <IoPricetags size={18} /> },
         { href: "/homepage/unit", text: "Unit", icon: <FaUnity  size={18} /> },
->>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
             ], 
 
         },
@@ -120,11 +96,6 @@ export default function SidebarMenu() {
         },
     };
 
-<<<<<<< HEAD
-    
-    // Fetch properties from session
-=======
->>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
     useEffect(() => {
         if (session?.propertyNames) {
             setProperties(session.propertyNames);
@@ -134,25 +105,12 @@ export default function SidebarMenu() {
     useEffect(() => {
         const savedSelectedProperty = localStorage.getItem("selectedProperty");
         const savedIsConfirmed = JSON.parse(localStorage.getItem("isConfirmed"));
-<<<<<<< HEAD
-    
-        if (savedSelectedProperty && savedIsConfirmed === true) {
-            setSelectedProperty(savedSelectedProperty);
-            setTempSelectedProperty(savedSelectedProperty);
-            setIsConfirmed(true);
-        } else {
-            // Reset everything if not confirmed
-            setSelectedProperty("");
-            setTempSelectedProperty("");
-            setIsConfirmed(false);
-=======
 
         if (savedSelectedProperty && savedIsConfirmed !== null) {
             setSelectedProperty(savedSelectedProperty || "");
             setTempSelectedProperty(savedSelectedProperty || "");
             setIsConfirmed(savedIsConfirmed);
 
->>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
         }
     }, []);
 
@@ -175,10 +133,6 @@ export default function SidebarMenu() {
                 }
 
                 setTempSelectedProperty(newPropertyID);
-<<<<<<< HEAD
-=======
-
->>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
             }}
             required
             className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-[#FC9D25]"

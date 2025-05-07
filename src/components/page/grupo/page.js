@@ -33,16 +33,11 @@ const DataGrupo = () => {
   const [groupToDelete, setGroupToDelete] = useState(null);
 
   
-  const [columnsearchTerm, setColumnSearchTerm] = useState("");
+
   const [itemsPerPage, setItemsPerPage] = useState(50);
   const [currentPage, setCurrentPage] = useState(1);
 
   const [sortConfig, setSortConfig] = useState({ key: 'VDesc', direction: 'asc' });
-<<<<<<< HEAD
-  const [columns, setColumns] = useState([]);  // Para armazenar as colunas dinâmicas
-  const [columnVisibility, setColumnVisibility] = useState({});
-=======
->>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
 
   const {
     isOpen: isAddModalOpen,
@@ -65,22 +60,6 @@ const DataGrupo = () => {
     onClose: onSelectModalClose,
   } = useDisclosure();
 
-<<<<<<< HEAD
-  useEffect(() => {
-    const savedVisibility = loadColumnVisibility();
-    setColumnVisibility(savedVisibility); // Carregar visibilidade das colunas
-  }, []);
-
-  const toggleColumnVisibility = (columnKey) => {
-    setColumnVisibility((prevState) => {
-      const updatedVisibility = { ...prevState, [columnKey]: !prevState[columnKey] };
-      localStorage.setItem('columnVisibility', JSON.stringify(updatedVisibility)); // Salva no localStorage
-      return updatedVisibility;
-    });
-  };
-
-=======
->>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
   const loadColumnVisibility = () => {
     const savedVisibility = localStorage.getItem('columnVisibility');
     if (savedVisibility) {
@@ -105,10 +84,6 @@ const DataGrupo = () => {
     });
   };
 
-<<<<<<< HEAD
-  const filteredGroups = groups.filter((group) =>
-    group.VDesc && group.VDesc.toLowerCase().includes(searchTerm.toLowerCase())
-=======
   // Agora você pode usar a loadColumnVisibility ao inicializar o state
   const [columnVisibility, setColumnVisibility] = useState(loadColumnVisibility());
 
@@ -130,7 +105,6 @@ const DataGrupo = () => {
 
   const filteredColumns = columns.filter((col) =>
     col.label.toLowerCase().includes(columnSearchTerm.toLowerCase())
->>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
   );
 
   const totalPages = Math.ceil(filteredGroups.length / itemsPerPage);
@@ -175,27 +149,7 @@ const DataGrupo = () => {
   const loadGroups = async () => {
     try {
       const grupos = await fetchGrup();
-      console.log("grupos", grupos);
-  
       setGroups(grupos);
-  
-      // Mapeamento das chaves para nomes mais amigáveis
-      const columnNames = {
-        VCodGrFam: 'cod Grp',
-        VDesc: 'Description',
-        DCriadoEm: 'created in',
-        // Adicione mais chaves e seus nomes aqui conforme necessário
-      };
-  
-      // Gerar as colunas dinamicamente com base no mapeamento
-      const dynamicColumns = Object.keys(grupos[0] || {}).map((key) => {
-        return {
-          key, 
-          label: columnNames[key] || key, // Usa o nome do mapeamento se existir, caso contrário, usa a chave original
-        };
-      });
-  
-      setColumns(dynamicColumns); // Definir as colunas dinâmicas
     } catch (err) {
       setError(err.message);
     }
@@ -208,14 +162,14 @@ const DataGrupo = () => {
     }));
   };
 
-<<<<<<< HEAD
-  
-  const filteredColumns = columns.filter((col) =>
-    col.label.toLowerCase().includes(columnsearchTerm.toLowerCase())
-  );
-=======
->>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
 
+  // const filteredGroups = groups.filter((group) => {
+  //   const searchLower = searchTerm.toLowerCase();
+  //   return (
+  //     group.id.toString().includes(searchLower) ||
+  //     group.group_name.toString().toLowerCase().includes(searchLower)
+  //   );
+  // });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -286,11 +240,7 @@ const DataGrupo = () => {
 
   return (
     <div className="p-4">
-<<<<<<< HEAD
-      <div className="w-1/3">
-=======
       <div className="w-full">
->>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
         {/* Campo de pesquisa */}
         <div className="mb-4 relative">
         <FaMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
@@ -299,11 +249,7 @@ const DataGrupo = () => {
           placeholder="Pesquisar..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-<<<<<<< HEAD
-          className="w-full max-w-md pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
-=======
           className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
->>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
         />
       </div>
     </div>
@@ -357,40 +303,6 @@ const DataGrupo = () => {
                 </Button>
               </ModalHeader>
             <ModalBody className="py-5 px-6">
-<<<<<<< HEAD
-  <div className="w-88">
-    {/* Campo de pesquisa */}
-    <div className="mb-4 relative">
-      <FaMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
-      <input
-        type="text"
-        placeholder="Pesquisar..."
-        value={columnsearchTerm}
-        onChange={(e) => setColumnSearchTerm(e.target.value)}
-        className="w-full max-w-md pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
-      />
-    </div>
-  </div>
-  <div className="space-y-4">
-    {filteredColumns.map((col) => (
-      <div key={col.key} className="flex items-center rounded border border-black p-1">
-        <input
-          type="checkbox"
-          checked={columnVisibility[col.key] ?? true} // Se não definido, assume true
-          onChange={() => {
-            toggleColumnVisibility(col.key); // Aqui está a chamada correta para toggleColumnVisibility
-          }}
-          className="mr-2"
-        />
-        <label className="text-sm">{col.label}</label>
-      </div>
-    ))}
-  </div>
-</ModalBody>
-
-        <ModalFooter className="w-102 border-t border-gray-200 pt-2 px-8">
-              
-=======
             <div className="w-88">
                  {/* Campo de pesquisa  */}
                 <div className="mb-4 relative">
@@ -432,7 +344,6 @@ const DataGrupo = () => {
             >
               {isLoading ? <Spinner size="sm" color="white" /> : 'Save'}
             </Button>
->>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
             </ModalFooter>
             </>
           )}
@@ -613,71 +524,6 @@ const DataGrupo = () => {
       {/* Tabela */}
       <div className="overflow-x-auto sm:flex sm:flex-col bg-muted/40">
         
-<<<<<<< HEAD
-      <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB] mx-auto">
-      <thead>
-        <tr>
-          <th className="border-collapse border border-[#EDEBEB] !w-[1px] px-1 sm:px-5 py-2 bg-[#FC9D25]">
-            <div className="flex items-center justify-center">
-              <FaGear size={20} color="white" />
-            </div>
-          </th>
-
-          {/* Renderiza as colunas dinamicamente com base na visibilidade */}
-          {columns.map((col) =>
-          columnVisibility[col.key] !== false && (  // Verifica se a coluna está visível
-            <th 
-              key={col.key} 
-              className={`uppercase border-collapse border border-[#EDEBEB] sm:px-4 py-4 bg-[#FC9D25] text-[#FAFAFA] text-sm ${col.key === "VCodGrFam" ? "w-[50px] text-right" : ""}`}
-            >
-              <div className="flex items-right justify-right">{col.label}</div>
-            </th>
-          )
-        )}
-        </tr>
-      </thead>
-      <tbody className="divide-y divide-gray-300">
-        {/* Mudei para filteredGroups ao invés de groups */}
-        {filteredGroups.map((group) => (
-          <tr key={group.VCodGrFam} className="hover:bg-gray-200">
-            {/* Ações */}
-            <td className="border border-[#EDEBEB] px-1 py-1 text-center">
-              <Dropdown>
-                <DropdownTrigger>
-                  <Button variant="bordered">
-                    <HiDotsVertical size={18} />
-                  </Button>
-                </DropdownTrigger>
-                <DropdownMenu aria-label="Dynamic Actions" placement="bottom-end" className="bg-white shadow-lg rounded-md p-1">
-                  <DropdownItem key="edit" onPress={() => handleEditGroup(group)}>
-                    Edit
-                  </DropdownItem>
-                </DropdownMenu>
-              </Dropdown>
-            </td>
-
-            {/* Renderiza os dados das colunas de acordo com a visibilidade */}
-            {columns.map((col) =>
-            columnVisibility[col.key] !== false && (  // Verifica se a coluna está visível
-              <td key={col.key} className="border border-[#EDEBEB] px-3 py-2 text-left">
-                {/* Verifica se a chave é DCriadoEm, que é a data */}
-                {col.key === "DCriadoEm" ? (
-                  // Converte a data para apenas a data (sem a hora)
-                  new Date(group[col.key]).toLocaleDateString([], { year: 'numeric', month: '2-digit', day: '2-digit' })
-                ) : (
-                  group[col.key]  // Exibe normalmente outros dados
-                )}
-              </td>
-              
-            )
-            
-          )}
-          </tr>
-        ))}
-      </tbody>
-    </table>
-
-=======
         <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB] mx-auto">
           <thead>
           <tr>
@@ -751,7 +597,6 @@ const DataGrupo = () => {
                     ))}
                   </tbody>
         </table>
->>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
         <div className="flex fixed bottom-0 left-0 items-center gap-2 w-full px-4 py-3 bg-gray-200 justify-end">
           <span className="px-2 py-1">Items per page</span>
 

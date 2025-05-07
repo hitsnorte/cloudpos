@@ -37,8 +37,8 @@ const DataFamily = () => {
   const [itemsPerPage, setItemsPerPage] = useState(50);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const [sortConfig, setSortConfig] = useState({ key: 'VDesc', direction: 'asc' });
 
+  const [sortConfig, setSortConfig] = useState({ key: 'VDesc', direction: 'asc' });
 
   const {
     isOpen: isAddModalOpen,
@@ -60,7 +60,6 @@ const DataFamily = () => {
     onOpen: onSelectModalOpen,
     onClose: onSelectModalClose,
   } = useDisclosure();
-
 
   useEffect(() => {
     loadFamilies();
@@ -179,19 +178,7 @@ const fetchGroupMap = async () => {
     return {};
   }
 };
-
-  const filteredFamilies = families.filter((familia) =>
-    Object.values(familia).some((value) =>
-      String(value).toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
-
-  const totalPages = Math.ceil(filteredFamilies.length / itemsPerPage);
-
-  const paginatedFamilies = filteredFamilies.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -298,42 +285,31 @@ const fetchGroupMap = async () => {
 
   return (
     <div className="p-4 pb-10">
+
       <div className="w-full">
         {/* Campo de pesquisa */}
         <div className="mb-4 relative">
-
           <FaMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
           <input
             type="text"
             placeholder="Pesquisar..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full max-w-md pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
           />
         </div>
       </div>
+
       {/* button */}
       <Dropdown>
       <DropdownTrigger>
-          <button 
-            onClick={onAddModalOpen}
-            className="absolute top-4 right-25 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
-            < Plus size={25}  />     
-        </button>
-        </DropdownTrigger>
-        </Dropdown>
-
-      {/* button adjustments*/}  
-       <Dropdown>
-          <DropdownTrigger>
-            <button 
-              onClick={onSelectModalOpen}
-              className="absolute top-4 right-10 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
-              <HiAdjustmentsHorizontal size={25} />
-            </button>
-         </DropdownTrigger>
-         </Dropdown>
-
+      <button 
+          onClick={onAddModalOpen}
+          className="absolute top-4 right-25 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
+          < Plus size={25}  />     
+      </button>
+      </DropdownTrigger>
+      </Dropdown>
 
       {/* button adjustments*/}  
         <Dropdown>

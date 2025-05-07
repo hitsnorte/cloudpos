@@ -1,4 +1,4 @@
-// src/lib/apiiva.js
+// src/lib/apiperiod.js
 export const fetchPeriod = async () => {
     try {
       // Obter o propertyID do localStorage

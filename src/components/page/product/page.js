@@ -17,6 +17,9 @@ import { fetchUnit } from '@/src/lib/apiunit';
 import { fetchClassepreco} from "@/src/lib/apiclassepreco";
 import { fetchPreco} from "@/src/lib/apipreco";
 import { IoInformationSharp } from "react-icons/io5";
+import {fetchPeriod} from "@/src/lib/apiperiod";
+import { fetchHour} from "@/src/lib/apihour";
+
 
 import {
     Modal,
@@ -361,10 +364,7 @@ const DataProduct = () => {
         return sorted;
     }, [paginatedProducts, sortConfig]);
 
-    const handleEditProduct = (product) => {
-        setEditProduct({ ...product });
-        onEditModalOpen();
-    };
+
 
     const handleUpdateProduct = async (e) => {
         e.preventDefault();
@@ -517,7 +517,7 @@ const DataProduct = () => {
 
             const contentType = response.headers.get("content-type");
             const data = await response.json();
-            console.log(data);
+
             if(!response.ok) throw new Error (`HTTP error! status: ${response.status}`);
             if(!contentType || !contentType.includes('application/json')) {
                 console.error('Unexpected response (not JSON):', data);
@@ -559,6 +559,93 @@ const DataProduct = () => {
 
         loadSubfam();
     }, []);
+
+    const [selectedProduct , setSelectedProduct] = useState('');
+
+    const handleEditProduct = (product) => {
+        console.log('Product being selected:', product);
+        setSelectedProduct(product);
+        setEditProduct(product);
+        onEditModalOpen();
+    };
+
+    const [filteredPrices, setFilteredPrices] = useState([]);
+
+    useEffect(() => {
+
+        if (selectedProduct && prices.length > 0) {
+            const filtered = prices.filter(
+                (price) => String(price.VCodprod) === String(selectedProduct.VPRODUTO)
+            );
+
+            setFilteredPrices(filtered);
+        }
+    }, [selectedProduct, prices]);
+
+    //Mostrar nomes das classes na tabela
+    const [classes, setClasses] = useState([]);
+
+    useEffect(() => {
+        const loadClasses = async () => {
+            try {
+                const data = await fetchClassepreco();
+                setClasses(data);
+            } catch (error) {
+                console.error('Erro ao carregar classes de preço:', error);
+            }
+        };
+
+        loadClasses();
+    }, []);
+
+    const getClassName = (vcodClas) => {
+        const match = classes.find(cls => cls.Vcodi === vcodClas);
+        return match?.Vdesc || vcodClas || '—';
+    };
+
+    //Mostrar descrições dos periodos na tabela
+
+    const [periods, setPeriods] = useState([]);
+
+    useEffect(() => {
+        const loadPeriods = async () => {
+            try {
+                const fetchedPeriods = await fetchPeriod();
+                setPeriods(fetchedPeriods);
+            } catch (error) {
+                console.error("Erro ao carregar períodos:", error);
+            }
+        };
+
+        loadPeriods();
+    }, []);
+
+    const getPeriodDescription = (code) => {
+        const period = periods.find(p => p.vcodi === code);
+        return period ? period.Vdesc : code || '—';
+    };
+
+    //Mostrar descrição das horas na tabela
+    const [hours, setHours] = useState([]);
+
+    useEffect(() => {
+        const loadHours = async () => {
+            try {
+                const fetchedHours = await fetchHour();
+                setHours(fetchedHours);
+            } catch (error) {
+                console.error("Erro ao carregar horas:", error);
+            }
+        };
+
+        loadHours();
+    }, []);
+
+    const getHourDescription = (code) => {
+        const hour = hours.find(h => h.Vcodi === code);
+        return hour ? hour.Vdesc : code || '—';
+    };
+
 
     return (
     <div className="p-4 pb-10">
@@ -831,6 +918,8 @@ const DataProduct = () => {
             placement="center" // Centraliza o modal
             className="w-[95vw] max-w-[1000px] min-w-[800px] bg-white shadow-xl rounded-lg"
             hideCloseButton={true}
+            product={selectedProduct}
+            prices={prices}
         >
             <ModalContent>
                 {(onClose) => (
@@ -999,15 +1088,15 @@ const DataProduct = () => {
                                             </tr>
                                             </thead>
                                             <tbody>
-                                            {prices.map((price, index) => (
+                                            {filteredPrices.map((price, index) => (
                                                 <tr key={index} className="bg-gray-100">
-                                                    <td className="px-4 py-2">{prices.VCodClas || '—'}</td>
-                                                    <td className="px-4 py-2">{prices.cexpName || '-'}</td>
-                                                    <td className="px-4 py-2">{prices.VCodPeri || '—'}</td>
-                                                    <td className="px-4 py-2">{prices.VCodInthoras || '—'}</td>
-                                                    <td className="px-4 py-2">€{prices.nValUnit?.toFixed(2) || '—'}</td>
+                                                    <td className="px-4 py-2">{getClassName(price.VCodClas)}</td>
+                                                    <td className="px-4 py-2">{price.cexpName || '-'}</td>
+                                                    <td className="px-4 py-2">{getPeriodDescription(price.VCodPeri)}</td>
+                                                    <td className="px-4 py-2">{getHourDescription(price.VCodInthoras)}</td>
+                                                    <td className="px-4 py-2">€{price.nValUnit?.toFixed(2) || '—'}</td>
                                                     <td className="px-4 py-2">€</td>
-                                                    <td className="px-4 py-2">{prices.VCodIva || '—'}%</td>
+                                                    <td className="px-4 py-2">{price.VCodIva || '—'}</td>
                                                     <td className="px-4 py-2 text-center">
                                                         <input type="checkbox" />
                                                     </td>
@@ -1016,7 +1105,6 @@ const DataProduct = () => {
                                             </tbody>
                                         </table>
                                     </div>
-
 
                                     {/*Criado por , em: , Ultima vez alterado por: , Em:*/}
                                     <div className="flex justify-end gap-4">

@@ -23,7 +23,6 @@ export default function ProductGroups() {
     const [familiesWithProducts, setFamiliesWithProducts] = useState([]);
     const [subfamiliesWithProducts, setSubfamiliesWithProducts] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
-    
 
     const [viewType, setViewType] = useState('groups', 'families', 'subfamilies') // 'groups' | 'families' | 'subfamilies'
 
@@ -34,6 +33,15 @@ export default function ProductGroups() {
         setCount(1);
     };
 
+    const filterByName = (items) => {
+    if (!searchTerm.trim()) return items;
+
+    return items
+      .map((item) =>
+        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ? item : null
+      )
+      .filter(Boolean);
+  };
 
     const toggleGroup = (id) => {
         setOpenGroupID((prev) => (prev === id ? null : id))
@@ -290,7 +298,7 @@ export default function ProductGroups() {
             </div>}
 
         <div className="p-6 space-y-4">
-            {viewType === 'groups' && groupsWithProducts.map((group) => {
+        {viewType === 'groups' && filterByName(groupsWithProducts).map((group) => {
                 const isOpen = openGroupID === group.id
                 return (
                     <div key={group.id} className="rounded shadow-md overflow-hidden">
@@ -347,7 +355,7 @@ export default function ProductGroups() {
             })}
         
 
-        {viewType === 'families' && familiesWithProducts.map((family) => {
+        {viewType === 'families' && filterByName(familiesWithProducts).map((family) => {
         const isOpen = openGroupID === family.id;
         return (
         <div key={family.id} className="rounded shadow-md overflow-hidden">
@@ -397,7 +405,7 @@ export default function ProductGroups() {
     );
 })}
 
-{viewType === 'subfamilies' && subfamiliesWithProducts.length > 0 && subfamiliesWithProducts.map((sub) => {
+{viewType === 'subfamilies' && filterByName(subfamiliesWithProducts).map((sub) => {
     const isOpen = openGroupID === sub.id;
     return (
         <div key={sub.id} className="rounded shadow-md overflow-hidden">

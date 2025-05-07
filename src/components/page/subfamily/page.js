@@ -1,10 +1,12 @@
 'use client'; // Necessário para componentes client-side no App Router
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { HiDotsVertical } from "react-icons/hi";
 import { Plus } from "lucide-react";
 import { FaGear } from "react-icons/fa6";
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
+import { HiAdjustmentsHorizontal } from "react-icons/hi2";
+import { FaMagnifyingGlass } from "react-icons/fa6";
 import { fetchSubfamily, createSubfamily, deleteSubfamily, updateSubfamily } from '@/src/lib/apisubfamily';
 import { fetchFamily } from '@/src/lib/apifamily';
 import { fetchGrup } from '@/src/lib/apigroup';
@@ -35,7 +37,8 @@ const DataSubfamilia = () => {
 
   const [itemsPerPage, setItemsPerPage] = useState(50);
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = Math.ceil(subfamilias.length / itemsPerPage);
+
+  const [sortConfig, setSortConfig] = useState({ key: 'VDesc', direction: 'asc' });
 
   const {
     isOpen: isAddModalOpen,
@@ -52,16 +55,102 @@ const DataSubfamilia = () => {
     onOpen: onDeleteModalOpen,
     onClose: onDeleteModalClose,
   } = useDisclosure();
+  const {
+    isOpen: isSelectModalOpen,
+    onOpen: onSelectModalOpen,
+    onClose: onSelectModalClose,
+  } = useDisclosure();
 
   useEffect(() => {
     loadSubfamilias();
     loadFamilies();
   }, []);
 
-  const paginatedSubfamilias = subfamilias.slice(
+  const loadColumnVisibility = () => {
+    const savedVisibility = localStorage.getItem('columnVisibility');
+    if (savedVisibility) {
+      return JSON.parse(savedVisibility);
+    }
+    return {
+      codSubFam: true, // estado padrão
+      description: true,
+      createdIn: true,
+      madeby: true,
+      codFam: true,
+      descFam: true,
+      codGrpFam: true,
+      descGrp: true,
+    };
+  };
+  const saveColumnVisibility = () => {
+    localStorage.setItem('columnVisibility', JSON.stringify(columnVisibility));
+  };
+  
+  const toggleColumn = (column) => {
+    setColumnVisibility((prev) => {
+      const newVisibility = { ...prev, [column]: !prev[column] };
+      localStorage.setItem('columnVisibility', JSON.stringify(newVisibility)); // Atualiza no localStorage
+      return newVisibility;
+    });
+  };
+
+  // Agora você pode usar a loadColumnVisibility ao inicializar o state
+  const [columnVisibility, setColumnVisibility] = useState(loadColumnVisibility());
+
+  const filteredSubfamilias = subfamilias.filter((subfamilia) =>
+    Object.values(subfamilia).some((value) =>
+      String(value).toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  const columns = [
+    { key: 'codSubFam', label: 'Cod Sub Fam' },
+    { key: 'description', label: 'Description' },
+    { key: 'createdIn', label: 'Created In' },
+    { key: 'madeby', label: 'Made By' },
+    { key: 'codFam', label: 'Cod Fam' },
+    { key: 'descFam', label: 'Desc Fam' },
+    { key: 'codGrpFam', label: 'Cod Grp' },
+    { key: 'descGrp', label: 'Desc Grp' },
+  ];
+
+  const [columnSearchTerm, setColumnSearchTerm] = useState('');
+
+  const filteredColumns = columns.filter((col) =>
+    col.label.toLowerCase().includes(columnSearchTerm.toLowerCase())
+  );
+
+  const totalPages = Math.ceil(filteredSubfamilias.length / itemsPerPage);
+
+  const paginatedSubfamilias = filteredSubfamilias.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+   const sortedFamilies = useMemo(() => {
+      if (!paginatedSubfamilias || !Array.isArray(paginatedSubfamilias)) return [];
+    
+      const sorted = [...paginatedSubfamilias].sort((a, b) => {
+        if (!sortConfig.key) return 0;
+    
+        let aValue = a[sortConfig.key];
+        let bValue = b[sortConfig.key];
+    
+        if (sortConfig.key === 'DCriadoEm') {
+          aValue = new Date(aValue);
+          bValue = new Date(bValue);
+        } else {
+          aValue = aValue?.toString().toLowerCase();
+          bValue = bValue?.toString().toLowerCase();
+        }
+    
+        if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+    
+      return sorted;
+    }, [paginatedSubfamilias, sortConfig]);
 
   const loadSubfamilias = async () => {
       try {
@@ -117,14 +206,6 @@ const DataSubfamilia = () => {
       }
     };
 
-    const filteredSubfamilias = (subfamilias || []).filter((subfamilia) => {
-      if (!subfamilia || !subfamilia.nome) return false; // Verifica se `subfamilia` e `subfamilia.nome` existem
-      const searchLower = searchTerm.toLowerCase();
-      return (
-        (subfamilia.id && subfamilia.id.toString().includes(searchLower)) || 
-        (subfamilia.nome && subfamilia.nome.toLowerCase().includes(searchLower))
-      );
-    });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -217,21 +298,123 @@ const DataSubfamilia = () => {
     }
   };
 
-  
+  const handleSort = (key) => {
+    setSortConfig((prevConfig) => ({
+      key,
+      direction: prevConfig.key === key && prevConfig.direction === 'asc' ? 'desc' : 'asc',
+    }));
+  };
 
   return (
     <div className="p-4 pb-10">
+    
+      <div className="w-full">
+        {/* Campo de pesquisa */}
+        <div className="mb-4 relative">
+        <FaMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+        <input
+          type="text"
+          placeholder="Pesquisar..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full  pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+        />
+      </div>
+    </div>
+
       {/* button */}
       <Dropdown>
       <DropdownTrigger>
       <button 
           onClick={onAddModalOpen}
-          className="absolute top-4 right-14 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
+          className="absolute top-4 right-25 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
           < Plus size={25}  />     
       </button>
       </DropdownTrigger>
-       
       </Dropdown>
+
+      {/* button adjustments*/}  
+      <Dropdown>
+        <DropdownTrigger>
+          <button 
+            onClick={onSelectModalOpen}
+            className="absolute top-4 right-10 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
+            <HiAdjustmentsHorizontal size={25} />
+          </button>
+      </DropdownTrigger>
+      </Dropdown>
+
+
+ {/* Modal para adjustments do grupo */} 
+     <Modal 
+      isOpen={isSelectModalOpen}
+      onOpenChange={onSelectModalClose}
+      size="sm" 
+      placement="center" 
+      className="w-100 bg-white shadow-xl rounded-lg" 
+      hideCloseButton={true}
+      >
+
+      <ModalContent>
+      {(onClose) => (
+          <>
+            <ModalHeader className="rounded bg-[#FC9D25] flex justify-between items-center">
+              <div className="text-xl font-bold text-white">Select Column</div>
+              <Button
+                  onClick={onClose}
+                  className="text-white bg-transparent border-0 text-2xl p-0"
+                  aria-label="Close"
+                >
+                  &times; {/* Unicode for "×" sign */}
+                </Button>
+              </ModalHeader>
+            <ModalBody className="py-5 px-6">
+            <div className="w-88">
+                 {/* Campo de pesquisa  */}
+                <div className="mb-4 relative">
+                <FaMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+                <input
+                  type="text"
+                  placeholder="Pesquisar..."
+                  value={columnSearchTerm}
+                  onChange={(e) => setColumnSearchTerm(e.target.value)}
+                  className="w-full max-w-md pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                />
+              </div>
+            </div>
+            <div className="space-y-4 max-h-60 overflow-y-auto pr-2">
+            {filteredColumns.map((col) => (
+              <div key={col.key} className="flex items-center rounded border border-black p-1">
+                <input
+                  type="checkbox"
+                  checked={columnVisibility[col.key]}
+                  onChange={() => toggleColumn(col.key)}
+                  className="mr-2"
+                />
+                <label className="text-sm">{col.label}</label>
+              </div>
+            ))}
+          </div>
+          </ModalBody>
+
+        <ModalFooter className="w-102 border-t border-gray-200 pt-2 px-8">
+              <Button
+              type="submit"
+              form="selectGroupForm"
+              className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
+              disabled={isLoading}
+              onClick={() => {
+                saveColumnVisibility(); // Salvar as configurações
+                window.location.reload(); // Recarregar a página
+              }}
+            >
+              {isLoading ? <Spinner size="sm" color="white" /> : 'Save'}
+            </Button>
+            </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
 
       {/* Modal para adicionar subfamilia */}
       <Modal
@@ -435,51 +618,84 @@ const DataSubfamilia = () => {
                   <FaGear size={20} color='white'/>
                 </div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-10 px-1 sm:px-5 py-3 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-                <div className=" flex items-left justify-left"> 
-                  Cod SubFam
-                </div>
+              {columnVisibility.codSubFam && (
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-30 px-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className="flex items-left justify-left">CodSubFam</div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-50 px-1 sm:px-5 py-3 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-                <div className=" flex items-left justify-left"> 
+              )}
+              {columnVisibility.description && (
+              <th onClick={() => handleSort('VDesc')} className="uppercase border-collapse border border-[#EDEBEB] w-400 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className="flex items-left justify-left">
                   Description
+                  {sortConfig.key === 'VDesc' && (
+                    <span className="ml-auto">
+                      {sortConfig.direction === 'asc' ? (
+                        <ArrowUpIcon className="inline-block w-4 h-4 text-white" />
+                      ) : (
+                        <ArrowDownIcon className="inline-block w-4 h-4 text-white" />
+                      )}
+                    </span>
+                  )}
                 </div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-25 sm:px-4 py-3 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-left justify-left "> 
-                  Created In
-              </div>
+              )}
+               {columnVisibility.createdIn && (
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-20 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className="flex items-left justify-left">Created In</div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-5 sm:px-4 py-3 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-left justify-left "> 
-                  Made by
-              </div>
+              )}
+              {columnVisibility.madeby && (
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-20 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className="flex items-left justify-left">Made By</div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-15 sm:px-4 py-3 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-left justify-left "> 
-                  Cod Fam
-              </div>
+              )}
+              {columnVisibility.codFam && (
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-10 px-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className="flex items-left justify-left">Cod Fam</div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-50 px-1 sm:px-5 py-3 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-                <div className=" flex items-left justify-left"> 
+              )}
+              {columnVisibility.descFam && (
+              <th onClick={() => handleSort('VDescFamily')} className="uppercase border-collapse border border-[#EDEBEB] w-400 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className="flex items-left justify-left">
                   Desc Fam
+                  {sortConfig.key === 'VDesc' && (
+                    <span className="ml-auto">
+                      {sortConfig.direction === 'asc' ? (
+                        <ArrowUpIcon className="inline-block w-4 h-4 text-white" />
+                      ) : (
+                        <ArrowDownIcon className="inline-block w-4 h-4 text-white" />
+                      )}
+                    </span>
+                  )}
                 </div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-15 sm:px-4 py-3 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-left justify-left "> 
-                  Cod Grp
-              </div>
+              )}
+              {columnVisibility.codGrpFam && (
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-10 px-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className="flex items-left justify-left">Cod Grp</div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-50 px-1 sm:px-5 py-3 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-                <div className=" flex items-left justify-left"> 
+              )}
+              {columnVisibility.descGrp && (
+              <th onClick={() => handleSort('VDescGroup')} className="uppercase border-collapse border border-[#EDEBEB] w-400 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className="flex items-left justify-left">
                   Desc Grp
+                  {sortConfig.key === 'VDesc' && (
+                    <span className="ml-auto">
+                      {sortConfig.direction === 'asc' ? (
+                        <ArrowUpIcon className="inline-block w-4 h-4 text-white" />
+                      ) : (
+                        <ArrowDownIcon className="inline-block w-4 h-4 text-white" />
+                      )}
+                    </span>
+                  )}
                 </div>
               </th>
+              )}
             </tr>
           </thead>
 
           <tbody className="divide-y divide-gray-300">
-          {paginatedSubfamilias.map((subfamilia) => (
+          {sortedFamilies.map((subfamilia) => (
             <tr key={subfamilia.VCodSubFam} className="hover:bg-gray-200">
               {/* Ações */}
               <td className="border border-[#EDEBEB] px-1 py-1 text-center">
@@ -498,17 +714,33 @@ const DataSubfamilia = () => {
               </td>
               
               {/* Dados do Produto */}
-              <td className="border border-[#EDEBEB] px-4 py-2 text-right">{subfamilia.VCodSubFam}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{subfamilia.VDesc}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-right">
-                {new Date(subfamilia.dcriadoem).toLocaleDateString('pt-BR')}
-              </td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{subfamilia.vcriadopor}</td>
+              {columnVisibility.codSubFam && (
+                <td className="border border-[#EDEBEB] px-3 py-2 text-right">{subfamilia.VCodSubFam}</td>
+              )}
+              {columnVisibility.description && (
+                <td className="border border-[#EDEBEB] px-3 py-2 text-left">{subfamilia.VDesc}</td>
+              )}
+              {columnVisibility.createdIn && (
+                <td className="border border-[#EDEBEB] px-4 py-2 text-right">
+                   {new Date(subfamilia.dcriadoem).toLocaleDateString('pt-BR')}
+                </td>
+              )}
+              {columnVisibility.madeby && (
+                <td className="border border-[#EDEBEB] px-3 py-2 text-left">{subfamilia.vcriadopor}</td>
+              )}
 
-              <td className="border border-[#EDEBEB] px-3 py-2 text-right">{subfamilia.VCodFam}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{subfamilia.VDescFamily}</td>
-              <td className="border border-[#EDEBEB] px-3 py-2 text-right">{subfamilia.VCodGrfam}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{subfamilia.VDescGroup}</td>
+              {columnVisibility.codFam && (
+                <td className="border border-[#EDEBEB] px-3 py-2 text-right">{subfamilia.VCodFam}</td>
+              )}
+              {columnVisibility.descFam && (
+                <td className="border border-[#EDEBEB] px-3 py-2 text-left">{subfamilia.VDescFamily}</td>
+              )}
+              {columnVisibility.codGrpFam && (
+                <td className="border border-[#EDEBEB] px-3 py-2 text-right">{subfamilia.VCodGrfam}</td>
+              )}
+              {columnVisibility.descGrp && (
+                <td className="border border-[#EDEBEB] px-3 py-2 text-left">{subfamilia.VDescGroup}</td>
+              )}
 
 
             </tr>

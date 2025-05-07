@@ -20,8 +20,15 @@ const PropertiesTable = () => {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const { isOpen: isEditOpen, onOpen: onEditOpen, onClose: onEditClose } = useDisclosure();
 
+<<<<<<< HEAD
     const  [searchTerm, setSearchTerm] = useState('');
     const [showSearchBar , setShowSearchBar] = useState(false);
+=======
+    const [deleteConfirmationName, setDeleteConfirmationName] = useState('');
+    const [propertyToDelete, setPropertyToDelete] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [searchInput , setSearchInput] = useState('');
+>>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
     const [itemsPerPage, setItemsPerPage] = useState(15);
     const [currentPage , setCurrentPage] = useState(1);
     const [properties, setProperties] = useState([]);
@@ -63,6 +70,8 @@ const PropertiesTable = () => {
         fetchProperties();
         fetchChains();
     }, []);
+
+
 
     const handleInputChange = (event) => {
         const { name, value } = event.target;
@@ -134,22 +143,30 @@ const PropertiesTable = () => {
         // Encontra o objeto correto da chain correspondente ao propertyChain
         const chain = chains.find(chain => chain.chainTag === property.propertyChain?.[0]);
 
+        console.log("Selected property:", property);
+        console.log("Associated chain:", chain);
+
         setEditingProperty({
+            ...property,
+            chainID: chain ? chain.chainID : "",  // Set the chainID if found, otherwise an empty string
+        });
+
+        // Define a propriedade e o chainID para editar
+        console.log("Editing property set:", {
             ...property,
             chainID: chain ? chain.chainID : "",
         });
 
+        // Abre o modal
         onEditOpen();
     };
-
-
 
     const handleEditChange = (event) => {
         const { name, value } = event.target;
 
         setEditingProperty((prev) => ({
             ...prev,
-            [name]: name === "chainID" ? parseInt(value,10):value ,
+            [name]: name === "chainID" ? parseInt(value, 10) : value,
         }));
     };
 
@@ -180,7 +197,6 @@ const PropertiesTable = () => {
         }
     };
 
-
     const handleCloseModal = () => {
         setNewProperty({
             propertyTag: "",
@@ -206,10 +222,44 @@ const PropertiesTable = () => {
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage,
     );
+<<<<<<< HEAD
+=======
+
+    const handleDeleteClick = (property) => {
+        setPropertyToDelete(property);
+        onDeleteOpen(); // Abre o modal para confirmação do delete da propriedade
+    };
+
+    const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose } = useDisclosure();
+
+    const handleDeleteConfirmation = async () => {
+        if (deleteConfirmationName !== propertyToDelete.propertyName) {
+            alert("The property name doesn't match!");
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/properties/${propertyToDelete.propertyID}`, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) throw new Error('Failed to delete property');
+
+            // Remove deleted property from the state
+            setProperties(properties.filter((property) => property.propertyID !== propertyToDelete.propertyID));
+
+            // Close the modal
+            onDeleteClose();
+        } catch (error) {
+            console.error('Error deleting property:', error);
+        }
+    };
+>>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
 
     return (
         <div className="p-4">
             <div className="flex justify-between items-center mb-4">
+<<<<<<< HEAD
                 <h2 className="text-xl font-bold">ALL PROPERTIES</h2>
 
                 <div className="flex items-center gap-2">
@@ -221,6 +271,23 @@ const PropertiesTable = () => {
                         <FaSearch size={18} />
                     </button>
                     <Dropdown>
+=======
+                <h2 className="text-xl font-bold">All properties</h2>
+
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => {
+                        setSearchTerm(searchInput);
+                        setCurrentPage(1);
+                    }}
+                        className="p-2 rounded hover:bg-gray-200 transition"
+                        aria-label="Search"
+                        >
+                    <FaSearch size={18} />
+                    </button>
+
+                <Dropdown>
+>>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
                         <DropdownTrigger>
                             <button
                                 onClick={onOpen}
@@ -234,6 +301,25 @@ const PropertiesTable = () => {
                         </DropdownMenu>
                     </Dropdown>
                 </div>
+<<<<<<< HEAD
+=======
+            </div>
+
+            <div className="flex mb-4 items-center gap-2">
+                <input
+                    type="text"
+                    placeholder="Search by property name..."
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                            setSearchTerm(searchInput);
+                            setCurrentPage(1);
+                        }
+                    }}
+                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-[#FC9D25]"
+                />
+>>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
             </div>
 
             {showSearchBar && (
@@ -329,6 +415,35 @@ const PropertiesTable = () => {
                 </ModalContent>
             </Modal>
 
+            {/* Modal de delete */}
+            <Modal isOpen={isDeleteOpen} onOpenChange={onDeleteClose} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
+                <ModalContent>
+                    <ModalHeader className="relative rounded bg-[#FC9D25] flex justify-between items-center px-6 py-3">
+                        <div className="text-xl font-bold text-white">Confirm Delete</div>
+                        <button
+                            type="button"
+                            onClick={onDeleteClose}
+                            className="absolute right-4 top-3 text-white text-2xl font-bold hover:text-gray-200"
+                        >
+                            &times;
+                        </button>
+                    </ModalHeader>
+                    <ModalBody className="py-5 px-6 bg-[#FAFAFA]">
+                        <p className="text-[#191919]">To confirm the deletion of this property, please type its name:</p>
+                        <input
+                            type="text"
+                            value={deleteConfirmationName}
+                            onChange={(e) => setDeleteConfirmationName(e.target.value)}
+                            placeholder="Property name"
+                            className="w-full p-2 bg-gray-200 rounded mt-2"
+                        />
+                    </ModalBody>
+                    <ModalFooter className="border-t border-[#EDEBEB] bg-[#FAFAFA] pt-2 px-8">
+                        <Button onPress={onDeleteClose} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">Cancel</Button>
+                        <Button onPress={handleDeleteConfirmation} className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray-600 transition">Delete</Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
 
 
             {/* Tabela */}
@@ -354,7 +469,7 @@ const PropertiesTable = () => {
                                     </DropdownTrigger>
                                     <DropdownMenu aria-label="Actions" className="bg-white shadow-lg rounded-md p-1">
                                         <DropdownItem key="edit" onPress={() => handleEditClick(property)}>Edit</DropdownItem>
-                                        <DropdownItem key="delete" className="text-danger">Delete</DropdownItem>
+                                        <DropdownItem key="delete" className="text-danger" onClick={()=> handleDeleteClick(property)}>Delete</DropdownItem>
                                     </DropdownMenu>
                                 </Dropdown>
                             </td>
@@ -402,6 +517,46 @@ const PropertiesTable = () => {
             </div>
 
 
+            {/* Paginação*/}
+            <div className="flex fixed bottom-0 left-0 items-center gap-2 w-full px-4 py-3 bg-[#EDEBEB] justify-end">
+                <span className="px-2 py-1">Items per page</span>
+
+                <select
+                    value={itemsPerPage}
+                    onChange={(e) => {
+                        setItemsPerPage(Number(e.target.value));
+                        setCurrentPage(1);
+                    }}
+                    className="border p-2 rounded px-2 py-1 w-16"
+                >
+                    {[5, 10, 20, 50].map((size) => (
+                        <option key={size} value={size}>{size}</option>
+                    ))}
+                </select>
+
+                <div className="flex items-center border rounded-lg overflow-hidden ml-4">
+                    <button
+                        onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                        className={`px-3 py-0.5 ${currentPage === 1 ? 'bg-white text-black cursor-not-allowed' : 'bg-white hover:bg-gray-100'}`}
+                    >
+                        &lt;
+                    </button>
+
+                    <span className="px-3 py-0.5 bg-white">
+            {currentPage}
+        </span>
+
+                    <button
+                        onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                        disabled={currentPage === totalPages}
+                        className={`px-3 py-0.5 ${currentPage === totalPages ? 'bg-white text-black cursor-not-allowed' : 'bg-white hover:bg-gray-100'}`}
+                    >
+                        &gt;
+                    </button>
+                </div>
+            </div>
+
             {/* Modal de edição de propriedade */}
             <Modal isOpen={isEditOpen} onOpenChange={onEditClose} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
                 <ModalContent>
@@ -421,7 +576,7 @@ const PropertiesTable = () => {
                             <ModalBody className="py-5 px-6 bg-[#FAFAFA]">
                                 {editingProperty && (
                                     <form id="editPropertyForm" onSubmit={handleUpdateProperty} className="space-y-6">
-                                        {[ 'propertyName', 'propertyServer', 'propertyPort', 'mpeHotel'].map((field, index) => (
+                                        {['propertyName', 'propertyServer', 'propertyPort', 'mpeHotel'].map((field, index) => (
                                             <div key={index}>
                                                 <label htmlFor={field} className="block text-sm font-medium text-[#191919] mb-1">
                                                     {field.charAt(0).toUpperCase() + field.slice(1)}
@@ -439,18 +594,22 @@ const PropertiesTable = () => {
                                         ))}
 
                                         <div>
-                                            <label htmlFor="propertyChain" className="block text-sm font-medium text-[#191919] mb-1">
+                                            <label htmlFor="chainID" className="block text-sm font-medium text-[#191919] mb-1">
                                                 Select Property Chain
                                             </label>
                                             <Select
-                                                id="propertyChain"
-                                                name="propertyChain"
-                                                options={chainOptions}
-                                                value={chainOptions.find(option => option.value === editingProperty?.propertyChain) || null}
+                                                id="chainID"
+                                                name="chainID"
+                                                options={chains.map((chain) => ({
+                                                    value: chain.chainID,
+                                                    label: chain.chainName, // Adjust this if necessary
+                                                }))}
+                                                // Ensure the selected value matches the chainID in editingProperty
+                                                value={chains.find(chain => chain.chainID === editingProperty.chainID) || null}
                                                 onChange={(selectedOption) =>
                                                     setEditingProperty((prev) => ({
                                                         ...prev,
-                                                        propertyChain: selectedOption ? selectedOption.value : null,
+                                                        chainID: selectedOption ? selectedOption.value : "",
                                                     }))
                                                 }
                                                 isSearchable
@@ -461,6 +620,7 @@ const PropertiesTable = () => {
                                     </form>
                                 )}
                             </ModalBody>
+
                             <ModalFooter className="border-t border-[#EDEBEB] bg-[#FAFAFA] pt-2 px-8">
                                 <Button onPress={onEditClose} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">Cancel</Button>
                                 <Button type="submit" form="editPropertyForm" className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray-600 transition">Update</Button>

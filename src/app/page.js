@@ -6,57 +6,64 @@ import { useSession } from "next-auth/react"; // Import useSession
 import { useEffect, useState } from "react";
 import { fetchDashboard } from '@/src/lib/apidashboard';
 
-
-
 export default function App() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [dashboardData, setDashboardData] = useState(null);
+  const [isConfirmed, setIsConfirmed] = useState(() => JSON.parse(localStorage.getItem("isConfirmed")) || false);
 
+  // If the user is unauthenticated, redirect them to the login page
   useEffect(() => {
     if (status === "unauthenticated") {
-      router.push("/login"); // Redireciona se o utilizador não deu login
+      router.push("/login");
     }
   }, [status, router]);
-  
+
+  // If the property is not confirmed, redirect to homepage
+  useEffect(() => {
+    if (!isConfirmed) {
+      router.push("/"); // Redirect to the homepage if the property is not confirmed
+    }
+  }, [isConfirmed, router]);
+
+  // Fetch the dashboard data when the user is authenticated and property is confirmed
   useEffect(() => {
     const fetchData = async () => {
-      if (status === "authenticated") {
+      if (status === "authenticated" && isConfirmed) {
         try {
-          // Chama a função fetchDashboard e aguarda a resposta
           const data = await fetchDashboard();
-          
-          // Verifica se a propriedade 'totalGroups' está presente
           if (data && data.totalGroups !== undefined && data.totalFamilies !== undefined && data.totalSubfamilies !== undefined && data.totalProducts !== undefined) {
-            setDashboardData(data); // Armazena os dados no estado
+            setDashboardData(data); // Store the fetched data
           } else {
-            throw new Error('Dados inválidos recebidos da API');
+            throw new Error('Invalid data received from API');
           }
         } catch (error) {
-          console.log('Erro ao carregar os dados:', error);
-          console.error('Erro ao carregar os dados:', error);
-          // Em caso de erro, define valores padrão
+          console.log('Error fetching dashboard data:', error);
           setDashboardData({ grupos: 0, familias: 0, subfamilias: 0, produtos: 0 });
         }
       }
     };
 
-    fetchData(); // Chama a função assíncrona para buscar os dados
-  }, [status]); // Recarrega quando o status de autenticação mudar
+    // Only fetch data if the status is authenticated and the property is confirmed
+    if (status === "authenticated" && isConfirmed) {
+      fetchData(); // Fetch dashboard data when status or isConfirmed changes
+    }
+  }, [status, isConfirmed]); // Fetch data again when the session or confirmation status changes
 
+  // While loading
   if (status === "loading") {
-    return <p className="text-center text-lg">Loading...</p>; // Mostra "Loading..." enquanto carrega
+    return <p className="text-center text-lg">Loading...</p>;
   }
 
   if (!session) {
-    return null; // Previne mostrar a página antes de dar redirect para o login
+    return null; // Prevent showing the page before redirecting to login
   }
 
-  // Garantir que os dados estejam disponíveis antes de renderizar
   if (!dashboardData) {
     return <p className="text-center text-lg">Loading dashboard...</p>;
   }
 
+  // Card paths for different sections
   const cardPaths = [
     { label: "GROUPS", value: dashboardData.totalGroups || 0, path: "/homepage/grupos" },
     { label: "FAMILIES", value: dashboardData.totalFamilies || 0, path: "/homepage/family" },
@@ -64,17 +71,15 @@ export default function App() {
     { label: "PRODUCTS", value: dashboardData.totalProducts || 0, path: "/homepage/product" },
   ];
 
-  // Define handleCardClick
+  // Navigate to the corresponding page when a card is clicked
   const handleCardClick = (path) => {
-    console.log(`Navigating to: ${path}`);
-    router.push(path); // Navega para o caminho dado
+    router.push(path);
   };
 
   return (
       <div>
         <h1 className="text-3xl font-semibold px-4">Dashboard</h1>
-
-        <div className="px-4 flex flex-wrap gap-6 p-6 ">
+        <div className="px-4 flex flex-wrap gap-6 p-6">
           {cardPaths.map((card, index) => (
               <Card
                   key={index}

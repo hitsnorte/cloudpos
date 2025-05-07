@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { HiDotsVertical } from "react-icons/hi";
 import { FaGear } from "react-icons/fa6";
+import { FaSearch } from "react-icons/fa";
 import { Plus } from "lucide-react";
 import Select from "react-select";
 import { Button, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/react";
@@ -19,6 +20,10 @@ const PropertiesTable = () => {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const { isOpen: isEditOpen, onOpen: onEditOpen, onClose: onEditClose } = useDisclosure();
 
+    const  [searchTerm, setSearchTerm] = useState('');
+    const [showSearchBar , setShowSearchBar] = useState(false);
+    const [itemsPerPage, setItemsPerPage] = useState(15);
+    const [currentPage , setCurrentPage] = useState(1);
     const [properties, setProperties] = useState([]);
     const [chains, setChains] = useState([]);
     const [newProperty, setNewProperty] = useState({
@@ -29,6 +34,8 @@ const PropertiesTable = () => {
         mpeHotel: "",
         propertyChain: "",
     });
+
+    const totalPages = Math.ceil(properties.length / itemsPerPage);
 
     const [editingProperty, setEditingProperty] = useState(null);
 
@@ -186,25 +193,62 @@ const PropertiesTable = () => {
         onClose();
     };
 
+    const filteredProperties = properties.filter((property) =>
+        property.propertyName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const sortedProperties = filteredProperties.sort((a, b) =>
+        a.propertyName.localeCompare(b.propertyName)
+    );
+
+
+    const paginatedProperties = sortedProperties.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage,
+    );
 
     return (
         <div className="p-4">
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold">ALL PROPERTIES</h2>
-                <Dropdown>
-                    <DropdownTrigger>
-                        <button
-                            onClick={onOpen}
-                            className="bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded"
-                        >
-                            <Plus size={25} />
-                        </button>
-                    </DropdownTrigger>
-                    <DropdownMenu aria-label="Actions" className="bg-white shadow-lg rounded-md p-1">
-                        <DropdownItem key="add" onPress={onOpen}>Add Property</DropdownItem>
-                    </DropdownMenu>
-                </Dropdown>
+
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => setShowSearchBar(prev => !prev)}
+                        className="p-2 rounded hover:bg-gray-200 transition"
+                        aria-label="Toggle Search"
+                    >
+                        <FaSearch size={18} />
+                    </button>
+                    <Dropdown>
+                        <DropdownTrigger>
+                            <button
+                                onClick={onOpen}
+                                className="bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded"
+                            >
+                                <Plus size={25} />
+                            </button>
+                        </DropdownTrigger>
+                        <DropdownMenu aria-label="Actions" className="bg-white shadow-lg rounded-md p-1">
+                            <DropdownItem key="add" onPress={onOpen}>Add Property</DropdownItem>
+                        </DropdownMenu>
+                    </Dropdown>
+                </div>
             </div>
+
+            {showSearchBar && (
+                <input
+                    type="text"
+                    placeholder="Search by property name..."
+                    value={searchTerm}
+                    onChange={(e) => {
+                        setSearchTerm(e.target.value);
+                        setCurrentPage(1); // Reset para a primeira página ao fazer pesquisa
+                    }}
+                    className="mb-4 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-[#FC9D25]"
+                />
+            )}
+
 
             {/* Modal de adição de propriedades*/}
             <Modal isOpen={isOpen} onOpenChange={onClose} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
@@ -299,7 +343,7 @@ const PropertiesTable = () => {
                     </tr>
                     </thead>
                     <tbody>
-                    {properties.map((property, index) => (
+                    {paginatedProperties.map((property, index) => (
                         <tr key={property.id ?? `property-${index}`} className="hover:bg-gray-100">
                             <td className="border border-[#EDEBEB] px-3 py-2 text-center">
                                 <Dropdown>
@@ -322,6 +366,41 @@ const PropertiesTable = () => {
                     </tbody>
                 </table>
             </div>
+            {/* Paginação */}
+            <div className="flex fixed bottom-0 left-0 items-center gap-2 w-full px-4 py-3 bg-gray-200 justify-end">
+                <span className="px-4 py-2">Items per page</span>
+                <select
+                    value={itemsPerPage}
+                    onChange={(e) => {
+                        setItemsPerPage(Number(e.target.value));
+                        setCurrentPage(1); // Reset para a primeira página
+                    }}
+                    className="border p-2 rounded px-4 py-2 w-20 bg-white"
+                >
+                    {[5, 10, 20, 50].map((size) => (
+                        <option key={size} value={size}>{size}</option>
+                    ))}
+                </select>
+
+                <button
+                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className={`px-4 py-2 rounded ${currentPage === 1 ? 'bg-gray-200 text-black cursor-not-allowed' : 'bg-white hover:bg-gray-300'}`}
+                >
+                    &lt;
+                </button>
+
+                <span className="px-4 py-2 rounded">{currentPage} / {totalPages}</span>
+
+                <button
+                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className={`px-4 py-2 rounded ${currentPage === totalPages ? 'bg-gray-200 text-black cursor-not-allowed' : 'bg-white hover:bg-gray-300'}`}
+                >
+                    &gt;
+                </button>
+            </div>
+
 
             {/* Modal de edição de propriedade */}
             <Modal isOpen={isEditOpen} onOpenChange={onEditClose} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
@@ -384,7 +463,7 @@ const PropertiesTable = () => {
                             </ModalBody>
                             <ModalFooter className="border-t border-[#EDEBEB] bg-[#FAFAFA] pt-2 px-8">
                                 <Button onPress={onEditClose} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">Cancel</Button>
-                                <Button type="submit" form="editPropertyForm" className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray-600 transition">Save</Button>
+                                <Button type="submit" form="editPropertyForm" className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray-600 transition">Update</Button>
                             </ModalFooter>
                         </>
                     )}

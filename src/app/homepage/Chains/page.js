@@ -3,17 +3,18 @@
 import { useState, useEffect } from "react";
 import { HiDotsVertical } from "react-icons/hi";
 import { FaGear } from "react-icons/fa6";
+import { FaSearch } from "react-icons/fa";
 import { Plus } from "lucide-react";
 import { Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@nextui-org/react";
 
 const ChainsTable = () => {
     // Controla visibilidade do modal
     const [isOpen, setIsOpen] = useState(false);
-    const [editIsOpen, setEditIsOpen] = useState(false);  // New state for edit modal
+    const [editIsOpen, setEditIsOpen] = useState(false);  // Novo estado para modal de edição
 
     // Guarda lista de cadeias
     const [chains, setChains] = useState([]);
-    const [selectedChain, setSelectedChain] = useState(null);  // Store the chain being edited
+    const [selectedChain, setSelectedChain] = useState(null);  // Guarda a chaina ser editada
 
     const [newChain, setNewChain] = useState({ chainTag: "", chainName: "" });
 
@@ -30,7 +31,9 @@ const ChainsTable = () => {
             const res = await fetch("/api/chains");
             if (!res.ok) throw new Error("Failed to fetch chains");
             const data = await res.json();
-            setChains(data);
+            // Sort chains alphabetically by chainName
+            const sortedChains = data.sort((a, b) => a.chainName.localeCompare(b.chainName));
+            setChains(sortedChains);
         } catch (error) {
             console.error("Error fetching chains:", error);
         }
@@ -126,19 +129,63 @@ const ChainsTable = () => {
         onClose();
     };
 
+    const [itemsPerPage, setItemsPerPage] = useState(15);
+    const [currentPage , setCurrentPage] = useState(1);
+    const [searchTerm , setSearchTerm] = useState('')
+    const [showSearchBar, setShowSearchBar] = useState(false);
+
+    // Filtra as chains com base na pesquisa
+    const filteredChains = chains.filter((chain) =>
+        chain.chainName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    // Paginação aplicada sobre o array filtrado
+    const paginatedChains = filteredChains.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
+    const totalPages = Math.ceil(filteredChains.length / itemsPerPage);
+
+
+
+
     return (
         <div className="p-4">
             {/* Header c/ botão de adicionar */}
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold">All Chains</h2>
-                {/* Directly open the Add Chain modal when clicking the + button */}
-                <button
-                    className="bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded"
-                    onClick={onOpen}
-                >
-                    <Plus size={25} />
-                </button>
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => setShowSearchBar(prev => !prev)}
+                        className="p-2 rounded hover:bg-gray-200 transition"
+                        aria-label="Toggle Search"
+                    >
+                        <FaSearch size ={25} />
+                    </button>
+                    <button
+                        className="bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded"
+                        onClick={onOpen}
+                    >
+                        <Plus size={25} />
+                    </button>
+                </div>
             </div>
+
+            {/* Barra de pesquisa, visível se showSearchBar for true */}
+            {showSearchBar && (
+                <input
+                    type="text"
+                    placeholder="Search by chain name..."
+                    value={searchTerm}
+                    onChange={(e) => {
+                        setSearchTerm(e.target.value);
+                        setCurrentPage(1); // reset página ao pesquisar
+                    }}
+                    className="mb-4 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-[#FC9D25]"
+                />
+            )}
+
 
             {/* Modal de adição de cadeias novas */}
             <Modal isOpen={isOpen} onOpenChange={onClose} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
@@ -262,8 +309,8 @@ const ChainsTable = () => {
                     </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-300">
-                    {chains.length > 0 ? (
-                        chains.map((chain) => (
+                    {paginatedChains.length > 0 ? (
+                        paginatedChains.map((chain) => (
                             <tr key={chain.id || chain.chainTag} className="hover:bg-gray-100">
                                 <td className="border border-[#EDEBEB] w-[50px] px-2 py-2 text-center">
                                     <HiDotsVertical size={18} onClick={() => onEditOpen(chain)} />
@@ -283,6 +330,41 @@ const ChainsTable = () => {
                     </tbody>
                 </table>
             </div>
+
+            <div className="flex fixed bottom-0 left-0 items-center gap-2 w-full px-4 py-3 bg-gray-200 justify-end p-0 z-10 border-t">
+                <span className="px-4 py-2">Items per page</span>
+                <select
+                    value={itemsPerPage}
+                    onChange={(e) => {
+                        setItemsPerPage(Number(e.target.value));
+                        setCurrentPage(1); // volta para a primeira página quando mudar
+                    }}
+                    className="border p-2 rounded px-4 py-2 w-20"
+                >
+                    {[5, 10, 15, 20, 50].map((size) => (
+                        <option key={size} value={size}>{size}</option>
+                    ))}
+                </select>
+
+                <button
+                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className={`px-4 py-2 rounded ${currentPage === 1 ? 'text-black cursor-not-allowed' : 'hover:bg-gray-300'}`}
+                >
+                    &lt;
+                </button>
+
+                <span className="px-4 py-2">{currentPage} / {totalPages || 1}</span>
+
+                <button
+                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className={`px-4 py-2 rounded ${currentPage === totalPages ? 'text-black cursor-not-allowed' : 'hover:bg-gray-300'}`}
+                >
+                    &gt;
+                </button>
+            </div>
+
         </div>
     );
 };

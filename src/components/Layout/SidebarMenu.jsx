@@ -2,7 +2,11 @@ import { useContext, useState, useEffect } from "react";
 import { SidebarContext } from "./Sidebar";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { TbLayoutDashboardFilled } from "react-icons/tb";
-import { FaTable } from "react-icons/fa";
+import { FaLayerGroup, FaUnity, FaProductHunt, FaHourglassEnd    } from "react-icons/fa";
+import { MdFamilyRestroom, MdClass } from "react-icons/md";
+import { GiFamilyTree } from "react-icons/gi";
+import { IoPricetags } from "react-icons/io5";
+import { CiViewTimeline } from "react-icons/ci";
 import { LuFolderOpenDot, LuFolderOpen, LuFolderCog, LuFolderDot } from "react-icons/lu";
 import { useSession } from "next-auth/react";
 
@@ -62,16 +66,27 @@ export default function SidebarMenu() {
       icon: <LuFolderCog  size={20} />, 
       submenu: [
         {  ref: "/", label: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> }, 
-        { ref: "/homepage/grupos", label: "Groups", icon: <FaTable size={18} /> }, 
-        { ref: "/homepage/family", label: "Families", icon: <FaTable size={18} /> },
-        { ref: "/homepage/subfamilia", label: "SubFamilies", icon: <FaTable size={18} /> },
-        { ref: "/homepage/product", label: "Products", icon: <FaTable size={18} /> },
-        { ref: "/homepage/Iva", label: "VAT", icon: <FaTable size={18} /> },
-        { ref: "/homepage/unit", label: "Unit", icon: <FaTable size={18} /> },
+        { ref: "/homepage/grupos", label: "Groups", icon: <FaLayerGroup  size={18} /> }, 
+        { ref: "/homepage/family", label: "Families", icon: <MdFamilyRestroom size={18} /> },
+        { ref: "/homepage/subfamilia", label: "SubFamilies", icon: <GiFamilyTree size={18} /> },
+        { ref: "/homepage/product", label: "Products", icon: <FaProductHunt size={18} /> },
+        { ref: "/homepage/Iva", label: "VAT", icon: <IoPricetags size={18} /> },
+        { ref: "/homepage/unit", label: "unit", icon: <FaUnity  size={18} /> },
+            ], 
+        },
+
+      "Store Price": {
+      icon: <LuFolderCog  size={20} />, 
+      submenu: [
+        { ref: "/homepage/price classes", label: "price classes", icon: <MdClass  size={18} /> }, 
+        { ref: "/homepage/periods", label: "periods", icon: <CiViewTimeline  size={18} /> }, 
+        // { ref: "/homepage/exploration center", label: "exploration center", icon: <MdFamilyRestroom size={18} /> },
+        { ref: "/homepage/hours", label: "hours", icon: <FaHourglassEnd size={18} /> },
             ], 
         },
     };
 
+    
     // Fetch properties from session
     useEffect(() => {
         if (session?.propertyNames) {
@@ -83,11 +98,16 @@ export default function SidebarMenu() {
     useEffect(() => {
         const savedSelectedProperty = localStorage.getItem("selectedProperty");
         const savedIsConfirmed = JSON.parse(localStorage.getItem("isConfirmed"));
-
-        if (savedSelectedProperty && savedIsConfirmed !== null) {
+    
+        if (savedSelectedProperty && savedIsConfirmed === true) {
             setSelectedProperty(savedSelectedProperty);
-            setTempSelectedProperty(savedSelectedProperty); // Atualiza tempSelectedProperty
-            setIsConfirmed(savedIsConfirmed);
+            setTempSelectedProperty(savedSelectedProperty);
+            setIsConfirmed(true);
+        } else {
+            // Reset everything if not confirmed
+            setSelectedProperty("");
+            setTempSelectedProperty("");
+            setIsConfirmed(false);
         }
     }, []);
 
@@ -97,26 +117,29 @@ export default function SidebarMenu() {
         <div className="p-3">
             {/* Select de propriedade) */}
             <select
-                id="selectProperty"
-                value={selectedProperty}
-                onChange={(e) => {
-                    const newPropertyID = e.target.value; // Pegue o ID da propriedade selecionada
+            id="selectProperty"
+            value={tempSelectedProperty || ""}
+            onChange={(e) => {
+                const newPropertyID = e.target.value;
 
-                    if (newPropertyID !== selectedProperty) {
-                        setIsConfirmed(false);
-                    }
+                if (newPropertyID !== selectedProperty) {
+                    setIsConfirmed(false);
+                }
 
-                    setTempSelectedProperty(newPropertyID); // Atualiza o estado com o novo ID
-                }}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-[#FC9D25]"
-            >
-                <option value="">Select a property</option>
-                {properties.map((property) => (
-                    <option key={property.id} value={property.id}>
-                        {property.name} {/* Exibe o nome da propriedade, mas armazena o ID */}
-                    </option>
-                ))}
-            </select>
+                setTempSelectedProperty(newPropertyID);
+            }}
+            required
+            className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-[#FC9D25]"
+        >
+            <option value="" >
+                Select a property
+            </option>
+            {properties.map((property) => (
+                <option key={property.id} value={property.id}>
+                    {property.name}
+                </option>
+            ))}
+        </select>
 
 
 

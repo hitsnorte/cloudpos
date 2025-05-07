@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { HiDotsVertical } from "react-icons/hi";
+import { FaSearch } from "react-icons/fa";
 import { FaGear } from "react-icons/fa6";
 import { Plus } from "lucide-react";
 import Select from "react-select";
@@ -19,6 +20,10 @@ const ProfilesTable = () => {
     const { isOpen: isAddProfileModalOpen, onOpen: onOpenAddProfileModal, onClose: onCloseAddProfileModal } = useDisclosure();
     const { isOpen: isEditProfileModalOpen, onOpen: onOpenEditProfileModal, onClose: onCloseEditProfileModal } = useDisclosure();
 
+    const [searchTerm , setSearchTerm] = useState('');
+    const [showSearchBar , setShowSearchBar] = useState(false);
+    const [itemsPerPage, setItemsPerPage] = useState(15);
+    const [currentPage , setCurrentPage] = useState(1);
     const [profiles, setProfiles] = useState([]);
     const [properties, setProperties] = useState([]);
     const [currentProfile, setCurrentProfile] = useState(null); // Holds the profile to edit
@@ -30,6 +35,8 @@ const ProfilesTable = () => {
         propertyIDs: [],
         propertyTags: [],
     });
+
+    const totalPages = Math.ceil(profiles.length/itemsPerPage);
 
     // Busca todos os perfis
     const fetchProfiles = async () => {
@@ -66,7 +73,6 @@ const ProfilesTable = () => {
         });
     };
 
-
     const propertyOptions = properties.map(property => ({
         value: property.propertyID,
         label: `${property.propertyName} (${property.propertyTag})`,
@@ -78,14 +84,12 @@ const ProfilesTable = () => {
         const selectedIDs = selectedOptions.map(option => option.value);
         const selectedTags = selectedOptions.map(option => option.tag);
 
-
         setNewProfile(prevProfile => ({
             ...prevProfile,
             propertyIDs: selectedIDs,
             propertyTags: selectedTags,
         }));
     };
-
 
     // Guardar perfil
     const handleSubmitProfile = async (e) => {
@@ -114,14 +118,11 @@ const ProfilesTable = () => {
                 onCloseAddProfileModal();
             }
 
-
-
             fetchProfiles(); // Busca perfis depois de adicionar/editar perfis
         } catch (error) {
             console.error("Error with profile:", error);
         }
     };
-
 
     // Abre o modal e insere os dados do perfil escolhido
     const openEditModal = (profile) => {
@@ -136,8 +137,6 @@ const ProfilesTable = () => {
         });
         onOpenEditProfileModal();
     };
-
-
 
     const handleCloseAddProfileModal = () => {
         setNewProfile({
@@ -163,13 +162,51 @@ const ProfilesTable = () => {
         onOpenAddProfileModal(); //  modal de adição abre com os campos vazios
     };
 
+    const filteredProfiles = profiles.filter((profile) => {
+        const fullName = `${profile.firstName} ${profile.secondName}`.toLowerCase();
+        return fullName.includes(searchTerm.toLowerCase());
+    });
 
+    const sortedProfiles = [...filteredProfiles].sort((a, b) => {
+        const fullNameA = `${a.firstName} ${a.secondName}`.toLowerCase();
+        const fullNameB = `${b.firstName} ${b.secondName}`.toLowerCase();
+        return fullNameA.localeCompare(fullNameB);
+    });
+
+
+    const paginatedProfiles = sortedProfiles.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage,
+    );
 
     return (
         <div className="p-4">
             {/* Header */}
             <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold">All Profiles</h2>
+                <div className="flex items-center gap-2">
+                    <h2 className="text-xl font-bold">All Profiles</h2>
+                    <button
+                        onClick={() => setShowSearchBar(prev => !prev)}
+                        className="p-1 text-gray-600 hover:bg-gray-200 transition"
+                        aria-label="Toggle search"
+                    >
+                        <FaSearch size = {18} />
+                    </button>
+                </div>
+                {showSearchBar && (
+                    <input
+                        type="text"
+                        placeholder="Search by name..."
+                        value={searchTerm}
+                        onChange={(e) => {
+                            setSearchTerm(e.target.value);
+                            setCurrentPage(1); // faz reset para a primeira página
+                        }}
+                        className="mb-4 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-[#FC9D25]"
+                    />
+                )}
+
+
                 <Button
                     onClick={openAddModal}
                     className="bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded"
@@ -177,7 +214,6 @@ const ProfilesTable = () => {
                     <Plus size={25} />
                 </Button>
             </div>
-
 
             {/* Modal de adição de perfil */}
             <Modal isOpen={isAddProfileModalOpen} onOpenChange={handleCloseAddProfileModal} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
@@ -306,7 +342,6 @@ const ProfilesTable = () => {
                 </ModalContent>
             </Modal>
 
-
             {/* Tabela */}
             <div className="overflow-x-auto bg-muted/40">
                 <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB] mx-auto">
@@ -323,7 +358,7 @@ const ProfilesTable = () => {
                     </thead>
                     <tbody className="divide-y divide-gray-300">
                     {profiles.length > 0 ? (
-                        profiles.map((profile, index) => (
+                        paginatedProfiles.map((profile, index) => (
                             <tr key={profile.id || `profile-${index}`} className="hover:bg-gray-100">
                                 <td className="border border-[#EDEBEB] w-[50px] px-2 py-2 text-center">
                                     <Dropdown>
@@ -353,6 +388,42 @@ const ProfilesTable = () => {
                     </tbody>
                 </table>
             </div>
+
+            {/*Paginação*/}
+            <div className="flex fixed bottom-0 left-0 items-center gap-2 w-full px-4 py-3 bg-gray-200 justify-end">
+                <span className="px-4 py-2">Items per page</span>
+                <select
+                    value={itemsPerPage}
+                    onChange={(e) => {
+                        setItemsPerPage(Number(e.target.value));
+                        setCurrentPage(1); // Reset para a primeira página
+                    }}
+                    className="border p-2 rounded px-4 py-2 w-20 bg-white"
+                >
+                    {[5, 10, 20, 50].map((size) => (
+                        <option key={size} value={size}>{size}</option>
+                    ))}
+                </select>
+
+                <button
+                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className={`px-4 py-2 rounded ${currentPage === 1 ? 'bg-gray-200 text-black cursor-not-allowed' : 'bg-white hover:bg-gray-300'}`}
+                >
+                    &lt;
+                </button>
+
+                <span className="px-4 py-2 rounded">{currentPage} / {totalPages}</span>
+
+                <button
+                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className={`px-4 py-2 rounded ${currentPage === totalPages ? 'bg-gray-200 text-black cursor-not-allowed' : 'bg-white hover:bg-gray-300'}`}
+                >
+                    &gt;
+                </button>
+            </div>
+
         </div>
     );
 };

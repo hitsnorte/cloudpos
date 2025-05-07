@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { HiDotsVertical } from "react-icons/hi";
 import { FaGear } from "react-icons/fa6";
 import { Plus } from "lucide-react";
-import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
+import { HiAdjustmentsHorizontal } from "react-icons/hi2";
+import { FaMagnifyingGlass } from "react-icons/fa6";
 import { fetchFamily, createFamily, deleteFamily, updateFamily } from '@/src/lib/apifamily';
 import { fetchGrup } from '@/src/lib/apigroup';
 
@@ -34,7 +35,7 @@ const DataFamily = () => {
 
   const [itemsPerPage, setItemsPerPage] = useState(50);
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = Math.ceil(families.length / itemsPerPage);
+  
 
   const {
     isOpen: isAddModalOpen,
@@ -51,16 +52,18 @@ const DataFamily = () => {
     onOpen: onDeleteModalOpen,
     onClose: onDeleteModalClose,
   } = useDisclosure();
+   const {
+      isOpen: isSelectModalOpen,
+      onOpen: onSelectModalOpen,
+      onClose: onSelectModalClose,
+    } = useDisclosure();
 
   useEffect(() => {
     loadFamilies();
   }, []);
 
   
-  const paginatedFamilies = families.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+ 
 
   const loadFamilies = async () => {
     try {
@@ -94,16 +97,18 @@ const fetchGroupMap = async () => {
   }
 };
 
+  const filteredFamilies = families.filter((familia) =>
+    Object.values(familia).some((value) =>
+      String(value).toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
 
-  const filteredFamilies = (families || []).filter((family) => {
-    if (!family || !family.family_name) return false; // Verifica se `family` e `family.family_name` existem
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      (family.id && family.id.toString().includes(searchLower)) || 
-      (family.family_name && family.family_name.toLowerCase().includes(searchLower))
-    );
-  });
-  
+  const totalPages = Math.ceil(filteredFamilies.length / itemsPerPage);
+
+  const paginatedFamilies = filteredFamilies.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -199,16 +204,40 @@ const fetchGroupMap = async () => {
 
   return (
     <div className="p-4 pb-10">
+      <div className="w-1/3">
+        {/* Campo de pesquisa */}
+          <div className="mb-4 relative">
+          <FaMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+          <input
+            type="text"
+            placeholder="Pesquisar..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full max-w-md pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+          />
+        </div>
+      </div>
       {/* button */}
       <Dropdown>
       <DropdownTrigger>
-      <button 
-          onClick={onAddModalOpen}
-          className="absolute top-4 right-14 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
-          < Plus size={25}  />     
-      </button>
-      </DropdownTrigger>
-      </Dropdown>
+          <button 
+            onClick={onAddModalOpen}
+            className="absolute top-4 right-25 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
+            < Plus size={25}  />     
+        </button>
+        </DropdownTrigger>
+        </Dropdown>
+
+      {/* button adjustments*/}  
+       <Dropdown>
+          <DropdownTrigger>
+            <button 
+              onClick={onSelectModalOpen}
+              className="absolute top-4 right-10 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
+              <HiAdjustmentsHorizontal size={25} />
+            </button>
+         </DropdownTrigger>
+         </Dropdown>
 
       {/* Modal para adicionar grupo */}
       <Modal
@@ -468,39 +497,45 @@ const fetchGroupMap = async () => {
             ))}
           </tbody>
         </table>
-        <div className="flex fixed bottom-0 left-0 items-center gap-2 w-full px-4 py-3 bg-gray-200 justify-end p-0">
-    <span className="px-4 py-2 ">Items per page</span>
+        <div className="flex fixed bottom-0 left-0 items-center gap-2 w-full px-4 py-3 bg-gray-200 justify-end">
+          <span className="px-2 py-1">Items per page</span>
+
           <select
             value={itemsPerPage}
             onChange={(e) => {
               setItemsPerPage(Number(e.target.value));
               setCurrentPage(1);
             }}
-            className="border p-2 rounded px-4 py-2 w-20 gray-200"
+            className="border p-2 rounded px-2 py-1 w-16"
           >
             {PAGE_SIZES.map((size) => (
               <option key={size} value={size}>{size}</option>
             ))}
           </select>
-          
-          <button 
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-            className={`px-4 py-2 rounded ${currentPage === 1 ? 'bg-gray-200 text-black cursor-not-allowed' : 'bg-gray-200 hover:bg-gray-200'}`}
-          >
-            &lt;  {/* Símbolo de "Anterior" */}
-          </button>
-  
-          <span className="px-4 py-2 rounded">{currentPage} / {totalPages}</span>
 
-          <button 
-            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-            disabled={currentPage === totalPages}
-            className={`px-4 py-2 rounded ${currentPage === totalPages ? 'bg-gray-200 text-black cursor-not-allowed' : 'bg-gray-200 hover:bg-gray-200'}`}
-          >
-            &gt;  {/* Símbolo de "Próximo" */}
-          </button>
-        </div> 
+          {/* Agrupamento do controle de paginação */}
+          <div className="flex items-center border rounded-lg overflow-hidden ml-4">
+            <button 
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className={`px-3 py-0.5 ${currentPage === 1 ? 'bg-white text-black cursor-not-allowed' : 'bg-white hover:bg-gray-100'}`}
+            >
+              &lt;
+            </button>
+
+            <span className="px-3 py-0.5 bg-white">
+              {currentPage}
+            </span>
+
+            <button 
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-0.5 ${currentPage === totalPages ? 'bg-white text-black cursor-not-allowed' : 'bg-white hover:bg-gray-100'}`}
+            >
+              &gt;
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

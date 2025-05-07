@@ -345,7 +345,7 @@ export default function ProductGroups() {
                     </div>
                 )
             })}
-        </div>
+        
 
         {viewType === 'families' && familiesWithProducts.map((family) => {
         const isOpen = openGroupID === family.id;
@@ -393,9 +393,7 @@ export default function ProductGroups() {
                     </table>
                 </div>
             )}
-        </div>
-
-        
+        </div>      
     );
 })}
 
@@ -445,7 +443,7 @@ export default function ProductGroups() {
         </div>
     );
 })}
-
+</div>
      </>
     )
 }

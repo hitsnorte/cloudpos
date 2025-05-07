@@ -646,6 +646,37 @@ const DataProduct = () => {
         return hour ? hour.Vdesc : code || '—';
     };
 
+    //Carrega os IVA para o dropdown
+    const [ivaOptions, setIvaOptions] = useState([]);
+
+    useEffect(() => {
+        const loadVat = async () => {
+            try {
+                const data = await fetchIva();
+                setIvaOptions(data);
+            } catch (err) {
+                console.error('Failed to load VAT options:', err);
+            }
+        };
+
+        loadVat();
+    }, []);
+
+    const handleVatChange = (index, newVatCode) => {
+        console.log('Alterando IVA para o index', index, 'Novo valor de IVA:', newVatCode);
+        const updatedPrices = [...filteredPrices];
+        updatedPrices[index].VCodIva = newVatCode;
+        setPrices(updatedPrices);
+    };
+
+    useEffect(() => {
+        console.log('IVA Options:', ivaOptions); // Mostra as opções de IVA no console toda vez que 'ivaOptions' mudar
+
+        // Se precisar de um log mais específico para verificar o conteúdo:
+        ivaOptions.forEach(option => {
+            console.log('IVA Option:', option); // Mostra cada opção de IVA individualmente
+        });
+    }, [ivaOptions]);
 
     return (
     <div className="p-4 pb-10">
@@ -1088,20 +1119,40 @@ const DataProduct = () => {
                                             </tr>
                                             </thead>
                                             <tbody>
-                                            {filteredPrices.map((price, index) => (
-                                                <tr key={index} className="bg-gray-100">
-                                                    <td className="px-4 py-2">{getClassName(price.VCodClas)}</td>
-                                                    <td className="px-4 py-2">{price.cexpName || '-'}</td>
-                                                    <td className="px-4 py-2">{getPeriodDescription(price.VCodPeri)}</td>
-                                                    <td className="px-4 py-2">{getHourDescription(price.VCodInthoras)}</td>
-                                                    <td className="px-4 py-2">€{price.nValUnit?.toFixed(2) || '—'}</td>
-                                                    <td className="px-4 py-2">€</td>
-                                                    <td className="px-4 py-2">{price.VCodIva || '—'}</td>
-                                                    <td className="px-4 py-2 text-center">
-                                                        <input type="checkbox" />
-                                                    </td>
-                                                </tr>
-                                            ))}
+                                            {filteredPrices.map((price, index) => {
+                                                const iva = ivaOptions.find(v => v.VCODI === Number(price.VCodIva));
+                                                const ivaRate = iva?.NPERC ?? 0;
+                                                const base = price.nValUnit ?? 0;
+                                                const valorFinal = base + (base * ivaRate / 100);
+
+                                                return (
+                                                    <tr key={index} className="bg-gray-100">
+                                                        <td className="px-4 py-2">{getClassName(price.VCodClas)}</td>
+                                                        <td className="px-4 py-2">{price.cexpName || '-'}</td>
+                                                        <td className="px-4 py-2">{getPeriodDescription(price.VCodPeri)}</td>
+                                                        <td className="px-4 py-2">{getHourDescription(price.VCodInthoras)}</td>
+                                                        <td className="px-4 py-2">€{price.nValUnit?.toFixed(2) || '—'}</td>
+                                                        <td className="px-4 py-2">€{valorFinal.toFixed(2)}</td>
+                                                        <td className="px-4 py-2">
+                                                            <select
+                                                                value={price.VCodIva ?? ''}
+                                                                onChange={(e) => handleVatChange(index, Number(e.target.value))}
+                                                                className="border rounded px-2 py-1 w-full"
+                                                            >
+                                                                <option value="">—</option>
+                                                                {ivaOptions.map((vat) => (
+                                                                    <option key={vat.VCODI} value={vat.VCODI}>
+                                                                        {vat.VDESC}
+                                                                    </option>
+                                                                ))}
+                                                            </select>
+                                                        </td>
+                                                        <td className="px-4 py-2 text-center">
+                                                            <input type="checkbox" />
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
                                             </tbody>
                                         </table>
                                     </div>
@@ -1172,7 +1223,7 @@ const DataProduct = () => {
                                 type="submit"
                                 form="updateProductForm"
                                 className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
-                                onClick={() => window.location.reload()} // still here for now
+                                onClick={() => window.location.reload()}
                             >
                                 Save
                             </Button>

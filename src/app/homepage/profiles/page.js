@@ -21,12 +21,19 @@ const ProfilesTable = () => {
     const { isOpen: isEditProfileModalOpen, onOpen: onOpenEditProfileModal, onClose: onCloseEditProfileModal } = useDisclosure();
     const { isOpen: isDeleteUserModalOpen, onOpen: onOpenDeleteUserModal, onClose: onCloseDeleteUserModal } = useDisclosure();
 
+<<<<<<< HEAD
+    const [searchTerm , setSearchTerm] = useState('');
+    const [showSearchBar , setShowSearchBar] = useState(false);
+    const [itemsPerPage, setItemsPerPage] = useState(15);
+    const [currentPage , setCurrentPage] = useState(1);
+=======
     const [searchTerm, setSearchTerm] = useState('');
     const [searchInput, setSearchInput] = useState('');
     const [itemsPerPage, setItemsPerPage] = useState(15);
     const [currentPage, setCurrentPage] = useState(1);
     const [deleteConfirmationEmail, setDeleteConfirmationEmail] = useState('');
     const [userToDelete, setUserToDelete] = useState(null);
+>>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
     const [profiles, setProfiles] = useState([]);
     const [properties, setProperties] = useState([]);
     const [currentProfile, setCurrentProfile] = useState(null);
@@ -39,6 +46,11 @@ const ProfilesTable = () => {
         propertyTags: [],
     });
 
+<<<<<<< HEAD
+    const totalPages = Math.ceil(profiles.length/itemsPerPage);
+
+    // Busca todos os perfis
+=======
     // Password management state
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
@@ -49,6 +61,7 @@ const ProfilesTable = () => {
     const totalPages = Math.ceil(profiles.length / itemsPerPage);
 
     // Fetch profiles and properties as before
+>>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
     const fetchProfiles = async () => {
         try {
             const response = await fetch('/api/user');
@@ -98,7 +111,11 @@ const ProfilesTable = () => {
         }));
     };
 
+<<<<<<< HEAD
+    // Guardar perfil
+=======
     // Handle profile submit (add or edit)
+>>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
     const handleSubmitProfile = async (e) => {
         e.preventDefault();
 
@@ -142,14 +159,22 @@ const ProfilesTable = () => {
                 onCloseAddProfileModal();
             }
 
+<<<<<<< HEAD
+            fetchProfiles(); // Busca perfis depois de adicionar/editar perfis
+=======
             fetchProfiles(); // Refresh profile list after submitting
+>>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
         } catch (error) {
             console.error("Error with profile:", error);
             alert(error.message);
         }
     };
 
+<<<<<<< HEAD
+    // Abre o modal e insere os dados do perfil escolhido
+=======
 
+>>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
     const openEditModal = (profile) => {
         setCurrentProfile(profile); // Set profile to edit
         setNewProfile({
@@ -187,6 +212,8 @@ const ProfilesTable = () => {
         onOpenAddProfileModal();
     };
 
+<<<<<<< HEAD
+=======
     // New password validation and toggle function
     const handlePasswordChange = async (e) => {
         e.preventDefault();
@@ -222,10 +249,13 @@ const ProfilesTable = () => {
         }
     };
 
+>>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
     const filteredProfiles = profiles.filter((profile) => {
         const fullName = `${profile.firstName} ${profile.secondName}`.toLowerCase();
         return fullName.includes(searchTerm.toLowerCase());
     });
+<<<<<<< HEAD
+=======
 
     const sortedProfiles = [...filteredProfiles].sort((a, b) => {
         const fullNameA = `${a.firstName} ${a.secondName}`.toLowerCase();
@@ -260,12 +290,59 @@ const ProfilesTable = () => {
             console.error('Error deleting user:', error);
         }
     };
+>>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
 
+    const sortedProfiles = [...filteredProfiles].sort((a, b) => {
+        const fullNameA = `${a.firstName} ${a.secondName}`.toLowerCase();
+        const fullNameB = `${b.firstName} ${b.secondName}`.toLowerCase();
+        return fullNameA.localeCompare(fullNameB);
+    });
+
+
+    const paginatedProfiles = sortedProfiles.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage,
+    );
 
     return (
         <div className="p-4">
             {/* Header */}
             <div className="flex justify-between items-center mb-6">
+<<<<<<< HEAD
+                <div className="flex items-center gap-2">
+                    <h2 className="text-xl font-bold">All Profiles</h2>
+                    <button
+                        onClick={() => setShowSearchBar(prev => !prev)}
+                        className="p-1 text-gray-600 hover:bg-gray-200 transition"
+                        aria-label="Toggle search"
+                    >
+                        <FaSearch size = {18} />
+                    </button>
+                </div>
+                {showSearchBar && (
+                    <input
+                        type="text"
+                        placeholder="Search by name..."
+                        value={searchTerm}
+                        onChange={(e) => {
+                            setSearchTerm(e.target.value);
+                            setCurrentPage(1); // faz reset para a primeira página
+                        }}
+                        className="mb-4 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-[#FC9D25]"
+                    />
+                )}
+
+
+                <Button
+                    onClick={openAddModal}
+                    className="bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded"
+                >
+                    <Plus size={25} />
+                </Button>
+            </div>
+
+            {/* Modal de adição de perfil */}
+=======
                 <h2 className="text-xl font-bold">All Profiles</h2>
                 <div className="flex items-center gap-2">
                     <button
@@ -307,6 +384,7 @@ const ProfilesTable = () => {
             </div>
 
             {/* Modal de adição */}
+>>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
             <Modal isOpen={isAddProfileModalOpen} onOpenChange={handleCloseAddProfileModal} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
                 <ModalContent>
                     {(onClose) => (
@@ -487,6 +565,8 @@ const ProfilesTable = () => {
                 </ModalContent>
             </Modal>
 
+<<<<<<< HEAD
+=======
             {/*Modal de apagar users*/}
             <Modal isOpen={isDeleteUserModalOpen} onOpenChange={onCloseDeleteUserModal} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
                 <ModalContent>
@@ -521,6 +601,7 @@ const ProfilesTable = () => {
                 </ModalContent>
             </Modal>
 
+>>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
             {/* Tabela */}
             <div className="overflow-x-auto bg-muted/40">
                 <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB] mx-auto">
@@ -573,23 +654,56 @@ const ProfilesTable = () => {
                 </table>
             </div>
 
+<<<<<<< HEAD
+            {/*Paginação*/}
+            <div className="flex fixed bottom-0 left-0 items-center gap-2 w-full px-4 py-3 bg-gray-200 justify-end">
+                <span className="px-4 py-2">Items per page</span>
+=======
             {/* Paginação */}
             <div className="flex fixed bottom-0 left-0 items-center gap-2 w-full px-4 py-3 bg-[#EDEBEB] justify-end">
                 <span className="px-2 py-1">Items per page</span>
 
+>>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
                 <select
                     value={itemsPerPage}
                     onChange={(e) => {
                         setItemsPerPage(Number(e.target.value));
+<<<<<<< HEAD
+                        setCurrentPage(1); // Reset para a primeira página
+                    }}
+                    className="border p-2 rounded px-4 py-2 w-20 bg-white"
+=======
                         setCurrentPage(1);
                     }}
                     className="border p-2 rounded px-2 py-1 w-16"
+>>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
                 >
                     {[5, 10, 20, 50].map((size) => (
                         <option key={size} value={size}>{size}</option>
                     ))}
                 </select>
 
+<<<<<<< HEAD
+                <button
+                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className={`px-4 py-2 rounded ${currentPage === 1 ? 'bg-gray-200 text-black cursor-not-allowed' : 'bg-white hover:bg-gray-300'}`}
+                >
+                    &lt;
+                </button>
+
+                <span className="px-4 py-2 rounded">{currentPage} / {totalPages}</span>
+
+                <button
+                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className={`px-4 py-2 rounded ${currentPage === totalPages ? 'bg-gray-200 text-black cursor-not-allowed' : 'bg-white hover:bg-gray-300'}`}
+                >
+                    &gt;
+                </button>
+            </div>
+
+=======
                 <div className="flex items-center border rounded-lg overflow-hidden ml-4">
                     <button
                         onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -612,6 +726,7 @@ const ProfilesTable = () => {
                     </button>
                 </div>
             </div>
+>>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
         </div>
     );
 };

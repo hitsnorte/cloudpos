@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { HiDotsVertical } from "react-icons/hi";
 import { FaGear } from "react-icons/fa6";
 import { Plus } from "lucide-react";
+import { FaMagnifyingGlass } from "react-icons/fa6";
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
 import { fetchProduct, createProduct, deleteProduct, updateProduct } from '@/src/lib/apiproduct';
 import { fetchIva } from '@/src/lib/apiiva';
@@ -76,7 +77,16 @@ const DataIva = () => {
     }
   };
 
+  const filteredIvas = ivas.filter((iva) =>
+    Object.values(iva).some((value) =>
+      String(value).toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
 
+  const paginatedIva = filteredIvas.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 //  const handleAddProduct = async (e) => {
 //      e.preventDefault();
      
@@ -136,11 +146,6 @@ const DataIva = () => {
 //     }
 //   };
 
-  const paginatedIva = ivas.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
 //   const handleEditProduct = (product) => {
 //     setEditProduct({ ...product });
 //     onEditModalOpen();
@@ -174,6 +179,20 @@ const DataIva = () => {
 
   return (
     <div className="p-4">
+      <div className="w-full">
+           {/* Campo de pesquisa */}
+          <div className="mb-4 relative">
+          <FaMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+           <input
+               type="text"
+               placeholder="Pesquisar..."
+               value={searchTerm}
+               onChange={(e) => setSearchTerm(e.target.value)}
+               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+             />
+            </div>
+          </div>
+
       {/* button */}
             <Dropdown>
             <DropdownTrigger>

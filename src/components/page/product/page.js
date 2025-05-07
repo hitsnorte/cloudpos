@@ -800,13 +800,13 @@ const DataProduct = () => {
                   <div
                     onClick={toggleCheck}
                     className={`w-6 h-6 border rounded-md flex items-center justify-center cursor-pointer 
-                      ${isChecked ? 'bg-[#FC9D25]' : 'bg-gray-200'}`}
+                      ${isChecked ? 'bg-[#FC9D25]' : 'bg-gray-200'} mt-6 `}
                   >
                     {isChecked && <span className="text-white text-xl">X</span>}
                   </div>
 
                   {/* Texto opcional ao lado da checkbox */}
-                  <span className="text-sm">{isChecked ? 'Ativo' : 'Inativo'}</span>
+                  <span className="text-sm h-0">{isChecked ? 'Ativo' : 'Inativo' }</span>
                 </div>
 
                 <div>
@@ -1229,7 +1229,7 @@ const DataProduct = () => {
   </Modal>
           {/*---------------------------------------------------------------------------------------------------------------------------------- */}
     <div className="overflow-x-auto sm:flex sm:flex-col bg-muted/40">
-    <table className="w-700 bg-[#FAFAFA] border-collapse border border-[#EDEBEB] mx-auto">
+    <table className="w-800 bg-[#FAFAFA] border-collapse border border-[#EDEBEB] mx-auto">
       
     <thead>
             <tr>

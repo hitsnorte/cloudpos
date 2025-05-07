@@ -4,10 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { HiDotsVertical } from "react-icons/hi";
 import { FaGear } from "react-icons/fa6";
 import { Plus } from "lucide-react";
-<<<<<<< HEAD
-=======
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
->>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
 import { HiAdjustmentsHorizontal } from "react-icons/hi2";
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import { fetchFamily, createFamily, deleteFamily, updateFamily } from '@/src/lib/apifamily';
@@ -39,13 +36,9 @@ const DataFamily = () => {
 
   const [itemsPerPage, setItemsPerPage] = useState(50);
   const [currentPage, setCurrentPage] = useState(1);
-<<<<<<< HEAD
-  
-=======
-
 
   const [sortConfig, setSortConfig] = useState({ key: 'VDesc', direction: 'asc' });
->>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
+
 
   const {
     isOpen: isAddModalOpen,
@@ -62,19 +55,12 @@ const DataFamily = () => {
     onOpen: onDeleteModalOpen,
     onClose: onDeleteModalClose,
   } = useDisclosure();
-<<<<<<< HEAD
-   const {
-      isOpen: isSelectModalOpen,
-      onOpen: onSelectModalOpen,
-      onClose: onSelectModalClose,
-    } = useDisclosure();
-=======
   const {
     isOpen: isSelectModalOpen,
     onOpen: onSelectModalOpen,
     onClose: onSelectModalClose,
   } = useDisclosure();
->>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
+
 
   useEffect(() => {
     loadFamilies();
@@ -94,9 +80,6 @@ const DataFamily = () => {
     };
   };
   
-<<<<<<< HEAD
- 
-=======
   const saveColumnVisibility = () => {
     localStorage.setItem('columnVisibility', JSON.stringify(columnVisibility));
   };
@@ -139,7 +122,6 @@ const DataFamily = () => {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
->>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
 
    const sortedFamilies = useMemo(() => {
       if (!paginatedFamilies || !Array.isArray(paginatedFamilies)) return [];
@@ -197,7 +179,6 @@ const fetchGroupMap = async () => {
     return {};
   }
 };
-<<<<<<< HEAD
 
   const filteredFamilies = families.filter((familia) =>
     Object.values(familia).some((value) =>
@@ -211,9 +192,6 @@ const fetchGroupMap = async () => {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-=======
-  
->>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -320,23 +298,16 @@ const fetchGroupMap = async () => {
 
   return (
     <div className="p-4 pb-10">
-<<<<<<< HEAD
-      <div className="w-1/3">
-        {/* Campo de pesquisa */}
-          <div className="mb-4 relative">
-=======
-
       <div className="w-full">
         {/* Campo de pesquisa */}
         <div className="mb-4 relative">
->>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
+
           <FaMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
           <input
             type="text"
             placeholder="Pesquisar..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-<<<<<<< HEAD
             className="w-full max-w-md pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
           />
         </div>
@@ -362,23 +333,7 @@ const fetchGroupMap = async () => {
             </button>
          </DropdownTrigger>
          </Dropdown>
-=======
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
-          />
-        </div>
-      </div>
 
-      {/* button */}
-      <Dropdown>
-      <DropdownTrigger>
-      <button 
-          onClick={onAddModalOpen}
-          className="absolute top-4 right-25 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
-          < Plus size={25}  />     
-      </button>
-      </DropdownTrigger>
-      </Dropdown>
->>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
 
       {/* button adjustments*/}  
         <Dropdown>

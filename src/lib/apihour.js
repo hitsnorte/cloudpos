@@ -1,4 +1,4 @@
-// src/lib/apiiva.js
+// src/lib/apihour.js
 export const fetchHour = async () => {
     try {
       // Obter o propertyID do localStorage

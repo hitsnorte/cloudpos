@@ -2,10 +2,14 @@
 
 import { fetchGrup } from '@/src/lib/apigroup'
 import { fetchProduct } from '@/src/lib/apiproduct'
+import { fetchFamily } from '@/src/lib/apifamily'
 import { useEffect, useState } from 'react'
 import { TiShoppingCart } from 'react-icons/ti'
 import { IoTrashBinOutline } from "react-icons/io5";
 import { ChevronDown, ChevronRight } from 'lucide-react'
+import { fetchSubfamily } from '@/src/lib/apisubfamily';
+import { FaMagnifyingGlass } from "react-icons/fa6";
+
 
 export default function ProductGroups() {
     const [groupsWithProducts, setGroupsWithProducts] = useState([])
@@ -16,6 +20,11 @@ export default function ProductGroups() {
     const [count , setCount]= useState(1)
     const [cartOpen , setCartOpen] = useState(false)
     const [cartItems, setCartItems] = useState([])
+    const [familiesWithProducts, setFamiliesWithProducts] = useState([]);
+    const [subfamiliesWithProducts, setSubfamiliesWithProducts] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const [viewType, setViewType] = useState('groups', 'families', 'subfamilies') // 'groups' | 'families' | 'subfamilies'
 
     const toggleCart = () => setCartOpen(prev => !prev);
 
@@ -24,6 +33,15 @@ export default function ProductGroups() {
         setCount(1);
     };
 
+    const filterByName = (items) => {
+    if (!searchTerm.trim()) return items;
+
+    return items
+      .map((item) =>
+        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ? item : null
+      )
+      .filter(Boolean);
+  };
 
     const toggleGroup = (id) => {
         setOpenGroupID((prev) => (prev === id ? null : id))
@@ -59,42 +77,72 @@ export default function ProductGroups() {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const [groups, products] = await Promise.all([
+                const [groups, families, subfamilies, products] = await Promise.all([
                     fetchGrup(),
+                    fetchFamily(),
+                    fetchSubfamily(),
                     fetchProduct(),
                 ]);
 
 
-                const structuredData = groups.map((group) => {
+                const structuredGroups = groups.map((group) => {
                     const productsForGroup = products
                         .filter((p) => String(p.VCodGrfam) === String(group.VCodGrFam))
-                        .map((p, index) => {
-
-
-                            return {
-                                id: p?.VCodProd ? String(p.VCodProd) : `product-${index}`,
-                                name: p?.VDESC1?.trim() || 'Unnamed Product',
-                            };
-                        })
-
-
+                        .map((p, index) => ({
+                            id: p?.VCodProd ? String(p.VCodProd) : `product-${index}`,
+                            name: p?.VDESC1?.trim() || 'Unnamed Product',
+                        }));
+    
                     return {
                         id: String(group.VCodGrFam),
                         name: group.VDesc,
                         products: productsForGroup,
                     };
                 });
+    
+                // Processa famílias
+                const structuredFamilies = families.map((family) => {
+                    const productsForFamily = products
+                        .filter((p) => String(p.VCodFam) === String(family.VCodFam))
+                        .map((p, index) => ({
+                            id: p?.VCodProd ? String(p.VCodProd) : `product-${index}`,
+                            name: p?.VDESC1?.trim() || 'Unnamed Product',
+                        }));
+    
+                    return {
+                        id: String(family.VCodFam),
+                        name: family.VDesc,
+                        products: productsForFamily,
+                    };
+                });
 
-                setGroupsWithProducts(structuredData);
+                 // Subfamílias
+                const structuredSubfamilies = subfamilies.map((subfamily) => {
+                    const productsForSubfamily = products
+                      .filter((p) => String(p.VCodSubFam) === String(subfamily.VCodSubFam))
+                      .map((p, index) => ({
+                          id: p?.VCodProd ? String(p.VCodProd) : `product-${index}`,
+                            name: p?.VDESC1?.trim() || 'Unnamed Product',
+                     }));
+                    return {
+                        id: String(subfamily.VCodSubFam),
+                        name: subfamily.VDesc,
+                        products: productsForSubfamily,
+                    };
+                });
+    
+                setGroupsWithProducts(structuredGroups);
+                setFamiliesWithProducts(structuredFamilies);
+                setSubfamiliesWithProducts(structuredSubfamilies);
             } catch (error) {
                 console.error('Error fetching data:', error);
             } finally {
                 setLoading(false);
             }
         };
-
-        fetchData()
-    }, [propertyID])
+    
+        fetchData();
+    }, [propertyID]);
 
     if (loading) {
         return <div className="p-6">LOADING PRODUCTS...</div>
@@ -104,8 +152,47 @@ export default function ProductGroups() {
         return <div className="p-6">NO GROUP OR PRODUCT FOUND</div>
     }
 
+    
+
     return (
+        
         <>
+        <div className="flex items-center justify-center space-x-4 p-4">
+             
+            {/*  botão de selecao de groups, families e subfamilies */}
+                <button
+                    onClick={() => setViewType('groups')}
+                    className={`px-4 py-2 rounded ${viewType === 'groups' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
+                >
+                    Groups
+                </button>
+                <button
+                    onClick={() => setViewType('families')}
+                    className={`px-4 py-2 rounded ${viewType === 'families' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
+                >
+                    Families
+                </button>
+                <button
+                    onClick={() => setViewType('subfamilies')}
+                    className={`px-4 py-2 rounded ${viewType === 'subfamilies' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
+                >
+                    Subfamilies
+                </button>
+            </div>
+            <div className="w-252 ml-5.5" >
+             {/* Campo de pesquisa */}
+                <div className="mb-4 relative">
+                    <FaMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+                     <input
+                      type="text"
+                      placeholder="Pesquisar..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                     />
+                 </div>
+             </div>
+
             {/*  botão do carrinho */}
             <div className="absolute top-4 right-4 z-50">
                 <button className="text-3xl text-[#191919] hover:text-[#FC9D25] transition" onClick={toggleCart}>
@@ -211,7 +298,7 @@ export default function ProductGroups() {
             </div>}
 
         <div className="p-6 space-y-4">
-            {groupsWithProducts.map((group) => {
+        {viewType === 'groups' && filterByName(groupsWithProducts).map((group) => {
                 const isOpen = openGroupID === group.id
                 return (
                     <div key={group.id} className="rounded shadow-md overflow-hidden">
@@ -266,8 +353,105 @@ export default function ProductGroups() {
                     </div>
                 )
             })}
-        </div>
+        
 
+        {viewType === 'families' && filterByName(familiesWithProducts).map((family) => {
+        const isOpen = openGroupID === family.id;
+        return (
+        <div key={family.id} className="rounded shadow-md overflow-hidden">
+            <div
+                className="flex items-center justify-between py-3 px-4 bg-white cursor-pointer hover:bg-indigo-50 text-[#191919] transition-colors"
+                onClick={() => toggleGroup(family.id)}
+            >
+                <div className="flex items-center text-lg font-semibold">
+                    {family.name}
+                </div>
+                <div className="text-gray-500">
+                    {isOpen ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                </div>
+            </div>
+
+            {isOpen && (
+                <div className="overflow-x-auto bg-muted/40 transition-all duration-300 ease-in-out">
+                    <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB]">
+                        <thead>
+                            <tr className="bg-[#FC9D25] text-white">
+                                <th className="border border-[#EDEBEB] px-4 py-2 text-left">Product</th>
+                                <th className="border border-[#EDEBEB] px-4 py-2 text-right">Price</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-300">
+                            {family.products.map((product, index) => (
+                                <tr
+                                    key={product.id || `product-${index}`}
+                                    className="hover:bg-indigo-50 transition-colors"
+                                >
+                                    <td className="border border-[#EDEBEB] px-4 py-2 text-gray-700">
+                                        <span
+                                            className="cursor-pointer hover:underline text-[#191919]"
+                                            onClick={() => setSelectedProduct(product)}
+                                        >
+                                            {product.name}
+                                        </span>
+                                    </td>
+                                    <td className="border border-[#EDEBEB] px-4 py-2 text-right text-gray-500">...€</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+        </div>      
+    );
+})}
+
+{viewType === 'subfamilies' && filterByName(subfamiliesWithProducts).map((sub) => {
+    const isOpen = openGroupID === sub.id;
+    return (
+        <div key={sub.id} className="rounded shadow-md overflow-hidden">
+            <div
+                className="flex items-center justify-between py-3 px-4 bg-white cursor-pointer hover:bg-indigo-50 text-[#191919] transition-colors"
+                onClick={() => toggleGroup(sub.id)}
+            >
+                <div className="flex items-center text-lg font-semibold">
+                    {sub.name}
+                </div>
+                <div className="text-gray-500">
+                    {isOpen ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                </div>
+            </div>
+
+            {isOpen && (
+                <div className="overflow-x-auto bg-muted/40 transition-all duration-300 ease-in-out">
+                    <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB]">
+                        <thead>
+                        <tr className="bg-[#FC9D25] text-white">
+                            <th className="border border-[#EDEBEB] px-4 py-2 text-left">Product</th>
+                            <th className="border border-[#EDEBEB] px-4 py-2 text-right">Price</th>
+                        </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-300">
+                            {sub.products.map((product, index) => (
+                                <tr key={product.id || `product-${index}`} className="hover:bg-indigo-50 transition-colors">
+                                    <td className="border border-[#EDEBEB] px-4 py-2 text-gray-700">
+                                        <span
+                                            className="cursor-pointer hover:underline text-[#191919]"
+                                            onClick={() => setSelectedProduct(product)}
+                                        >
+                                            {product.name}
+                                        </span>
+                                    </td>
+                                    <td className="border border-[#EDEBEB] px-4 py-2 text-right text-gray-500">...€</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+        </div>
+    );
+})}
+</div>
      </>
     )
 }

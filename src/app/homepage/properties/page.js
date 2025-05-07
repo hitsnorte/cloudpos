@@ -20,15 +20,10 @@ const PropertiesTable = () => {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const { isOpen: isEditOpen, onOpen: onEditOpen, onClose: onEditClose } = useDisclosure();
 
-<<<<<<< HEAD
-    const  [searchTerm, setSearchTerm] = useState('');
-    const [showSearchBar , setShowSearchBar] = useState(false);
-=======
     const [deleteConfirmationName, setDeleteConfirmationName] = useState('');
     const [propertyToDelete, setPropertyToDelete] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [searchInput , setSearchInput] = useState('');
->>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
     const [itemsPerPage, setItemsPerPage] = useState(15);
     const [currentPage , setCurrentPage] = useState(1);
     const [properties, setProperties] = useState([]);
@@ -222,8 +217,6 @@ const PropertiesTable = () => {
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage,
     );
-<<<<<<< HEAD
-=======
 
     const handleDeleteClick = (property) => {
         setPropertyToDelete(property);
@@ -254,24 +247,10 @@ const PropertiesTable = () => {
             console.error('Error deleting property:', error);
         }
     };
->>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
 
     return (
         <div className="p-4">
             <div className="flex justify-between items-center mb-4">
-<<<<<<< HEAD
-                <h2 className="text-xl font-bold">ALL PROPERTIES</h2>
-
-                <div className="flex items-center gap-2">
-                    <button
-                        onClick={() => setShowSearchBar(prev => !prev)}
-                        className="p-2 rounded hover:bg-gray-200 transition"
-                        aria-label="Toggle Search"
-                    >
-                        <FaSearch size={18} />
-                    </button>
-                    <Dropdown>
-=======
                 <h2 className="text-xl font-bold">All properties</h2>
 
                 <div className="flex items-center gap-2">
@@ -287,7 +266,6 @@ const PropertiesTable = () => {
                     </button>
 
                 <Dropdown>
->>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
                         <DropdownTrigger>
                             <button
                                 onClick={onOpen}
@@ -301,8 +279,6 @@ const PropertiesTable = () => {
                         </DropdownMenu>
                     </Dropdown>
                 </div>
-<<<<<<< HEAD
-=======
             </div>
 
             <div className="flex mb-4 items-center gap-2">
@@ -319,22 +295,7 @@ const PropertiesTable = () => {
                     }}
                     className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-[#FC9D25]"
                 />
->>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
             </div>
-
-            {showSearchBar && (
-                <input
-                    type="text"
-                    placeholder="Search by property name..."
-                    value={searchTerm}
-                    onChange={(e) => {
-                        setSearchTerm(e.target.value);
-                        setCurrentPage(1); // Reset para a primeira página ao fazer pesquisa
-                    }}
-                    className="mb-4 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-[#FC9D25]"
-                />
-            )}
-
 
             {/* Modal de adição de propriedades*/}
             <Modal isOpen={isOpen} onOpenChange={onClose} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
@@ -481,41 +442,6 @@ const PropertiesTable = () => {
                     </tbody>
                 </table>
             </div>
-            {/* Paginação */}
-            <div className="flex fixed bottom-0 left-0 items-center gap-2 w-full px-4 py-3 bg-gray-200 justify-end">
-                <span className="px-4 py-2">Items per page</span>
-                <select
-                    value={itemsPerPage}
-                    onChange={(e) => {
-                        setItemsPerPage(Number(e.target.value));
-                        setCurrentPage(1); // Reset para a primeira página
-                    }}
-                    className="border p-2 rounded px-4 py-2 w-20 bg-white"
-                >
-                    {[5, 10, 20, 50].map((size) => (
-                        <option key={size} value={size}>{size}</option>
-                    ))}
-                </select>
-
-                <button
-                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                    disabled={currentPage === 1}
-                    className={`px-4 py-2 rounded ${currentPage === 1 ? 'bg-gray-200 text-black cursor-not-allowed' : 'bg-white hover:bg-gray-300'}`}
-                >
-                    &lt;
-                </button>
-
-                <span className="px-4 py-2 rounded">{currentPage} / {totalPages}</span>
-
-                <button
-                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                    disabled={currentPage === totalPages}
-                    className={`px-4 py-2 rounded ${currentPage === totalPages ? 'bg-gray-200 text-black cursor-not-allowed' : 'bg-white hover:bg-gray-300'}`}
-                >
-                    &gt;
-                </button>
-            </div>
-
 
             {/* Paginação*/}
             <div className="flex fixed bottom-0 left-0 items-center gap-2 w-full px-4 py-3 bg-[#EDEBEB] justify-end">

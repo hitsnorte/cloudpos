@@ -1264,41 +1264,6 @@ const DataProduct = () => {
               <th onClick={() => handleSort('VDESC1')} className="uppercase border-collapse border border-[#EDEBEB] w-200 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
                 <div className="flex items-left justify-left">
                   Description
-<<<<<<< HEAD
-              </div>
-              </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-5 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className=" flex items-left justify-left "> 
-                  Cod Iva
-              </div>
-              </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-180 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-left justify-left"> 
-                  Desc Iva
-              </div>
-              </th>
-             
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-15 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-left justify-left "> 
-                  ID Unit
-              </div>
-              </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-130 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-left justify-left"> 
-                 Desc Unit
-              </div>
-              </th>
-            
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-5 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-left justify-left "> 
-                  Product of
-              </div>
-
-              </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-10 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-                <div className="flex items-left justify-left"> 
-                Active
-=======
                   {sortConfig.key === 'VDesc' && (
                     <span className="ml-auto">
                       {sortConfig.direction === 'asc' ? (
@@ -1308,7 +1273,6 @@ const DataProduct = () => {
                       )}
                     </span>
                   )}
->>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
                 </div>
               </th>
               )}
@@ -1316,10 +1280,6 @@ const DataProduct = () => {
               <th className="uppercase border-collapse border border-[#EDEBEB] w-20 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
                 <div className="flex items-left justify-left">Cod IVA</div>
               </th>
-<<<<<<< HEAD
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-130 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className=" items-left justify-left"> 
-=======
               )}
               {columnVisibility.descIva && (
               <th className="uppercase border-collapse border border-[#EDEBEB] w-200 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
@@ -1354,7 +1314,6 @@ const DataProduct = () => {
               {columnVisibility.descSubFam && (
               <th onClick={() => handleSort('VDescSubfamily')} className="uppercase border-collapse border border-[#EDEBEB] w-200 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
                 <div className="flex items-left justify-left">
->>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
                   Desc SubFam
                   {sortConfig.key === 'VDesc' && (
                     <span className="ml-auto">
@@ -1372,15 +1331,10 @@ const DataProduct = () => {
               <th className="uppercase border-collapse border border-[#EDEBEB] w-10 px-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
                 <div className="flex items-left justify-left">Cod Fam</div>
               </th>
-<<<<<<< HEAD
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-130 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className=" items-left justify-left"> 
-=======
               )}
               {columnVisibility.descFam && (
               <th onClick={() => handleSort('VDescFamily')} className="uppercase border-collapse border border-[#EDEBEB] w-200 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
                 <div className="flex items-left justify-left">
->>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
                   Desc Fam
                   {sortConfig.key === 'VDesc' && (
                     <span className="ml-auto">
@@ -1398,15 +1352,10 @@ const DataProduct = () => {
               <th className="uppercase border-collapse border border-[#EDEBEB] w-10 px-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
                 <div className="flex items-left justify-left">Cod Grp</div>
               </th>
-<<<<<<< HEAD
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-130 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className=" items-left justify-left"> 
-=======
               )}
               {columnVisibility.descFam && (
               <th onClick={() => handleSort('VDescGroup')} className="uppercase border-collapse border border-[#EDEBEB] w-200 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
                 <div className="flex items-left justify-left">
->>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
                   Desc Grp
                   {sortConfig.key === 'VDesc' && (
                     <span className="ml-auto">
@@ -1443,33 +1392,6 @@ const DataProduct = () => {
               </td>
               
               {/* Dados do Produto */}
-<<<<<<< HEAD
-              <td className="border border-[#EDEBEB] px-4 py-2 text-right">{product.VPRODUTO}</td>
-              <td className="border border-[#EDEBEB] px-3 py-2 text-left">{product.Abreviatura}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.VDESC1}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-right">{product.VCodIva}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.VDescIva}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-right">{product.DefinicaoProduto}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.VDescUnit}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.ProductType}</td>
-
-              <td className="py-4 px-2 flex items-center justify-center">
-                {product.activo ? (
-                  <FaCheckCircle size={20} color="#4CAF50" className="self-center" />  // Aqui você pode ajustar o tamanho e a cor do ícone
-                ) : (
-                  ""
-                )}
-              </td>
-
-              <td className="border border-[#EDEBEB] px-4 py-2 text-right">{product.VSUBFAM}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.VDescSubfamily}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-right">{product.VCodFam}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.VDescFamily}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-right">{product.VCodGrfam}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{product.VDescGroup}</td>
-
-             
-=======
                {columnVisibility.codProd && (
                   <td className="border border-[#EDEBEB] px-3 py-2 text-right">{product.VPRODUTO}</td>
                )}
@@ -1521,7 +1443,6 @@ const DataProduct = () => {
                {columnVisibility.descGrp && (
                   <td className="border border-[#EDEBEB] px-3 py-2 text-left">{product.VDescGroup}</td>
                )}  
->>>>>>> 55c68949a6555cbd2d29a073de0dbad28cf7a935
             </tr>
           ))}
         </tbody>

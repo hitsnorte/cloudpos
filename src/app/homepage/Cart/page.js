@@ -179,7 +179,7 @@ export default function ProductGroups() {
                     Subfamilies
                 </button>
             </div>
-            <div className="w-252 ml-5.5" >
+            <div className="py-3 px-4 " >
              {/* Campo de pesquisa */}
                 <div className="mb-4 relative">
                     <FaMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />

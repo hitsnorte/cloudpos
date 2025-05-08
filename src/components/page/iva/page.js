@@ -1,10 +1,11 @@
 'use client'; // Necessário para componentes client-side no App Router
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { HiDotsVertical } from "react-icons/hi";
 import { FaGear } from "react-icons/fa6";
 import { Plus } from "lucide-react";
 import { FaMagnifyingGlass } from "react-icons/fa6";
+import { HiAdjustmentsHorizontal } from "react-icons/hi2";
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
 import { fetchProduct, createProduct, deleteProduct, updateProduct } from '@/src/lib/apiproduct';
 import { fetchIva } from '@/src/lib/apiiva';
@@ -40,8 +41,9 @@ const DataIva = () => {
 
   const [itemsPerPage, setItemsPerPage] = useState(50);
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = Math.ceil(ivas.length / itemsPerPage);
 
+  const [sortConfig, setSortConfig] = useState({ key: 'VDesc', direction: 'asc' });
+  
   const {
     isOpen: isAddModalOpen,
     onOpen: onAddModalOpen,
@@ -56,6 +58,11 @@ const DataIva = () => {
     isOpen: isDeleteModalOpen,
     onOpen: onDeleteModalOpen,
     onClose: onDeleteModalClose,
+  } = useDisclosure();
+const {
+    isOpen: isSelectModalOpen,
+    onOpen: onSelectModalOpen,
+    onClose: onSelectModalClose,
   } = useDisclosure();
 
   useEffect(() => {
@@ -77,16 +84,91 @@ const DataIva = () => {
     }
   };
 
+  const handleSort = (key) => {
+    setSortConfig((prevConfig) => ({
+      key,
+      direction: prevConfig.key === key && prevConfig.direction === 'asc' ? 'desc' : 'asc',
+    }));
+  };
+
+  const loadColumnVisibility = () => {
+      const savedVisibility = localStorage.getItem('columnVisibility');
+      if (savedVisibility) {
+        return JSON.parse(savedVisibility);
+      }
+      return {
+        codIva: true, // estado padrão
+        ivaPer: true,
+        description: true,
+      };
+    };
+    
+    const saveColumnVisibility = () => {
+      localStorage.setItem('columnVisibility', JSON.stringify(columnVisibility));
+    };
+    
+    const toggleColumn = (column) => {
+      setColumnVisibility((prev) => {
+        const newVisibility = { ...prev, [column]: !prev[column] };
+        localStorage.setItem('columnVisibility', JSON.stringify(newVisibility)); // Atualiza no localStorage
+        return newVisibility;
+      });
+    };
+  
+    // Agora você pode usar a loadColumnVisibility ao inicializar o state
+    const [columnVisibility, setColumnVisibility] = useState(loadColumnVisibility());
+
   const filteredIvas = ivas.filter((iva) =>
     Object.values(iva).some((value) =>
       String(value).toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 
-  const paginatedIva = filteredIvas.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+
+
+   const columns = [
+      { key: 'codIva', label: 'Cod Iva' },
+      { key: 'ivaPer', label: 'Iva Per' },
+      { key: 'description', label: 'description' },
+    ];
+  
+    const [columnSearchTerm, setColumnSearchTerm] = useState('');
+  
+    const filteredColumns = columns.filter((col) =>
+      col.label.toLowerCase().includes(columnSearchTerm.toLowerCase())
+    );
+  
+    const totalPages = Math.ceil(filteredIvas.length / itemsPerPage);
+    
+    const paginatedIvas = filteredIvas.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    );
+
+    const sortedIvas = useMemo(() => {
+        if (!paginatedIvas || !Array.isArray(paginatedIvas)) return [];
+      
+        const sorted = [...paginatedIvas].sort((a, b) => {
+          if (!sortConfig.key) return 0;
+      
+          let aValue = a[sortConfig.key];
+          let bValue = b[sortConfig.key];
+      
+          if (sortConfig.key === 'DCriadoEm') {
+            aValue = new Date(aValue);
+            bValue = new Date(bValue);
+          } else {
+            aValue = aValue?.toString().toLowerCase();
+            bValue = bValue?.toString().toLowerCase();
+          }
+      
+          if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+          if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+          return 0;
+        });
+      
+        return sorted;
+      }, [paginatedIvas, sortConfig]);
 //  const handleAddProduct = async (e) => {
 //      e.preventDefault();
      
@@ -175,7 +257,10 @@ const DataIva = () => {
 //         setError(err.message); // Define o erro para exibição no modal
 //       }
 //     };
-   
+const handleEditIvas = (iva) => {
+  setEditIva({ ...iva });
+  onEditModalOpen();
+};
 
   return (
     <div className="p-4">
@@ -198,13 +283,94 @@ const DataIva = () => {
             <DropdownTrigger>
             <button 
                 onClick={onAddModalOpen}
-                className="absolute top-4 right-10 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
+                className="absolute top-4 right-25 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
                 < Plus size={25}  />     
             </button> 
             </DropdownTrigger>
       
             </Dropdown>
           
+      {/* button adjustments*/}  
+      <Dropdown>
+        <DropdownTrigger>
+          <button 
+            onClick={onSelectModalOpen}
+            className="absolute top-4 right-10 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
+            <HiAdjustmentsHorizontal size={25} />
+          </button>
+      </DropdownTrigger>
+      </Dropdown>
+
+      {/* Modal para adjustments do grupo */} 
+            <Modal 
+            isOpen={isSelectModalOpen}
+            onOpenChange={onSelectModalClose}
+            size="sm" 
+            placement="center" 
+            className="w-100 bg-white shadow-xl rounded-lg" 
+            hideCloseButton={true}
+            >
+      
+            <ModalContent>
+            {(onClose) => (
+                <>
+                  <ModalHeader className="rounded bg-[#FC9D25] flex justify-between items-center">
+                    <div className="text-xl font-bold text-white">Select Column</div>
+                    <Button
+                        onClick={onClose}
+                        className="text-white bg-transparent border-0 text-2xl p-0"
+                        aria-label="Close"
+                      >
+                        &times; {/* Unicode for "×" sign */}
+                      </Button>
+                    </ModalHeader>
+                  <ModalBody className="py-5 px-6">
+                  <div className="w-88">
+                       {/* Campo de pesquisa  */}
+                      <div className="mb-4 relative">
+                      <FaMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+                      <input
+                        type="text"
+                        placeholder="Pesquisar..."
+                        value={columnSearchTerm}
+                        onChange={(e) => setColumnSearchTerm(e.target.value)}
+                        className="w-full max-w-md pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                  {filteredColumns.map((col) => (
+                    <div key={col.key} className="flex items-center rounded border border-black p-1">
+                      <input
+                        type="checkbox"
+                        checked={columnVisibility[col.key]}
+                        onChange={() => toggleColumn(col.key)}
+                        className="mr-2"
+                      />
+                      <label className="text-sm">{col.label}</label>
+                    </div>
+                  ))}
+                </div>
+                </ModalBody>
+      
+              <ModalFooter className="w-102 border-t border-gray-200 pt-2 px-8">
+                    <Button
+                    type="submit"
+                    form="selectGroupForm"
+                    className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
+                    disabled={isLoading}
+                    onClick={() => {
+                      saveColumnVisibility(); // Salvar as configurações
+                      window.location.reload(); // Recarregar a página
+                    }}
+                  >
+                    {isLoading ? <Spinner size="sm" color="white" /> : 'Save'}
+                  </Button>
+                  </ModalFooter>
+                  </>
+                )}
+              </ModalContent>
+            </Modal>
 
       {/* Modal para adicionar produto */}
       <Modal 
@@ -633,25 +799,36 @@ const DataIva = () => {
                   <FaGear size={20} color='white'/>
                 </div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-20 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-left justify-left "> 
-                Cod Iva
-              </div>
+               {columnVisibility.codIva && (
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-7 px-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className="flex items-left justify-left">Cod Iva</div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-20 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-                <div className="flex items-left justify-left"> 
-                Iva Per
+              )}
+              {columnVisibility.ivaPer && (
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-7 px-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className="flex items-left justify-left">Iva Per</div>
+              </th>
+              )}
+               {columnVisibility.description && (
+              <th onClick={() => handleSort('VDESC')} className="uppercase border-collapse border border-[#EDEBEB] w-400 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className="flex items-left justify-left">
+                  Description
+                  {sortConfig.key === 'VDesc' && (
+                    <span className="ml-auto">
+                      {sortConfig.direction === 'asc' ? (
+                        <ArrowUpIcon className="inline-block w-4 h-4 text-white" />
+                      ) : (
+                        <ArrowDownIcon className="inline-block w-4 h-4 text-white" />
+                      )}
+                    </span>
+                  )}
                 </div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB]  w-full sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-left justify-left"> 
-                Description
-              </div>
-              </th>
+              )}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-300">
-          {paginatedIva.map((iva)  => (
+          {sortedIvas.map((iva)  => (
             <tr key={iva.VCODI} className="hover:bg-gray-200">
               
               {/* Ações */}
@@ -663,15 +840,23 @@ const DataIva = () => {
                     </Button>
                   </DropdownTrigger>
                   <DropdownMenu aria-label="Dynamic Actions" placement="bottom-end" className="bg-white shadow-lg rounded-md p-1">
-                    <DropdownItem key="edit" onPress={() => alert(`Editando ${iva.VDESC}`)}>Editar</DropdownItem>
-                  </DropdownMenu>
+                            <DropdownItem key="edit" onPress={() => handleEditIvas(iva)}>
+                              Edit
+                            </DropdownItem>
+                          </DropdownMenu>
                 </Dropdown>
               </td>
               
               {/* Dados do Produto */}
-              <td className="border border-[#EDEBEB] px-4 py-2 text-right">{iva.VCODI}</td>
-              <td className="border border-[#EDEBEB] px-3 py-2 text-right">{iva.NPERC}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{iva.VDESC}</td>
+              {columnVisibility.codIva && (
+                  <td className="border border-[#EDEBEB] px-3 py-2 text-right">{iva.VCODI}</td>
+              )}
+              {columnVisibility.ivaPer && (
+                  <td className="border border-[#EDEBEB] px-3 py-2 text-right">{iva.NPERC}</td>
+              )}
+              {columnVisibility.description && (
+                  <td className="border border-[#EDEBEB] px-3 py-2 text-left">{iva.VDESC}</td>
+              )}
             </tr>
           ))}
         </tbody>

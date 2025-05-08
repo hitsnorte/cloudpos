@@ -6,6 +6,7 @@ import { FaGear } from "react-icons/fa6";
 import { Plus } from "lucide-react";
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
 import { FaMagnifyingGlass } from "react-icons/fa6";
+import { HiAdjustmentsHorizontal } from "react-icons/hi2";
 import { fetchPeriod, createPeriod } from '@/src/lib/apiperiod';
 import axios from 'axios';
 
@@ -39,7 +40,6 @@ const DataPeriod = () => {
 
   const [itemsPerPage, setItemsPerPage] = useState(50);
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = Math.ceil(periods.length / itemsPerPage);
 
   const {
     isOpen: isAddModalOpen,
@@ -55,6 +55,11 @@ const DataPeriod = () => {
     isOpen: isDeleteModalOpen,
     onOpen: onDeleteModalOpen,
     onClose: onDeleteModalClose,
+  } = useDisclosure();
+  const {
+    isOpen: isSelectModalOpen,
+    onOpen: onSelectModalOpen,
+    onClose: onSelectModalClose,
   } = useDisclosure();
 
   useEffect(() => {
@@ -103,11 +108,56 @@ const DataPeriod = () => {
     fetchPropertyDetails();
   }, []);
 
+   const loadColumnVisibility = () => {
+          const savedVisibility = localStorage.getItem('columnVisibility');
+          if (savedVisibility) {
+            return JSON.parse(savedVisibility);
+          }
+          return {
+            codPeriod: true, // estado padrão
+            description: true,
+            startDate: true,
+            endDate: true,
+            exploCenter: true,
+          };
+        };
+        
+        const saveColumnVisibility = () => {
+          localStorage.setItem('columnVisibility', JSON.stringify(columnVisibility));
+        };
+        
+        const toggleColumn = (column) => {
+          setColumnVisibility((prev) => {
+            const newVisibility = { ...prev, [column]: !prev[column] };
+            localStorage.setItem('columnVisibility', JSON.stringify(newVisibility)); // Atualiza no localStorage
+            return newVisibility;
+          });
+        };
+      
+        // Agora você pode usar a loadColumnVisibility ao inicializar o state
+        const [columnVisibility, setColumnVisibility] = useState(loadColumnVisibility());
+
   const filteredPeriods = periods.filter((period) =>
     Object.values(period).some((value) =>
       String(value).toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
+
+   const columns = [
+            { key: 'codPeriod', label: 'Cod Period' },
+            { key: 'description', label: 'Description' },
+            { key: 'startDate', label: 'Start Date' },
+            { key: 'endDate', label: 'End date' },
+            { key: 'exploCenter', label: 'Exploration Center' },
+          ];
+        
+          const [columnSearchTerm, setColumnSearchTerm] = useState('');
+        
+          const filteredColumns = columns.filter((col) =>
+            col.label.toLowerCase().includes(columnSearchTerm.toLowerCase())
+          );
+        
+          const totalPages = Math.ceil(filteredPeriods.length / itemsPerPage);
 //  const handleAddProduct = async (e) => {
 //      e.preventDefault();
      
@@ -306,13 +356,94 @@ const sortedPeriod = useMemo(() => {
             <DropdownTrigger>
             <button 
                 onClick={onAddModalOpen}
-                className="absolute top-4 right-10 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
+                className="absolute top-4 right-25 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
                 < Plus size={25}  />     
             </button> 
             </DropdownTrigger>
       
             </Dropdown>
-          
+
+            {/* button adjustments*/}  
+            <Dropdown>
+              <DropdownTrigger>
+                <button 
+                  onClick={onSelectModalOpen}
+                  className="absolute top-4 right-10 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
+                  <HiAdjustmentsHorizontal size={25} />
+                </button>
+            </DropdownTrigger>
+            </Dropdown>  
+            
+            {/* Modal para adjustments do grupo */} 
+            <Modal 
+            isOpen={isSelectModalOpen}
+            onOpenChange={onSelectModalClose}
+            size="sm" 
+            placement="center" 
+            className="w-100 bg-white shadow-xl rounded-lg" 
+            hideCloseButton={true}
+            >
+      
+            <ModalContent>
+            {(onClose) => (
+                <>
+                  <ModalHeader className="rounded bg-[#FC9D25] flex justify-between items-center">
+                    <div className="text-xl font-bold text-white">Select Column</div>
+                    <Button
+                        onClick={onClose}
+                        className="text-white bg-transparent border-0 text-2xl p-0"
+                        aria-label="Close"
+                      >
+                        &times; {/* Unicode for "×" sign */}
+                      </Button>
+                    </ModalHeader>
+                  <ModalBody className="py-5 px-6">
+                  <div className="w-88">
+                       {/* Campo de pesquisa  */}
+                      <div className="mb-4 relative">
+                      <FaMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+                      <input
+                        type="text"
+                        placeholder="Pesquisar..."
+                        value={columnSearchTerm}
+                        onChange={(e) => setColumnSearchTerm(e.target.value)}
+                        className="w-full max-w-md pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                  {filteredColumns.map((col) => (
+                    <div key={col.key} className="flex items-center rounded border border-black p-1">
+                      <input
+                        type="checkbox"
+                        checked={columnVisibility[col.key]}
+                        onChange={() => toggleColumn(col.key)}
+                        className="mr-2"
+                      />
+                      <label className="text-sm">{col.label}</label>
+                    </div>
+                  ))}
+                </div>
+                </ModalBody>
+      
+              <ModalFooter className="w-102 border-t border-gray-200 pt-2 px-8">
+                    <Button
+                    type="submit"
+                    form="selectGroupForm"
+                    className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
+                    disabled={isLoading}
+                    onClick={() => {
+                      saveColumnVisibility(); // Salvar as configurações
+                      window.location.reload(); // Recarregar a página
+                    }}
+                  >
+                    {isLoading ? <Spinner size="sm" color="white" /> : 'Save'}
+                  </Button>
+                  </ModalFooter>
+                  </>
+                )}
+              </ModalContent>
+            </Modal>
 
       {/* Modal para adicionar produto */}
       <Modal 
@@ -495,15 +626,16 @@ const sortedPeriod = useMemo(() => {
                   <FaGear size={20} color='white'/>
                 </div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-20 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-left justify-left "> 
-                CodPeriod
-              </div>
+              {columnVisibility.codPeriod && (
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-7 px-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className="flex items-left justify-left">Cod Period</div>
               </th>
-              <th onClick={() => handleSort('Vdesc')} className="uppercase border-collapse border border-[#EDEBEB] w-200 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+              )}
+              {columnVisibility.description && (
+              <th onClick={() => handleSort('Vdesc')} className="uppercase border-collapse border border-[#EDEBEB] w-100 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
                 <div className="flex items-left justify-left">
                   Description
-                  {sortConfig.key === 'Vdesc' && (
+                  {sortConfig.key === 'VDesc' && (
                     <span className="ml-auto">
                       {sortConfig.direction === 'asc' ? (
                         <ArrowUpIcon className="inline-block w-4 h-4 text-white" />
@@ -514,21 +646,22 @@ const sortedPeriod = useMemo(() => {
                   )}
                 </div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB]  w-30 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-left justify-left"> 
-                Start Date
-              </div>
+              )}
+              {columnVisibility.startDate && (
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-7 px-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className="flex items-left justify-left">Start Date</div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-30 sm:px-3 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-left justify-left "> 
-                End Date
-              </div>
+              )}
+              {columnVisibility.endDate && (
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-7 px-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className="flex items-left justify-left">End Date</div>
               </th>
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-60 sm:px-3 py-3 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-               <div className="flex items-left justify-left "> 
-                Exploration center
-              </div>
+              )}
+              {columnVisibility.exploCenter && (
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-50 px-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <div className="flex items-left justify-left">Exploration Center</div>
               </th>
+              )}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-300">
@@ -552,18 +685,28 @@ const sortedPeriod = useMemo(() => {
               </td>
               
               {/* Dados do Produto */}
-              <td className="border border-[#EDEBEB] px-4 py-2 text-right">{period.vcodi}</td>
-              <td className="border border-[#EDEBEB] px-4 py-2 text-left">{period.Vdesc}</td>
+              {columnVisibility.codPeriod && (
+                  <td className="border border-[#EDEBEB] px-3 py-2 text-right">{period.vcodi}</td>
+              )}
+              {columnVisibility.description && (
+                  <td className="border border-[#EDEBEB] px-3 py-2 text-left">{period.Vdesc}</td>
+              )}
+              {columnVisibility.startDate && (
               <td className="border border-[#EDEBEB] px-4 py-2 text-right">
                {new Date(period.DDataIni).toLocaleDateString('pt-PT')}
               </td>
+              )}
+              {columnVisibility.endDate && (
               <td className="border border-[#EDEBEB] px-4 py-2 text-right">
                {new Date(period.DDataFim).toLocaleDateString('pt-PT')}
               </td>
+              )}
                 {/* Exibindo o propertyName no campo "Exploration center" */}
+              {columnVisibility.exploCenter && (
                 <td className="border border-[#EDEBEB] px-4 py-2 text-left">
               {propertyDetails ? propertyDetails.propertyName : 'Loading...'}
             </td>
+            )}
             </tr>
           ))}
         </tbody>

@@ -9,6 +9,7 @@ import { IoTrashBinOutline } from "react-icons/io5";
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { fetchSubfamily } from '@/src/lib/apisubfamily';
 import { FaMagnifyingGlass } from "react-icons/fa6";
+import { fetchPreco} from "@/src/lib/apipreco";
 
 
 export default function ProductGroups() {
@@ -69,46 +70,56 @@ export default function ProductGroups() {
 
     //Busca grupos e produtos quando o propertyID estiver disponivel
     useEffect(() => {
-        if (!propertyID) {
-
-            return
-        }
+        if (!propertyID) return;
 
         const fetchData = async () => {
             setLoading(true);
             try {
-                const [groups, families, subfamilies, products] = await Promise.all([
+                const [groups, families, subfamilies, products, prices] = await Promise.all([
                     fetchGrup(),
                     fetchFamily(),
                     fetchSubfamily(),
                     fetchProduct(),
+                    fetchPreco(),
                 ]);
 
+                // Merge price into products
+                const enrichedProducts = products.map((product) => {
+                    const matchingPrice = prices.find((price) => price.VCodprod === product.VPRODUTO);
+                    return {
+                        ...product,
+                        price: matchingPrice ? matchingPrice.npreco : null,
+                        cexpName: matchingPrice?.cexpName || null,
+                    };
+                });
 
                 const structuredGroups = groups.map((group) => {
-                    const productsForGroup = products
+                    const productsForGroup = enrichedProducts
                         .filter((p) => String(p.VCodGrfam) === String(group.VCodGrFam))
                         .map((p, index) => ({
                             id: p?.VCodProd ? String(p.VCodProd) : `product-${index}`,
                             name: p?.VDESC1?.trim() || 'Unnamed Product',
+                            price: p.price,
+                            cexpName: p.cexpName,
                         }));
-    
+
                     return {
                         id: String(group.VCodGrFam),
                         name: group.VDesc,
                         products: productsForGroup,
                     };
                 });
-    
-                // Processa famílias
+
                 const structuredFamilies = families.map((family) => {
-                    const productsForFamily = products
+                    const productsForFamily = enrichedProducts
                         .filter((p) => String(p.VCodFam) === String(family.VCodFam))
                         .map((p, index) => ({
                             id: p?.VCodProd ? String(p.VCodProd) : `product-${index}`,
                             name: p?.VDESC1?.trim() || 'Unnamed Product',
+                            price: p.price,
+                            cexpName: p.cexpName,
                         }));
-    
+
                     return {
                         id: String(family.VCodFam),
                         name: family.VDesc,
@@ -116,21 +127,23 @@ export default function ProductGroups() {
                     };
                 });
 
-                 // Subfamílias
                 const structuredSubfamilies = subfamilies.map((subfamily) => {
-                    const productsForSubfamily = products
-                      .filter((p) => String(p.VCodSubFam) === String(subfamily.VCodSubFam))
-                      .map((p, index) => ({
-                          id: p?.VCodProd ? String(p.VCodProd) : `product-${index}`,
+                    const productsForSubfamily = enrichedProducts
+                        .filter((p) => String(p.VCodSubFam) === String(subfamily.VCodSubFam))
+                        .map((p, index) => ({
+                            id: p?.VCodProd ? String(p.VCodProd) : `product-${index}`,
                             name: p?.VDESC1?.trim() || 'Unnamed Product',
-                     }));
+                            price: p.price,
+                            cexpName: p.cexpName,
+                        }));
+
                     return {
                         id: String(subfamily.VCodSubFam),
                         name: subfamily.VDesc,
                         products: productsForSubfamily,
                     };
                 });
-    
+
                 setGroupsWithProducts(structuredGroups);
                 setFamiliesWithProducts(structuredFamilies);
                 setSubfamiliesWithProducts(structuredSubfamilies);
@@ -140,9 +153,10 @@ export default function ProductGroups() {
                 setLoading(false);
             }
         };
-    
+
         fetchData();
     }, [propertyID]);
+
 
     if (loading) {
         return <div className="p-6">LOADING PRODUCTS...</div>
@@ -152,7 +166,6 @@ export default function ProductGroups() {
         return <div className="p-6">NO GROUP OR PRODUCT FOUND</div>
     }
 
-    
 
     return (
         
@@ -255,49 +268,56 @@ export default function ProductGroups() {
         )}
 
             {/* Modal do carrinho */}
-            {cartOpen &&
-            <div className="fixed top-16 right-4  bg-opacity-10 z-50">
-                <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
-                    <button onClick={toggleCart}
-                    className="absolute top-2 right-1 text-[#1919] text-lg">
-                        X
-                    </button>
+            {cartOpen && (
+                <div className="fixed top-16 right-4 bg-opacity-10 z-50">
+                    <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative" >
+                        <button
+                            onClick={toggleCart}
+                            className="absolute top-2 right-1 text-[#1919] text-lg"
+                        >
+                            X
+                        </button>
 
-                    <h2 className="text-xl font-semibold text-[#191919] mb-4">
-                        Your Cart
-                    </h2>
-                    {cartItems.length === 0 ? (
-                        <p className="text-[#191919]">No products added.</p>
-                    ) : (
-                        <ul className="space-y-2">
-                            {cartItems.map((item, index) => (
-                                <li
-                                    key={item.id || `item-${index}`}
-                                    className="flex justify-between items-center border-b pb-2"
-                                >
-                                    <div>
-                                        <p className="font-medium text-[#191919]">{item.name}</p>
-                                        <p className="text-sm text-gray-500">Qty: {item.count}</p>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-[#FC9D25] font-bold">...€</span>
-                                        <button onClick={()=>{
-                                            setCartItems(prev => prev.filter(ci => ci.id !== item.id));
-
-                                        }}
+                        <h2 className="text-xl font-semibold text-[#191919] mb-4">
+                            Your Cart
+                        </h2>
+                        {cartItems.length === 0 ? (
+                            <p className="text-[#191919]">No products added.</p>
+                        ) : (
+                            <ul className="space-y-2">
+                                {cartItems.map((item, index) => (
+                                    <li
+                                        key={item.id || `item-${index}`}
+                                        className="flex justify-between items-center border-b pb-2"
+                                    >
+                                        <div>
+                                            <p className="font-medium text-[#191919]">{item.name}</p>
+                                            <p className="text-sm text-gray-500">Qty: {item.count}</p>
+                                        </div>
+                                        <div className="flex flex-col items-end gap-2"> {/* Change to flex column */}
+                                            <span className="text-[#FC9D25] font-bold">{item.price}€</span>
+                                            <span className="text-sm text-[#191919]">
+                  Total: {(item.price * item.count).toFixed(2)}€
+                </span>
+                                            <button
+                                                onClick={() => {
+                                                    setCartItems((prev) => prev.filter((ci) => ci.id !== item.id));
+                                                }}
                                                 className="text-red-500 hover:text-red-700 transition"
-                                        >
-                                            <IoTrashBinOutline size={20}></IoTrashBinOutline>
-                                        </button>
-                                    </div>
-                                </li>
-                            ))}
-                        </ul>
-                    )}
+                                            >
+                                                <IoTrashBinOutline size={20} />
+                                            </button>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
                 </div>
-            </div>}
+            )}
 
-        <div className="p-6 space-y-4">
+
+            <div className="p-6 space-y-4">
         {viewType === 'groups' && filterByName(groupsWithProducts).map((group) => {
                 const isOpen = openGroupID === group.id
                 return (
@@ -342,7 +362,7 @@ export default function ProductGroups() {
                                                     </span>
                                                 </td>
                                                 <td className="border border-[#EDEBEB] px-4 py-2 text-right text-gray-500">
-                                                    ...€
+                                                    {product.price}€
                                                 </td>
                                             </tr>
                                         ))}

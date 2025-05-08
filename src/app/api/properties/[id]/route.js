@@ -65,7 +65,7 @@ export async function PUT(req, { params }) {
 }
 
 export async function GET(req, { params }) {
-    const { id } = params; // Extrai o ID da URL
+    const { id } = await params; // Extrai o ID da URL
     try {
         // Busca os dados da propriedade
         const property = await prisma.cloud_properties.findUnique({

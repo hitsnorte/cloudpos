@@ -133,7 +133,6 @@ export default function SidebarMenu() {
                 }
 
                 setTempSelectedProperty(newPropertyID);
-
             }}
             required
             className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-[#FC9D25]"

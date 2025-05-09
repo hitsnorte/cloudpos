@@ -1,4 +1,4 @@
-// src/lib/apiiva.js
+// src/lib/apiclassepreco.js
 export const fetchClassepreco = async () => {
     try {
       // Obter o propertyID do localStorage

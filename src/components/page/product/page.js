@@ -622,7 +622,7 @@ const DataProduct = () => {
 
     const getPeriodDescription = (code) => {
         const period = periods.find(p => p.vcodi === code);
-        return period ? period.Vdesc : code || '—';
+        return period ? period.DDataFim : code || '—';
     };
 
     //Mostrar descrição das horas na tabela
@@ -643,7 +643,7 @@ const DataProduct = () => {
 
     const getHourDescription = (code) => {
         const hour = hours.find(h => h.Vcodi === code);
-        return hour ? hour.Vdesc : code || '—';
+        return hour ? hour.VHoraFim : code || '—';
     };
 
     //Carrega os IVA para o dropdown
@@ -1109,13 +1109,16 @@ const DataProduct = () => {
                                             <thead className="bg-[#FC9D25] text-white">
                                             <tr>
                                                 <th className="px-4 py-2">Class</th>
-                                                <th className="px-4 py-2">C.Exp.</th>
-                                                <th className="px-4 py-2">Period</th>
+                                                <th className="px-4 py-2">Property</th>
+                                                <th className="px-4 py-2">Season</th>
                                                 <th className="px-4 py-2">Hours</th>
-                                                <th className="px-4 py-2">Unitary Value</th>
-                                                <th className="px-4 py-2">Final Value</th>
+                                                <th className="px-4 py-2">PVP</th>
+                                                <th className="px-4 py-2">Price</th>
                                                 <th className="px-4 py-2">VAT</th>
                                                 <th className="px-4 py-2 text-center">✓</th>
+                                                <th className="px-4 py-2 text-center">
+                                                    <HiDotsVertical size = {18}/>
+                                                </th>
                                             </tr>
                                             </thead>
                                             <tbody>
@@ -1295,7 +1298,7 @@ const DataProduct = () => {
               </th>
               )}
               {columnVisibility.abbreviation && (
-                <th onClick={() => handleSort('Abreviatura')} className="uppercase border-collapse border border-[#EDEBEB] w-200 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                <th onClick={() => handleSort('Abreviatura')} className="uppercase border-collapse border border-[#EDEBEB] w-100 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
                   <div className="flex items-left justify-left">
                     Abbreviation
                     {sortConfig.key === 'Abreviatura' && (
@@ -1312,7 +1315,7 @@ const DataProduct = () => {
               )}
 
               {columnVisibility.description && (
-              <th onClick={() => handleSort('VDESC1')} className="uppercase border-collapse border border-[#EDEBEB] w-200 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+              <th onClick={() => handleSort('VDESC1')} className="uppercase border-collapse border border-[#EDEBEB] w-100 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
                 <div className="flex items-left justify-left">
                   Description
                   {sortConfig.key === 'VDesc' && (
@@ -1333,7 +1336,7 @@ const DataProduct = () => {
               </th>
               )}
               {columnVisibility.descIva && (
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-200 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-100 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
                 <div className="flex items-left justify-left">Desc IVA</div>
               </th>
               )}
@@ -1343,7 +1346,7 @@ const DataProduct = () => {
               </th>
               )}
               {columnVisibility.descUnit && (
-              <th className="uppercase border-collapse border border-[#EDEBEB] w-200 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+              <th className="uppercase border-collapse border border-[#EDEBEB] w-100 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
                 <div className="flex items-left justify-left">Desc Unit</div>
               </th>
               )}
@@ -1363,7 +1366,7 @@ const DataProduct = () => {
               </th>
               )}
               {columnVisibility.descSubFam && (
-              <th onClick={() => handleSort('VDescSubfamily')} className="uppercase border-collapse border border-[#EDEBEB] w-200 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+              <th onClick={() => handleSort('VDescSubfamily')} className="uppercase border-collapse border border-[#EDEBEB] w-100 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
                 <div className="flex items-left justify-left">
                   Desc SubFam
                   {sortConfig.key === 'VDesc' && (
@@ -1384,7 +1387,7 @@ const DataProduct = () => {
               </th>
               )}
               {columnVisibility.descFam && (
-              <th onClick={() => handleSort('VDescFamily')} className="uppercase border-collapse border border-[#EDEBEB] w-200 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+              <th onClick={() => handleSort('VDescFamily')} className="uppercase border-collapse border border-[#EDEBEB] w-100 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
                 <div className="flex items-left justify-left">
                   Desc Fam
                   {sortConfig.key === 'VDesc' && (
@@ -1405,7 +1408,7 @@ const DataProduct = () => {
               </th>
               )}
               {columnVisibility.descFam && (
-              <th onClick={() => handleSort('VDescGroup')} className="uppercase border-collapse border border-[#EDEBEB] w-200 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+              <th onClick={() => handleSort('VDescGroup')} className="uppercase border-collapse border border-[#EDEBEB] w-100 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
                 <div className="flex items-left justify-left">
                   Desc Grp
                   {sortConfig.key === 'VDesc' && (

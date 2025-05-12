@@ -277,7 +277,6 @@ export default function ProductGroups() {
                         >
                             X
                         </button>
-
                         <h2 className="text-xl font-semibold text-[#191919] mb-4">
                             Your Cart
                         </h2>

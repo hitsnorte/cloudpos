@@ -623,7 +623,7 @@ const DataProduct = () => {
 
   const getPeriodDescription = (code) => {
     const period = periods.find(p => p.vcodi === code);
-    return period ? period.Vdesc : code || '—';
+    return period ? period.DDataFim : code || '—';
   };
 
   //Mostrar descrição das horas na tabela
@@ -644,7 +644,7 @@ const DataProduct = () => {
 
   const getHourDescription = (code) => {
     const hour = hours.find(h => h.Vcodi === code);
-    return hour ? hour.Vdesc : code || '—';
+    return hour ? hour.VHoraFim : code || '—';
   };
 
   //Carrega os IVA para o dropdown
@@ -1110,13 +1110,16 @@ const DataProduct = () => {
                         <thead className="bg-[#FC9D25] text-white">
                           <tr>
                             <th className="px-4 py-2">Class</th>
-                            <th className="px-4 py-2">C.Exp.</th>
+                            <th className="px-4 py-2">Property</th>
                             <th className="px-4 py-2">Period</th>
                             <th className="px-4 py-2">Hours</th>
-                            <th className="px-4 py-2">Unitary Value</th>
-                            <th className="px-4 py-2">Final Value</th>
+                            <th className="px-4 py-2">PVP</th>
+                            <th className="px-4 py-2">Price</th>
                             <th className="px-4 py-2">VAT</th>
                             <th className="px-4 py-2 text-center">✓</th>
+                            <th className="px-4 py-2 text-center">
+                              <HiDotsVertical size={18} />
+                            </th>
                           </tr>
                         </thead>
                         <tbody>
@@ -1150,6 +1153,9 @@ const DataProduct = () => {
                                 </td>
                                 <td className="px-4 py-2 text-center">
                                   <input type="checkbox" />
+                                </td>
+                                <td className="px-4 py-2">
+                                  <HiDotsVertical size={18} />
                                 </td>
                               </tr>
                             );

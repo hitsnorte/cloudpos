@@ -9,7 +9,9 @@ import { IoTrashBinOutline } from "react-icons/io5";
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { fetchSubfamily } from '@/src/lib/apisubfamily';
 import { FaMagnifyingGlass } from "react-icons/fa6";
-import { Spinner } from '@chakra-ui/react';
+import {
+  Spinner,
+} from '@nextui-org/react';
 
 
 export default function ProductGroups() {

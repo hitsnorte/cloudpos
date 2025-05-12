@@ -5,10 +5,15 @@ import { fetchProduct } from '@/src/lib/apiproduct'
 import { fetchFamily } from '@/src/lib/apifamily'
 import { useEffect, useState } from 'react'
 import { TiShoppingCart } from 'react-icons/ti'
+import { useRouter } from "next/navigation";
 import { IoTrashBinOutline } from "react-icons/io5";
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { fetchSubfamily } from '@/src/lib/apisubfamily';
+import { fetchDashboard } from '@/src/lib/apidashboard';
+import { fetchClassepreco } from '@/src/lib/apiclassepreco';
 import { FaMagnifyingGlass } from "react-icons/fa6";
+import { Card, CardBody } from "@heroui/react";
+import { useSession } from "next-auth/react"; // Import useSession
 import {
   Spinner,
 } from '@nextui-org/react';
@@ -28,6 +33,13 @@ export default function ProductGroups() {
     const [searchTerm, setSearchTerm] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     
+    const [produtos, setProdutos] = useState([]);
+    const [dashboardData, setDashboardData] = useState(null);
+    const router = useRouter();
+    const { data: session, status } = useSession();
+    const [classeprecoWithProducts, setClasseprecoWithProducts] = useState([]);
+    const [isConfirmed, setIsConfirmed] = useState(() => JSON.parse(localStorage.getItem("isConfirmed")) || false);
+
 
     const [viewType, setViewType] = useState('groups', 'families', 'subfamilies') // 'groups' | 'families' | 'subfamilies'
 
@@ -82,11 +94,12 @@ export default function ProductGroups() {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const [groups, families, subfamilies, products] = await Promise.all([
+                const [groups, families, subfamilies, products, classeprecos] = await Promise.all([
                     fetchGrup(),
                     fetchFamily(),
                     fetchSubfamily(),
                     fetchProduct(),
+                    fetchClassepreco(),
                 ]);
 
 
@@ -136,9 +149,26 @@ export default function ProductGroups() {
                     };
                 });
 
+                //classepreco
+                const structuredClassePrecos = classeprecos.map((classepreco) => {
+                    const productsForClassepreco = products
+                        .filter((p) => String(p.Vcodi) === String(classepreco.Vcodi))
+                        .map((p, index) => ({
+                            id: p?.VCodProd ? String(p.VCodProd) : `product-${index}`,
+                            name: p?.VDESC1?.trim() || 'Unnamed Product',
+                        }));
+
+                    return {
+                        id: String(classepreco.Vcodi),
+                        name: classepreco.Vdesc,
+                        products: productsForClassepreco,
+                    };
+                });
+
                 setGroupsWithProducts(structuredGroups);
                 setFamiliesWithProducts(structuredFamilies);
                 setSubfamiliesWithProducts(structuredSubfamilies);
+                setClasseprecoWithProducts(structuredClassePrecos);
             } catch (error) {
                 console.error('Error fetching data:', error);
             } finally {
@@ -149,7 +179,52 @@ export default function ProductGroups() {
         fetchData();
     }, [propertyID]);
 
-    if (loading) {
+    // If the property is not confirmed, redirect to homepage
+    useEffect(() => {
+    if (!isConfirmed) {
+      router.push("/"); // Redirect to the homepage if the property is not confirmed
+    }
+    }, [isConfirmed, router]);
+
+    // useeffect para a dashboard
+    useEffect(() => {
+        const fetchData = async () => {
+          if (status === "authenticated" && isConfirmed) {
+            try {
+              const data = await fetchDashboard();
+              if (data && data.BLIND !== undefined && data.SPA !== undefined && data.FLORBELA !== undefined) {
+                setDashboardData(data); // Store the fetched data
+              } else {
+                throw new Error('Invalid data received from API');
+              }
+            } catch (error) {
+              console.log('Error fetching dashboard data:', error);
+              setDashboardData({ BLIND: 0, SPA: 0, FLORBELA: 0,});
+            }
+          }
+        };
+    
+        // Only fetch data if the status is authenticated and the property is confirmed
+        if (status === "authenticated" && isConfirmed) {
+          fetchData(); // Fetch dashboard data when status or isConfirmed changes
+        }
+      }, [status, isConfirmed]); // Fetch data again when the session or confirmation status changes
+    
+      if (status === "loading" || loading) {
+        return <p className="text-center text-lg">Carregando...</p>;
+      }
+
+    if (!dashboardData) {
+        return <p className="text-center text-lg">Loading dashboard...</p>;
+      }
+
+    const cardPaths = [
+        { label: "BLIND", value: dashboardData.BLIND || 0, path: "/homepage/" },
+        { label: "SPA", value: dashboardData.SPA || 0, path: "/homepage/" },
+        { label: "FLORBELA", value: dashboardData.FLORBELA || 0, path: "/homepage/" },
+      ];
+
+      if (loading) {
         return <div className="p-6">LOADING PRODUCTS...</div>
     }
 
@@ -165,11 +240,39 @@ export default function ProductGroups() {
         return <div className="p-6">NO SUBFAMILIES OR PRODUCT FOUND</div>
     }
 
+      
     return (
-
         <>
-            <div className="flex items-center justify-center space-x-4 ">
+        <div>
 
+            {/*  dashboard */}
+            <h1 className="text-3xl font-semibold px-4">Dashboard</h1>
+            <div className="px-4 flex flex-wrap gap-6 p-6">
+            {cardPaths.map((card, index) => (
+              <Card
+                  key={index}
+                  className="w-70 h-45 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center cursor-pointer hover:bg-gray-100"
+              >
+                <CardBody className="flex flex-col items-center w-full h-full relative">
+                  <div
+                      className="w-full h-full cursor-pointer hover:bg-gray-100"
+                      onClick={() => handleCardClick(card.path)}
+                  >
+                    <p className="text-5xl font-bold text-[#FC9D25] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                      {card.value}
+                    </p>
+                    <p className="text-center h-13 text-lg text-gray-600 absolute bottom-4 left-1/2 transform -translate-x-1/2">
+                      {card.label}
+                    </p>
+                  </div>
+                </CardBody>
+              </Card>
+          ))}
+        </div>
+      </div>
+
+
+            <div className="flex items-center justify-center space-x-4 ">
                 {/*  botão de selecao de groups, families e subfamilies */}
                 <button
                     onClick={() => setViewType('groups')}

@@ -80,7 +80,7 @@ export default function SidebarMenu() {
       icon: <LuFolderCog  size={20} />, 
       submenu: [
         { href: "/homepage/classepreco", text: "Price classes", icon: <MdClass  size={18} /> }, 
-        { href: "/homepage/period", text: "Periods", icon: <CiViewTimeline  size={18} /> }, 
+        { href: "/homepage/season", text: "Seasons", icon: <CiViewTimeline  size={18} /> }, 
         // { ref: "/homepage/exploration center", label: "exploration center", icon: <MdFamilyRestroom size={18} /> },
         { href: "/homepage/hour", text: "Hours", icon: <FaHourglassEnd size={18} /> },
             ], 

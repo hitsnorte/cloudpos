@@ -148,7 +148,7 @@ const DataClassepreco = () => {
     { key: 'codPrice', label: 'Cod Price' },
     { key: 'abbreviation', label: 'Abbreviation' },
     { key: 'description', label: 'Description' },
-    { key: 'exploCenter', label: 'Exploration Center' },
+    { key: 'property', label: 'Property' },
   ];
 
   const [columnSearchTerm, setColumnSearchTerm] = useState('');
@@ -565,9 +565,9 @@ const DataClassepreco = () => {
                   </div>
                 </th>
               )}
-              {columnVisibility.exploCenter && (
+              {columnVisibility.property && (
                 <th className="uppercase border-collapse border border-[#EDEBEB] w-50 px-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-                  <div className="flex items-left justify-left">Exploration Center</div>
+                  <div className="flex items-left justify-left">Property</div>
                 </th>
               )}
             </tr>
@@ -602,8 +602,8 @@ const DataClassepreco = () => {
                 {columnVisibility.description && (
                   <td className="border border-[#EDEBEB] px-3 py-2 text-left">{classepreco.Vdesc}</td>
                 )}
-                {/* Exibindo o propertyName no campo "Exploration center" */}
-                {columnVisibility.exploCenter && (
+                {/* Exibindo o propertyName no campo "property" */}
+                {columnVisibility.property && (
                   <td className="border border-[#EDEBEB] px-4 py-2 text-left">
                     {propertyDetails ? propertyDetails.propertyName : 'Loading...'}
                   </td>

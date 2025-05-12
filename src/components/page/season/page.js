@@ -7,7 +7,7 @@ import { Plus } from "lucide-react";
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import { HiAdjustmentsHorizontal } from "react-icons/hi2";
-import { fetchPeriod, createPeriod } from '@/src/lib/apiperiod';
+import { fetchPeriod, createPeriod } from '@/src/lib/apiseason';
 import axios from 'axios';
 
 import {
@@ -23,7 +23,7 @@ import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@
 
 const PAGE_SIZES = [25, 50, 150, 250];
 
-const DataPeriod = () => {
+const DataSeason = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [editProduct, setEditProduct] = useState(null);
@@ -118,7 +118,7 @@ const DataPeriod = () => {
       description: true,
       startDate: true,
       endDate: true,
-      exploCenter: true,
+      property: true,
     };
   };
 
@@ -148,7 +148,7 @@ const DataPeriod = () => {
     { key: 'description', label: 'Description' },
     { key: 'startDate', label: 'Start Date' },
     { key: 'endDate', label: 'End date' },
-    { key: 'exploCenter', label: 'Exploration Center' },
+    { key: 'property', label: 'Property' },
   ];
 
   const [columnSearchTerm, setColumnSearchTerm] = useState('');
@@ -572,9 +572,9 @@ const DataPeriod = () => {
                   <div className="flex items-left justify-left">End Date</div>
                 </th>
               )}
-              {columnVisibility.exploCenter && (
+              {columnVisibility.property && (
                 <th className="uppercase border-collapse border border-[#EDEBEB] w-50 px-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-                  <div className="flex items-left justify-left">Exploration Center</div>
+                  <div className="flex items-left justify-left">Property</div>
                 </th>
               )}
             </tr>
@@ -616,8 +616,8 @@ const DataPeriod = () => {
                     {new Date(period.DDataFim).toLocaleDateString('pt-PT')}
                   </td>
                 )}
-                {/* Exibindo o propertyName no campo "Exploration center" */}
-                {columnVisibility.exploCenter && (
+                {/* Exibindo o propertyName no campo "Property" */}
+                {columnVisibility.property && (
                   <td className="border border-[#EDEBEB] px-4 py-2 text-left">
                     {propertyDetails ? propertyDetails.propertyName : 'Loading...'}
                   </td>
@@ -672,4 +672,4 @@ const DataPeriod = () => {
   );
 };
 
-export default DataPeriod;
+export default DataSeason;

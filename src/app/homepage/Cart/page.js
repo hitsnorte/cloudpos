@@ -23,6 +23,8 @@ export default function ProductGroups() {
     const [familiesWithProducts, setFamiliesWithProducts] = useState([]);
     const [subfamiliesWithProducts, setSubfamiliesWithProducts] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    
 
     const [viewType, setViewType] = useState('groups', 'families', 'subfamilies') // 'groups' | 'families' | 'subfamilies'
 
@@ -152,12 +154,18 @@ export default function ProductGroups() {
         return <div className="p-6">NO GROUP OR PRODUCT FOUND</div>
     }
 
+    if (familiesWithProducts.length === 0) {
+        return <div className="p-6">NO FAMILIES OR PRODUCT FOUND</div>
+    }
 
+    if (subfamiliesWithProducts.length === 0) {
+        return <div className="p-6">NO SUBFAMILIES OR PRODUCT FOUND</div>
+    }
 
     return (
 
         <>
-            <div className="flex items-center justify-center space-x-4 p-4">
+            <div className="flex items-center justify-center space-x-4 ">
 
                 {/*  botão de selecao de groups, families e subfamilies */}
                 <button
@@ -179,7 +187,7 @@ export default function ProductGroups() {
                     Subfamilies
                 </button>
             </div>
-            <div className="py-3 px-6 " >
+            <div className="py-5 px-6 " >
                 {/* Campo de pesquisa */}
                 <div className="mb-4 relative">
                     <FaMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
@@ -194,15 +202,21 @@ export default function ProductGroups() {
             </div>
 
             {/*  botão do carrinho */}
-            <div className="absolute top-4 right-4 z-50">
-                <button className="text-3xl text-[#191919] hover:text-[#FC9D25] transition" onClick={toggleCart}>
-                    <TiShoppingCart />
-                </button>
+            <div className="absolute top-6 right-11 w-17 text-white flex items-center justify-center">
+            <button
+                className="relative text-3xl text-[#191919] hover:text-[#FC9D25] transition"
+                onClick={toggleCart}
+            >
+                <TiShoppingCart />
+                {cartItems.length > 0 && (
+                <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full border border-white"></span>
+                )}
+            </button>
             </div>
 
             {selectedProduct && (
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#FAFAFA] bg-opacity-90 rounded-lg  w-full max-w-md p-6">
-                    <div className="bg-[#FAFAFA] rounded-lg shadow-xl w-full max-w-md p-6">
+                <div className="absolute top-1/3 left-1/3 w-100 bg-white shadow-xl rounded-lg ">
+                    <div className="bg-[#FAFAFA] w-full ">
                         <div className="flex justify-between items-center mb-4 px-4 py-2 bg-[#FC9D25] rounded-t-lg">
                             <h2 className=" text-xl font-semibold text-white ">
                                 {selectedProduct.name}
@@ -213,7 +227,7 @@ export default function ProductGroups() {
                             </button>
                         </div>
 
-                        <div className="flex items-center justify-center space-x-4 mt-4">
+                        <div className="flex items-left justify-left space-x-4 m-5">
                             <button
                                 onClick={() => setCount((prev) => Math.max(1, prev - 1))}
                                 className="px-3 py-1 bg-gray-300 text-[#191919] rounded hover:bg-gray-400 transition"
@@ -230,12 +244,10 @@ export default function ProductGroups() {
                         </div>
 
                         {/* Modal de quantidades*/}
-                        <div className="mt-6 flex justify-end gap-2">
-                            <button onClick={closeModal} className="bg-red-500 text-[#191919] px-4 py-2 rounded hover: bg-indigo-600 transition ">
-                                Close
-                            </button>
-
-                            <button onClick={() => {
+                        <div className="mt-6 flex justify-end gap-2 "
+                        >
+                            <button 
+                                onClick={() => {
                                 setCartItems(prev => {
                                     const existing = prev.find(item => item.id === selectedProduct.id);
                                     if (existing) {
@@ -246,8 +258,8 @@ export default function ProductGroups() {
                                     }
                                 });
                                 closeModal();
-                            }} className="bg-[#FC9D25] text-white px-4 py-2 rounded ml-2">
-                                Save
+                            }} className="px-6 py-2 m-5 mt-0 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200">
+                               {isLoading ? <Spinner size="sm" color="white" /> : 'Save'}
                             </button>
                         </div>
                     </div>
@@ -255,47 +267,68 @@ export default function ProductGroups() {
             )}
 
             {/* Modal do carrinho */}
-            {cartOpen &&
-                <div className="fixed top-16 right-4  bg-opacity-10 z-50">
-                    <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
-                        <button onClick={toggleCart}
-                            className="absolute top-2 right-1 text-[#1919] text-lg">
-                            X
-                        </button>
+            {cartOpen && (
+            <div className="fixed top-16 right-15.5">
+                <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-4 relative">
+                <button
+                    onClick={toggleCart}
+                    className="absolute top-4 right-4 text-[#191919] text-lg"
+                >
+                    X
+                </button>
 
-                        <h2 className="text-xl font-semibold text-[#191919] mb-4">
-                            Your Cart
-                        </h2>
-                        {cartItems.length === 0 ? (
-                            <p className="text-[#191919]">No products added.</p>
-                        ) : (
-                            <ul className="space-y-2">
-                                {cartItems.map((item, index) => (
-                                    <li
-                                        key={item.id || `item-${index}`}
-                                        className="flex justify-between items-center border-b pb-2"
-                                    >
-                                        <div>
-                                            <p className="font-medium text-[#191919]">{item.name}</p>
-                                            <p className="text-sm text-gray-500">Qty: {item.count}</p>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-[#FC9D25] font-bold">...€</span>
-                                            <button onClick={() => {
-                                                setCartItems(prev => prev.filter(ci => ci.id !== item.id));
-
-                                            }}
-                                                className="text-red-500 hover:text-red-700 transition"
-                                            >
-                                                <IoTrashBinOutline size={20}></IoTrashBinOutline>
-                                            </button>
-                                        </div>
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
-                    </div>
-                </div>}
+                <h2 className="text-xl font-semibold text-[#191919] mb-7">Your Cart</h2>
+                {cartItems.length === 0 ? (
+                    <p className="text-[#191919] text-left">No products added.</p>
+                ) : (
+                    <ul className="space-y-2">
+                    {cartItems.map((item, index) => (
+                        <li
+                        key={item.id || `item-${index}`}
+                        className="flex justify-between items-center border-b pb-2"
+                        >
+                        <div>
+                            <p className="font-medium text-[#191919] px-5">{item.name}</p>
+                            <div className="px-5 text-sm text-gray-500 flex items-center gap-2">
+                            Qty:
+                            <input
+                                type="number"
+                                min="1"
+                                value={item.count}
+                                onChange={(e) => {
+                                const newCount = parseInt(e.target.value);
+                                if (newCount >= 1) {
+                                    setCartItems((prev) =>
+                                    prev.map((ci) =>
+                                        ci.id === item.id ? { ...ci, count: newCount } : ci
+                                    )
+                                    );
+                                }
+                                }}
+                                className="w-16 border rounded px-2 py-1 text-center"
+                            />
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <span className="text-[#FC9D25] font-bold">...€</span>
+                            <button
+                            onClick={() => {
+                                setCartItems((prev) =>
+                                prev.filter((ci) => ci.id !== item.id)
+                                );
+                            }}
+                            className="text-red-500 hover:text-red-700 transition"
+                            >
+                            <IoTrashBinOutline size={20} />
+                            </button>
+                        </div>
+                        </li>
+                    ))}
+                    </ul>
+                )}
+                </div>
+            </div>
+            )}
 
             <div className="p-6 space-y-4">
                 {viewType === 'groups' && filterByName(groupsWithProducts).map((group) => {

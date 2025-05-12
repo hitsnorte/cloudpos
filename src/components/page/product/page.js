@@ -17,7 +17,7 @@ import { fetchUnit } from '@/src/lib/apiunit';
 import { fetchClassepreco } from "@/src/lib/apiclassepreco";
 import { fetchPreco } from "@/src/lib/apipreco";
 import { IoInformationSharp } from "react-icons/io5";
-import { fetchPeriod } from "@/src/lib/apiperiod";
+import { fetchPeriod } from "@/src/lib/apiseason";
 import { fetchHour } from "@/src/lib/apihour";
 
 

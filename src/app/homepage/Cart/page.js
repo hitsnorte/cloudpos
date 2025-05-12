@@ -213,19 +213,15 @@ export default function ProductGroups() {
       if (status === "loading" || loading) {
         return <p className="text-center text-lg">Carregando...</p>;
       }
-    
-      const produtosPorClasse = (vcodi) =>
-        produtos.filter((p) => p.Vcodi === vcodi);
-    
 
     if (!dashboardData) {
         return <p className="text-center text-lg">Loading dashboard...</p>;
       }
 
     const cardPaths = [
-        { label: "BLIND", value: dashboardData.totalGroups || 0, path: "/homepage/" },
-        { label: "SPA", value: dashboardData.totalFamilies || 0, path: "/homepage/" },
-        { label: "FLORBELA", value: dashboardData.totalSubfamilies || 0, path: "/homepage/" },
+        { label: "BLIND", value: dashboardData.BLIND || 0, path: "/homepage/" },
+        { label: "SPA", value: dashboardData.SPA || 0, path: "/homepage/" },
+        { label: "FLORBELA", value: dashboardData.FLORBELA || 0, path: "/homepage/" },
       ];
 
       if (loading) {

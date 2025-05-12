@@ -39,6 +39,7 @@ export default function ProductGroups() {
     const { data: session, status } = useSession();
     const [classeprecoWithProducts, setClasseprecoWithProducts] = useState([]);
     const [isConfirmed, setIsConfirmed] = useState(() => JSON.parse(localStorage.getItem("isConfirmed")) || false);
+    const [selectedCardPath, setSelectedCardPath] = useState(null);
 
 
     const [viewType, setViewType] = useState('groups', 'families', 'subfamilies') // 'groups' | 'families' | 'subfamilies'
@@ -243,36 +244,48 @@ export default function ProductGroups() {
       
     return (
         <>
-        <div>
-
-            {/*  dashboard */}
-            <h1 className="text-3xl font-semibold px-4">Dashboard</h1>
-            <div className="px-4 flex flex-wrap gap-6 p-6">
-            {cardPaths.map((card, index) => (
-              <Card
-                  key={index}
-                  className="w-70 h-45 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center cursor-pointer hover:bg-gray-100"
-              >
-                <CardBody className="flex flex-col items-center w-full h-full relative">
-                  <div
-                      className="w-full h-full cursor-pointer hover:bg-gray-100"
-                      onClick={() => handleCardClick(card.path)}
-                  >
-                    <p className="text-5xl font-bold text-[#FC9D25] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                      {card.value}
-                    </p>
-                    <p className="text-center h-13 text-lg text-gray-600 absolute bottom-4 left-1/2 transform -translate-x-1/2">
-                      {card.label}
-                    </p>
-                  </div>
-                </CardBody>
-              </Card>
-          ))}
-        </div>
-      </div>
-
+       {!selectedCardPath && (
+  <>
+    <h1 className="text-3xl font-semibold px-4">Dashboard</h1>
+    <div className="px-4 flex flex-wrap gap-6 p-6">
+      {cardPaths.map((card, index) => (
+        <Card
+          key={index}
+          className="w-70 h-45 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center cursor-pointer hover:bg-gray-100"
+        >
+          <CardBody className="flex flex-col items-center w-full h-full relative">
+            <div
+              className="w-full h-full cursor-pointer hover:bg-gray-100"
+              onClick={() => setSelectedCardPath(card.path)} // define o card selecionado
+            >
+              <p className="text-5xl font-bold text-[#FC9D25] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                {card.value}
+              </p>
+              <p className="text-center h-13 text-lg text-gray-600 absolute bottom-4 left-1/2 transform -translate-x-1/2">
+                {card.label}
+              </p>
+            </div>
+          </CardBody>
+        </Card>
+      ))}
+    </div>
+  </>
+)}
+{selectedCardPath && (
+  <button
+    onClick={() => setSelectedCardPath(null)}
+    className="absolute top-6 right-239.5 bg-[#FC9D25] text-white px-4 py-2 rounded"
+  >
+    Dashboard
+  </button>
+)}
+      {/* Conteúdo restante só aparece após clicar em um card */}
+        {selectedCardPath && (
+            <>
+           
 
             <div className="flex items-center justify-center space-x-4 ">
+                
                 {/*  botão de selecao de groups, families e subfamilies */}
                 <button
                     onClick={() => setViewType('groups')}
@@ -293,6 +306,7 @@ export default function ProductGroups() {
                     Subfamilies
                 </button>
             </div>
+            
             <div className="py-5 px-6 " >
                 {/* Campo de pesquisa */}
                 <div className="mb-4 relative">
@@ -309,6 +323,7 @@ export default function ProductGroups() {
 
             {/*  botão do carrinho */}
             <div className="absolute top-6 right-11 w-17 text-white flex items-center justify-center">
+                
             <button
                 className="relative text-3xl text-[#191919] hover:text-[#FC9D25] transition"
                 onClick={toggleCart}
@@ -319,7 +334,7 @@ export default function ProductGroups() {
                 )}
             </button>
             </div>
-
+            
             {selectedProduct && (
                 <div className="absolute top-1/3 left-1/3 w-100 bg-white shadow-xl rounded-lg ">
                     <div className="bg-[#FAFAFA] w-full ">
@@ -435,6 +450,7 @@ export default function ProductGroups() {
                 </div>
             </div>
             )}
+      
 
             <div className="p-6 space-y-4">
                 {viewType === 'groups' && filterByName(groupsWithProducts).map((group) => {
@@ -591,6 +607,11 @@ export default function ProductGroups() {
                     );
                 })}
             </div>
-        </>
+       
+            </>
+        )}
+       </>
+        
+        
     )
 }

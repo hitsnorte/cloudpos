@@ -48,6 +48,7 @@ const DataProduct = () => {
   const [selectedIva, setSelectedIva] = useState("");
   const [selectedTipo, setSelectedTipo] = useState("");
   const [isActive, setIsActive] = useState(false);
+  const [dashboardData, setDashboardData] = useState(null);
 
   const [itemsPerPage, setItemsPerPage] = useState(50);
   const [currentPage, setCurrentPage] = useState(1);

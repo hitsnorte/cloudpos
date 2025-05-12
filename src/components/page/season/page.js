@@ -7,7 +7,7 @@ import { Plus } from "lucide-react";
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import { HiAdjustmentsHorizontal } from "react-icons/hi2";
-import { fetchHour, createHour } from '@/src/lib/apihour';
+import { fetchPeriod, createPeriod } from '@/src/lib/apiseason';
 import axios from 'axios';
 
 import {
@@ -23,7 +23,7 @@ import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@
 
 const PAGE_SIZES = [25, 50, 150, 250];
 
-const DataHour = () => {
+const DataSeason = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [editProduct, setEditProduct] = useState(null);
@@ -33,14 +33,13 @@ const DataHour = () => {
   const [selectedTipo, setSelectedTipo] = useState("");
   const [isActive, setIsActive] = useState(false);
 
-  const [hours, setHours] = useState([]);
-  const [editHour, setEditHour] = useState(null);
-  const [newHour, setNewHour] = useState({ hour_name: '' });
-  const [sortConfig, setSortConfig] = useState({ key: 'VDesc', direction: 'asc' });
+  const [periods, setPeriods] = useState([]);
+  const [editPeriod, setEditPeriod] = useState(null);
+  const [newPeriod, setNewPeriod] = useState({ period_name: '' });
+  const [sortConfig, setSortConfig] = useState({ key: 'Vdesc', direction: 'asc' });
 
   const [itemsPerPage, setItemsPerPage] = useState(50);
   const [currentPage, setCurrentPage] = useState(1);
-
 
   const {
     isOpen: isAddModalOpen,
@@ -64,19 +63,19 @@ const DataHour = () => {
   } = useDisclosure();
 
   useEffect(() => {
-    loadHour();
+    loadPeriod();
   }, []);
 
-  const loadHour = async () => {
+  const loadPeriod = async () => {
     try {
-      const hours = await fetchHour();
+      const periods = await fetchPeriod();
 
       // Mapeamos os produtos, adicionando a descrição da subfamília e da família correspondente
-      const enrichedHours = hours.map(hour => ({
-        ...hour,
+      const enrichedPeriods = periods.map(period => ({
+        ...period,
       }));
 
-      setHours(enrichedHours);
+      setPeriods(enrichedPeriods);
     } catch (err) {
       setError(err.message);
     }
@@ -115,7 +114,7 @@ const DataHour = () => {
       return JSON.parse(savedVisibility);
     }
     return {
-      codHour: true, // estado padrão
+      codPeriod: true, // estado padrão
       description: true,
       startDate: true,
       endDate: true,
@@ -138,14 +137,14 @@ const DataHour = () => {
   // Agora você pode usar a loadColumnVisibility ao inicializar o state
   const [columnVisibility, setColumnVisibility] = useState(loadColumnVisibility());
 
-  const filteredHours = hours.filter((hour) =>
-    Object.values(hour).some((value) =>
+  const filteredPeriods = periods.filter((period) =>
+    Object.values(period).some((value) =>
       String(value).toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 
   const columns = [
-    { key: 'codHour', label: 'Cod Period' },
+    { key: 'codPeriod', label: 'Cod Period' },
     { key: 'description', label: 'Description' },
     { key: 'startDate', label: 'Start Date' },
     { key: 'endDate', label: 'End date' },
@@ -158,55 +157,56 @@ const DataHour = () => {
     col.label.toLowerCase().includes(columnSearchTerm.toLowerCase())
   );
 
-  const totalPages = Math.ceil(filteredHours.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredPeriods.length / itemsPerPage);
 
-  const paginatedHour = filteredHours.slice(
+
+  const paginatedPeriod = filteredPeriods.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  const handleEditHour = (hour) => {
-    setEditHour({ ...hour });
+  const handleEditPeriod = (period) => {
+    setEditPeriod({ ...period });
     onEditModalOpen();
   };
 
-  const handleUpdateHour = (id, newDesc) => {
-    setHours(prevHours => {
-      return prevHours.map(hour =>
-        hour.Vcodi === id ? { ...hour, Vdesc: newDesc } : hour
+  const handleUpdatePeriod = (id, newDesc) => {
+    setPeriods(prevPeriods => {
+      return prevPeriods.map(period =>
+        period.vcodi === id ? { ...period, Vdesc: newDesc } : period
       );
     });
-    console.log(`Hour ${id} atualizado para: ${newDesc}`);
+    console.log(`Period ${id} atualizado para: ${newDesc}`);
   };
 
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setNewHour((prev) => ({ ...prev, [name]: value }));
+    setNewPeriod((prev) => ({ ...prev, [name]: value }));
   };
 
 
-  const handleAddHour = async (e) => {
+  const handleAddPeriod = async (e) => {
     e.preventDefault();
-    if (!newHour.hour_name) {
-      setError('Preencha o nome do hour.');
+    if (!newPeriod.period_name) {
+      setError('Preencha o nome do period.');
       return;
     }
 
-    const hourExists = hours.some(
-      (hour) => hour.hour_name.toLowerCase() === newHour.hour_name.toLowerCase()
+    const periodExists = periods.some(
+      (period) => period.period_name.toLowerCase() === newPeriod.period_name.toLowerCase()
     );
-    if (hourExists) {
-      setError('Este hour já existe. Por favor, use um nome diferente.');
+    if (periodExists) {
+      setError('Este classepreco já existe. Por favor, use um nome diferente.');
       return;
     }
 
     try {
       setIsLoading(true);
-      const hourData = { hour_name: newHour.hour_name };
-      const createdHour = await createHour(hourData);
-      setHours([...hours, createdHour]);
-      setNewHour({ hour_name: '' });
+      const periodData = { period_name: newPeriod.period_name };
+      const createdPeriod = await createPeriod(periodData);
+      setPeriods([...periods, createdPeriod]);
+      setNewPeriod({ period_name: '' });
       setError(null); // Limpa o erro após sucesso
       onAddModalClose();
     } catch (err) {
@@ -216,35 +216,6 @@ const DataHour = () => {
     }
   };
 
-  //   const handleEditProduct = (product) => {
-  //     setEditProduct({ ...product });
-  //     onEditModalOpen();
-  //   };
-
-  //   const handleUpdateProduct = async (e) => {
-  //       e.preventDefault();
-  //       if (!editProduct || !editProduct.product_name) {
-  //         setError('Preencha o nome do produto.');
-  //         return;
-  //       }
-
-  //       try {
-  //         console.log('Enviando para API:', { id: editProduct.id, product_name: editProduct.product_name });
-  //         const updatedProduct = await updateProduct(editProduct.id, {
-  //           product_name: editProduct.product_name,
-  //           quantity: editProduct.quantity,
-  //         });
-  //         console.log('Resposta da API:', updatedProduct);
-  //         setProducts(products.map((product) => (product.id === updatedProduct.id ? updatedProduct : product)));
-  //         setEditProduct(null);
-  //         setError(null); // Limpa o erro após sucesso
-  //         onEditModalClose();
-  //       } catch (err) {
-  //         console.error('Erro ao atualizar produto:', err.message);
-  //         console.log('Erro ao atualizar produto:', err.message);
-  //         setError(err.message); // Define o erro para exibição no modal
-  //       }
-  //     };
   const handleSort = (key) => {
     setSortConfig((prevConfig) => ({
       key,
@@ -252,10 +223,10 @@ const DataHour = () => {
     }));
   };
 
-  const sortedHour = useMemo(() => {
-    if (!paginatedHour || !Array.isArray(paginatedHour)) return [];
+  const sortedPeriod = useMemo(() => {
+    if (!paginatedPeriod || !Array.isArray(paginatedPeriod)) return [];
 
-    const sorted = [...paginatedHour].sort((a, b) => {
+    const sorted = [...paginatedPeriod].sort((a, b) => {
       if (!sortConfig.key) return 0;
 
       let aValue = a[sortConfig.key];
@@ -275,7 +246,9 @@ const DataHour = () => {
     });
 
     return sorted;
-  }, [paginatedHour, sortConfig]);
+  }, [paginatedPeriod, sortConfig]);
+
+
 
   return (
     <div className="p-4">
@@ -304,7 +277,6 @@ const DataHour = () => {
         </DropdownTrigger>
 
       </Dropdown>
-
 
       {/* button adjustments*/}
       <Dropdown>
@@ -401,7 +373,7 @@ const DataHour = () => {
           {(onClose) => (
             <>
               <ModalHeader className="rounded bg-[#FC9D25] flex justify-between items-center">
-                <div className="text-xl font-bold text-white">New Hour</div>
+                <div className="text-xl font-bold text-white">New Price classe</div>
                 <Button
                   onClick={onClose}
                   className="text-white bg-transparent border-0 text-2xl p-0"
@@ -411,19 +383,19 @@ const DataHour = () => {
                 </Button>
               </ModalHeader>
               <ModalBody className="py-5 px-6">
-                <form id="addHourForm" onSubmit={handleAddHour} className="space-y-6">
+                <form id="addClasseperiodForm" onSubmit={handleAddPeriod} className="space-y-6">
                   <div>
                     <label
-                      htmlFor="newHourDescription"
+                      htmlFor="newPeriodDescription"
                       className="block text-sm font-medium text-gray-400 mb-1"
                     >
                       Description
                     </label>
                     <input
-                      id="newHourName"
+                      id="newPeriodName"
                       type="text"
-                      name="hour_name"
-                      value={newHour.hour_name}
+                      name="period_name"
+                      value={newPeriod.period_name}
                       onChange={handleInputChange}
                       placeholder="Digite o nome da descriçao"
                       className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
@@ -438,7 +410,7 @@ const DataHour = () => {
               <ModalFooter className="w-102 border-t border-gray-200 pt-2 px-8">
                 <Button
                   type="submit"
-                  form="addHourForm"
+                  form="addPeriodForm"
                   className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
                   disabled={isLoading}
                   onClick={() => window.location.reload()} // Recarrega a página ao clicar
@@ -464,7 +436,7 @@ const DataHour = () => {
           {(onClose) => (
             <>
               <ModalHeader className="rounded bg-[#FC9D25] flex justify-between items-center">
-                <div className="text-xl font-bold text-white">Edit Hour </div>
+                <div className="text-xl font-bold text-white">Edit Price Classe </div>
                 <Button
                   onClick={onClose}
                   className="text-white bg-transparent border-0 text-2xl p-0"
@@ -474,18 +446,18 @@ const DataHour = () => {
                 </Button>
               </ModalHeader>
               <ModalBody className="py-5 px-6">
-                {editHour && (
-                  <form id="updateHourForm" onSubmit={handleUpdateHour} className="space-y-6">
+                {editPeriod && (
+                  <form id="updatePeriodForm" onSubmit={handleUpdatePeriod} className="space-y-6">
                     <div>
-                      <label htmlFor="hourDescription" className="block text-sm font-medium text-gray-400 mb-1">
+                      <label htmlFor="periodDescription" className="block text-sm font-medium text-gray-400 mb-1">
                         Description
                       </label>
                       <input
-                        id="hourDesc"
+                        id="periodDesc"
                         type="text"
-                        value={editHour ? editHour.Vdesc : ''}
+                        value={editPeriod ? editPeriod.Vdesc : ''}
                         onChange={(e) =>
-                          setEditHour({ ...editHour, Vdesc: e.target.value })
+                          setEditPeriod({ ...editPeriod, Vdesc: e.target.value })
                         }
                         placeholder="Digite a nova descrição"
                         className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
@@ -501,9 +473,9 @@ const DataHour = () => {
               <ModalFooter className="w-102 border-t border-gray-200 pt-2 px-8">
                 <Button
                   type="submit"
-                  form="updateHourForm"
+                  form="updatePeriodForm"
                   className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
-                  onClick={() => handleUpdateHour(editHour.Vcodi, editHour.Vdesc)}
+                  onClick={() => handleUpdatePeriod(editPeriod.vcodi, editPeriod.Vdesc)}
                 >
                   Save
                 </Button>
@@ -569,9 +541,9 @@ const DataHour = () => {
                   <FaGear size={20} color='white' />
                 </div>
               </th>
-              {columnVisibility.codHour && (
+              {columnVisibility.codPeriod && (
                 <th className="uppercase border-collapse border border-[#EDEBEB] w-7 px-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-                  <div className="flex items-left justify-left">Cod Hour</div>
+                  <div className="flex items-left justify-left">Cod Period</div>
                 </th>
               )}
               {columnVisibility.description && (
@@ -590,7 +562,6 @@ const DataHour = () => {
                   </div>
                 </th>
               )}
-
               {columnVisibility.startDate && (
                 <th className="uppercase border-collapse border border-[#EDEBEB] w-7 px-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
                   <div className="flex items-left justify-left">Start Date</div>
@@ -609,8 +580,8 @@ const DataHour = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-300">
-            {sortedHour.map((hour) => (
-              <tr key={hour.Vcodi} className="hover:bg-gray-200">
+            {sortedPeriod.map((period) => (
+              <tr key={period.vcodi} className="hover:bg-gray-200">
 
                 {/* Ações */}
                 <td className="border border-[#EDEBEB] px-1 py-1 text-center">
@@ -621,7 +592,7 @@ const DataHour = () => {
                       </Button>
                     </DropdownTrigger>
                     <DropdownMenu aria-label="Dynamic Actions" placement="bottom-end" className="bg-white shadow-lg rounded-md p-1">
-                      <DropdownItem key="edit" onPress={() => handleEditHour(hour)}>
+                      <DropdownItem key="edit" onPress={() => handleEditPeriod(period)}>
                         Edit
                       </DropdownItem>
                     </DropdownMenu>
@@ -629,24 +600,28 @@ const DataHour = () => {
                 </td>
 
                 {/* Dados do Produto */}
-                {columnVisibility.codHour && (
-                  <td className="border border-[#EDEBEB] px-3 py-2 text-right">{hour.Vcodi}</td>
+                {columnVisibility.codPeriod && (
+                  <td className="border border-[#EDEBEB] px-3 py-2 text-right">{period.vcodi}</td>
                 )}
                 {columnVisibility.description && (
-                  <td className="border border-[#EDEBEB] px-3 py-2 text-left">{hour.Vdesc}</td>
+                  <td className="border border-[#EDEBEB] px-3 py-2 text-left">{period.Vdesc}</td>
                 )}
                 {columnVisibility.startDate && (
-                  <td className="border border-[#EDEBEB] px-3 py-2 text-right">{hour.VHoraIni}</td>
+                  <td className="border border-[#EDEBEB] px-4 py-2 text-right">
+                    {new Date(period.DDataIni).toLocaleDateString('pt-PT')}
+                  </td>
                 )}
                 {columnVisibility.endDate && (
-                  <td className="border border-[#EDEBEB] px-3 py-2 text-right">{hour.VHoraFim}</td>
+                  <td className="border border-[#EDEBEB] px-4 py-2 text-right">
+                    {new Date(period.DDataFim).toLocaleDateString('pt-PT')}
+                  </td>
                 )}
+                {/* Exibindo o propertyName no campo "Property" */}
                 {columnVisibility.property && (
                   <td className="border border-[#EDEBEB] px-4 py-2 text-left">
                     {propertyDetails ? propertyDetails.propertyName : 'Loading...'}
                   </td>
                 )}
-
               </tr>
             ))}
           </tbody>
@@ -697,4 +672,4 @@ const DataHour = () => {
   );
 };
 
-export default DataHour;
+export default DataSeason;

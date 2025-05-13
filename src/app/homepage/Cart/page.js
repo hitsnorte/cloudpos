@@ -385,20 +385,18 @@ export default function ProductGroups() {
 
             {/* Modal do carrinho */}
                 {cartOpen && (
-                    <div className="fixed top-16 right-4 bg-opacity-10 z-50">
-                        <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative" style={{ minHeight: '350px' }}> {/* Increase the height */}
+                    <div className="fixed top-16 right-15.5">
+                        <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-4 relative">
                             <button
                                 onClick={toggleCart}
-                                className="absolute top-2 right-1 text-[#1919] text-lg"
+                                className="absolute top-4 right-4 text-[#191919] text-lg"
                             >
                                 X
                             </button>
 
-                            <h2 className="text-xl font-semibold text-[#191919] mb-4">
-                                Your Cart
-                            </h2>
+                            <h2 className="text-xl font-semibold text-[#191919] mb-7">Your Cart</h2>
                             {cartItems.length === 0 ? (
-                                <p className="text-[#191919]">No products added.</p>
+                                <p className="text-[#191919] text-left">No products added.</p>
                             ) : (
                                 <ul className="space-y-2">
                                     {cartItems.map((item, index) => (
@@ -407,17 +405,34 @@ export default function ProductGroups() {
                                             className="flex justify-between items-center border-b pb-2"
                                         >
                                             <div>
-                                                <p className="font-medium text-[#191919]">{item.name}</p>
-                                                <p className="text-sm text-gray-500">Qty: {item.count}</p>
+                                                <p className="font-medium text-[#191919] px-5">{item.name}</p>
+                                                <div className="px-5 text-sm text-gray-500 flex items-center gap-2">
+                                                    Qty:
+                                                    <input
+                                                        type="number"
+                                                        min="1"
+                                                        value={item.count}
+                                                        onChange={(e) => {
+                                                            const newCount = parseInt(e.target.value);
+                                                            if (newCount >= 1) {
+                                                                setCartItems((prev) =>
+                                                                    prev.map((ci) =>
+                                                                        ci.id === item.id ? { ...ci, count: newCount } : ci
+                                                                    )
+                                                                );
+                                                            }
+                                                        }}
+                                                        className="w-16 border rounded px-2 py-1 text-center"
+                                                    />
+                                                </div>
                                             </div>
-                                            <div className="flex flex-col items-end gap-2"> {/* Change to flex column */}
+                                            <div className="flex items-center gap-2">
                                                 <span className="text-[#FC9D25] font-bold">{item.price}€</span>
-                                                <span className="text-sm text-[#191919]">
-                  Total: {(item.price * item.count).toFixed(2)}€
-                </span>
                                                 <button
                                                     onClick={() => {
-                                                        setCartItems((prev) => prev.filter((ci) => ci.id !== item.id));
+                                                        setCartItems((prev) =>
+                                                            prev.filter((ci) => ci.id !== item.id)
+                                                        );
                                                     }}
                                                     className="text-red-500 hover:text-red-700 transition"
                                                 >
@@ -431,9 +446,6 @@ export default function ProductGroups() {
                         </div>
                     </div>
                 )}
-
-
-
                 <div className="p-6 space-y-4">
                 {viewType === 'groups' && filterByName(groupsWithProducts).map((group) => {
                     const isOpen = openGroupID === group.id
@@ -591,7 +603,6 @@ export default function ProductGroups() {
                     );
                 })}
             </div>
-       
             </>
         )}
        </>

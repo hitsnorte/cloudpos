@@ -1126,13 +1126,31 @@ const DataProduct = () => {
                             const base = price.nValUnit ?? 0;
                             const valorFinal = base + (base * ivaRate / 100);
 
+                            const handlePvpChange = (e) => {
+                              const newValue = parseFloat(e.target.value);
+                              if (!isNaN(newValue)) {
+                                // atualiza o valor do PVP em filteredPrices
+                                const updatedPrices = [...filteredPrices];
+                                updatedPrices[index] = { ...updatedPrices[index], nValUnit: newValue };
+                                // atualiza o estado com o novo valor
+                                setFilteredPrices(updatedPrices);
+                              }
+                            };
+
                             return (
                                 <tr key={index} className="bg-gray-100">
                                   <td className="px-4 py-2">{getClassName(price.VCodClas)}</td>
                                   <td className="px-4 py-2">{price.cexpName || '-'}</td>
                                   <td className="px-4 py-2">{getPeriodDescription(price.VCodPeri)}</td>
                                   <td className="px-4 py-2">{getHourDescription(price.VCodInthoras)}</td>
-                                  <td className="px-4 py-2">€{price.nValUnit?.toFixed(2) || '—'}</td>
+                                  <td className="px-4 py-2">
+                                    <input
+                                        type="text"
+                                        value={price.nValUnit?.toFixed(2) || ''}
+                                        onChange={handlePvpChange}
+                                        className="border rounded px-2 py-1 w-full"
+                                    />
+                                  </td>
                                   <td className="px-4 py-2">€{valorFinal.toFixed(2)}</td>
                                   <td className="px-4 py-2">
                                     <select

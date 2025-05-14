@@ -119,7 +119,7 @@ const DataHour = () => {
       description: true,
       startDate: true,
       endDate: true,
-      exploCenter: true,
+      property: true,
     };
   };
 
@@ -149,7 +149,7 @@ const DataHour = () => {
     { key: 'description', label: 'Description' },
     { key: 'startDate', label: 'Start Date' },
     { key: 'endDate', label: 'End date' },
-    { key: 'exploCenter', label: 'Exploration Center' },
+    { key: 'property', label: 'Property' },
   ];
 
   const [columnSearchTerm, setColumnSearchTerm] = useState('');
@@ -601,9 +601,9 @@ const DataHour = () => {
                   <div className="flex items-left justify-left">End Date</div>
                 </th>
               )}
-              {columnVisibility.exploCenter && (
+              {columnVisibility.property && (
                 <th className="uppercase border-collapse border border-[#EDEBEB] w-50 px-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-                  <div className="flex items-left justify-left">Exploration Center</div>
+                  <div className="flex items-left justify-left">Property</div>
                 </th>
               )}
             </tr>
@@ -641,7 +641,7 @@ const DataHour = () => {
                 {columnVisibility.endDate && (
                   <td className="border border-[#EDEBEB] px-3 py-2 text-right">{hour.VHoraFim}</td>
                 )}
-                {columnVisibility.exploCenter && (
+                {columnVisibility.property && (
                   <td className="border border-[#EDEBEB] px-4 py-2 text-left">
                     {propertyDetails ? propertyDetails.propertyName : 'Loading...'}
                   </td>

@@ -17,7 +17,7 @@ import { fetchUnit } from '@/src/lib/apiunit';
 import { fetchClassepreco } from "@/src/lib/apiclassepreco";
 import { fetchPreco } from "@/src/lib/apipreco";
 import { IoInformationSharp } from "react-icons/io5";
-import { fetchPeriod } from "@/src/lib/apiperiod";
+import { fetchPeriod } from "@/src/lib/apiseason";
 import { fetchHour } from "@/src/lib/apihour";
 
 
@@ -48,6 +48,7 @@ const DataProduct = () => {
   const [selectedIva, setSelectedIva] = useState("");
   const [selectedTipo, setSelectedTipo] = useState("");
   const [isActive, setIsActive] = useState(false);
+  const [dashboardData, setDashboardData] = useState(null);
 
   const [itemsPerPage, setItemsPerPage] = useState(50);
   const [currentPage, setCurrentPage] = useState(1);

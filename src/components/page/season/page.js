@@ -7,12 +7,7 @@ import { Plus } from "lucide-react";
 import { HiAdjustmentsHorizontal } from "react-icons/hi2";
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
 import { FaMagnifyingGlass } from "react-icons/fa6";
-<<<<<<< HEAD:src/components/page/period/page.js
-import { fetchPeriod, createPeriod } from '@/src/lib/apiperiod';
-=======
-import { HiAdjustmentsHorizontal } from "react-icons/hi2";
 import { fetchPeriod, createPeriod } from '@/src/lib/apiseason';
->>>>>>> f39e94bb0ba2f524114d70812ff86427ba5b7b8a:src/components/page/season/page.js
 import axios from 'axios';
 
 import {

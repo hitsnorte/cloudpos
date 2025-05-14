@@ -1121,10 +1121,6 @@ const DataProduct = () => {
                           </thead>
                           <tbody>
                           {filteredPrices.map((price, index) => {
-                            const iva = ivaOptions.find(v => v.VCODI === Number(price.VCodIva));
-                            const ivaRate = iva?.NPERC ?? 0;
-                            const base = price.nValUnit ?? 0;
-                            const valorFinal = base + (base * ivaRate / 100);
 
                             const handlePvpChange = (e) => {
                               const newValue = parseFloat(e.target.value);
@@ -1151,7 +1147,7 @@ const DataProduct = () => {
                                         className="border rounded px-2 py-1 w-full"
                                     />
                                   </td>
-                                  <td className="px-4 py-2">€{valorFinal.toFixed(2)}</td>
+                                  <td className="px-4 py-2">0.00€</td>
                                   <td className="px-4 py-2">
                                     <select
                                         value={price.VCodIva ?? ''}
@@ -1167,7 +1163,7 @@ const DataProduct = () => {
                                     </select>
                                   </td>
                                   <td className="px-4 py-2 text-center">
-                                    <input type="checkbox" />
+                                    <input type="checkbox" checked={!price.Indisponivel} />
                                   </td>
                                   <td className="px-4 py-2">
                                     <HiDotsVertical size={18} />

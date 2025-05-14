@@ -7,7 +7,6 @@ import { Plus } from "lucide-react";
 import { HiAdjustmentsHorizontal } from "react-icons/hi2";
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
 import { FaMagnifyingGlass } from "react-icons/fa6";
-import { HiAdjustmentsHorizontal } from "react-icons/hi2";
 import { fetchHour, createHour } from '@/src/lib/apihour';
 import axios from 'axios';
 

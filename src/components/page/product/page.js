@@ -529,19 +529,6 @@ const DataProduct = () => {
     }
   }
 
-  const [showFamilyTooltip, setShowFamilyTooltip] = useState(false);
-
-  const handleButtonClick = async () => {
-    const familyId = editProduct?.VCodFam;
-
-    if (familyId) {
-      await fetchFamilia(familyId);
-    }
-
-    setShowFamilyTooltip(true);
-  };
-
-
   // Simulação do carregamento da subfamília ao renderizar
   useEffect(() => {
     const loadSubfam = async () => {
@@ -668,6 +655,16 @@ const DataProduct = () => {
       console.log('IVA Option:', option); // Mostra cada opção de IVA individualmente
     });
   }, [ivaOptions]);
+
+  //useEffect para o fetchFamilia , antes era usado num handleButtonClick para a tooltip
+  useEffect(() => {
+    const familyId = editProduct?.VCodFam;
+    if (familyId) {
+      fetchFamilia(familyId);
+    }
+  }, [editProduct?.VCodFam]);
+
+
 
   return (
     <div className="p-4 pb-10">
@@ -1021,35 +1018,17 @@ const DataProduct = () => {
                             value={editProduct?.VDESC1 || ''}
                             onChange={(e) => setEditProduct({ ...editProduct, VDESC1: e.target.value })}
                             placeholder="Insert product description"
-                            className="w-full p-2 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                            className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500 "
                         />
                       </div>
 
-                      {/* Sub-Família, Referência e IVA - Alinhados à direita */}
-                      <div className="flex justify-end gap-4">
+                      {/* Sub-Família, Family, Group */}
+                      <div className="flex justify-between gap-4 mb-4">
                         {/* Sub-Família */}
                         <div className="w-1/3">
-                          <div className="flex items-center gap-1 mb-1">
-                            <label htmlFor="subFamilia" className="text-sm font-medium text-[#191919]">
-                              Sub-Família
-                            </label>
-                            <button
-                                type="button"
-                                className="text-[#191919] relative"
-                                onClick={handleButtonClick}
-                            >
-                              <IoInformationSharp size={16} />
-
-                              {/* Tooltip de Família */}
-                              {showFamilyTooltip && (
-                                  <div className="absolute top-full left-0 z-50 mt-1 w-max bg-white border border-gray-300 shadow-md rounded px-3 py-2 text-sm text-gray-800">
-                                    The family associated with this subfamily is {loadingFamily ? 'loading...' : FamilyName || 'Unknown'}
-                                  </div>
-                              )}
-                            </button>
-                          </div>
-
-                          {/* Exibir a Subfamília sem ser afetada pela Tooltip */}
+                          <label htmlFor="subFamilia" className="text-sm font-medium text-[#191919] mb-1 block">
+                            Sub-Família
+                          </label>
                           <div
                               id="subFamilia"
                               className="w-full p-1 bg-gray-100 rounded text-sm text-gray-700"
@@ -1058,8 +1037,37 @@ const DataProduct = () => {
                           </div>
                         </div>
 
-                        {/* VREFERENCIA */}
+                        {/* Familia */}
                         <div className="w-1/3">
+                          <label htmlFor="family" className="text-sm font-medium text-[#191919] mb-1 block">
+                            Family
+                          </label>
+                          <div
+                              id="family"
+                              className="w-full p-1 bg-gray-100 rounded text-sm text-gray-700"
+                          >
+                            {loadingFamily ? 'Loading...' : FamilyName || 'Unknown'}
+                          </div>
+                        </div>
+
+                        {/* Grupo , por enquanto estático */}
+                        <div className="w-1/3">
+                          <label htmlFor="group" className="text-sm font-medium text-[#191919] mb-1 block">
+                            Group
+                          </label>
+                          <div
+                              id="group"
+                              className="w-full p-1 bg-gray-100 rounded text-sm text-gray-700"
+                          >
+                            Placeholder group
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Referência e IVA */}
+                      <div className="flex justify-between gap-4">
+                        {/* Referência */}
+                        <div className="w-1/2">
                           <label htmlFor="referencia" className="block text-sm font-medium text-[#191919] mb-1">
                             Reference
                           </label>
@@ -1074,7 +1082,7 @@ const DataProduct = () => {
                         </div>
 
                         {/* IVA */}
-                        <div className="w-1/3">
+                        <div className="w-1/2">
                           <label htmlFor="iva" className="block text-sm font-medium text-[#191919] mb-1">
                             VAT
                           </label>
@@ -1094,12 +1102,13 @@ const DataProduct = () => {
                                 setSelectedIva(selectedOption ? selectedOption.value : "");
                               }}
                               isSearchable
-                              className="w-full"
+                              className="w-full p-1"
                               classNamePrefix="select"
                               placeholder="Select VAT"
                           />
                         </div>
                       </div>
+
 
                       {/* Tabela */}
                       <div className="overflow-x-auto border border-gray-300 rounded">
@@ -1152,7 +1161,7 @@ const DataProduct = () => {
                                     <select
                                         value={price.VCodIva ?? ''}
                                         onChange={(e) => handleVatChange(index, Number(e.target.value))}
-                                        className="border rounded px-2 py-1 w-full"
+                                        className="border rounded px-2 py-1 w-1/2"
                                     >
                                       <option value="">—</option>
                                       {ivaOptions.map((vat) => (

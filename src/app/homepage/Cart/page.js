@@ -270,7 +270,7 @@ export default function ProductGroups() {
 {selectedCardPath && (
   <button
     onClick={() => setSelectedCardPath(null)}
-    className="absolute top-6 right-239.5 bg-[#FC9D25] text-white px-4 py-2 rounded"
+    className="absolute top-6 right-378 bg-[#FC9D25] text-white px-4 py-2 rounded"
   >
     Dashboard
   </button>

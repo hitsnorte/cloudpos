@@ -172,6 +172,7 @@ export default function SidebarMenu() {
                             setIsConfirmed(true);
                             localStorage.setItem("selectedProperty", tempSelectedProperty);
                             localStorage.setItem("isConfirmed", JSON.stringify(true));
+                            window.location.reload(); // Força o refresh da página
                         }}
                     >
                         Proceed

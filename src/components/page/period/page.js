@@ -4,10 +4,10 @@ import { useState, useEffect, useMemo } from 'react';
 import { HiDotsVertical } from "react-icons/hi";
 import { FaGear } from "react-icons/fa6";
 import { Plus } from "lucide-react";
+import { HiAdjustmentsHorizontal } from "react-icons/hi2";
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
 import { FaMagnifyingGlass } from "react-icons/fa6";
-import { HiAdjustmentsHorizontal } from "react-icons/hi2";
-import { fetchClassepreco, createClassepreco } from '@/src/lib/apiclassepreco';
+import { fetchPeriod, createPeriod } from '@/src/lib/apiperiod';
 import axios from 'axios';
 
 import {
@@ -23,7 +23,7 @@ import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@
 
 const PAGE_SIZES = [25, 50, 150, 250];
 
-const DataClassepreco = () => {
+const DataPeriod = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [editProduct, setEditProduct] = useState(null);
@@ -33,15 +33,13 @@ const DataClassepreco = () => {
   const [selectedTipo, setSelectedTipo] = useState("");
   const [isActive, setIsActive] = useState(false);
 
-  const [classeprecos, setClasseprecos] = useState([]);
-  const [editClassepreco, setEditClassepreco] = useState(null);
-  const [newClassepreco, setNewClassepreco] = useState({ classepreco_name: '' });
-  const [sortConfig, setSortConfig] = useState({ key: 'VDesc', direction: 'asc' });
-
+  const [periods, setPeriods] = useState([]);
+  const [editPeriod, setEditPeriod] = useState(null);
+  const [newPeriod, setNewPeriod] = useState({ period_name: '' });
+  const [sortConfig, setSortConfig] = useState({ key: 'Vdesc', direction: 'asc' });
 
   const [itemsPerPage, setItemsPerPage] = useState(50);
   const [currentPage, setCurrentPage] = useState(1);
-
 
   const {
     isOpen: isAddModalOpen,
@@ -65,19 +63,19 @@ const DataClassepreco = () => {
   } = useDisclosure();
 
   useEffect(() => {
-    loadClassepreco();
+    loadPeriod();
   }, []);
 
-  const loadClassepreco = async () => {
+  const loadPeriod = async () => {
     try {
-      const classeprecos = await fetchClassepreco();
+      const periods = await fetchPeriod();
 
       // Mapeamos os produtos, adicionando a descrição da subfamília e da família correspondente
-      const enrichedClasseprecos = classeprecos.map(classepreco => ({
-        ...classepreco,
+      const enrichedPeriods = periods.map(period => ({
+        ...period,
       }));
 
-      setClasseprecos(enrichedClasseprecos);
+      setPeriods(enrichedPeriods);
     } catch (err) {
       setError(err.message);
     }
@@ -116,9 +114,10 @@ const DataClassepreco = () => {
       return JSON.parse(savedVisibility);
     }
     return {
-      codPrice: true, // estado padrão
-      abbreviation: true,
+      codPeriod: true, // estado padrão
       description: true,
+      startDate: true,
+      endDate: true,
       exploCenter: true,
     };
   };
@@ -138,17 +137,18 @@ const DataClassepreco = () => {
   // Agora você pode usar a loadColumnVisibility ao inicializar o state
   const [columnVisibility, setColumnVisibility] = useState(loadColumnVisibility());
 
-  const filteredClasseprecos = classeprecos.filter((classepreco) =>
-    Object.values(classepreco).some((value) =>
+  const filteredPeriods = periods.filter((period) =>
+    Object.values(period).some((value) =>
       String(value).toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 
   const columns = [
-    { key: 'codPrice', label: 'Cod Price' },
-    { key: 'abbreviation', label: 'Abbreviation' },
+    { key: 'codPeriod', label: 'Cod Period' },
     { key: 'description', label: 'Description' },
-    { key: 'property', label: 'Property' },
+    { key: 'startDate', label: 'Start Date' },
+    { key: 'endDate', label: 'End date' },
+    { key: 'exploCenter', label: 'Exploration Center' },
   ];
 
   const [columnSearchTerm, setColumnSearchTerm] = useState('');
@@ -157,55 +157,56 @@ const DataClassepreco = () => {
     col.label.toLowerCase().includes(columnSearchTerm.toLowerCase())
   );
 
-  const totalPages = Math.ceil(filteredClasseprecos.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredPeriods.length / itemsPerPage);
 
-  const paginatedClassepreco = filteredClasseprecos.slice(
+
+  const paginatedPeriod = filteredPeriods.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  const handleEditClassepreco = (classepreco) => {
-    setEditClassepreco({ ...classepreco });
+  const handleEditPeriod = (period) => {
+    setEditPeriod({ ...period });
     onEditModalOpen();
   };
 
-  const handleUpdateClassepreco = (id, newDesc) => {
-    setClasseprecos(prevClasseprecos => {
-      return prevClasseprecos.map(classepreco =>
-        classepreco.Vcodi === id ? { ...classepreco, VDesc: newDesc } : classepreco
+  const handleUpdatePeriod = (id, newDesc) => {
+    setPeriods(prevPeriods => {
+      return prevPeriods.map(period =>
+        period.vcodi === id ? { ...period, Vdesc: newDesc } : period
       );
     });
-    console.log(`Price Classe ${id} atualizado para: ${newDesc}`);
+    console.log(`Period ${id} atualizado para: ${newDesc}`);
   };
 
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setNewClassepreco((prev) => ({ ...prev, [name]: value }));
+    setNewPeriod((prev) => ({ ...prev, [name]: value }));
   };
 
 
-  const handleAddClassepreco = async (e) => {
+  const handleAddPeriod = async (e) => {
     e.preventDefault();
-    if (!newClassepreco.classepreco_name) {
-      setError('Preencha o nome do classepreco.');
+    if (!newPeriod.period_name) {
+      setError('Preencha o nome do period.');
       return;
     }
 
-    const classeprecoExists = classeprecos.some(
-      (classepreco) => classepreco.classepreco_name.toLowerCase() === newClassepreco.classepreco_name.toLowerCase()
+    const periodExists = periods.some(
+      (period) => period.period_name.toLowerCase() === newPeriod.period_name.toLowerCase()
     );
-    if (classeprecoExists) {
+    if (periodExists) {
       setError('Este classepreco já existe. Por favor, use um nome diferente.');
       return;
     }
 
     try {
       setIsLoading(true);
-      const classeprecoData = { classepreco_name: newClassepreco.classepreco_name };
-      const createdClasspreco = await createClassepreco(classeprecoData);
-      setClasseprecos([...classeprecos, createdClasspreco]);
-      setNewClassepreco({ classepreco_name: '' });
+      const periodData = { period_name: newPeriod.period_name };
+      const createdPeriod = await createPeriod(periodData);
+      setPeriods([...periods, createdPeriod]);
+      setNewPeriod({ period_name: '' });
       setError(null); // Limpa o erro após sucesso
       onAddModalClose();
     } catch (err) {
@@ -222,10 +223,10 @@ const DataClassepreco = () => {
     }));
   };
 
-  const sortedClassepreco = useMemo(() => {
-    if (!paginatedClassepreco || !Array.isArray(paginatedClassepreco)) return [];
+  const sortedPeriod = useMemo(() => {
+    if (!paginatedPeriod || !Array.isArray(paginatedPeriod)) return [];
 
-    const sorted = [...paginatedClassepreco].sort((a, b) => {
+    const sorted = [...paginatedPeriod].sort((a, b) => {
       if (!sortConfig.key) return 0;
 
       let aValue = a[sortConfig.key];
@@ -245,7 +246,7 @@ const DataClassepreco = () => {
     });
 
     return sorted;
-  }, [paginatedClassepreco, sortConfig]);
+  }, [paginatedPeriod, sortConfig]);
 
 
 
@@ -274,6 +275,7 @@ const DataClassepreco = () => {
             < Plus size={25} />
           </button>
         </DropdownTrigger>
+
       </Dropdown>
 
       {/* button adjustments*/}
@@ -381,19 +383,19 @@ const DataClassepreco = () => {
                 </Button>
               </ModalHeader>
               <ModalBody className="py-5 px-6">
-                <form id="addClasseprecoForm" onSubmit={handleAddClassepreco} className="space-y-6">
+                <form id="addClasseperiodForm" onSubmit={handleAddPeriod} className="space-y-6">
                   <div>
                     <label
-                      htmlFor="newClasseprecoDescription"
+                      htmlFor="newPeriodDescription"
                       className="block text-sm font-medium text-gray-400 mb-1"
                     >
                       Description
                     </label>
                     <input
-                      id="newClasseprecoName"
+                      id="newPeriodName"
                       type="text"
-                      name="classepreco_name"
-                      value={newClassepreco.classepreco_name}
+                      name="period_name"
+                      value={newPeriod.period_name}
                       onChange={handleInputChange}
                       placeholder="Digite o nome da descriçao"
                       className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
@@ -408,7 +410,7 @@ const DataClassepreco = () => {
               <ModalFooter className="w-102 border-t border-gray-200 pt-2 px-8">
                 <Button
                   type="submit"
-                  form="addClasseprecoForm"
+                  form="addPeriodForm"
                   className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
                   disabled={isLoading}
                   onClick={() => window.location.reload()} // Recarrega a página ao clicar
@@ -421,7 +423,7 @@ const DataClassepreco = () => {
         </ModalContent>
       </Modal>
 
-      {/* Modal para editar classepreco */}
+      {/* Modal para editar produto */}
       <Modal
         isOpen={isEditModalOpen}
         onOpenChange={onEditModalClose}
@@ -444,18 +446,18 @@ const DataClassepreco = () => {
                 </Button>
               </ModalHeader>
               <ModalBody className="py-5 px-6">
-                {editClassepreco && (
-                  <form id="updateClasseprecoForm" onSubmit={handleUpdateClassepreco} className="space-y-6">
+                {editPeriod && (
+                  <form id="updatePeriodForm" onSubmit={handleUpdatePeriod} className="space-y-6">
                     <div>
-                      <label htmlFor="classeprecoDescription" className="block text-sm font-medium text-gray-400 mb-1">
+                      <label htmlFor="periodDescription" className="block text-sm font-medium text-gray-400 mb-1">
                         Description
                       </label>
                       <input
-                        id="classeprecoDesc"
+                        id="periodDesc"
                         type="text"
-                        value={editClassepreco ? editClassepreco.Vdesc : ''}
+                        value={editPeriod ? editPeriod.Vdesc : ''}
                         onChange={(e) =>
-                          setEditClassepreco({ ...editClassepreco, Vdesc: e.target.value })
+                          setEditPeriod({ ...editPeriod, Vdesc: e.target.value })
                         }
                         placeholder="Digite a nova descrição"
                         className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
@@ -471,9 +473,9 @@ const DataClassepreco = () => {
               <ModalFooter className="w-102 border-t border-gray-200 pt-2 px-8">
                 <Button
                   type="submit"
-                  form="updateClasseprecoForm"
+                  form="updatePeriodForm"
                   className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
-                  onClick={() => handleUpdateClassepreco(editClassepreco.Vcodi, editClassepreco.Vdesc)}
+                  onClick={() => handleUpdatePeriod(editPeriod.vcodi, editPeriod.Vdesc)}
                 >
                   Save
                 </Button>
@@ -534,19 +536,14 @@ const DataClassepreco = () => {
 
           <thead>
             <tr>
-              <th className="border-collapse border border-[#EDEBEB] !w-[1px] px-1 sm:px-5 py-3 bg-[#FC9D25]">
+              <th className="border-collapse border border-[#EDEBEB] !w-[1px] px-1 sm:px-5 py-4 bg-[#FC9D25]">
                 <div className=" flex items-center justify-center">
                   <FaGear size={20} color='white' />
                 </div>
               </th>
-              {columnVisibility.codPrice && (
+              {columnVisibility.codPeriod && (
                 <th className="uppercase border-collapse border border-[#EDEBEB] w-7 px-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-                  <div className="flex items-left justify-left">Cod Price</div>
-                </th>
-              )}
-              {columnVisibility.abbreviation && (
-                <th className="uppercase border-collapse border border-[#EDEBEB] w-100 px-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-                  <div className="flex items-left justify-left">Abbreviation</div>
+                  <div className="flex items-left justify-left">Cod Period</div>
                 </th>
               )}
               {columnVisibility.description && (
@@ -565,16 +562,26 @@ const DataClassepreco = () => {
                   </div>
                 </th>
               )}
-              {columnVisibility.property && (
+              {columnVisibility.startDate && (
+                <th className="uppercase border-collapse border border-[#EDEBEB] w-7 px-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                  <div className="flex items-left justify-left">Start Date</div>
+                </th>
+              )}
+              {columnVisibility.endDate && (
+                <th className="uppercase border-collapse border border-[#EDEBEB] w-7 px-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                  <div className="flex items-left justify-left">End Date</div>
+                </th>
+              )}
+              {columnVisibility.exploCenter && (
                 <th className="uppercase border-collapse border border-[#EDEBEB] w-50 px-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-                  <div className="flex items-left justify-left">Property</div>
+                  <div className="flex items-left justify-left">Exploration Center</div>
                 </th>
               )}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-300">
-            {sortedClassepreco.map((classepreco) => (
-              <tr key={classepreco.Vcodi} className="hover:bg-gray-200">
+            {sortedPeriod.map((period) => (
+              <tr key={period.vcodi} className="hover:bg-gray-200">
 
                 {/* Ações */}
                 <td className="border border-[#EDEBEB] px-1 py-1 text-center">
@@ -585,7 +592,7 @@ const DataClassepreco = () => {
                       </Button>
                     </DropdownTrigger>
                     <DropdownMenu aria-label="Dynamic Actions" placement="bottom-end" className="bg-white shadow-lg rounded-md p-1">
-                      <DropdownItem key="edit" onPress={() => handleEditClassepreco(classepreco)}>
+                      <DropdownItem key="edit" onPress={() => handleEditPeriod(period)}>
                         Edit
                       </DropdownItem>
                     </DropdownMenu>
@@ -593,17 +600,24 @@ const DataClassepreco = () => {
                 </td>
 
                 {/* Dados do Produto */}
-                {columnVisibility.codPrice && (
-                  <td className="border border-[#EDEBEB] px-3 py-2 text-right">{classepreco.Vcodi}</td>
-                )}
-                {columnVisibility.abbreviation && (
-                  <td className="border border-[#EDEBEB] px-3 py-2 text-left">{classepreco.abreviatura}</td>
+                {columnVisibility.codPeriod && (
+                  <td className="border border-[#EDEBEB] px-3 py-2 text-right">{period.vcodi}</td>
                 )}
                 {columnVisibility.description && (
-                  <td className="border border-[#EDEBEB] px-3 py-2 text-left">{classepreco.Vdesc}</td>
+                  <td className="border border-[#EDEBEB] px-3 py-2 text-left">{period.Vdesc}</td>
                 )}
-                {/* Exibindo o propertyName no campo "property" */}
-                {columnVisibility.property && (
+                {columnVisibility.startDate && (
+                  <td className="border border-[#EDEBEB] px-4 py-2 text-right">
+                    {new Date(period.DDataIni).toLocaleDateString('pt-PT')}
+                  </td>
+                )}
+                {columnVisibility.endDate && (
+                  <td className="border border-[#EDEBEB] px-4 py-2 text-right">
+                    {new Date(period.DDataFim).toLocaleDateString('pt-PT')}
+                  </td>
+                )}
+                {/* Exibindo o propertyName no campo "Exploration center" */}
+                {columnVisibility.exploCenter && (
                   <td className="border border-[#EDEBEB] px-4 py-2 text-left">
                     {propertyDetails ? propertyDetails.propertyName : 'Loading...'}
                   </td>
@@ -658,4 +672,4 @@ const DataClassepreco = () => {
   );
 };
 
-export default DataClassepreco;
+export default DataPeriod;

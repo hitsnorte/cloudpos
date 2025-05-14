@@ -19,7 +19,7 @@ import { fetchPreco } from "@/src/lib/apipreco";
 import { IoInformationSharp } from "react-icons/io5";
 import { fetchPeriod } from "@/src/lib/apiseason";
 import { fetchHour } from "@/src/lib/apihour";
-
+import Select from "react-select";
 
 import {
   Modal,
@@ -415,14 +415,6 @@ const DataProduct = () => {
     }
   };
 
-
-  const ivaList = [
-    { id: 1, taxa: 23, descricao: "IVA Padrão" },
-    { id: 2, taxa: 13, descricao: "IVA Intermediário" },
-    { id: 3, taxa: 6, descricao: "IVA Reduzido" },
-    { id: 4, taxa: 0, descricao: "Isento de IVA" },
-  ];
-
   const tipoOperacaoList = [
     { id: 1, tipo: "venda", descricao: "Venda" },
     { id: 2, tipo: "compra", descricao: "Compra" },
@@ -438,8 +430,6 @@ const DataProduct = () => {
   const [subfam, setSubFam] = useState('');
   const [fam, setFam] = useState('');
   const [loadingsubfam, setLoadingSubFam] = useState(true);
-
-
 
   const fetchSubFamilia = async (subFamiliaId) => {
     try {
@@ -623,7 +613,7 @@ const DataProduct = () => {
 
   const getPeriodDescription = (code) => {
     const period = periods.find(p => p.vcodi === code);
-    return period ? period.Vdesc : code || '—';
+    return period ? period.DDataFim : code || '—';
   };
 
   //Mostrar descrição das horas na tabela
@@ -644,7 +634,7 @@ const DataProduct = () => {
 
   const getHourDescription = (code) => {
     const hour = hours.find(h => h.Vcodi === code);
-    return hour ? hour.Vdesc : code || '—';
+    return hour ? hour.VHoraFim : code || '—';
   };
 
   //Carrega os IVA para o dropdown
@@ -969,249 +959,281 @@ const DataProduct = () => {
 
               <ModalBody className="py-5 px-6">
                 {editProduct && (
-                  <form id="updateProductForm" onSubmit={handleUpdateProduct} className="space-y-6">
-                    {/* Abreviatura e tipo de produto */}
-                    <div className="flex gap-4">
-                      {/* Abreviatura*/}
-                      <div className="w-1/2">
-                        <label htmlFor="productAbbreviation" className="block text-sm font-medium text-[#191919] mb-1">
-                          Abbreviation
+                    <form id="updateProductForm" onSubmit={handleUpdateProduct} className="space-y-6">
+                      {/* Abreviatura e tipo de produto */}
+                      <div className="flex gap-4">
+                        {/* Abreviatura*/}
+                        <div className="w-1/2">
+                          <label htmlFor="productAbbreviation" className="block text-sm font-medium text-[#191919] mb-1">
+                            Abbreviation
+                          </label>
+                          <input
+                              id="productAbreviatura"
+                              type="text"
+                              value={editProduct?.Abreviatura || ''}
+                              onChange={(e) => setEditProduct({ ...editProduct, Abreviatura: e.target.value })}
+                              placeholder="Digite a Abbreviation do produto"
+                              className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                              required
+                          />
+                        </div>
+
+                        {/* Detalhes do tipo de produto */}
+                        <div className="w-1/2 flex gap-2 items-end">
+                          {/* Tipo de produto */}
+                          <div className="flex flex-col w-1/3">
+                            <label className="text-sm font-medium text-[#191919] mb-1">Prod. Type</label>
+                            <div className="bg-gray-100 p-1 rounded text-sm text-gray-700">
+                              {editProduct?.vtipprod || '—'}
+                            </div>
+                          </div>
+
+                          {/* Tipo de produto */}
+                          <div className="flex flex-col w-1/3">
+                            <label className="text-sm font-medium text-[#191919] mb-1">Type</label>
+                            <div className="bg-gray-100 p-1 rounded text-sm text-gray-700">
+                              {editProduct?.ProductType || '—'}
+                            </div>
+                          </div>
+
+                          {/* Status*/}
+                          <div className="flex flex-col w-1/3 items-center">
+                            <label className="text-sm font-medium text-[#191919] mb-1">Status</label>
+                            <label className="flex items-center gap-1 text-sm text-gray-700">
+                              <input
+                                  type="checkbox"
+                                  checked={editProduct?.activo || false}
+                                  onChange={(e) => setEditProduct({ ...editProduct, activo: e.target.checked })}
+                              />
+                              {editProduct?.activo ? 'Active' : 'Inactive'}
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Descrição */}
+                      <div className="w-full">
+                        <label htmlFor="productDescription" className="block text-sm font-medium text-[#191919] mb-1">
+                          Description
                         </label>
-                        <input
-                          id="productAbreviatura"
-                          type="text"
-                          value={editProduct?.Abreviatura || ''}
-                          onChange={(e) => setEditProduct({ ...editProduct, Abreviatura: e.target.value })}
-                          placeholder="Digite a Abbreviation do produto"
-                          className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
-                          required
+                        <textarea
+                            id="productDescription"
+                            value={editProduct?.VDESC1 || ''}
+                            onChange={(e) => setEditProduct({ ...editProduct, VDESC1: e.target.value })}
+                            placeholder="Insert product description"
+                            className="w-full p-2 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
                         />
                       </div>
 
-                      {/* Detalhes do tipo de produto */}
-                      <div className="w-1/2 flex gap-2 items-end">
-                        {/* Tipo de produto */}
-                        <div className="flex flex-col w-1/3">
-                          <label className="text-sm font-medium text-[#191919] mb-1">Prod. Type</label>
-                          <div className="bg-gray-100 p-1 rounded text-sm text-gray-700">
-                            {editProduct?.vtipprod || '—'}
+                      {/* Sub-Família, Referência e IVA - Alinhados à direita */}
+                      <div className="flex justify-end gap-4">
+                        {/* Sub-Família */}
+                        <div className="w-1/3">
+                          <div className="flex items-center gap-1 mb-1">
+                            <label htmlFor="subFamilia" className="text-sm font-medium text-[#191919]">
+                              Sub-Família
+                            </label>
+                            <button
+                                type="button"
+                                className="text-[#191919] relative"
+                                onClick={handleButtonClick}
+                            >
+                              <IoInformationSharp size={16} />
+
+                              {/* Tooltip de Família */}
+                              {showFamilyTooltip && (
+                                  <div className="absolute top-full left-0 z-50 mt-1 w-max bg-white border border-gray-300 shadow-md rounded px-3 py-2 text-sm text-gray-800">
+                                    The family associated with this subfamily is {loadingFamily ? 'loading...' : FamilyName || 'Unknown'}
+                                  </div>
+                              )}
+                            </button>
                           </div>
-                        </div>
 
-                        {/* Tipo de produto */}
-                        <div className="flex flex-col w-1/3">
-                          <label className="text-sm font-medium text-[#191919] mb-1">Type</label>
-                          <div className="bg-gray-100 p-1 rounded text-sm text-gray-700">
-                            {editProduct?.ProductType || '—'}
-                          </div>
-                        </div>
-
-                        {/* Status*/}
-                        <div className="flex flex-col w-1/3 items-center">
-                          <label className="text-sm font-medium text-[#191919] mb-1">Status</label>
-                          <label className="flex items-center gap-1 text-sm text-gray-700">
-                            <input
-                              type="checkbox"
-                              checked={editProduct?.activo || false}
-                              onChange={(e) => setEditProduct({ ...editProduct, activo: e.target.checked })}
-                            />
-                            {editProduct?.activo ? 'Active' : 'Inactive'}
-                          </label>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Descrição */}
-                    <div className="w-full">
-                      <label htmlFor="productDescription" className="block text-sm font-medium text-[#191919] mb-1">
-                        Description
-                      </label>
-                      <textarea
-                        id="productDescription"
-                        value={editProduct?.VDESC1 || ''}
-                        onChange={(e) => setEditProduct({ ...editProduct, VDESC1: e.target.value })}
-                        placeholder="Insert product description"
-                        className="w-full p-2 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
-                      />
-                    </div>
-
-                    {/* Sub-Família, Referência e IVA - Alinhados à direita */}
-                    <div className="flex justify-end gap-4">
-                      {/* Sub-Família */}
-                      <div className="w-1/3">
-                        <div className="flex items-center gap-1 mb-1">
-                          <label htmlFor="subFamilia" className="text-sm font-medium text-[#191919]">
-                            Sub-Família
-                          </label>
-                          <button
-                            type="button"
-                            className="text-[#191919] relative"
-                            onClick={handleButtonClick}
+                          {/* Exibir a Subfamília sem ser afetada pela Tooltip */}
+                          <div
+                              id="subFamilia"
+                              className="w-full p-1 bg-gray-100 rounded text-sm text-gray-700"
                           >
-                            <IoInformationSharp size={16} />
-
-                            {/* Tooltip de Família */}
-                            {showFamilyTooltip && (
-                              <div className="absolute top-full left-0 z-50 mt-1 w-max bg-white border border-gray-300 shadow-md rounded px-3 py-2 text-sm text-gray-800">
-                                The family associated with this subfamily is {loadingFamily ? 'loading...' : FamilyName || 'Unknown'}
-                              </div>
-                            )}
-                          </button>
+                            {loadingsubfam ? 'Loading...' : subfam || 'Not associated'}
+                          </div>
                         </div>
 
-                        {/* Exibir a Subfamília sem ser afetada pela Tooltip */}
-                        <div
-                          id="subFamilia"
-                          className="w-full p-1 bg-gray-100 rounded text-sm text-gray-700"
-                        >
-                          {loadingsubfam ? 'Loading...' : subfam || 'Not associated'}
+                        {/* VREFERENCIA */}
+                        <div className="w-1/3">
+                          <label htmlFor="referencia" className="block text-sm font-medium text-[#191919] mb-1">
+                            Reference
+                          </label>
+                          <input
+                              id="referencia"
+                              type="text"
+                              value={editProduct?.VREFERENCIA || ''}
+                              onChange={(e) => setEditProduct({ ...editProduct, VREFERENCIA: e.target.value })}
+                              placeholder="Insert reference"
+                              className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                          />
+                        </div>
+
+                        {/* IVA */}
+                        <div className="w-1/3">
+                          <label htmlFor="iva" className="block text-sm font-medium text-[#191919] mb-1">
+                            VAT
+                          </label>
+                          <Select
+                              inputId="iva"
+                              name="iva"
+                              options={ivaOptions.map(vat => ({
+                                value: vat.VCODI,
+                                label: vat.VDESC,
+                              }))}
+                              value={
+                                  ivaOptions
+                                      .map(vat => ({ value: vat.VCODI, label: vat.VDESC }))
+                                      .find(option => option.value === selectedIva) || null
+                              }
+                              onChange={(selectedOption) => {
+                                setSelectedIva(selectedOption ? selectedOption.value : "");
+                              }}
+                              isSearchable
+                              className="w-full"
+                              classNamePrefix="select"
+                              placeholder="Select VAT"
+                          />
                         </div>
                       </div>
 
-                      {/* VREFERENCIA */}
-                      <div className="w-1/3">
-                        <label htmlFor="referencia" className="block text-sm font-medium text-[#191919] mb-1">
-                          Reference
-                        </label>
-                        <input
-                          id="referencia"
-                          type="text"
-                          value={editProduct?.VREFERENCIA || ''}
-                          onChange={(e) => setEditProduct({ ...editProduct, VREFERENCIA: e.target.value })}
-                          placeholder="Insert reference"
-                          className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
-                        />
-                      </div>
-
-                      {/* IVA */}
-                      <div className="w-1/3">
-                        <label htmlFor="iva" className="block text-sm font-medium text-[#191919] mb-1">
-                          VAT
-                        </label>
-                        <select
-                          id="iva"
-                          className="w-full p-1 rounded bg-gray-200 focus:outline-none focus:ring-1 focus:ring-gray-500"
-                          value={selectedIva}
-                          onChange={(e) => setSelectedIva(e.target.value)}
-                        >
-                          <option value="">Select</option>
-                          {ivaList.map((iva) => (
-                            <option key={iva.id} value={iva.taxa}>
-                              {iva.taxa}% - {iva.descricao}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-
-                    {/* Tabela */}
-                    <div className="overflow-x-auto border border-gray-300 rounded">
-                      <table className="min-w-full text-sm text-left text-gray-700">
-                        <thead className="bg-[#FC9D25] text-white">
+                      {/* Tabela */}
+                      <div className="overflow-x-auto border border-gray-300 rounded">
+                        <table className="min-w-full text-sm text-left text-gray-700">
+                          <thead className="bg-[#FC9D25] text-white">
                           <tr>
                             <th className="px-4 py-2">Class</th>
-                            <th className="px-4 py-2">C.Exp.</th>
+                            <th className="px-4 py-2">Property</th>
                             <th className="px-4 py-2">Period</th>
                             <th className="px-4 py-2">Hours</th>
-                            <th className="px-4 py-2">Unitary Value</th>
-                            <th className="px-4 py-2">Final Value</th>
+                            <th className="px-4 py-2">PVP</th>
+                            <th className="px-4 py-2">Price</th>
                             <th className="px-4 py-2">VAT</th>
                             <th className="px-4 py-2 text-center">✓</th>
+                            <th className="px-4 py-2 text-center">
+                              <HiDotsVertical size={18} />
+                            </th>
                           </tr>
-                        </thead>
-                        <tbody>
+                          </thead>
+                          <tbody>
                           {filteredPrices.map((price, index) => {
                             const iva = ivaOptions.find(v => v.VCODI === Number(price.VCodIva));
                             const ivaRate = iva?.NPERC ?? 0;
                             const base = price.nValUnit ?? 0;
                             const valorFinal = base + (base * ivaRate / 100);
 
+                            const handlePvpChange = (e) => {
+                              const newValue = parseFloat(e.target.value);
+                              if (!isNaN(newValue)) {
+                                // atualiza o valor do PVP em filteredPrices
+                                const updatedPrices = [...filteredPrices];
+                                updatedPrices[index] = { ...updatedPrices[index], nValUnit: newValue };
+                                // atualiza o estado com o novo valor
+                                setFilteredPrices(updatedPrices);
+                              }
+                            };
+
                             return (
-                              <tr key={index} className="bg-gray-100">
-                                <td className="px-4 py-2">{getClassName(price.VCodClas)}</td>
-                                <td className="px-4 py-2">{price.cexpName || '-'}</td>
-                                <td className="px-4 py-2">{getPeriodDescription(price.VCodPeri)}</td>
-                                <td className="px-4 py-2">{getHourDescription(price.VCodInthoras)}</td>
-                                <td className="px-4 py-2">€{price.nValUnit?.toFixed(2) || '—'}</td>
-                                <td className="px-4 py-2">€{valorFinal.toFixed(2)}</td>
-                                <td className="px-4 py-2">
-                                  <select
-                                    value={price.VCodIva ?? ''}
-                                    onChange={(e) => handleVatChange(index, Number(e.target.value))}
-                                    className="border rounded px-2 py-1 w-full"
-                                  >
-                                    <option value="">—</option>
-                                    {ivaOptions.map((vat) => (
-                                      <option key={vat.VCODI} value={vat.VCODI}>
-                                        {vat.VDESC}
-                                      </option>
-                                    ))}
-                                  </select>
-                                </td>
-                                <td className="px-4 py-2 text-center">
-                                  <input type="checkbox" />
-                                </td>
-                              </tr>
+                                <tr key={index} className="bg-gray-100">
+                                  <td className="px-4 py-2">{getClassName(price.VCodClas)}</td>
+                                  <td className="px-4 py-2">{price.cexpName || '-'}</td>
+                                  <td className="px-4 py-2">{getPeriodDescription(price.VCodPeri)}</td>
+                                  <td className="px-4 py-2">{getHourDescription(price.VCodInthoras)}</td>
+                                  <td className="px-4 py-2">
+                                    <input
+                                        type="text"
+                                        value={price.nValUnit?.toFixed(2) || ''}
+                                        onChange={handlePvpChange}
+                                        className="border rounded px-2 py-1 w-full"
+                                    />
+                                  </td>
+                                  <td className="px-4 py-2">€{valorFinal.toFixed(2)}</td>
+                                  <td className="px-4 py-2">
+                                    <select
+                                        value={price.VCodIva ?? ''}
+                                        onChange={(e) => handleVatChange(index, Number(e.target.value))}
+                                        className="border rounded px-2 py-1 w-full"
+                                    >
+                                      <option value="">—</option>
+                                      {ivaOptions.map((vat) => (
+                                          <option key={vat.VCODI} value={vat.VCODI}>
+                                            {vat.VDESC}
+                                          </option>
+                                      ))}
+                                    </select>
+                                  </td>
+                                  <td className="px-4 py-2 text-center">
+                                    <input type="checkbox" />
+                                  </td>
+                                  <td className="px-4 py-2">
+                                    <HiDotsVertical size={18} />
+                                  </td>
+                                </tr>
                             );
                           })}
-                        </tbody>
-                      </table>
-                    </div>
+                          </tbody>
+                        </table>
+                      </div>
 
-                    {/*Criado por , em: , Ultima vez alterado por: , Em:*/}
-                    <div className="flex justify-end gap-4">
-                      {/* Criado por: */}
-                      <div className="w-1/4">
-                        <label className="block text-sm font-medium text-[#191919] mb-1">
-                          Created by:
-                        </label>
-                        <div className="w-full p-1 bg-gray-100 rounded text-sm text-gray-700">
-                          {editProduct?.vcriadopor || '—'}
+                      {/*Criado por , em: , Ultima vez alterado por: , Em:*/}
+                      <div className="flex justify-end gap-4">
+                        {/* Criado por: */}
+                        <div className="w-1/4">
+                          <label className="block text-sm font-medium text-[#191919] mb-1">
+                            Created by:
+                          </label>
+                          <div className="w-full p-1 bg-gray-100 rounded text-sm text-gray-700">
+                            {editProduct?.vcriadopor || '—'}
+                          </div>
+                        </div>
+
+                        {/* Criado em: */}
+                        <div className="w-1/4">
+                          <label className="block text-sm font-medium text-[#191919] mb-1">
+                            Created on:
+                          </label>
+                          <div className="w-full p-1 bg-gray-100 rounded text-sm text-gray-700">
+                            {editProduct?.dcriadoem || '—'}
+                          </div>
+                        </div>
+
+                        {/* ultima vez alterado por:*/}
+                        <div className="w-1/4">
+                          <label htmlFor="vUltalpor" className="block text-sm font-medium text-[#191919] mb-1">
+                            Last changed by:
+                          </label>
+                          <input
+                              id="vUltalpor"
+                              type="text"
+                              value={editProduct?.vultaltpor || ''}
+                              onChange={(e) => setEditProduct({ ...editProduct, vultaltpor: e.target.value })}
+                              placeholder="Last changed by"
+                              className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                          />
+                        </div>
+
+                        {/* ultima vez alterado em: */}
+                        <div className="w-1/4">
+                          <label htmlFor="dAlteradoem" className="block text-sm font-medium text-[#191919] mb-1">
+                            Changed on:
+                          </label>
+                          <input
+                              id="dAlteradoem"
+                              type="date"
+                              value={editProduct?.dultaltem || ''}
+                              onChange={(e) => setEditProduct({ ...editProduct, dultaltem: e.target.value })}
+                              className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                          />
                         </div>
                       </div>
-
-                      {/* Criado em: */}
-                      <div className="w-1/4">
-                        <label className="block text-sm font-medium text-[#191919] mb-1">
-                          Created on:
-                        </label>
-                        <div className="w-full p-1 bg-gray-100 rounded text-sm text-gray-700">
-                          {editProduct?.dcriadoem || '—'}
-                        </div>
-                      </div>
-
-                      {/* ultima vez alterado por:*/}
-                      <div className="w-1/4">
-                        <label htmlFor="vUltalpor" className="block text-sm font-medium text-[#191919] mb-1">
-                          Last changed by:
-                        </label>
-                        <input
-                          id="vUltalpor"
-                          type="text"
-                          value={editProduct?.vultaltpor || ''}
-                          onChange={(e) => setEditProduct({ ...editProduct, vultaltpor: e.target.value })}
-                          placeholder="Last changed by"
-                          className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
-                        />
-                      </div>
-
-                      {/* ultima vez alterado em: */}
-                      <div className="w-1/4">
-                        <label htmlFor="dAlteradoem" className="block text-sm font-medium text-[#191919] mb-1">
-                          Changed on:
-                        </label>
-                        <input
-                          id="dAlteradoem"
-                          type="date"
-                          value={editProduct?.dultaltem || ''}
-                          onChange={(e) => setEditProduct({ ...editProduct, dultaltem: e.target.value })}
-                          className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
-                        />
-                      </div>
-                    </div>
-                  </form>
+                    </form>
                 )}
               </ModalBody>
+
 
               <ModalFooter className="w-full border-t border-gray-200 pt-4 px-6 flex justify-end gap-4">
                 <Button

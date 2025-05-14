@@ -10,6 +10,7 @@ import { IoTrashBinOutline } from "react-icons/io5";
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { fetchSubfamily } from '@/src/lib/apisubfamily';
 import { fetchDashboard } from '@/src/lib/apidashboard';
+import {fetchPreco} from "@/src/lib/apipreco";
 import { fetchClassepreco } from '@/src/lib/apiclassepreco';
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import { Card, CardBody } from "@heroui/react";
@@ -87,29 +88,37 @@ export default function ProductGroups() {
 
     //Busca grupos e produtos quando o propertyID estiver disponivel
     useEffect(() => {
-        if (!propertyID) {
-
-            return
-        }
+        if (!propertyID) return;
 
         const fetchData = async () => {
             setLoading(true);
             try {
-                const [groups, families, subfamilies, products, classeprecos] = await Promise.all([
+                const [groups, families, subfamilies, products, prices] = await Promise.all([
                     fetchGrup(),
                     fetchFamily(),
                     fetchSubfamily(),
                     fetchProduct(),
-                    fetchClassepreco(),
+                    fetchPreco(), // Add price fetch here
                 ]);
 
+                // Merge price into products
+                const enrichedProducts = products.map((product) => {
+                    const matchingPrice = prices.find((price) => price.VCodProd === product.VCodProd);
+                    return {
+                        ...product,
+                        price: matchingPrice ? matchingPrice.nValUnit : null,
+                        cexpName: matchingPrice?.cexpName || null,
+                    };
+                });
 
                 const structuredGroups = groups.map((group) => {
-                    const productsForGroup = products
+                    const productsForGroup = enrichedProducts
                         .filter((p) => String(p.VCodGrfam) === String(group.VCodGrFam))
                         .map((p, index) => ({
                             id: p?.VCodProd ? String(p.VCodProd) : `product-${index}`,
                             name: p?.VDESC1?.trim() || 'Unnamed Product',
+                            price: p.price,
+                            cexpName: p.cexpName,
                         }));
 
                     return {
@@ -119,13 +128,14 @@ export default function ProductGroups() {
                     };
                 });
 
-                // Processa famílias
                 const structuredFamilies = families.map((family) => {
-                    const productsForFamily = products
+                    const productsForFamily = enrichedProducts
                         .filter((p) => String(p.VCodFam) === String(family.VCodFam))
                         .map((p, index) => ({
                             id: p?.VCodProd ? String(p.VCodProd) : `product-${index}`,
                             name: p?.VDESC1?.trim() || 'Unnamed Product',
+                            price: p.price,
+                            cexpName: p.cexpName,
                         }));
 
                     return {
@@ -135,14 +145,16 @@ export default function ProductGroups() {
                     };
                 });
 
-                // Subfamílias
                 const structuredSubfamilies = subfamilies.map((subfamily) => {
-                    const productsForSubfamily = products
+                    const productsForSubfamily = enrichedProducts
                         .filter((p) => String(p.VCodSubFam) === String(subfamily.VCodSubFam))
                         .map((p, index) => ({
                             id: p?.VCodProd ? String(p.VCodProd) : `product-${index}`,
                             name: p?.VDESC1?.trim() || 'Unnamed Product',
+                            price: p.price,
+                            cexpName: p.cexpName,
                         }));
+
                     return {
                         id: String(subfamily.VCodSubFam),
                         name: subfamily.VDesc,
@@ -150,26 +162,9 @@ export default function ProductGroups() {
                     };
                 });
 
-                //classepreco
-                const structuredClassePrecos = classeprecos.map((classepreco) => {
-                    const productsForClassepreco = products
-                        .filter((p) => String(p.Vcodi) === String(classepreco.Vcodi))
-                        .map((p, index) => ({
-                            id: p?.VCodProd ? String(p.VCodProd) : `product-${index}`,
-                            name: p?.VDESC1?.trim() || 'Unnamed Product',
-                        }));
-
-                    return {
-                        id: String(classepreco.Vcodi),
-                        name: classepreco.Vdesc,
-                        products: productsForClassepreco,
-                    };
-                });
-
                 setGroupsWithProducts(structuredGroups);
                 setFamiliesWithProducts(structuredFamilies);
                 setSubfamiliesWithProducts(structuredSubfamilies);
-                setClasseprecoWithProducts(structuredClassePrecos);
             } catch (error) {
                 console.error('Error fetching data:', error);
             } finally {
@@ -179,6 +174,7 @@ export default function ProductGroups() {
 
         fetchData();
     }, [propertyID]);
+
 
     // If the property is not confirmed, redirect to homepage
     useEffect(() => {
@@ -274,7 +270,7 @@ export default function ProductGroups() {
 {selectedCardPath && (
   <button
     onClick={() => setSelectedCardPath(null)}
-    className="absolute top-6 right-239.5 bg-[#FC9D25] text-white px-4 py-2 rounded"
+    className="absolute top-6 right-378 bg-[#FC9D25] text-white px-4 py-2 rounded"
   >
     Dashboard
   </button>
@@ -388,71 +384,69 @@ export default function ProductGroups() {
             )}
 
             {/* Modal do carrinho */}
-            {cartOpen && (
-            <div className="fixed top-16 right-15.5">
-                <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-4 relative">
-                <button
-                    onClick={toggleCart}
-                    className="absolute top-4 right-4 text-[#191919] text-lg"
-                >
-                    X
-                </button>
-
-                <h2 className="text-xl font-semibold text-[#191919] mb-7">Your Cart</h2>
-                {cartItems.length === 0 ? (
-                    <p className="text-[#191919] text-left">No products added.</p>
-                ) : (
-                    <ul className="space-y-2">
-                    {cartItems.map((item, index) => (
-                        <li
-                        key={item.id || `item-${index}`}
-                        className="flex justify-between items-center border-b pb-2"
-                        >
-                        <div>
-                            <p className="font-medium text-[#191919] px-5">{item.name}</p>
-                            <div className="px-5 text-sm text-gray-500 flex items-center gap-2">
-                            Qty:
-                            <input
-                                type="number"
-                                min="1"
-                                value={item.count}
-                                onChange={(e) => {
-                                const newCount = parseInt(e.target.value);
-                                if (newCount >= 1) {
-                                    setCartItems((prev) =>
-                                    prev.map((ci) =>
-                                        ci.id === item.id ? { ...ci, count: newCount } : ci
-                                    )
-                                    );
-                                }
-                                }}
-                                className="w-16 border rounded px-2 py-1 text-center"
-                            />
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <span className="text-[#FC9D25] font-bold">...€</span>
+                {cartOpen && (
+                    <div className="fixed top-16 right-15.5">
+                        <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-4 relative">
                             <button
-                            onClick={() => {
-                                setCartItems((prev) =>
-                                prev.filter((ci) => ci.id !== item.id)
-                                );
-                            }}
-                            className="text-red-500 hover:text-red-700 transition"
+                                onClick={toggleCart}
+                                className="absolute top-4 right-4 text-[#191919] text-lg"
                             >
-                            <IoTrashBinOutline size={20} />
+                                X
                             </button>
-                        </div>
-                        </li>
-                    ))}
-                    </ul>
-                )}
-                </div>
-            </div>
-            )}
-      
 
-            <div className="p-6 space-y-4">
+                            <h2 className="text-xl font-semibold text-[#191919] mb-7">Your Cart</h2>
+                            {cartItems.length === 0 ? (
+                                <p className="text-[#191919] text-left">No products added.</p>
+                            ) : (
+                                <ul className="space-y-2">
+                                    {cartItems.map((item, index) => (
+                                        <li
+                                            key={item.id || `item-${index}`}
+                                            className="flex justify-between items-center border-b pb-2"
+                                        >
+                                            <div>
+                                                <p className="font-medium text-[#191919] px-5">{item.name}</p>
+                                                <div className="px-5 text-sm text-gray-500 flex items-center gap-2">
+                                                    Qty:
+                                                    <input
+                                                        type="number"
+                                                        min="1"
+                                                        value={item.count}
+                                                        onChange={(e) => {
+                                                            const newCount = parseInt(e.target.value);
+                                                            if (newCount >= 1) {
+                                                                setCartItems((prev) =>
+                                                                    prev.map((ci) =>
+                                                                        ci.id === item.id ? { ...ci, count: newCount } : ci
+                                                                    )
+                                                                );
+                                                            }
+                                                        }}
+                                                        className="w-16 border rounded px-2 py-1 text-center"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[#FC9D25] font-bold">{item.price}€</span>
+                                                <button
+                                                    onClick={() => {
+                                                        setCartItems((prev) =>
+                                                            prev.filter((ci) => ci.id !== item.id)
+                                                        );
+                                                    }}
+                                                    className="text-red-500 hover:text-red-700 transition"
+                                                >
+                                                    <IoTrashBinOutline size={20} />
+                                                </button>
+                                            </div>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
+                    </div>
+                )}
+                <div className="p-6 space-y-4">
                 {viewType === 'groups' && filterByName(groupsWithProducts).map((group) => {
                     const isOpen = openGroupID === group.id
                     return (
@@ -497,7 +491,7 @@ export default function ProductGroups() {
                                                         </span>
                                                     </td>
                                                     <td className="border border-[#EDEBEB] px-4 py-2 text-right text-gray-500">
-                                                        ...€
+                                                        {product.price}€
                                                     </td>
                                                 </tr>
                                             ))}
@@ -596,7 +590,9 @@ export default function ProductGroups() {
                                                             {product.name}
                                                         </span>
                                                     </td>
-                                                    <td className="border border-[#EDEBEB] px-4 py-2 text-right text-gray-500">...€</td>
+                                                    <td className="border border-[#EDEBEB] px-4 py-2 text-right text-gray-500">
+                                                        {product.price}€
+                                                    </td>
                                                 </tr>
                                             ))}
                                         </tbody>
@@ -607,7 +603,6 @@ export default function ProductGroups() {
                     );
                 })}
             </div>
-       
             </>
         )}
        </>

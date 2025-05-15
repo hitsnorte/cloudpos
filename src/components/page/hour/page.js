@@ -4,9 +4,9 @@ import { useState, useEffect, useMemo } from 'react';
 import { HiDotsVertical } from "react-icons/hi";
 import { FaGear } from "react-icons/fa6";
 import { Plus } from "lucide-react";
+import { HiAdjustmentsHorizontal } from "react-icons/hi2";
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
 import { FaMagnifyingGlass } from "react-icons/fa6";
-import { HiAdjustmentsHorizontal } from "react-icons/hi2";
 import { fetchHour, createHour } from '@/src/lib/apihour';
 import axios from 'axios';
 
@@ -564,7 +564,7 @@ const DataHour = () => {
 
           <thead>
             <tr>
-              <th className="border-collapse border border-[#EDEBEB] !w-[1px] px-1 sm:px-5 py-2 bg-[#FC9D25]">
+              <th className="border-collapse border border-[#EDEBEB] !w-[1px] px-1 sm:px-5 py-4 bg-[#FC9D25]">
                 <div className=" flex items-center justify-center">
                   <FaGear size={20} color='white' />
                 </div>

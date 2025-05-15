@@ -95,7 +95,9 @@ const DataProduct = () => {
     setFamilyName(''); // Reset family name
     setSubFam(''); // Reset subfamily name
     setLoadingFamily(false); // Reset loading state for family
-    setLoadingSubFam(true); // Reset loading state for subfamily
+    setLoadingSubFam(true);
+    setGroup(false);
+    setLoadingGroup(false);
 
     // Call original modal onClose (from useDisclosure)
     onEditModalClose();
@@ -489,9 +491,6 @@ const DataProduct = () => {
     }
   }, [isEditModalOpen]);
 
-  useEffect(() => {
-    console.log('Preços:', prices);
-  }, [prices]);
 
   const [FamilyName, setFamilyName] = useState('');
   const [loadingFamily, setLoadingFamily] = useState(false);
@@ -541,7 +540,6 @@ const DataProduct = () => {
   const [selectedProduct, setSelectedProduct] = useState('');
 
   const handleEditProduct = (product) => {
-    console.log('Product being selected:', product);
     setSelectedProduct(product);
     setEditProduct(product);
     onEditModalOpen();
@@ -641,20 +639,12 @@ const DataProduct = () => {
   }, []);
 
   const handleVatChange = (index, newVatCode) => {
-    console.log('Alterando IVA para o index', index, 'Novo valor de IVA:', newVatCode);
+
     const updatedPrices = [...filteredPrices];
     updatedPrices[index].VCodIva = newVatCode;
     setPrices(updatedPrices);
   };
 
-  useEffect(() => {
-    console.log('IVA Options:', ivaOptions); // Mostra as opções de IVA no console toda vez que 'ivaOptions' mudar
-
-    // Se precisar de um log mais específico para verificar o conteúdo:
-    ivaOptions.forEach(option => {
-      console.log('IVA Option:', option); // Mostra cada opção de IVA individualmente
-    });
-  }, [ivaOptions]);
 
   //useEffect para o fetchFamilia , antes era usado num handleButtonClick para a tooltip
   useEffect(() => {
@@ -663,6 +653,37 @@ const DataProduct = () => {
       fetchFamilia(familyId);
     }
   }, [editProduct?.VCodFam]);
+
+  const [group, setGroup] = useState('');
+  const [loadingGroup, setLoadingGroup] = useState(true);
+
+  const fetchGroup = async (groupId) => {
+
+    setLoadingGroup(true);
+    try {
+      const allGroups = await fetchGrup();
+
+      const found = allGroups.find(g => String(g.VCodGrFam) === String(groupId));
+
+      if (found?.VDesc) {
+        setGroup(found.VDesc);
+      } else {
+        setGroup('Não encontrado');
+      }
+    } catch (error) {
+      console.error('Erro ao buscar grupo:', error);
+      setGroup('Erro ao carregar');
+    } finally {
+      setLoadingGroup(false);
+    }
+  };
+
+
+  useEffect(() => {
+    if (isEditModalOpen && editProduct?.VCodGrfam) {
+      fetchGroup(editProduct.VCodGrfam);
+    }
+  }, [isEditModalOpen, editProduct]);
 
 
 
@@ -1050,16 +1071,16 @@ const DataProduct = () => {
                           </div>
                         </div>
 
-                        {/* Grupo , por enquanto estático */}
+                        {/* Grupo */}
                         <div className="w-1/3">
                           <label htmlFor="group" className="text-sm font-medium text-[#191919] mb-1 block">
-                            Group
+                            Grupo
                           </label>
                           <div
                               id="group"
                               className="w-full p-1 bg-gray-100 rounded text-sm text-gray-700"
                           >
-                            Placeholder group
+                            {loadingGroup ? 'Loading...' : group || 'Group is not associated'}
                           </div>
                         </div>
                       </div>

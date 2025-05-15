@@ -11,6 +11,7 @@ import { ChevronDown, ChevronRight } from 'lucide-react'
 import { fetchSubfamily } from '@/src/lib/apisubfamily';
 import { fetchDashboard } from '@/src/lib/apidashboard';
 import { fetchClassepreco } from '@/src/lib/apiclassepreco';
+import { fetchPreco } from "@/src/lib/apipreco";
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import { Card, CardBody } from "@heroui/react";
 import { useSession } from "next-auth/react"; // Import useSession
@@ -38,11 +39,19 @@ export default function ProductGroups() {
     const router = useRouter();
     const { data: session, status } = useSession();
     const [classeprecoWithProducts, setClasseprecoWithProducts] = useState([]);
+    const [precoWithProducts, setPrecoWithProducts] = useState([]);
     const [isConfirmed, setIsConfirmed] = useState(() => JSON.parse(localStorage.getItem("isConfirmed")) || false);
     const [selectedCardPath, setSelectedCardPath] = useState(null);
 
 
     const [viewType, setViewType] = useState('groups', 'families', 'subfamilies') // 'groups' | 'families' | 'subfamilies'
+
+
+    //side bar
+    const [isOpen, setIsOpen] = useState(false);
+    const toggleSidebar = () => setIsOpen(!isOpen);
+    const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
 
     const toggleCart = () => setCartOpen(prev => !prev);
 
@@ -51,6 +60,23 @@ export default function ProductGroups() {
         setCount(1);
     };
 
+    const addToCart = (product) => {
+        setCartItems((prevItems) => {
+            const existingItem = prevItems.find((item) => item.id === product.id);
+
+            if (existingItem) {
+                // Já existe — somar quantidade
+                return prevItems.map((item) =>
+                    item.id === product.id
+                        ? { ...item, quantity: item.quantity + product.quantity }
+                        : item
+                );
+            } else {
+                // Novo produto
+                return [...prevItems, product];
+            }
+        });
+    };
     const filterByName = (items) => {
         if (!searchTerm.trim()) return items;
 
@@ -64,6 +90,28 @@ export default function ProductGroups() {
     const toggleGroup = (id) => {
         setOpenGroupID((prev) => (prev === id ? null : id))
     }
+
+    //side bar carrinho
+    useEffect(() => {
+        console.log("Cart updated:", cartItems);
+    }, [cartItems]);
+
+    const [quantities, setQuantities] = useState(
+        cartItems.reduce((acc, item) => {
+            acc[item.id] = item.quantity || 1;
+            return acc;
+        }, {})
+    );
+
+    const removeItem = (id) => {
+        setCartItems((prev) => prev.filter((item) => item.id !== id));
+    };
+
+    const clearCart = () => {
+        setCartItems([]);
+        setQuantities({});
+    };
+
 
     // UseEffect to fetch propertyID from localStorage
     useEffect(() => {
@@ -95,22 +143,33 @@ export default function ProductGroups() {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const [groups, families, subfamilies, products, classeprecos] = await Promise.all([
+                const [groups, families, subfamilies, products, classeprecos, precos] = await Promise.all([
                     fetchGrup(),
                     fetchFamily(),
                     fetchSubfamily(),
                     fetchProduct(),
                     fetchClassepreco(),
+                    fetchPreco(),
                 ]);
 
+
+                const precoMap = new Map();
+                precos.forEach((preco) => {
+                    const key = String(preco.VCodProd || preco.vCodigo).trim();
+                    const value = parseFloat(String(preco.npreco).replace(',', '.')) || 0;
+                    precoMap.set(key, value);
+                });
 
                 const structuredGroups = groups.map((group) => {
                     const productsForGroup = products
                         .filter((p) => String(p.VCodGrfam) === String(group.VCodGrFam))
-                        .map((p, index) => ({
-                            id: p?.VCodProd ? String(p.VCodProd) : `product-${index}`,
-                            name: p?.VDESC1?.trim() || 'Unnamed Product',
-                        }));
+                        .map((p, index) => {
+                            const id = p?.VCodProd ? String(p.VCodProd) : `product-${index}`;
+                            const name = p?.VDESC1?.trim() || 'Unnamed Product';
+                            const price = precoMap.get(String(p.VCodProd)) || 0;
+
+                            return { id, name, price };
+                        });
 
                     return {
                         id: String(group.VCodGrFam),
@@ -150,6 +209,7 @@ export default function ProductGroups() {
                     };
                 });
 
+
                 //classepreco
                 const structuredClassePrecos = classeprecos.map((classepreco) => {
                     const productsForClassepreco = products
@@ -166,10 +226,29 @@ export default function ProductGroups() {
                     };
                 });
 
+                //preco
+                const structuredPrecos = precos.map((preco) => {
+                    const productsForPreco = products
+                        .filter((p) => String(p.vCodigo) == String(preco.vCodigo))
+                        .map((p, index) => ({
+                            id: p?.VCodProd ? String(p.VCodProd) : `product-${index}`,
+                            name: p?.VdescProd?.trim() || 'Unnamed Product',
+                            price: parseFloat(p?.npreco) || 0, // Garantir número, não string
+                        }));
+
+                    return {
+                        id: String(preco.vCodigo),
+                        name: preco.VdescProd,
+                        price: preco.npreco,
+                        products: productsForPreco,
+                    };
+                });
+
                 setGroupsWithProducts(structuredGroups);
                 setFamiliesWithProducts(structuredFamilies);
                 setSubfamiliesWithProducts(structuredSubfamilies);
                 setClasseprecoWithProducts(structuredClassePrecos);
+                setPrecoWithProducts(structuredPrecos);
             } catch (error) {
                 console.error('Error fetching data:', error);
             } finally {
@@ -259,7 +338,7 @@ export default function ProductGroups() {
                                         onClick={() => setSelectedCardPath(card.path)} // define o card selecionado
                                     >
                                         <p className="text-5xl font-bold text-[#FC9D25] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                                            {card.value}
+                                            <TiShoppingCart />
                                         </p>
                                         <p className="text-center h-13 text-lg text-gray-600 absolute bottom-4 left-1/2 transform -translate-x-1/2">
                                             {card.label}
@@ -324,17 +403,125 @@ export default function ProductGroups() {
                     </div>
 
                     {/*  botão do carrinho */}
-                    <div className="absolute top-6 right-11 w-17 text-white flex items-center justify-center">
-
-                        <button
-                            className="relative text-3xl text-[#191919] hover:text-[#FC9D25] transition"
-                            onClick={toggleCart}
+                    <div className="relative">
+                        {/* Botão Carrinho */}
+                        {!isOpen && (
+                            <button
+                                className="fixed top-6 right-15 z-50 text-3xl text-[#191919] hover:text-[#FC9D25] transition"
+                                onClick={toggleSidebar}
+                            >
+                                <TiShoppingCart />
+                                {cartItems.length > 0 && (
+                                    <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                                        {cartItems.reduce((total, item) => total + item.quantity, 0)}
+                                    </span>
+                                )}
+                            </button>
+                        )}
+                        {/* Overlay escuro */}
+                        {isOpen && (
+                            <div
+                                className="fixed inset-0 bg-black/40 z-30"
+                                onClick={toggleSidebar}
+                            ></div>
+                        )}
+                        {/* Sidebar Carrinho */}
+                        <div
+                            className={`fixed top-0 right-0 h-full w-[400px] max-w-full bg-white shadow-lg transition-transform duration-300 z-40 ${isOpen ? 'translate-x-0' : 'translate-x-full'
+                                }`}
                         >
-                            <TiShoppingCart />
-                            {cartItems.length > 0 && (
-                                <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full border border-white"></span>
-                            )}
-                        </button>
+                            {/* Cabeçalho */}
+                            <div className="flex items-center justify-between p-3 border-b">
+                                <h2 className="text-xl font-semibold">O seu carrinho</h2>
+                                <button onClick={toggleSidebar} className="text-2xl font-bold text-gray-600 hover:text-black">&times;</button>
+                            </div>
+
+                            {/* Conteúdo do Carrinho */}
+                            <div className="p-7 flex flex-col h-[calc(100%-150px)] overflow-y-auto">
+                                {cartItems.length === 0 ? (
+                                    <p className="text-gray-500">O seu carrinho está vazio.</p>
+                                ) : (
+                                    cartItems.map((item, idx) => (
+                                        <div key={idx} className="flex justify-between items-center py-3 border-b">
+                                            <div className="w-full">
+                                                <div className="flex justify-between items-start">
+                                                    <div>
+                                                        <p className="text-sm font-medium">{item.name}</p>
+
+                                                        <div className="flex items-center justify-center gap-2 mt-2 bg-white rounded-md shadow border w-fit">
+                                                            <button
+                                                                onClick={() =>
+                                                                    setQuantities((prev) => ({
+                                                                        ...prev,
+                                                                        [item.id]: Math.max(1, prev[item.id] - 1),
+                                                                    }))
+                                                                }
+                                                                className="px-3.5 py-1 bg-white text-[#191919] rounded hover:bg-gray-400 transition"
+                                                            >
+                                                                -
+                                                            </button>
+
+                                                            <span className="text-xl font-medium text-[#191919] min-w-[24px] text-center">
+                                                                {quantities[item.id]}
+                                                            </span>
+
+                                                            <button
+                                                                onClick={() =>
+                                                                    setQuantities((prev) => ({
+                                                                        ...prev,
+                                                                        [item.id]: prev[item.id] + 1,
+                                                                    }))
+                                                                }
+                                                                className="px-3 py-1 bg-white text-[#191919] rounded hover:bg-gray-400 transition"
+                                                            >
+                                                                +
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex flex-col items-end justify-between min-w-[70px] space-y-2">
+                                                        {/* Botão de remover */}
+                                                        <button
+                                                            onClick={() => removeItem(item.id)}
+                                                            className="text-red-600 hover:text-red-800"
+                                                            title="Remover produto"
+                                                        >
+                                                            <IoTrashBinOutline />
+                                                        </button>
+
+                                                        {/* Preço total do item */}
+                                                        <p className="text-sm font-semibold text-right m-2">
+                                                            {(item.price * quantities[item.id]).toFixed(2)} €
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+
+                            {/* Rodapé */}
+                            < div className="absolute bottom-0 w-full bg-white p-4 border-t" >
+                                <div className="flex justify-between mb-4">
+                                    <span className="text-sm font-medium">Total:</span>
+                                    <span className="text-lg font-bold">{total.toFixed(2)} €</span>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={clearCart} // função que deves ter para limpar o carrinho
+                                        className="w-12 border border-[#FC9D25] text-[#FC9D25] rounded py-2 text-sm hover:bg-[#fff4e6] transition flex items-center justify-center gap-2"
+                                    >
+                                        <IoTrashBinOutline className="text-lg" />
+
+                                    </button>
+                                    <button className="w-full bg-[#FC9D25] text-white rounded py-2 text-sm hover:bg-[#e88a1c] transition flex items-center justify-center gap-2">
+                                        <TiShoppingCart className="text-lg" />
+                                        Comprar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     {selectedProduct && (
@@ -369,18 +556,13 @@ export default function ProductGroups() {
                                 {/* Modal de quantidades*/}
                                 <div className="mt-6 flex justify-end gap-2 "
                                 >
+
                                     <button
                                         onClick={() => {
-                                            setCartItems(prev => {
-                                                const existing = prev.find(item => item.id === selectedProduct.id);
-                                                if (existing) {
-                                                    return prev.map(item => item.id === selectedProduct.id ? { ...item, count: item.count + count } : item);
-                                                }
-                                                else {
-                                                    return [...prev, { ...selectedProduct, count }];
-                                                }
-                                            });
-                                            closeModal();
+                                            if (count > 0) {
+                                                addToCart({ ...selectedProduct, quantity: count });
+                                                setSelectedProduct(null); // fecha o modal
+                                            }
                                         }} className="px-6 py-2 m-5 mt-0 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200">
                                         {isLoading ? <Spinner size="sm" color="white" /> : 'Save'}
                                     </button>
@@ -493,13 +675,17 @@ export default function ProductGroups() {
                                                             <td className="border border-[#EDEBEB] px-4 py-2 text-gray-700">
                                                                 <span
                                                                     className="cursor-pointer hover:underline text-[#191919]"
-                                                                    onClick={() => setSelectedProduct(product)}
+                                                                    onClick={() => {
+                                                                        setSelectedProduct(product); // abre modal
+                                                                        setCount(1); // resetar quantidade
+                                                                    }}
+
                                                                 >
                                                                     {product.name}
                                                                 </span>
                                                             </td>
-                                                            <td className="border border-[#EDEBEB] px-4 py-2 text-right text-gray-500">
-                                                                ...€
+                                                            <td className="px-4 py-2">
+                                                                {product.price?.toFixed(2) || ''}
                                                             </td>
                                                         </tr>
                                                     ))}

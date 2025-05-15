@@ -26,7 +26,6 @@ export default function ProductGroups() {
     const [loading, setLoading] = useState(true)
     const [propertyID, setPropertyID] = useState(null)
     const [selectedProduct, setSelectedProduct] = useState(null)
-    const [count, setCount] = useState(1)
     const [cartOpen, setCartOpen] = useState(false)
     const [cartItems, setCartItems] = useState([])
     const [familiesWithProducts, setFamiliesWithProducts] = useState([]);
@@ -96,12 +95,21 @@ export default function ProductGroups() {
         console.log("Cart updated:", cartItems);
     }, [cartItems]);
 
-    const [quantities, setQuantities] = useState(
-        cartItems.reduce((acc, item) => {
+    const [quantities, setQuantities] = useState(() => {
+        return cartItems.reduce((acc, item) => {
             acc[item.id] = item.quantity || 1;
             return acc;
-        }, {})
-    );
+        }, {});
+    });
+
+    useEffect(() => {
+        setQuantities(
+            cartItems.reduce((acc, item) => {
+                acc[item.id] = item.quantity || 1;
+                return acc;
+            }, {})
+        );
+    }, [cartItems]);
 
     const removeItem = (id) => {
         setCartItems((prev) => prev.filter((item) => item.id !== id));
@@ -133,6 +141,10 @@ export default function ProductGroups() {
         fetchPropertyID()
     }, [])
 
+    const [count, setCount] = useState(() => {
+        return selectedProduct?.id ? (quantities[selectedProduct.id] || 1) : 1;
+    });
+
     //Busca grupos e produtos quando o propertyID estiver disponivel
     useEffect(() => {
         if (!propertyID) {
@@ -155,7 +167,7 @@ export default function ProductGroups() {
 
                 const precoMap = new Map();
                 precos.forEach((preco) => {
-                    const key = String(preco.VCodProd || preco.vCodigo).trim();
+                    const key = String(preco.VCodprod).trim();  // usar VCodprod (mesmo que VPRODUTO na api produtos)
                     const value = parseFloat(String(preco.npreco).replace(',', '.')) || 0;
                     precoMap.set(key, value);
                 });
@@ -164,9 +176,9 @@ export default function ProductGroups() {
                     const productsForGroup = products
                         .filter((p) => String(p.VCodGrfam) === String(group.VCodGrFam))
                         .map((p, index) => {
-                            const id = p?.VCodProd ? String(p.VCodProd) : `product-${index}`;
+                            const id = p?.VPRODUTO ? String(p.VPRODUTO) : `product-${index}`;
                             const name = p?.VDESC1?.trim() || 'Unnamed Product';
-                            const price = precoMap.get(String(p.VCodProd)) || 0;
+                            const price = precoMap.get(String(p.VPRODUTO)) || 0;
 
                             return { id, name, price };
                         });
@@ -289,6 +301,7 @@ export default function ProductGroups() {
             fetchData(); // Fetch dashboard data when status or isConfirmed changes
         }
     }, [status, isConfirmed]); // Fetch data again when the session or confirmation status changes
+
 
     if (status === "loading" || loading) {
         return <p className="text-center text-lg">Carregando...</p>;
@@ -448,35 +461,59 @@ export default function ProductGroups() {
                                                     <div>
                                                         <p className="text-sm font-medium">{item.name}</p>
 
-                                                        <div className="flex items-center justify-center gap-2 mt-2 bg-white rounded-md shadow border w-fit">
+                                                        <div className="flex items-center rounded overflow-hidden border border-gray-200 w-max">
                                                             <button
-                                                                onClick={() =>
-                                                                    setQuantities((prev) => ({
-                                                                        ...prev,
-                                                                        [item.id]: Math.max(1, prev[item.id] - 1),
-                                                                    }))
-                                                                }
-                                                                className="px-3.5 py-1 bg-white text-[#191919] rounded hover:bg-gray-400 transition"
+                                                                className="px-3.5 py-1.5 bg-white text-[#191919] hover:bg-gray-300 transition"
+
+                                                                onClick={() => {
+                                                                    setQuantities(prev => {
+                                                                        const newQuantity = Math.max(1, (prev[item.id] || 1) - 1);
+
+                                                                        // Atualiza a quantidade no cartItems também
+                                                                        setCartItems(cartPrev =>
+                                                                            cartPrev.map(ci =>
+                                                                                ci.id === item.id ? { ...ci, quantity: newQuantity } : ci
+                                                                            )
+                                                                        );
+
+                                                                        return {
+                                                                            ...prev,
+                                                                            [item.id]: newQuantity,
+                                                                        };
+                                                                    });
+                                                                }}
                                                             >
                                                                 -
                                                             </button>
 
-                                                            <span className="text-xl font-medium text-[#191919] min-w-[24px] text-center">
-                                                                {quantities[item.id]}
+                                                            <span className="px-4 py-1 bg-white text-xl font-medium text-[#191919] border-gray-300">
+                                                                {quantities[item.id] || 1}
                                                             </span>
 
                                                             <button
-                                                                onClick={() =>
-                                                                    setQuantities((prev) => ({
-                                                                        ...prev,
-                                                                        [item.id]: prev[item.id] + 1,
-                                                                    }))
-                                                                }
-                                                                className="px-3 py-1 bg-white text-[#191919] rounded hover:bg-gray-400 transition"
+                                                                className="px-3.5 py-1.5 bg-white text-[#191919] hover:bg-gray-300 transition"
+
+                                                                onClick={() => {
+                                                                    setQuantities(prev => {
+                                                                        const newQuantity = (prev[item.id] || 1) + 1;
+
+                                                                        setCartItems(cartPrev =>
+                                                                            cartPrev.map(ci =>
+                                                                                ci.id === item.id ? { ...ci, quantity: newQuantity } : ci
+                                                                            )
+                                                                        );
+
+                                                                        return {
+                                                                            ...prev,
+                                                                            [item.id]: newQuantity,
+                                                                        };
+                                                                    });
+                                                                }}
                                                             >
                                                                 +
                                                             </button>
                                                         </div>
+
                                                     </div>
 
                                                     <div className="flex flex-col items-end justify-between min-w-[70px] space-y-2">
@@ -537,20 +574,30 @@ export default function ProductGroups() {
                                     </button>
                                 </div>
 
-                                <div className="flex items-left justify-left space-x-4 m-5">
-                                    <button
-                                        onClick={() => setCount((prev) => Math.max(1, prev - 1))}
-                                        className="px-3 py-1 bg-gray-300 text-[#191919] rounded hover:bg-gray-400 transition"
-                                    >
-                                        -
-                                    </button>
-                                    <span className="text-xl font-medium text-[#191919]">{count}</span>
-                                    <button
-                                        onClick={() => setCount((prev) => prev + 1)}
-                                        className="px-3 py-1 bg-gray-300 text-[#191919] rounded hover:bg-gray-400 transition"
-                                    >
-                                        +
-                                    </button>
+                                <div className="flex items-center justify-center space-x-33 m-5">
+                                    {/* Preço */}
+                                    <div className="text-lg text-[#191919] font-semibold whitespace-nowrap">
+                                        Price: {(selectedProduct?.price).toFixed(2)} €
+                                    </div>
+
+                                    {/* Seletor de quantidade */}
+                                    <div className="flex items-center rounded overflow-hidden border border-gray-200 w-max">
+                                        <button
+                                            onClick={() => setCount((prev) => Math.max(1, prev - 1))}
+                                            className="px-4 py-1.5 bg-white text-[#191919] hover:bg-gray-300 transition"
+                                        >
+                                            -
+                                        </button>
+                                        <span className="px-4 py-1 bg-white text-xl font-medium text-[#191919] border-gray-300">
+                                            {count}
+                                        </span>
+                                        <button
+                                            onClick={() => setCount((prev) => prev + 1)}
+                                            className="px-3.5 py-1.5 bg-white text-[#191919] hover:bg-gray-300 transition"
+                                        >
+                                            +
+                                        </button>
+                                    </div>
                                 </div>
 
                                 {/* Modal de quantidades*/}
@@ -661,7 +708,7 @@ export default function ProductGroups() {
                                                         <th className="border border-[#EDEBEB] px-4 py-2 text-left">
                                                             Product
                                                         </th>
-                                                        <th className="border border-[#EDEBEB] px-4 py-2 text-right">
+                                                        <th className="border border-[#EDEBEB] px-4 py-2 text-left">
                                                             Price
                                                         </th>
                                                     </tr>
@@ -684,9 +731,8 @@ export default function ProductGroups() {
                                                                     {product.name}
                                                                 </span>
                                                             </td>
-                                                            <td className="px-4 py-2">
-                                                                {product.price?.toFixed(2) || ''}
-                                                            </td>
+                                                            
+                                                             <td className="border border-[#EDEBEB] px-3 py-2 text-right">{product.price.toFixed(2)} €</td>
                                                         </tr>
                                                     ))}
                                                 </tbody>

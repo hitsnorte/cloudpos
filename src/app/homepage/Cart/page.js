@@ -8,6 +8,7 @@ import { TiShoppingCart } from 'react-icons/ti'
 import { useRouter } from "next/navigation";
 import { IoTrashBinOutline } from "react-icons/io5";
 import { ChevronDown, ChevronRight } from 'lucide-react'
+import { fetchIva } from '@/src/lib/apiiva';
 import { fetchSubfamily } from '@/src/lib/apisubfamily';
 import { fetchDashboard } from '@/src/lib/apidashboard';
 import { fetchClassepreco } from '@/src/lib/apiclassepreco';
@@ -155,16 +156,23 @@ export default function ProductGroups() {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const [groups, families, subfamilies, products, classeprecos, precos] = await Promise.all([
+                const [groups, families, subfamilies, products, classeprecos, precos, ivas] = await Promise.all([
                     fetchGrup(),
                     fetchFamily(),
                     fetchSubfamily(),
                     fetchProduct(),
                     fetchClassepreco(),
                     fetchPreco(),
+                    fetchIva(),
                 ]);
 
-
+                const ivaMap = new Map();
+                ivas.forEach((iva) => {
+                    ivaMap.set(String(iva.VCODI), {
+                        percentage: iva.NPERC,
+                        description: iva.VDESC,
+                    });
+                });
                 const precoMap = new Map();
                 precos.forEach((preco) => {
                     const key = String(preco.VCodprod).trim();  // usar VCodprod (mesmo que VPRODUTO na api produtos)
@@ -179,8 +187,15 @@ export default function ProductGroups() {
                             const id = p?.VPRODUTO ? String(p.VPRODUTO) : `product-${index}`;
                             const name = p?.VDESC1?.trim() || 'Unnamed Product';
                             const price = precoMap.get(String(p.VPRODUTO)) || 0;
+                            const iva = ivaMap.get(String(p.VCodIva)) || { percentage: 0, description: "IVA desconhecido" };
 
-                            return { id, name, price };
+                            return {
+                                id,
+                                name,
+                                price,
+                                iva: iva.percentage,
+                                ivaDescription: iva.description,
+                            };
                         });
 
                     return {
@@ -304,11 +319,11 @@ export default function ProductGroups() {
 
 
     if (status === "loading" || loading) {
-        return <p className="text-center text-lg">Carregando...</p>;
+        return <p className="text-center text-sm">Carregando...</p>;
     }
 
     if (!dashboardData) {
-        return <p className="text-center text-lg">Loading dashboard...</p>;
+        return <p className="text-center text-sm">Loading dashboard...</p>;
     }
 
     const cardPaths = [
@@ -353,7 +368,7 @@ export default function ProductGroups() {
                                         <p className="text-5xl font-bold text-[#FC9D25] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                                             <TiShoppingCart />
                                         </p>
-                                        <p className="text-center h-13 text-lg text-gray-600 absolute bottom-4 left-1/2 transform -translate-x-1/2">
+                                        <p className="text-center h-13 text-sm text-gray-600 absolute bottom-4 left-1/2 transform -translate-x-1/2">
                                             {card.label}
                                         </p>
                                     </div>
@@ -445,25 +460,26 @@ export default function ProductGroups() {
                         >
                             {/* Cabeçalho */}
                             <div className="flex items-center justify-between p-3 border-b">
-                                <h2 className="text-xl font-semibold">O seu carrinho</h2>
-                                <button onClick={toggleSidebar} className="text-2xl font-bold text-gray-600 hover:text-black">&times;</button>
+                                <h2 className="text-sm font-semibold">O seu carrinho</h2>
+                                <button onClick={toggleSidebar} className="text-sm font-bold text-gray-600 hover:text-black">&times;</button>
                             </div>
 
                             {/* Conteúdo do Carrinho */}
                             <div className="p-7 flex flex-col h-[calc(100%-150px)] overflow-y-auto">
                                 {cartItems.length === 0 ? (
-                                    <p className="text-gray-500">O seu carrinho está vazio.</p>
+                                    <p className="text-sm">O seu carrinho está vazio.</p>
                                 ) : (
                                     cartItems.map((item, idx) => (
                                         <div key={idx} className="flex justify-between items-center py-3 border-b">
                                             <div className="w-full">
                                                 <div className="flex justify-between items-start">
                                                     <div>
-                                                        <p className="text-sm font-medium">{item.name}</p>
-
+                                                        <p className="text-sm font-medium">
+                                                            {item.name} - <span className="text-black font-semibold">{item.price.toFixed(2)}€</span>
+                                                        </p>
                                                         <div className="flex items-center rounded overflow-hidden border border-gray-200 w-max">
                                                             <button
-                                                                className="px-3.5 py-1.5 bg-white text-[#191919] hover:bg-gray-300 transition"
+                                                                className="px-4 py-1.5 bg-white text-[#191919] hover:bg-gray-300 transition"
 
                                                                 onClick={() => {
                                                                     setQuantities(prev => {
@@ -542,18 +558,18 @@ export default function ProductGroups() {
                             < div className="absolute bottom-0 w-full bg-white p-4 border-t" >
                                 <div className="flex justify-between mb-4">
                                     <span className="text-sm font-medium">Total:</span>
-                                    <span className="text-lg font-bold">{total.toFixed(2)} €</span>
+                                    <span className="text-sm font-bold">{total.toFixed(2)} €</span>
                                 </div>
                                 <div className="flex gap-2">
                                     <button
                                         onClick={clearCart} // função que deves ter para limpar o carrinho
                                         className="w-12 border border-[#FC9D25] text-[#FC9D25] rounded py-2 text-sm hover:bg-[#fff4e6] transition flex items-center justify-center gap-2"
                                     >
-                                        <IoTrashBinOutline className="text-lg" />
+                                        <IoTrashBinOutline className="text-sm" />
 
                                     </button>
                                     <button className="w-full bg-[#FC9D25] text-white rounded py-2 text-sm hover:bg-[#e88a1c] transition flex items-center justify-center gap-2">
-                                        <TiShoppingCart className="text-lg" />
+                                        <TiShoppingCart className="text-sm" />
                                         Comprar
                                     </button>
                                 </div>
@@ -574,10 +590,16 @@ export default function ProductGroups() {
                                     </button>
                                 </div>
 
-                                <div className="flex items-center justify-center space-x-33 m-5">
+                                <div className="flex items-center justify-center  space-x-28 m-5">
                                     {/* Preço */}
-                                    <div className="text-lg text-[#191919] font-semibold whitespace-nowrap">
-                                        Price: {(selectedProduct?.price).toFixed(2)} €
+                                    <div className="flex flex-col items-left justify-center  space-x-15 m-5 space-y-1">
+                                        <div className="text-l text-[#191919] font-semibold whitespace-nowrap">
+                                            Price: €{(selectedProduct?.price).toFixed(2)}/un
+                                        </div>
+
+                                        <div className="text-l text-red-600 font-semibold whitespace-nowrap">
+                                            IVA: {selectedProduct?.iva}%
+                                        </div>
                                     </div>
 
                                     {/* Seletor de quantidade */}
@@ -640,7 +662,10 @@ export default function ProductGroups() {
                                                 className="flex justify-between items-center border-b pb-2"
                                             >
                                                 <div>
-                                                    <p className="font-medium text-[#191919] px-5">{item.name}</p>
+                                                    <p className="font-medium text-[#191919] px-5">
+                                                        {item.name} - <span className="text-[#FC9D25] font-semibold">{item.price.toFixed(2)}€</span>
+                                                    </p>
+
                                                     <div className="px-5 text-sm text-gray-500 flex items-center gap-2">
                                                         Qty:
                                                         <input
@@ -661,6 +686,7 @@ export default function ProductGroups() {
                                                         />
                                                     </div>
                                                 </div>
+
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-[#FC9D25] font-bold">...€</span>
                                                     <button
@@ -731,8 +757,8 @@ export default function ProductGroups() {
                                                                     {product.name}
                                                                 </span>
                                                             </td>
-                                                            
-                                                             <td className="border border-[#EDEBEB] px-3 py-2 text-right">{product.price.toFixed(2)} €</td>
+
+                                                            <td className="border border-[#EDEBEB] px-3 py-2 text-right">{product.price.toFixed(2)} €</td>
                                                         </tr>
                                                     ))}
                                                 </tbody>

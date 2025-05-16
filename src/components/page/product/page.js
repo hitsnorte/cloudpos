@@ -391,7 +391,7 @@ const DataProduct = () => {
         activo: editProduct.activo,
         IVA: selectedIva,
         vultaltpor: editProduct.vultaltpor,
-        dultaltem: editProduct.dUltAltEm
+        dultaltem: editProduct.dUltAltEm,
       };
 
       console.log('Enviando para API:', updatedProductData);
@@ -697,12 +697,16 @@ const DataProduct = () => {
     return dateString.split('T')[0] || dateString.split(' ')[0];
   };
 
-  const formatToInputDate = (dateString) => {
-    if (!dateString) return '';
-    return dateString.slice(0, 10);  //muda o formato da data
+  //Ativa/Desativa as checkbox localmente , NENHUMA ALTERAÇÂO É FEITA NA BD
+  const toggleIndisponivel = (id) => {
+    setFilteredPrices((prevPrices) =>
+        prevPrices.map((price) =>
+            price.vCodigo === id
+                ? { ...price, Indisponivel: !price.Indisponivel }
+                : price
+        )
+    );
   };
-  console.log('editProduct.dUltAltEm:', editProduct?.dUltAltEm);
-  console.log('Formatted date:', formatToInputDate(editProduct?.dUltAltEm));
 
   return (
     <div className="p-4 pb-10">
@@ -1211,7 +1215,8 @@ const DataProduct = () => {
                                     </select>
                                   </td>
                                   <td className="px-4 py-2 text-center">
-                                    <input type="checkbox" checked={!price.Indisponivel} />
+                                    <input type="checkbox" checked={!price.Indisponivel}
+                                            onChange={() => toggleIndisponivel(price.vCodigo)}/>
                                   </td>
                                   <td className="px-4 py-2">
                                     <HiDotsVertical size={18} />
@@ -1250,14 +1255,9 @@ const DataProduct = () => {
                           <label htmlFor="vUltalpor" className="block text-sm font-medium text-[#191919] mb-1">
                             Last changed by:
                           </label>
-                          <input
-                              id="vUltalpor"
-                              type="text"
-                              value={editProduct?.vultaltpor || ''}
-                              onChange={(e) => setEditProduct({ ...editProduct, vultaltpor: e.target.value })}
-                              placeholder="Last changed by"
-                              className="w-full h-[30px] px-3 bg-gray-200 rounded text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-gray-500"
-                          />
+                          <div className="w-full h-[30px] px-3 bg-gray-100 rounded text-sm text-gray-700 flex items-center">
+                            {editProduct?.vultaltpor || '—'}
+                          </div>
                         </div>
 
                         {/* ultima vez alterado em: */}
@@ -1265,13 +1265,9 @@ const DataProduct = () => {
                           <label htmlFor="dAlteradoem" className="block text-sm font-medium text-[#191919] mb-1">
                             Changed on:
                           </label>
-                          <input
-                            id="dAlteradoem"
-                            type="date"
-                            value={formatToInputDate(editProduct?.dUltAltEm)}
-                            onChange={(e) => setEditProduct({ ...editProduct, dultaltem: e.target.value })}
-                            className="w-full h-[30px] px-3 bg-gray-200 rounded text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-gray-500"
-                            />
+                          <div className="w-full h-[30px] px-3 bg-gray-100 rounded text-sm text-gray-700 flex items-center">
+                            {formatDateOnly(editProduct?.dultaltem)}
+                          </div>
                         </div>
                       </div>
                     </form>

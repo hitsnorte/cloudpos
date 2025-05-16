@@ -1,4 +1,4 @@
-// src/app/api/cloudproducts/route.js
+// src/app/api/subfamily/route.js
 import prisma from '@/src/lib/prisma';
 
 export async function GET(request) {

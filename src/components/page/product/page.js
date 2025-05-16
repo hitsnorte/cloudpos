@@ -90,16 +90,15 @@ const DataProduct = () => {
   };
 
   const handleEditModalClose = () => {
-    // Reset tooltip when modal is closed
-    setShowFamilyTooltip(false); // Close tooltip
-    setFamilyName(''); // Reset family name
-    setSubFam(''); // Reset subfamily name
-    setLoadingFamily(false); // Reset loading state for family
+
+    setFamilyName('');
+    setSubFam('');
+    setLoadingFamily(false);
     setLoadingSubFam(true);
     setGroup(false);
     setLoadingGroup(false);
 
-    // Call original modal onClose (from useDisclosure)
+
     onEditModalClose();
   };
 
@@ -392,7 +391,7 @@ const DataProduct = () => {
         activo: editProduct.activo,
         IVA: selectedIva,
         vultaltpor: editProduct.vultaltpor,
-        dultaltem: editProduct.dultaltem
+        dultaltem: editProduct.dUltAltEm
       };
 
       console.log('Enviando para API:', updatedProductData);
@@ -598,8 +597,12 @@ const DataProduct = () => {
 
   const getPeriodDescription = (code) => {
     const period = periods.find(p => p.vcodi === code);
-    return period ? period.DDataFim : code || '—';
+    if (!period) return code || '—';
+
+    // Mostra só a data
+    return period.DDataFim.split('T')[0] || period.DDataFim.split(' ')[0];
   };
+
 
   //Mostrar descrição das horas na tabela
   const [hours, setHours] = useState([]);
@@ -619,8 +622,12 @@ const DataProduct = () => {
 
   const getHourDescription = (code) => {
     const hour = hours.find(h => h.Vcodi === code);
-    return hour ? hour.VHoraFim : code || '—';
+    if (!hour) return code || '—';
+
+
+    return hour.VHoraFim.slice(0, 5);
   };
+
 
   //Carrega os IVA para o dropdown
   const [ivaOptions, setIvaOptions] = useState([]);
@@ -685,7 +692,17 @@ const DataProduct = () => {
     }
   }, [isEditModalOpen, editProduct]);
 
+  const formatDateOnly = (dateString) => {
+    if (!dateString) return '—';
+    return dateString.split('T')[0] || dateString.split(' ')[0];
+  };
 
+  const formatToInputDate = (dateString) => {
+    if (!dateString) return '';
+    return dateString.slice(0, 10);  //muda o formato da data
+  };
+  console.log('editProduct.dUltAltEm:', editProduct?.dUltAltEm);
+  console.log('Formatted date:', formatToInputDate(editProduct?.dUltAltEm));
 
   return (
     <div className="p-4 pb-10">
@@ -967,7 +984,7 @@ const DataProduct = () => {
               <ModalHeader className="rounded bg-[#FC9D25] flex justify-between items-center">
                 <div className="text-xl font-bold text-white">Edit product</div>
                 <Button
-                  onClick={onClose}
+                  onClick={onEditModalClose}
                   className="text-white bg-transparent border-0 text-2xl p-0"
                   aria-label="Close"
                 >
@@ -1001,7 +1018,7 @@ const DataProduct = () => {
                           {/* Tipo de produto */}
                           <div className="flex flex-col w-1/3">
                             <label className="text-sm font-medium text-[#191919] mb-1">Prod. Type</label>
-                            <div className="bg-gray-100 p-1 rounded text-sm text-gray-700">
+                            <div className="bg-gray-200 p-1 rounded text-sm text-gray-700">
                               {editProduct?.vtipprod || '—'}
                             </div>
                           </div>
@@ -1009,7 +1026,7 @@ const DataProduct = () => {
                           {/* Tipo de produto */}
                           <div className="flex flex-col w-1/3">
                             <label className="text-sm font-medium text-[#191919] mb-1">Type</label>
-                            <div className="bg-gray-100 p-1 rounded text-sm text-gray-700">
+                            <div className="bg-gray-200 p-1 rounded text-sm text-gray-700">
                               {editProduct?.ProductType || '—'}
                             </div>
                           </div>
@@ -1047,12 +1064,12 @@ const DataProduct = () => {
                       <div className="flex justify-between gap-4 mb-4">
                         {/* Sub-Família */}
                         <div className="w-1/3">
-                          <label htmlFor="subFamilia" className="text-sm font-medium text-[#191919] mb-1 block">
-                            Sub-Família
+                          <label htmlFor="subFamilia" className="text-sm font-medium text-[#191919] mb-1 block ">
+                            Sub-Family
                           </label>
                           <div
                               id="subFamilia"
-                              className="w-full p-1 bg-gray-100 rounded text-sm text-gray-700"
+                              className="w-full p-1 bg-gray-200 rounded text-sm text-gray-700"
                           >
                             {loadingsubfam ? 'Loading...' : subfam || 'Not associated'}
                           </div>
@@ -1065,7 +1082,7 @@ const DataProduct = () => {
                           </label>
                           <div
                               id="family"
-                              className="w-full p-1 bg-gray-100 rounded text-sm text-gray-700"
+                              className="w-full p-1 bg-gray-200 rounded text-sm text-gray-700"
                           >
                             {loadingFamily ? 'Loading...' : FamilyName || 'Unknown'}
                           </div>
@@ -1078,7 +1095,7 @@ const DataProduct = () => {
                           </label>
                           <div
                               id="group"
-                              className="w-full p-1 bg-gray-100 rounded text-sm text-gray-700"
+                              className="w-full p-1 bg-gray-200 rounded text-sm text-gray-700"
                           >
                             {loadingGroup ? 'Loading...' : group || 'Group is not associated'}
                           </div>
@@ -1088,7 +1105,7 @@ const DataProduct = () => {
                       {/* Referência e IVA */}
                       <div className="flex justify-between gap-4">
                         {/* Referência */}
-                        <div className="w-1/2">
+                        <div className="w-1/2 flex flex-col justify-end">
                           <label htmlFor="referencia" className="block text-sm font-medium text-[#191919] mb-1">
                             Reference
                           </label>
@@ -1098,7 +1115,7 @@ const DataProduct = () => {
                               value={editProduct?.VREFERENCIA || ''}
                               onChange={(e) => setEditProduct({ ...editProduct, VREFERENCIA: e.target.value })}
                               placeholder="Insert reference"
-                              className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                              className="w-full h-[40px] px-3 relative -top-[2px] bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
                           />
                         </div>
 
@@ -1167,15 +1184,16 @@ const DataProduct = () => {
                                 <tr key={index} className="bg-gray-100">
                                   <td className="px-4 py-2">{getClassName(price.VCodClas)}</td>
                                   <td className="px-4 py-2">{price.cexpName || '-'}</td>
-                                  <td className="px-4 py-2">{getPeriodDescription(price.VCodPeri)}</td>
+                                  <td className="px-4 py-2 min-w-[8rem]">{getPeriodDescription(price.VCodPeri)}</td>
                                   <td className="px-4 py-2">{getHourDescription(price.VCodInthoras)}</td>
                                   <td className="px-4 py-2">
                                     <input
                                         type="text"
                                         value={price.nValUnit?.toFixed(2) || ''}
                                         onChange={handlePvpChange}
-                                        className="border rounded px-2 py-1 w-full"
+                                        className="border rounded px-2 py-1 block w-full"
                                     />
+
                                   </td>
                                   <td className="px-4 py-2">0.00€</td>
                                   <td className="px-4 py-2">
@@ -1212,7 +1230,7 @@ const DataProduct = () => {
                           <label className="block text-sm font-medium text-[#191919] mb-1">
                             Created by:
                           </label>
-                          <div className="w-full p-1 bg-gray-100 rounded text-sm text-gray-700">
+                          <div className="w-full h-[30px] px-3 bg-gray-100 rounded text-sm text-gray-700 flex items-center">
                             {editProduct?.vcriadopor || '—'}
                           </div>
                         </div>
@@ -1222,8 +1240,8 @@ const DataProduct = () => {
                           <label className="block text-sm font-medium text-[#191919] mb-1">
                             Created on:
                           </label>
-                          <div className="w-full p-1 bg-gray-100 rounded text-sm text-gray-700">
-                            {editProduct?.dcriadoem || '—'}
+                          <div className="w-full h-[30px] px-3 bg-gray-100 rounded text-sm text-gray-700 flex items-center">
+                            {formatDateOnly(editProduct?.dcriadoem)}
                           </div>
                         </div>
 
@@ -1238,7 +1256,7 @@ const DataProduct = () => {
                               value={editProduct?.vultaltpor || ''}
                               onChange={(e) => setEditProduct({ ...editProduct, vultaltpor: e.target.value })}
                               placeholder="Last changed by"
-                              className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                              className="w-full h-[30px] px-3 bg-gray-200 rounded text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-gray-500"
                           />
                         </div>
 
@@ -1248,12 +1266,12 @@ const DataProduct = () => {
                             Changed on:
                           </label>
                           <input
-                              id="dAlteradoem"
-                              type="date"
-                              value={editProduct?.dultaltem || ''}
-                              onChange={(e) => setEditProduct({ ...editProduct, dultaltem: e.target.value })}
-                              className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
-                          />
+                            id="dAlteradoem"
+                            type="date"
+                            value={formatToInputDate(editProduct?.dUltAltEm)}
+                            onChange={(e) => setEditProduct({ ...editProduct, dultaltem: e.target.value })}
+                            className="w-full h-[30px] px-3 bg-gray-200 rounded text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-gray-500"
+                            />
                         </div>
                       </div>
                     </form>

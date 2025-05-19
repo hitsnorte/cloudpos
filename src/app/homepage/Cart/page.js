@@ -578,61 +578,72 @@ export default function ProductGroups() {
                     </div>
 
                     {selectedProduct && (
-                        <div className="absolute top-1/3 left-1/3 w-100 bg-white shadow-xl rounded-lg ">
+                        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-115 bg-white shadow-xl rounded-lg z-50">
                             <div className="bg-[#FAFAFA] w-full ">
-                                <div className="flex justify-between items-center mb-4 px-4 py-2 bg-[#FC9D25] rounded-t-lg">
-                                    <h2 className=" text-xl font-semibold text-white ">
-                                        {selectedProduct.name}
+                                <div className="flex justify-between items-center mb-4 px-4 py-3 bg-[#FC9D25] rounded-t-lg">
+                                    <h2 className=" text-l font-semibold text-white ml-1 ">
+                                        Add product
                                     </h2>
-
-                                    <button onClick={closeModal} className="text-white text-xl">
-                                        x
-                                    </button>
                                 </div>
-
-                                <div className="flex items-center justify-center  space-x-28 m-5">
+                                <h2 className="text-l font-semibold text-black ml-5 mb-5">
+                                    {selectedProduct.name
+                                        .toLowerCase()
+                                        .split(' ')
+                                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                                        .join(' ')}
+                                </h2>
+                                <div className="flex items-center justify-left px-6">
                                     {/* Preço */}
-                                    <div className="flex flex-col items-left justify-center  space-x-15 m-5 space-y-1">
-                                        <div className="text-l text-[#191919] font-semibold whitespace-nowrap">
-                                            Price: €{(selectedProduct?.price).toFixed(2)}/un
+                                    <div className="flex flex-col ">
+                                        <div className="text-xl text-[#FC9D25] font-semibold whitespace-nowrap">
+                                            €{(selectedProduct?.price).toFixed(2)}/un
                                         </div>
 
-                                        <div className="text-l text-red-600 font-semibold whitespace-nowrap">
-                                            IVA: {selectedProduct?.iva}%
+                                        <div className="text-sm text-black whitespace-nowrap">
+                                            Iva {selectedProduct?.iva?.toFixed(2)}%
                                         </div>
                                     </div>
 
                                     {/* Seletor de quantidade */}
-                                    <div className="flex items-center rounded overflow-hidden border border-gray-200 w-max">
+                                    <div className="flex items-center rounded overflow-hidden border border-gray-200 w-max fixed ml-72 -mt-4">
                                         <button
                                             onClick={() => setCount((prev) => Math.max(1, prev - 1))}
-                                            className="px-4 py-1.5 bg-white text-[#191919] hover:bg-gray-300 transition"
+                                            className="px-4 py-1 bg-white text-[#FC9D25] hover:bg-gray-300 transition"
                                         >
-                                            -
+                                            <span className="inline-block transform scale-150 font-thin">-</span>
                                         </button>
-                                        <span className="px-4 py-1 bg-white text-xl font-medium text-[#191919] border-gray-300">
-                                            {count}
+                                        <span className="px-2 py-1 bg-white text-sm font-medium text-[#191919] border-gray-300">
+                                            {count} un
                                         </span>
                                         <button
                                             onClick={() => setCount((prev) => prev + 1)}
-                                            className="px-3.5 py-1.5 bg-white text-[#191919] hover:bg-gray-300 transition"
+                                            className="px-3.5 py-1 bg-white text-[#FC9D25] hover:bg-gray-300 transition"
                                         >
-                                            +
+                                            <span className="inline-block transform scale-150 font-thin">+</span>
                                         </button>
                                     </div>
                                 </div>
 
                                 {/* Modal de quantidades*/}
-                                <div className="mt-6 flex justify-end gap-2 "
-                                >
+                                <div className="flex justify-end space-x-3 ml-8 mb-5 m-5 mr-7">
+                                    {/* Botão Close */}
+                                    <button
+                                        onClick={() => setSelectedProduct(null)}
+                                        className="px-10.5 py-1 bg-[#D3D3D3] text-white rounded-md hover:bg-gray font-medium transition duration-200"
+                                    >
+                                        Close
+                                    </button>
 
+                                    {/* Botão Save */}
                                     <button
                                         onClick={() => {
                                             if (count > 0) {
                                                 addToCart({ ...selectedProduct, quantity: count });
-                                                setSelectedProduct(null); // fecha o modal
+                                                setSelectedProduct(null);
                                             }
-                                        }} className="px-6 py-2 m-5 mt-0 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200">
+                                        }}
+                                        className="px-10.5 py-1 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
+                                    >
                                         {isLoading ? <Spinner size="sm" color="white" /> : 'Save'}
                                     </button>
                                 </div>

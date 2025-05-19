@@ -12,6 +12,7 @@ import { fetchIva } from '@/src/lib/apiiva';
 import { fetchSubfamily } from '@/src/lib/apisubfamily';
 import { fetchDashboard } from '@/src/lib/apidashboard';
 import { fetchClassepreco } from '@/src/lib/apiclassepreco';
+import { CiTrash } from "react-icons/ci";
 import { fetchPreco } from "@/src/lib/apipreco";
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import { Card, CardBody } from "@heroui/react";
@@ -28,12 +29,14 @@ export default function ProductGroups() {
     const [propertyID, setPropertyID] = useState(null)
     const [selectedProduct, setSelectedProduct] = useState(null)
     const [cartOpen, setCartOpen] = useState(false)
-    const [cartItems, setCartItems] = useState([])
     const [familiesWithProducts, setFamiliesWithProducts] = useState([]);
     const [subfamiliesWithProducts, setSubfamiliesWithProducts] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-
+    const [cartItems, setCartItems] = useState(() => {
+        const saved = localStorage.getItem('cart');
+        return saved ? JSON.parse(saved) : [];
+    });
     const [produtos, setProdutos] = useState([]);
     const [dashboardData, setDashboardData] = useState(null);
     const router = useRouter();
@@ -145,6 +148,40 @@ export default function ProductGroups() {
     const [count, setCount] = useState(() => {
         return selectedProduct?.id ? (quantities[selectedProduct.id] || 1) : 1;
     });
+
+
+
+    // 1. Lê o carrinho salvo do localStorage na inicialização
+    useEffect(() => {
+        const saved = localStorage.getItem('cart');
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            setCartItems(parsed);
+
+            const quantityMap = {};
+            parsed.forEach(item => {
+                quantityMap[item.id] = item.quantity || 1;
+            });
+            setQuantities(quantityMap);
+        }
+    }, []);
+
+    // 2. Salva automaticamente quando cartItems muda
+    useEffect(() => {
+        console.log('Saving cart to localStorage:', cartItems);
+        localStorage.setItem('cart', JSON.stringify(cartItems));
+    }, [cartItems]);
+
+    useEffect(() => {
+        localStorage.setItem('quantities', JSON.stringify(quantities));
+    }, [quantities]);
+
+    useEffect(() => {
+        const storedQuantities = localStorage.getItem('quantities');
+        if (storedQuantities) {
+            setQuantities(JSON.parse(storedQuantities));
+        }
+    }, []);
 
     //Busca grupos e produtos quando o propertyID estiver disponivel
     useEffect(() => {
@@ -455,120 +492,107 @@ export default function ProductGroups() {
                         )}
                         {/* Sidebar Carrinho */}
                         <div
-                            className={`fixed top-0 right-0 h-full w-[400px] max-w-full bg-white shadow-lg transition-transform duration-300 z-40 ${isOpen ? 'translate-x-0' : 'translate-x-full'
+                            className={`fixed top-0 right-0 h-full w-[400px] max-w-full bg-[#F0F0F0] shadow-lg transition-transform duration-300 z-40 ${isOpen ? 'translate-x-0' : 'translate-x-full'
                                 }`}
                         >
                             {/* Cabeçalho */}
-                            <div className="flex items-center justify-between p-3 border-b">
-                                <h2 className="text-sm font-semibold">O seu carrinho</h2>
-                                <button onClick={toggleSidebar} className="text-sm font-bold text-gray-600 hover:text-black">&times;</button>
+                            <div className="flex items-center justify-between p-5 ml-1">
+                                <h2 className="text-l font-semibold ml-1">Your Shopping Cart</h2>
+                                <button onClick={toggleSidebar} className="text-l text-[#FC9D25]">
+                                    <span className="inline-block transform scale-150 font-thin mr-5">x</span>
+                                </button>
                             </div>
 
                             {/* Conteúdo do Carrinho */}
-                            <div className="p-7 flex flex-col h-[calc(100%-150px)] overflow-y-auto">
+                            <div className="p-7 flex flex-col h-[calc(100%-150px)] overflow-y-auto  -mt-5">
                                 {cartItems.length === 0 ? (
-                                    <p className="text-sm">O seu carrinho está vazio.</p>
+                                    <p className="text-sm">Your Shopping Card Is Empty.</p>
                                 ) : (
-                                    cartItems.map((item, idx) => (
-                                        <div key={idx} className="flex justify-between items-center py-3 border-b">
-                                            <div className="w-full">
+                                    <div className="bg-white rounded-l border border-white pt-2 px-4 flex flex-col">
+                                        {cartItems.map((item, idx) => (
+                                            <div
+                                                key={item.id}
+                                                className={`w-full py-4 ${idx !== cartItems.length - 1 ? "border-b border-[#EDEDED]" : "pb-7"}`}
+                                            >
                                                 <div className="flex justify-between items-start">
                                                     <div>
-                                                        <p className="text-sm font-medium">
-                                                            {item.name} - <span className="text-black font-semibold">{item.price.toFixed(2)}€</span>
-                                                        </p>
-                                                        <div className="flex items-center rounded overflow-hidden border border-gray-200 w-max">
-                                                            <button
-                                                                className="px-4 py-1.5 bg-white text-[#191919] hover:bg-gray-300 transition"
+                                                        <p className="font-semibold text-sm font-medium">
+                                                            {item.name
+                                                                .toLowerCase()
+                                                                .split(' ')
+                                                                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                                                                .join(' ')}
 
+                                                        </p>
+                                                        <div className="flex items-center rounded overflow-hidden border border-gray-200 w-max mt-2">
+                                                            <button
+                                                                className="px-3.5 py-1 bg-white text-[#FC9D25] hover:bg-gray-300 transition"
                                                                 onClick={() => {
                                                                     setQuantities(prev => {
                                                                         const newQuantity = Math.max(1, (prev[item.id] || 1) - 1);
-
-                                                                        // Atualiza a quantidade no cartItems também
                                                                         setCartItems(cartPrev =>
-                                                                            cartPrev.map(ci =>
-                                                                                ci.id === item.id ? { ...ci, quantity: newQuantity } : ci
-                                                                            )
+                                                                            cartPrev.map(ci => (ci.id === item.id ? { ...ci, quantity: newQuantity } : ci))
                                                                         );
-
-                                                                        return {
-                                                                            ...prev,
-                                                                            [item.id]: newQuantity,
-                                                                        };
+                                                                        return { ...prev, [item.id]: newQuantity };
                                                                     });
                                                                 }}
                                                             >
-                                                                -
+                                                                <span className="inline-block transform scale-150 font-thin">-</span>
                                                             </button>
-
-                                                            <span className="px-4 py-1 bg-white text-xl font-medium text-[#191919] border-gray-300">
-                                                                {quantities[item.id] || 1}
+                                                            <span className="px-1 py-1 bg-white text-sm font-medium text-[#191919] border-gray-300">
+                                                                {quantities[item.id] || 1} un
                                                             </span>
-
                                                             <button
-                                                                className="px-3.5 py-1.5 bg-white text-[#191919] hover:bg-gray-300 transition"
-
+                                                                className="px-3 py-1 bg-white text-[#FC9D25] hover:bg-gray-300 transition"
                                                                 onClick={() => {
                                                                     setQuantities(prev => {
                                                                         const newQuantity = (prev[item.id] || 1) + 1;
-
                                                                         setCartItems(cartPrev =>
-                                                                            cartPrev.map(ci =>
-                                                                                ci.id === item.id ? { ...ci, quantity: newQuantity } : ci
-                                                                            )
+                                                                            cartPrev.map(ci => (ci.id === item.id ? { ...ci, quantity: newQuantity } : ci))
                                                                         );
-
-                                                                        return {
-                                                                            ...prev,
-                                                                            [item.id]: newQuantity,
-                                                                        };
+                                                                        return { ...prev, [item.id]: newQuantity };
                                                                     });
                                                                 }}
                                                             >
-                                                                +
+                                                                <span className="inline-block transform scale-150 font-thin">+</span>
                                                             </button>
                                                         </div>
-
                                                     </div>
-
-                                                    <div className="flex flex-col items-end justify-between min-w-[70px] space-y-2">
-                                                        {/* Botão de remover */}
+                                                    <div className="flex flex-col items-end justify-between space-y-2">
                                                         <button
                                                             onClick={() => removeItem(item.id)}
                                                             className="text-red-600 hover:text-red-800"
                                                             title="Remover produto"
                                                         >
-                                                            <IoTrashBinOutline />
+                                                            <CiTrash />
                                                         </button>
-
-                                                        {/* Preço total do item */}
                                                         <p className="text-sm font-semibold text-right m-2">
-                                                            {(item.price * quantities[item.id]).toFixed(2)} €
+                                                            €{(item.price * quantities[item.id]).toFixed(2)}
                                                         </p>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    ))
+                                        ))}
+                                    </div>
                                 )}
                             </div>
 
+
                             {/* Rodapé */}
-                            < div className="absolute bottom-0 w-full bg-white p-4 border-t" >
-                                <div className="flex justify-between mb-4">
-                                    <span className="text-sm font-medium">Total:</span>
-                                    <span className="text-sm font-bold">{total.toFixed(2)} €</span>
+                            < div className="absolute bottom-0 w-full bg-white p-3 border-white" >
+                                <div className="flex justify-between mb-2">
+                                    <span className="text-sm font-bold ml-2">Total:</span>
+                                    <span className="text-sm font-bold mr-2">€{total.toFixed(2)}</span>
                                 </div>
-                                <div className="flex gap-2">
+                                <div className="flex gap-3">
                                     <button
                                         onClick={clearCart} // função que deves ter para limpar o carrinho
-                                        className="w-12 border border-[#FC9D25] text-[#FC9D25] rounded py-2 text-sm hover:bg-[#fff4e6] transition flex items-center justify-center gap-2"
+                                        className="w-12 ml-2 border border-[#ff0000] text-[#ff0000] rounded py-2 text-sm hover:bg-[#fff4e6] transition flex items-center justify-center gap-2"
                                     >
                                         <IoTrashBinOutline className="text-sm" />
 
                                     </button>
-                                    <button className="w-full bg-[#FC9D25] text-white rounded py-2 text-sm hover:bg-[#e88a1c] transition flex items-center justify-center gap-2">
+                                    <button className="w-full mr-2 bg-[#FC9D25] text-white rounded py-2 text-sm hover:bg-[#e88a1c] transition flex items-center justify-center gap-2">
                                         <TiShoppingCart className="text-sm" />
                                         Comprar
                                     </button>
@@ -592,6 +616,7 @@ export default function ProductGroups() {
                                         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
                                         .join(' ')}
                                 </h2>
+
                                 <div className="flex items-center justify-left px-6">
                                     {/* Preço */}
                                     <div className="flex flex-col ">

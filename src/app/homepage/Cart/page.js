@@ -496,7 +496,7 @@ export default function ProductGroups() {
                                 }`}
                         >
                             {/* Cabeçalho */}
-                            <div className="flex items-center justify-between p-5 ml-1">
+                            <div className="sticky top-0 z-10 bg-[#F0F0F0] flex items-center justify-between p-5 ml-1">
                                 <h2 className="text-l font-semibold ml-1">Your Shopping Cart</h2>
                                 <button onClick={toggleSidebar} className="text-l text-[#FC9D25]">
                                     <span className="inline-block transform scale-150 font-thin mr-5">x</span>
@@ -845,7 +845,11 @@ export default function ProductGroups() {
                                                                     {product.name}
                                                                 </span>
                                                             </td>
-                                                            <td className="border border-[#EDEBEB] px-4 py-2 text-right text-gray-500">...€</td>
+                                                            <td className="...">
+                                                                {product?.price != null && !isNaN(product.price)
+                                                                    ? `${Number(product.price).toFixed(2)} €`
+                                                                    : '—'}
+                                                            </td>
                                                         </tr>
                                                     ))}
                                                 </tbody>
@@ -892,7 +896,11 @@ export default function ProductGroups() {
                                                                     {product.name}
                                                                 </span>
                                                             </td>
-                                                            <td className="border border-[#EDEBEB] px-4 py-2 text-right text-gray-500">...€</td>
+                                                             <td className="...">
+                                                                {product?.price != null && !isNaN(product.price)
+                                                                    ? `${Number(product.price).toFixed(2)} €`
+                                                                    : '—'}
+                                                            </td>
                                                         </tr>
                                                     ))}
                                                 </tbody>

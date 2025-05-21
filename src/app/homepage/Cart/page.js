@@ -446,7 +446,7 @@ export default function ProductGroups() {
                         {selectedCardPath && (
                             <button
                                 onClick={() => setSelectedCardPath(null)}
-                                className="fixed top-6 right-[958] bg-[#FC9D25] text-white px-4 py-2 rounded "
+                                className="fixed top-6 right-378 bg-[#FC9D25] text-white px-4 py-2 rounded "
                             >
                                 Dashboard
                             </button>
@@ -524,40 +524,55 @@ export default function ProductGroups() {
                                                                 .join(' ')}
 
                                                         </p>
-                                                        <div className="flex items-center rounded overflow-hidden border border-gray-200 w-max mt-2">
-                                                            <button
-                                                                className="px-3.5 py-1 bg-white text-[#FC9D25] hover:bg-gray-300 transition"
-                                                                onClick={() => {
-                                                                    setQuantities(prev => {
-                                                                        const newQuantity = Math.max(1, (prev[item.id] || 1) - 1);
-                                                                        setCartItems(cartPrev =>
-                                                                            cartPrev.map(ci => (ci.id === item.id ? { ...ci, quantity: newQuantity } : ci))
-                                                                        );
-                                                                        return { ...prev, [item.id]: newQuantity };
-                                                                    });
-                                                                }}
-                                                            >
-                                                                <span className="inline-block transform scale-150 font-thin">-</span>
-                                                            </button>
-                                                            <span className="px-1 py-1 bg-white text-sm font-medium text-[#191919] border-gray-300">
-                                                                {quantities[item.id] || 1} un
-                                                            </span>
-                                                            <button
-                                                                className="px-3 py-1 bg-white text-[#FC9D25] hover:bg-gray-300 transition"
-                                                                onClick={() => {
-                                                                    setQuantities(prev => {
-                                                                        const newQuantity = (prev[item.id] || 1) + 1;
-                                                                        setCartItems(cartPrev =>
-                                                                            cartPrev.map(ci => (ci.id === item.id ? { ...ci, quantity: newQuantity } : ci))
-                                                                        );
-                                                                        return { ...prev, [item.id]: newQuantity };
-                                                                    });
-                                                                }}
-                                                            >
-                                                                <span className="inline-block transform scale-150 font-thin">+</span>
-                                                            </button>
+                                                        <div className="flex items-center justify-between mt-2 gap-4">
+                                                            {/* Quantity controls with border */}
+                                                            <div className="flex items-center rounded overflow-hidden border border-gray-200 w-max">
+                                                                <button
+                                                                    className="px-3.5 py-1 bg-white text-[#FC9D25] hover:bg-gray-300 transition"
+                                                                    onClick={() => {
+                                                                        setQuantities(prev => {
+                                                                            const newQuantity = Math.max(1, (prev[item.id] || 1) - 1);
+                                                                            setCartItems(cartPrev =>
+                                                                                cartPrev.map(ci =>
+                                                                                    ci.id === item.id ? { ...ci, quantity: newQuantity } : ci
+                                                                                )
+                                                                            );
+                                                                            return { ...prev, [item.id]: newQuantity };
+                                                                        });
+                                                                    }}
+                                                                >
+                                                                    <span className="inline-block transform scale-150 font-thin">-</span>
+                                                                </button>
+                                                                <span className="px-1 py-1 bg-white text-sm font-medium text-[#191919] border-gray-300">
+                                                                    {quantities[item.id] || 1} un
+                                                                </span>
+                                                                <button
+                                                                    className="px-3 py-1 bg-white text-[#FC9D25] hover:bg-gray-300 transition"
+                                                                    onClick={() => {
+                                                                        setQuantities(prev => {
+                                                                            const newQuantity = (prev[item.id] || 1) + 1;
+                                                                            setCartItems(cartPrev =>
+                                                                                cartPrev.map(ci =>
+                                                                                    ci.id === item.id ? { ...ci, quantity: newQuantity } : ci
+                                                                                )
+                                                                            );
+                                                                            return { ...prev, [item.id]: newQuantity };
+                                                                        });
+                                                                    }}
+                                                                >
+                                                                    <span className="inline-block transform scale-150 font-thin">+</span>
+                                                                </button>
+                                                            </div>
+
+                                                            {/* Price - OUTSIDE the bordered box */}
+                                                            <div className="px-8 text-sm text-[#FC9D25] font-semibold whitespace-nowrap">
+                                                                €{item.price.toFixed(2)}/un
+                                                            </div>
                                                         </div>
+
+
                                                     </div>
+
                                                     <div className="flex flex-col items-end justify-between space-y-2">
                                                         <button
                                                             onClick={() => removeItem(item.id)}
@@ -566,7 +581,7 @@ export default function ProductGroups() {
                                                         >
                                                             <CiTrash />
                                                         </button>
-                                                        <p className="text-sm font-semibold text-right m-2">
+                                                        <p className="text-sm font-semibold text-right m-2 mt-3">
                                                             €{(item.price * quantities[item.id]).toFixed(2)}
                                                         </p>
                                                     </div>
@@ -586,15 +601,19 @@ export default function ProductGroups() {
                                 </div>
                                 <div className="flex gap-3">
                                     <button
-                                        onClick={clearCart} // função que deves ter para limpar o carrinho
+                                        onClick={() => {
+                                            const confirmed = window.confirm("Are you sure you want to delete all items from the cart?");
+                                            if (confirmed) {
+                                                clearCart();
+                                            }
+                                        }}
                                         className="w-12 ml-2 border border-[#ff0000] text-[#ff0000] rounded py-2 text-sm hover:bg-[#fff4e6] transition flex items-center justify-center gap-2"
                                     >
-                                        <IoTrashBinOutline className="text-sm" />
-
+                                        <CiTrash className="text-sm" />
                                     </button>
                                     <button className="w-full mr-2 bg-[#FC9D25] text-white rounded py-2 text-sm hover:bg-[#e88a1c] transition flex items-center justify-center gap-2">
                                         <TiShoppingCart className="text-sm" />
-                                        Comprar
+                                        Payment
                                     </button>
                                 </div>
                             </div>
@@ -896,7 +915,7 @@ export default function ProductGroups() {
                                                                     {product.name}
                                                                 </span>
                                                             </td>
-                                                             <td className="...">
+                                                            <td className="...">
                                                                 {product?.price != null && !isNaN(product.price)
                                                                     ? `${Number(product.price).toFixed(2)} €`
                                                                     : '—'}

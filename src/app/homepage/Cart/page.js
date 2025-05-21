@@ -13,6 +13,7 @@ import { fetchSubfamily } from '@/src/lib/apisubfamily';
 import { fetchDashboard } from '@/src/lib/apidashboard';
 import { fetchClassepreco } from '@/src/lib/apiclassepreco';
 import { CiTrash } from "react-icons/ci";
+import { FaTrash } from "react-icons/fa";
 import { fetchPreco } from "@/src/lib/apipreco";
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import { Card, CardBody } from "@heroui/react";
@@ -565,7 +566,7 @@ export default function ProductGroups() {
                                                             </div>
 
                                                             {/* Price - OUTSIDE the bordered box */}
-                                                            <div className="px-8 text-sm text-[#FC9D25] font-semibold whitespace-nowrap">
+                                                            <div className="px-8 text-sm text-[#191919] whitespace-nowrap">
                                                                 €{item.price.toFixed(2)}/un
                                                             </div>
                                                         </div>
@@ -579,9 +580,9 @@ export default function ProductGroups() {
                                                             className="text-red-600 hover:text-red-800"
                                                             title="Remover produto"
                                                         >
-                                                            <CiTrash />
+                                                            <CiTrash size={20} />
                                                         </button>
-                                                        <p className="text-sm font-semibold text-right m-2 mt-3">
+                                                        <p className="text-sm font-semibold text-right m-2 mt-2">
                                                             €{(item.price * quantities[item.id]).toFixed(2)}
                                                         </p>
                                                     </div>
@@ -609,7 +610,7 @@ export default function ProductGroups() {
                                         }}
                                         className="w-12 ml-2 border border-[#ff0000] text-[#ff0000] rounded py-2 text-sm hover:bg-[#fff4e6] transition flex items-center justify-center gap-2"
                                     >
-                                        <CiTrash className="text-sm" />
+                                        <CiTrash className="text-sm" size={20} />
                                     </button>
                                     <button className="w-full mr-2 bg-[#FC9D25] text-white rounded py-2 text-sm hover:bg-[#e88a1c] transition flex items-center justify-center gap-2">
                                         <TiShoppingCart className="text-sm" />

@@ -56,7 +56,8 @@ const DataProduct = () => {
   const [isChecked, setIsChecked] = useState(false);
 
   const [sortConfig, setSortConfig] = useState({ key: 'VDesc', direction: 'asc' });
-
+  const [options, setOptions] = useState({});
+  const [loading , setLoading] = useState(true);
 
 
   const {
@@ -708,6 +709,34 @@ const DataProduct = () => {
     );
   };
 
+  useEffect(() => {
+    const fetchSubfamilias = async () => {
+      try {
+        const response = await fetch('/api/cloudproducts/subfamilia/lista', {
+          headers: {
+            'X-Property-ID': localStorage.getItem('selectedProperty'),
+          }
+        });
+
+        const data = await response.json();
+        if (Array.isArray(data.data)) {
+          const formatted = data.data.map(sf => ({
+            value: sf.VCodSubFam,
+            label: sf.VDesc
+          }));
+          setOptions(formatted);
+        }
+      } catch (error) {
+        console.error("Erro ao buscar subfamílias:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSubfamilias();
+  }, []);
+
+
   return (
     <div className="p-4 pb-10">
       <div className="w-full">
@@ -1069,14 +1098,20 @@ const DataProduct = () => {
                         {/* Sub-Família */}
                         <div className="w-1/3">
                           <label htmlFor="subFamilia" className="text-sm font-medium text-[#191919] mb-1 block ">
-                            Sub-Family
+                            Subfamily
                           </label>
-                          <div
-                              id="subFamilia"
-                              className="w-full p-1 bg-gray-200 rounded text-sm text-[#191919]"
-                          >
-                            {loadingsubfam ? 'Loading...' : subfam || 'Not associated'}
-                          </div>
+                          <Select
+                          inputId="subFamilia"
+                          name="subFamilia"
+                          options={options}
+                          value={options.find(opt => opt.value === selectedSubfamily) || null}
+                          onChange={selected => setSelectedSubfamily(selected?.value || '')}
+                          isSearchable
+                          isLoading={loading}
+                          placeholder="Selecione uma Subfamília"
+                          className="w-full p-1"
+                          classNamePrefix="select"
+                          />
                         </div>
 
                         {/* Familia */}
@@ -1086,7 +1121,7 @@ const DataProduct = () => {
                           </label>
                           <div
                               id="family"
-                              className="w-full p-1 bg-gray-200 rounded text-sm text-[#191919]"
+                              className=" flex items-center w-full h-[40px] px-3 relative -top-[8px] p-1 bg-gray-200 rounded text-sm  text-[#191919]"
                           >
                             {loadingFamily ? 'Loading...' : FamilyName || 'Unknown'}
                           </div>
@@ -1099,7 +1134,7 @@ const DataProduct = () => {
                           </label>
                           <div
                               id="group"
-                              className="w-full p-1 bg-gray-200 rounded text-sm text-[#191919]"
+                              className=" flex items-center w-full h-[40px] px-3 relative -top-[8px] p-1 bg-gray-200 rounded text-sm  text-[#191919]"
                           >
                             {loadingGroup ? 'Loading...' : group || 'Group is not associated'}
                           </div>
@@ -1195,7 +1230,7 @@ const DataProduct = () => {
                                         type="text"
                                         value={price.nValUnit?.toFixed(2) || ''}
                                         onChange={handlePvpChange}
-                                        className="border rounded px-2 py-1 block w-full"
+                                        className="border border-gray-300 rounded px-2 py-1 block w-full"
                                     />
 
                                   </td>
@@ -1204,7 +1239,7 @@ const DataProduct = () => {
                                     <select
                                         value={price.VCodIva ?? ''}
                                         onChange={(e) => handleVatChange(index, Number(e.target.value))}
-                                        className="border rounded px-2 py-1 w-1/2"
+                                        className="border border-gray-300 rounded px-2 py-1 w-1/2"
                                     >
                                       <option value="">—</option>
                                       {ivaOptions.map((vat) => (
@@ -1605,6 +1640,6 @@ const DataProduct = () => {
       </div>
     </div>
   );
-};
+}
 
-export default DataProduct;
+  export default DataProduct;

@@ -44,7 +44,7 @@ const DataProduct = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
   const [quantityError, setQuantityError] = useState('');
-  const [selectedSubfamily, setSelectedSubfamily] = useState("");
+  const [selectedSubfamily, setSelectedSubfamily] = useState(null);
   const [selectedIva, setSelectedIva] = useState("");
   const [selectedTipo, setSelectedTipo] = useState("");
   const [isActive, setIsActive] = useState(false);
@@ -58,7 +58,6 @@ const DataProduct = () => {
   const [sortConfig, setSortConfig] = useState({ key: 'VDesc', direction: 'asc' });
   const [options, setOptions] = useState({});
   const [loading , setLoading] = useState(true);
-
 
   const {
     isOpen: isAddModalOpen,
@@ -501,7 +500,7 @@ const DataProduct = () => {
       const response = await fetch('/api/cloudproducts/familia', {
         headers: {
           'X-Property-ID': localStorage.getItem('selectedProperty'),
-          'X-Fam-ID': famID.toString(),
+          'X-Fam-ID':famID? famID.toString(): '',
         }
       });
 
@@ -518,11 +517,11 @@ const DataProduct = () => {
         setFamilyName(data?.data?.VDesc);
       }
       else {
-        setFamilyName('Não Encontrado');
+        setFamilyName('Not found');
       }
     } catch (error) {
-      console.error('Erro ao buscar familia:', error);
-      setFamilyName('Erro ao carregar');
+      console.error('Error fetching family:', error);
+      setFamilyName('Error while loading');
     } finally {
       setLoadingFamily(false);
     }
@@ -567,7 +566,7 @@ const DataProduct = () => {
         const data = await fetchClassepreco();
         setClasses(data);
       } catch (error) {
-        console.error('Erro ao carregar classes de preço:', error);
+        console.error('Error while loading price classes:', error);
       }
     };
 
@@ -589,7 +588,7 @@ const DataProduct = () => {
         const fetchedPeriods = await fetchPeriod();
         setPeriods(fetchedPeriods);
       } catch (error) {
-        console.error("Erro ao carregar períodos:", error);
+        console.error("Error while loading periods:", error);
       }
     };
 
@@ -614,7 +613,7 @@ const DataProduct = () => {
         const fetchedHours = await fetchHour();
         setHours(fetchedHours);
       } catch (error) {
-        console.error("Erro ao carregar horas:", error);
+        console.error("Error while loading hours:", error);
       }
     };
 
@@ -676,11 +675,11 @@ const DataProduct = () => {
       if (found?.VDesc) {
         setGroup(found.VDesc);
       } else {
-        setGroup('Não encontrado');
+        setGroup('Not found');
       }
     } catch (error) {
-      console.error('Erro ao buscar grupo:', error);
-      setGroup('Erro ao carregar');
+      console.error('Error fetching group:', error);
+      setGroup('Error while loading');
     } finally {
       setLoadingGroup(false);
     }
@@ -722,12 +721,14 @@ const DataProduct = () => {
         if (Array.isArray(data.data)) {
           const formatted = data.data.map(sf => ({
             value: sf.VCodSubFam,
-            label: sf.VDesc
+            label: sf.VDesc,
+            familyID:sf.VCodFam,
+            groupID: sf.VCodGrfam
           }));
           setOptions(formatted);
         }
       } catch (error) {
-        console.error("Erro ao buscar subfamílias:", error);
+        console.error("Error while fetching subfamilies:", error);
       } finally {
         setLoading(false);
       }
@@ -735,6 +736,26 @@ const DataProduct = () => {
 
     fetchSubfamilias();
   }, []);
+
+  useEffect(() => {
+    if (!selectedSubfamily) {
+      setFamilyName('');
+      setGroup('');
+      return;
+    }
+
+    if (selectedSubfamily.groupID) {
+      fetchGroup(selectedSubfamily.groupID);
+    } else {
+      setGroup('Unknown');
+    }
+
+    if (selectedSubfamily.familyID) {
+      fetchFamilia(selectedSubfamily.familyID);
+    } else {
+      setFamilyName('Unknown');
+    }
+  }, [selectedSubfamily]);
 
 
   return (
@@ -1104,8 +1125,8 @@ const DataProduct = () => {
                           inputId="subFamilia"
                           name="subFamilia"
                           options={options}
-                          value={options.find(opt => opt.value === selectedSubfamily) || null}
-                          onChange={selected => setSelectedSubfamily(selected?.value || '')}
+                          value={ selectedSubfamily || null}
+                          onChange={selected => setSelectedSubfamily(selected || '')}
                           isSearchable
                           isLoading={loading}
                           placeholder="Selecione uma Subfamília"
@@ -1121,7 +1142,7 @@ const DataProduct = () => {
                           </label>
                           <div
                               id="family"
-                              className=" w-full h-[40px] px-3 relative -top-[6px] p-1 bg-gray-200 rounded text-sm  text-[#191919]"
+                              className="flex items-center h-[40px] px-3 p-1 bg-gray-200 rounded text-sm text-[#191919]"
                           >
                             {loadingFamily ? 'Loading...' : FamilyName || 'Unknown'}
                           </div>
@@ -1134,7 +1155,7 @@ const DataProduct = () => {
                           </label>
                           <div
                               id="group"
-                              className=" flex items-center w-full h-[40px] px-3 relative -top-[6px] p-1 bg-gray-200 rounded text-sm  text-[#191919]"
+                              className="flex items-center w-full h-[40px] px-3 p-1 bg-gray-200 rounded text-sm text-[#191919]"
                           >
                             {loadingGroup ? 'Loading...' : group || 'Group is not associated'}
                           </div>

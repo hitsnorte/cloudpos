@@ -87,10 +87,11 @@ export default function SidebarMenu() {
       },
     
 
-        "Shopping cart": {
+        "Shopping": {
             icon: <TiShoppingCart size={20} />,
             submenu: [
-                { href: "/homepage/Cart", text: "Shopping cart", icon: <TiShoppingCart size={18} /> },
+                { href: "/homepage/Cart", text: "Cart", icon: <TiShoppingCart size={18} /> },
+                 { href: "/", text: "PoS", icon: <TiShoppingCart size={18} /> },
             ],
 
         },

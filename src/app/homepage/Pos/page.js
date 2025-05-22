@@ -4,7 +4,6 @@ import { fetchGrup } from '@/src/lib/apigroup'
 import { fetchProduct } from '@/src/lib/apiproduct'
 import { fetchFamily } from '@/src/lib/apifamily'
 import { useEffect, useState, useRef } from 'react'
-import { TiShoppingCart } from 'react-icons/ti'
 import { useRouter } from "next/navigation";
 import { fetchIva } from '@/src/lib/apiiva';
 import { fetchSubfamily } from '@/src/lib/apisubfamily';
@@ -14,9 +13,6 @@ import { fetchPreco } from "@/src/lib/apipreco";
 import { MdPointOfSale } from "react-icons/md";
 import { Card, CardBody } from "@heroui/react";
 import { useSession } from "next-auth/react"; // Import useSession
-import {
-    Spinner,
-} from '@nextui-org/react';
 
 
 export default function ProductGroups() {
@@ -54,50 +50,6 @@ export default function ProductGroups() {
 
     const [showConfirm, setShowConfirm] = useState(false);
     const popoverRef = useRef(null);
-
-
-    const handleConfirm = () => {
-        clearCart();
-        setShowConfirm(false);
-    };
-
-    const toggleCart = () => setCartOpen(prev => !prev);
-
-    const closeModal = () => {
-        setSelectedProduct(null);
-        setCount(1);
-    };
-
-    const addToCart = (product) => {
-        setCartItems((prevItems) => {
-            const existingItem = prevItems.find((item) => item.id === product.id);
-
-            if (existingItem) {
-                // Já existe — somar quantidade
-                return prevItems.map((item) =>
-                    item.id === product.id
-                        ? { ...item, quantity: item.quantity + product.quantity }
-                        : item
-                );
-            } else {
-                // Novo produto
-                return [...prevItems, product];
-            }
-        });
-    };
-    const filterByName = (items) => {
-        if (!searchTerm.trim()) return items;
-
-        return items
-            .map((item) =>
-                item.name.toLowerCase().includes(searchTerm.toLowerCase()) ? item : null
-            )
-            .filter(Boolean);
-    };
-
-    const toggleGroup = (id) => {
-        setOpenGroupID((prev) => (prev === id ? null : id))
-    }
 
     // Fecha o popover se clicar fora
     useEffect(() => {
@@ -167,11 +119,6 @@ export default function ProductGroups() {
         }
         fetchPropertyID()
     }, [])
-
-    const [count, setCount] = useState(() => {
-        return selectedProduct?.id ? (quantities[selectedProduct.id] || 1) : 1;
-    });
-
 
 
     // 1. Lê o carrinho salvo do localStorage na inicialização
@@ -387,9 +334,19 @@ export default function ProductGroups() {
         return <p className="text-center text-sm">Loading dashboard...</p>;
     }
 
+    const cardPaths2 = [
+        { label: "Pos1", value: dashboardData.BLIND || 0, path: "/homepage/" },
+        { label: "Pos2", value: dashboardData.SPA || 0, path: "/homepage/" },
+        { label: "Pos3", value: dashboardData.FLORBELA || 0, path: "/homepage/" },
+    ];
+
     const cardPaths = [
         { label: "Pos1", value: dashboardData.BLIND || 0, path: "/homepage/" },
         { label: "Pos2", value: dashboardData.SPA || 0, path: "/homepage/" },
+        { label: "Pos3", value: dashboardData.FLORBELA || 0, path: "/homepage/" },
+        { label: "Pos3", value: dashboardData.FLORBELA || 0, path: "/homepage/" },
+        { label: "Pos3", value: dashboardData.FLORBELA || 0, path: "/homepage/" },
+        { label: "Pos3", value: dashboardData.FLORBELA || 0, path: "/homepage/" },
         { label: "Pos3", value: dashboardData.FLORBELA || 0, path: "/homepage/" },
     ];
 
@@ -416,7 +373,7 @@ export default function ProductGroups() {
                 <>
                     <h1 className="text-3xl font-semibold px-4">Dashboard</h1>
                     <div className="px-4 flex flex-wrap gap-6 p-6">
-                        {cardPaths.map((card, index) => (
+                        {cardPaths2.map((card, index) => (
                             <Card
                                 key={index}
                                 className="w-70 h-45 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center cursor-pointer hover:bg-gray-100"
@@ -427,7 +384,7 @@ export default function ProductGroups() {
                                         onClick={() => setSelectedCardPath(card.path)} // define o card selecionado
                                     >
                                         <p className="text-5xl font-bold text-[#FC9D25] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                                            <MdPointOfSale /> 
+                                            <MdPointOfSale />
                                         </p>
                                         <p className="text-center h-13 text-sm text-gray-600 absolute bottom-4 left-1/2 transform -translate-x-1/2">
                                             {card.label}
@@ -444,6 +401,28 @@ export default function ProductGroups() {
             {/* Conteúdo restante só aparece após clicar em um card */}
             {selectedCardPath && (
                 <>
+                    <div className="grid grid-cols-7 gap-4 p-6">
+                        {cardPaths.map((card, index) => (
+                            <Card
+                                key={index}
+                                className="w-full h-40 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center cursor-pointer hover:bg-gray-100"
+                            >
+                                <CardBody className="flex flex-col items-center w-full h-full relative">
+                                    <div
+                                        className="w-full h-full cursor-pointer hover:bg-gray-100"
+                                        onClick={() => setSelectedCardPath(card.path)}
+                                    >
+                                        <p className="text-5xl font-bold text-[#FC9D25] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                                            <MdPointOfSale />
+                                        </p>
+                                        <p className="text-center h-13 text-sm text-gray-600 absolute bottom-4 left-1/2 transform -translate-x-1/2">
+                                            {card.label}
+                                        </p>
+                                    </div>
+                                </CardBody>
+                            </Card>
+                        ))}
+                    </div>
 
 
 

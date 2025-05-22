@@ -8,6 +8,8 @@ import { HiAdjustmentsHorizontal } from "react-icons/hi2";
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import { fetchPeriod, createPeriod } from '@/src/lib/apiseason';
+import { fetchClassepreco } from '@/src/lib/apiclassepreco';
+import { fetchClacexp } from '@/src/lib/apiclacexp';
 import axios from 'axios';
 
 import {
@@ -32,7 +34,11 @@ const DataSeason = () => {
   const [selectedIva, setSelectedIva] = useState("");
   const [selectedTipo, setSelectedTipo] = useState("");
   const [isActive, setIsActive] = useState(false);
+  const [periodo, setPeriodo] = useState([]);
 
+  const [dadosRelacionados, setDadosRelacionados] = useState([]);
+  const [classePreco, setClasseprecos] = useState([]);
+  const [clacexp, setClacexp] = useState([]);
   const [periods, setPeriods] = useState([]);
   const [editPeriod, setEditPeriod] = useState(null);
   const [newPeriod, setNewPeriod] = useState({ period_name: '' });
@@ -63,23 +69,33 @@ const DataSeason = () => {
   } = useDisclosure();
 
   useEffect(() => {
-    loadPeriod();
-  }, []);
-
-  const loadPeriod = async () => {
+  const loadAllData = async () => {
     try {
-      const periods = await fetchPeriod();
+      const [periodosData, classeprecosData, clacexpData] = await Promise.all([
+        fetchPeriod(),
+        fetchClassepreco(),
+        fetchClacexp(),
+      ]);
 
-      // Mapeamos os produtos, adicionando a descrição da subfamília e da família correspondente
-      const enrichedPeriods = periods.map(period => ({
-        ...period,
-      }));
+      setPeriods(periodosData);
+      setClasseprecos(classeprecosData);
+      setClacexp(clacexpData);
 
-      setPeriods(enrichedPeriods);
+      const dadosComRelacionamento = relacionarDados({
+        periodos: periodosData,
+        clacexp: clacexpData,
+        classes: classeprecosData,
+      });
+
+      setDadosRelacionados(dadosComRelacionamento);
     } catch (err) {
+      console.error('Erro ao carregar dados:', err);
       setError(err.message);
     }
   };
+
+  loadAllData();
+}, []);
 
   const [propertyDetails, setPropertyDetails] = useState(null); // Estado para armazenar os dados da propriedade
 
@@ -119,6 +135,7 @@ const DataSeason = () => {
       startDate: true,
       endDate: true,
       property: true,
+      classePreco: true,
     };
   };
 
@@ -149,6 +166,7 @@ const DataSeason = () => {
     { key: 'startDate', label: 'Start Date' },
     { key: 'endDate', label: 'End date' },
     { key: 'property', label: 'Property' },
+    { key: 'classePreco', label: 'Classe preços' },
   ];
 
   const [columnSearchTerm, setColumnSearchTerm] = useState('');
@@ -248,6 +266,17 @@ const DataSeason = () => {
     return sorted;
   }, [paginatedPeriod, sortConfig]);
 
+  const relacionarDados = ({ periodos, clacexp, classes }) => {
+  return periodos.map(periodo => {
+    const relacao = clacexp.find(c => c.icodi === periodo.icodClasCexp);
+    const classePreco = classes.find(cls => cls.Vcodi === relacao?.icodiClasse);
+
+    return {
+      ...periodo,
+      classePrecoDesc: classePreco?.Vdesc || 'Sem descrição',
+    };
+  });
+};
 
 
   return (
@@ -577,10 +606,15 @@ const DataSeason = () => {
                   <div className="flex items-left justify-left">Property</div>
                 </th>
               )}
+              {columnVisibility.classePreco && (
+                <th className="uppercase border-collapse border border-[#EDEBEB] w-50 px-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                  <div className="flex items-left justify-left">Classe Preco</div>
+                </th>
+              )}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-300">
-            {sortedPeriod.map((period) => (
+            {dadosRelacionados.map((period) => (
               <tr key={period.vcodi} className="hover:bg-gray-200">
 
                 {/* Ações */}
@@ -621,6 +655,9 @@ const DataSeason = () => {
                   <td className="border border-[#EDEBEB] px-4 py-2 text-left">
                     {propertyDetails ? propertyDetails.propertyName : 'Loading...'}
                   </td>
+                )}
+                 {columnVisibility.classePreco && (
+                  <td className="border border-[#EDEBEB] px-3 py-2 text-left">{period.classePrecoDesc}</td>
                 )}
               </tr>
             ))}

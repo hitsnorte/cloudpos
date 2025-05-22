@@ -662,7 +662,7 @@ export default function ProductGroups() {
                                 ref={popoverRef}
 
                                 className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
-                 bg-white w-[440px] text-center rounded-lg shadow-md z-50 overflow-hidden "                                            >
+                                bg-white w-[440px] text-center rounded-lg shadow-md z-50 overflow-hidden"                                            >
                                 <p className="text-l font-semibold text-white flex justify-between items-center mb-4 px-4 py-3 bg-[#FC9D25]">
                                     Attention
 

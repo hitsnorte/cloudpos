@@ -3,7 +3,7 @@
 import { fetchGrup } from '@/src/lib/apigroup'
 import { fetchProduct } from '@/src/lib/apiproduct'
 import { fetchFamily } from '@/src/lib/apifamily'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { TiShoppingCart } from 'react-icons/ti'
 import { useRouter } from "next/navigation";
 import { IoTrashBinOutline } from "react-icons/io5";
@@ -56,6 +56,14 @@ export default function ProductGroups() {
     const toggleSidebar = () => setIsOpen(!isOpen);
     const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
+    const [showConfirm, setShowConfirm] = useState(false);
+    const popoverRef = useRef(null);
+
+
+    const handleConfirm = () => {
+        clearCart();
+        setShowConfirm(false);
+    };
 
     const toggleCart = () => setCartOpen(prev => !prev);
 
@@ -94,6 +102,24 @@ export default function ProductGroups() {
     const toggleGroup = (id) => {
         setOpenGroupID((prev) => (prev === id ? null : id))
     }
+
+    // Fecha o popover se clicar fora
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (popoverRef.current && !popoverRef.current.contains(event.target)) {
+                setShowConfirm(false);
+            }
+        }
+
+        if (showConfirm) {
+            document.addEventListener("mousedown", handleClickOutside);
+        } else {
+            document.removeEventListener("mousedown", handleClickOutside);
+        }
+
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [showConfirm]);
+
 
     //side bar carrinho
     useEffect(() => {
@@ -250,7 +276,7 @@ export default function ProductGroups() {
                         .map((p, index) => ({
                             id: p?.VCodProd ? String(p.VCodProd) : `product-${index}`,
                             name: p?.VDESC1?.trim() || 'Unnamed Product',
-                            
+
                         }));
 
                     return {
@@ -602,17 +628,21 @@ export default function ProductGroups() {
                                     <span className="text-sm font-bold mr-2">€{total.toFixed(2)}</span>
                                 </div>
                                 <div className="flex gap-3">
-                                    <button
-                                        onClick={() => {
-                                            const confirmed = window.confirm("Are you sure you want to delete all items from the cart?");
-                                            if (confirmed) {
-                                                clearCart();
-                                            }
-                                        }}
-                                        className="w-12 ml-2 border border-[#ff0000] text-[#ff0000] rounded py-2 text-sm hover:bg-[#fff4e6] transition flex items-center justify-center gap-2"
-                                    >
-                                        <CiTrash className="text-sm" size={20} />
-                                    </button>
+
+                                    {showConfirm && (
+                                        <div className="fixed inset-0 bg-opacity-30 z-40" />
+                                    )}
+
+                                    <div className="relative z-50 inline-block">
+                                        <button
+                                            onClick={() => setShowConfirm(true)}
+                                            className="w-12 ml-2 border border-[#ff0000] text-[#ff0000] rounded py-2 text-sm hover:bg-[#fff4e6] transition flex items-center justify-center gap-2"
+                                        >
+                                            <CiTrash className="text-sm" size={20} />
+                                        </button>
+
+
+                                    </div>
                                     <button className="w-full mr-2 bg-[#FC9D25] text-white rounded py-2 text-sm hover:bg-[#e88a1c] transition flex items-center justify-center gap-2">
                                         <TiShoppingCart className="text-sm" />
                                         Payment
@@ -621,6 +651,45 @@ export default function ProductGroups() {
                             </div>
                         </div>
                     </div>
+
+                    {showConfirm && (
+                        <>
+                            <div
+                                className="fixed inset-0 bg-black/40 z-40"
+                                onClick={() => setShowConfirm(false)}
+                            />
+                            <div
+                                ref={popoverRef}
+
+                                className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
+                 bg-white w-[440px] text-center rounded-lg shadow-md z-50 overflow-hidden "                                            >
+                                <p className="text-l font-semibold text-white flex justify-between items-center mb-4 px-4 py-3 bg-[#FC9D25]">
+                                    Attention
+
+                                </p>
+                                <div className="px-6 pb-5">
+                                    <p className="flex justift-left mb-4 text-sm text-gray-800 -ml-2">
+                                        Are you sure you want to delete all items from the cart?
+                                    </p>
+
+                                    <div className="flex justify-center gap-3">
+                                        <button
+                                            onClick={() => setShowConfirm(false)}
+                                            className="px-4 py-2 text-sm text-white bg-[#D3D3D3] text-white rounded-md hover:bg-gray"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onClick={handleConfirm}
+                                            className="px-4 py-2 text-sm bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
+                                        >
+                                            Confirm
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </>
+                    )}
 
                     {selectedProduct && (
                         <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-115 bg-white shadow-xl rounded-lg z-50">

@@ -249,6 +249,7 @@ export default function ProductGroups() {
                         .map((p, index) => ({
                             id: p?.VCodProd ? String(p.VCodProd) : `product-${index}`,
                             name: p?.VDESC1?.trim() || 'Unnamed Product',
+                            
                         }));
 
                     return {
@@ -594,7 +595,7 @@ export default function ProductGroups() {
                                     </button>
                                     <button className="w-full mr-2 bg-[#FC9D25] text-white rounded py-2 text-sm hover:bg-[#e88a1c] transition flex items-center justify-center gap-2">
                                         <TiShoppingCart className="text-sm" />
-                                        Comprar
+                                        Payment
                                     </button>
                                 </div>
                             </div>
@@ -896,7 +897,7 @@ export default function ProductGroups() {
                                                                     {product.name}
                                                                 </span>
                                                             </td>
-                                                             <td className="...">
+                                                            <td className="...">
                                                                 {product?.price != null && !isNaN(product.price)
                                                                     ? `${Number(product.price).toFixed(2)} €`
                                                                     : '—'}

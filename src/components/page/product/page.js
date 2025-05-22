@@ -1121,7 +1121,7 @@ const DataProduct = () => {
                           </label>
                           <div
                               id="family"
-                              className=" flex items-center w-full h-[40px] px-3 relative -top-[8px] p-1 bg-gray-200 rounded text-sm  text-[#191919]"
+                              className=" w-full h-[40px] px-3 relative -top-[6px] p-1 bg-gray-200 rounded text-sm  text-[#191919]"
                           >
                             {loadingFamily ? 'Loading...' : FamilyName || 'Unknown'}
                           </div>
@@ -1134,7 +1134,7 @@ const DataProduct = () => {
                           </label>
                           <div
                               id="group"
-                              className=" flex items-center w-full h-[40px] px-3 relative -top-[8px] p-1 bg-gray-200 rounded text-sm  text-[#191919]"
+                              className=" flex items-center w-full h-[40px] px-3 relative -top-[6px] p-1 bg-gray-200 rounded text-sm  text-[#191919]"
                           >
                             {loadingGroup ? 'Loading...' : group || 'Group is not associated'}
                           </div>

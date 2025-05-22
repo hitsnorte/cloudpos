@@ -8,6 +8,7 @@ import { HiAdjustmentsHorizontal } from "react-icons/hi2";
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import { fetchHour, createHour } from '@/src/lib/apihour';
+import { fetchPeriod } from '@/src/lib/apiseason';
 import axios from 'axios';
 
 import {
@@ -32,6 +33,8 @@ const DataHour = () => {
   const [selectedIva, setSelectedIva] = useState("");
   const [selectedTipo, setSelectedTipo] = useState("");
   const [isActive, setIsActive] = useState(false);
+  const [periodo, setPeriodo] = useState([]);
+
 
   const [hours, setHours] = useState([]);
   const [editHour, setEditHour] = useState(null);
@@ -65,6 +68,7 @@ const DataHour = () => {
 
   useEffect(() => {
     loadHour();
+    loadPeriodo();
   }, []);
 
   const loadHour = async () => {
@@ -79,6 +83,15 @@ const DataHour = () => {
       setHours(enrichedHours);
     } catch (err) {
       setError(err.message);
+    }
+  };
+
+  const loadPeriodo = async () => {
+    try {
+      const data = await fetchPeriod();
+      setPeriodo(data);
+    } catch (err) {
+      console.error('Erro ao carregar período:', err);
     }
   };
 
@@ -120,6 +133,7 @@ const DataHour = () => {
       startDate: true,
       endDate: true,
       property: true,
+      season: true,
     };
   };
 
@@ -150,6 +164,7 @@ const DataHour = () => {
     { key: 'startDate', label: 'Start Date' },
     { key: 'endDate', label: 'End date' },
     { key: 'property', label: 'Property' },
+    { key: 'season', label: 'season' },
   ];
 
   const [columnSearchTerm, setColumnSearchTerm] = useState('');
@@ -216,6 +231,7 @@ const DataHour = () => {
     }
   };
 
+
   //   const handleEditProduct = (product) => {
   //     setEditProduct({ ...product });
   //     onEditModalOpen();
@@ -276,6 +292,20 @@ const DataHour = () => {
 
     return sorted;
   }, [paginatedHour, sortConfig]);
+
+  const horasComPeriodo = useMemo(() => {
+    if (!sortedHour || !periodo) return [];
+
+    return sortedHour.map(hour => {
+      const periodoEncontrado = periodo.find(p => p.vcodi.toString() === hour.VCodiPeri);
+
+      return {
+        ...hour,
+        PeriodoDescricao: periodoEncontrado ? periodoEncontrado.Vdesc : 'Desconhecido',
+      };
+    });
+  }, [sortedHour, periodo]);
+
 
   return (
     <div className="p-4">
@@ -606,10 +636,15 @@ const DataHour = () => {
                   <div className="flex items-left justify-left">Property</div>
                 </th>
               )}
+              {columnVisibility.season && (
+                <th className="uppercase border-collapse border border-[#EDEBEB] w-50 px-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
+                  <div className="flex items-left justify-left">Seasons</div>
+                </th>
+              )}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-300">
-            {sortedHour.map((hour) => (
+            {horasComPeriodo.map((hour) => (
               <tr key={hour.Vcodi} className="hover:bg-gray-200">
 
                 {/* Ações */}
@@ -644,6 +679,11 @@ const DataHour = () => {
                 {columnVisibility.property && (
                   <td className="border border-[#EDEBEB] px-4 py-2 text-left">
                     {propertyDetails ? propertyDetails.propertyName : 'Loading...'}
+                  </td>
+                )}
+                {columnVisibility.season && (
+                  <td className="border border-[#EDEBEB] px-3 py-2 text-left">
+                    {hour.PeriodoDescricao}
                   </td>
                 )}
 

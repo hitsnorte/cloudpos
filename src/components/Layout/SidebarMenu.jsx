@@ -10,6 +10,7 @@ import { CiViewTimeline } from "react-icons/ci";
 import { LuFolderOpenDot, LuFolderOpen, LuFolderCog, LuFolderDot } from "react-icons/lu";
 import { useSession } from "next-auth/react";
 import {TiShoppingCart} from "react-icons/ti";
+import { MdPointOfSale } from "react-icons/md";
 
 
 
@@ -91,7 +92,7 @@ export default function SidebarMenu() {
             icon: <TiShoppingCart size={20} />,
             submenu: [
                 { href: "/homepage/Cart", text: "Cart", icon: <TiShoppingCart size={18} /> },
-                 { href: "/", text: "PoS", icon: <TiShoppingCart size={18} /> },
+                { href: "/homepage/Pos", text: "PoS", icon: <MdPointOfSale  size={18} /> },
             ],
 
         },

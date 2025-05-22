@@ -56,7 +56,8 @@ const DataProduct = () => {
   const [isChecked, setIsChecked] = useState(false);
 
   const [sortConfig, setSortConfig] = useState({ key: 'VDesc', direction: 'asc' });
-
+  const [options, setOptions] = useState({});
+  const [loading , setLoading] = useState(true);
 
 
   const {
@@ -708,6 +709,34 @@ const DataProduct = () => {
     );
   };
 
+  useEffect(() => {
+    const fetchSubfamilias = async () => {
+      try {
+        const response = await fetch('/api/cloudproducts/subfamilia/lista', {
+          headers: {
+            'X-Property-ID': localStorage.getItem('selectedProperty'),
+          }
+        });
+
+        const data = await response.json();
+        if (Array.isArray(data.data)) {
+          const formatted = data.data.map(sf => ({
+            value: sf.VCodSubFam,
+            label: sf.VDesc
+          }));
+          setOptions(formatted);
+        }
+      } catch (error) {
+        console.error("Erro ao buscar subfamílias:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSubfamilias();
+  }, []);
+
+
   return (
     <div className="p-4 pb-10">
       <div className="w-full">
@@ -1012,7 +1041,7 @@ const DataProduct = () => {
                               value={editProduct?.Abreviatura || ''}
                               onChange={(e) => setEditProduct({ ...editProduct, Abreviatura: e.target.value })}
                               placeholder="Digite a Abbreviation do produto"
-                              className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                              className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500 text-[#191919]"
                               required
                           />
                         </div>
@@ -1022,7 +1051,7 @@ const DataProduct = () => {
                           {/* Tipo de produto */}
                           <div className="flex flex-col w-1/3">
                             <label className="text-sm font-medium text-[#191919] mb-1">Prod. Type</label>
-                            <div className="bg-gray-200 p-1 rounded text-sm text-gray-700">
+                            <div className="bg-gray-200 p-1 rounded text-sm text-[#191919]">
                               {editProduct?.vtipprod || '—'}
                             </div>
                           </div>
@@ -1030,7 +1059,7 @@ const DataProduct = () => {
                           {/* Tipo de produto */}
                           <div className="flex flex-col w-1/3">
                             <label className="text-sm font-medium text-[#191919] mb-1">Type</label>
-                            <div className="bg-gray-200 p-1 rounded text-sm text-gray-700">
+                            <div className="bg-gray-200 p-1 rounded text-sm text-[#191919]">
                               {editProduct?.ProductType || '—'}
                             </div>
                           </div>
@@ -1038,7 +1067,7 @@ const DataProduct = () => {
                           {/* Status*/}
                           <div className="flex flex-col w-1/3 items-center">
                             <label className="text-sm font-medium text-[#191919] mb-1">Status</label>
-                            <label className="flex items-center gap-1 text-sm text-gray-700">
+                            <label className="flex items-center gap-1 text-sm text-[#191919]">
                               <input
                                   type="checkbox"
                                   checked={editProduct?.activo || false}
@@ -1060,7 +1089,7 @@ const DataProduct = () => {
                             value={editProduct?.VDESC1 || ''}
                             onChange={(e) => setEditProduct({ ...editProduct, VDESC1: e.target.value })}
                             placeholder="Insert product description"
-                            className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500 "
+                            className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500 text-[#191919]"
                         />
                       </div>
 
@@ -1069,14 +1098,20 @@ const DataProduct = () => {
                         {/* Sub-Família */}
                         <div className="w-1/3">
                           <label htmlFor="subFamilia" className="text-sm font-medium text-[#191919] mb-1 block ">
-                            Sub-Family
+                            Subfamily
                           </label>
-                          <div
-                              id="subFamilia"
-                              className="w-full p-1 bg-gray-200 rounded text-sm text-gray-700"
-                          >
-                            {loadingsubfam ? 'Loading...' : subfam || 'Not associated'}
-                          </div>
+                          <Select
+                          inputId="subFamilia"
+                          name="subFamilia"
+                          options={options}
+                          value={options.find(opt => opt.value === selectedSubfamily) || null}
+                          onChange={selected => setSelectedSubfamily(selected?.value || '')}
+                          isSearchable
+                          isLoading={loading}
+                          placeholder="Selecione uma Subfamília"
+                          className="w-full p-1"
+                          classNamePrefix="select"
+                          />
                         </div>
 
                         {/* Familia */}
@@ -1086,7 +1121,7 @@ const DataProduct = () => {
                           </label>
                           <div
                               id="family"
-                              className="w-full p-1 bg-gray-200 rounded text-sm text-gray-700"
+                              className=" flex items-center w-full h-[40px] px-3 relative -top-[8px] p-1 bg-gray-200 rounded text-sm  text-[#191919]"
                           >
                             {loadingFamily ? 'Loading...' : FamilyName || 'Unknown'}
                           </div>
@@ -1099,7 +1134,7 @@ const DataProduct = () => {
                           </label>
                           <div
                               id="group"
-                              className="w-full p-1 bg-gray-200 rounded text-sm text-gray-700"
+                              className=" flex items-center w-full h-[40px] px-3 relative -top-[8px] p-1 bg-gray-200 rounded text-sm  text-[#191919]"
                           >
                             {loadingGroup ? 'Loading...' : group || 'Group is not associated'}
                           </div>
@@ -1124,7 +1159,7 @@ const DataProduct = () => {
                         </div>
 
                         {/* IVA */}
-                        <div className="w-1/2">
+                        <div className="w-full">
                           <label htmlFor="iva" className="block text-sm font-medium text-[#191919] mb-1">
                             VAT
                           </label>
@@ -1154,7 +1189,7 @@ const DataProduct = () => {
 
                       {/* Tabela */}
                       <div className="overflow-x-auto border border-gray-300 rounded">
-                        <table className="min-w-full text-sm text-left text-gray-700">
+                        <table className="min-w-full text-sm text-left text-[#191919]">
                           <thead className="bg-[#FC9D25] text-white">
                           <tr>
                             <th className="px-4 py-2">Class</th>
@@ -1195,7 +1230,7 @@ const DataProduct = () => {
                                         type="text"
                                         value={price.nValUnit?.toFixed(2) || ''}
                                         onChange={handlePvpChange}
-                                        className="border rounded px-2 py-1 block w-full"
+                                        className="border border-gray-300 rounded px-2 py-1 block w-full"
                                     />
 
                                   </td>
@@ -1204,7 +1239,7 @@ const DataProduct = () => {
                                     <select
                                         value={price.VCodIva ?? ''}
                                         onChange={(e) => handleVatChange(index, Number(e.target.value))}
-                                        className="border rounded px-2 py-1 w-1/2"
+                                        className="border border-gray-300 rounded px-2 py-1 w-1/2"
                                     >
                                       <option value="">—</option>
                                       {ivaOptions.map((vat) => (
@@ -1235,7 +1270,7 @@ const DataProduct = () => {
                           <label className="block text-sm font-medium text-[#191919] mb-1">
                             Created by:
                           </label>
-                          <div className="w-full h-[30px] px-3 bg-gray-100 rounded text-sm text-gray-700 flex items-center">
+                          <div className="w-full h-[30px] px-3 bg-gray-200 rounded text-sm text-[#191919] flex items-center">
                             {editProduct?.vcriadopor || '—'}
                           </div>
                         </div>
@@ -1245,7 +1280,7 @@ const DataProduct = () => {
                           <label className="block text-sm font-medium text-[#191919] mb-1">
                             Created on:
                           </label>
-                          <div className="w-full h-[30px] px-3 bg-gray-100 rounded text-sm text-gray-700 flex items-center">
+                          <div className="w-full h-[30px] px-3 bg-gray-200 rounded text-sm text-[#191919] flex items-center">
                             {formatDateOnly(editProduct?.dcriadoem)}
                           </div>
                         </div>
@@ -1255,7 +1290,7 @@ const DataProduct = () => {
                           <label htmlFor="vUltalpor" className="block text-sm font-medium text-[#191919] mb-1">
                             Last changed by:
                           </label>
-                          <div className="w-full h-[30px] px-3 bg-gray-100 rounded text-sm text-gray-700 flex items-center">
+                          <div className="w-full h-[30px] px-3 bg-gray-200 rounded text-sm text-[#191919] flex items-center">
                             {editProduct?.vultaltpor || '—'}
                           </div>
                         </div>
@@ -1265,7 +1300,7 @@ const DataProduct = () => {
                           <label htmlFor="dAlteradoem" className="block text-sm font-medium text-[#191919] mb-1">
                             Changed on:
                           </label>
-                          <div className="w-full h-[30px] px-3 bg-gray-100 rounded text-sm text-gray-700 flex items-center">
+                          <div className="w-full h-[30px] px-3 bg-gray-200 rounded text-sm text-[#191919] flex items-center">
                             {formatDateOnly(editProduct?.dultaltem)}
                           </div>
                         </div>
@@ -1605,6 +1640,6 @@ const DataProduct = () => {
       </div>
     </div>
   );
-};
+}
 
-export default DataProduct;
+  export default DataProduct;

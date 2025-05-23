@@ -13,6 +13,8 @@ import { fetchPreco } from "@/src/lib/apipreco";
 import { MdPointOfSale } from "react-icons/md";
 import { Card, CardBody } from "@heroui/react";
 import { useSession } from "next-auth/react"; // Import useSession
+import {MdTableBar} from "react-icons/md";
+import { IoIosArrowBack } from "react-icons/io";
 
 
 export default function ProductGroups() {
@@ -38,7 +40,7 @@ export default function ProductGroups() {
     const [precoWithProducts, setPrecoWithProducts] = useState([]);
     const [isConfirmed, setIsConfirmed] = useState(() => JSON.parse(localStorage.getItem("isConfirmed")) || false);
     const [selectedCardPath, setSelectedCardPath] = useState(null);
-
+    const [selectedTable, setSelectedTable] = useState(null);
 
     const [viewType, setViewType] = useState('groups', 'families', 'subfamilies') // 'groups' | 'families' | 'subfamilies'
 
@@ -341,13 +343,13 @@ export default function ProductGroups() {
     ];
 
     const cardPaths = [
-        { label: "Pos1", value: dashboardData.BLIND || 0, path: "/homepage/" },
-        { label: "Pos2", value: dashboardData.SPA || 0, path: "/homepage/" },
-        { label: "Pos3", value: dashboardData.FLORBELA || 0, path: "/homepage/" },
-        { label: "Pos3", value: dashboardData.FLORBELA || 0, path: "/homepage/" },
-        { label: "Pos3", value: dashboardData.FLORBELA || 0, path: "/homepage/" },
-        { label: "Pos3", value: dashboardData.FLORBELA || 0, path: "/homepage/" },
-        { label: "Pos3", value: dashboardData.FLORBELA || 0, path: "/homepage/" },
+        { label: "Room 1", value: dashboardData.BLIND || 0, path: "/homepage/" },
+        { label: "Room 2", value: dashboardData.SPA || 0, path: "/homepage/" },
+        { label: "Room 3", value: dashboardData.FLORBELA || 0, path: "/homepage/" },
+        { label: "Room 4", value: dashboardData.FLORBELA || 0, path: "/homepage/" },
+        { label: "Room 5", value: dashboardData.FLORBELA || 0, path: "/homepage/" },
+        { label: "Room 6", value: dashboardData.FLORBELA || 0, path: "/homepage/" },
+        { label: "Room 7", value: dashboardData.FLORBELA || 0, path: "/homepage/" },
     ];
 
     if (loading) {
@@ -366,10 +368,16 @@ export default function ProductGroups() {
         return <div className="p-6">NO SUBFAMILIES OR PRODUCT FOUND</div>
     }
 
+    const mesa = [
+        {label: "Table 1" , path: "/homepage/" , icon: <MdTableBar /> },
+        {label: "Table 2", path: "/homepage/" , icon:<MdTableBar /> },
+        {label: "Table 3" , path: "/homepage/" , icon: <MdTableBar />},
+        {label: "Table 4", path: "/homepage/" , icon: <MdTableBar />},
+    ]
 
     return (
         <>
-            {!selectedCardPath && (
+            {!selectedCardPath && !selectedTable && (
                 <>
                     <h1 className="text-3xl font-semibold px-4">Dashboard</h1>
                     <div className="px-4 flex flex-wrap gap-6 p-6">
@@ -397,12 +405,11 @@ export default function ProductGroups() {
                 </>
             )}
 
-
             {/* Conteúdo restante só aparece após clicar em um card */}
-            {selectedCardPath && (
+            {selectedCardPath && !selectedTable && (
                 <>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4 p-6">
-                        {cardPaths.map((card, index) => (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 p-6">
+                    {cardPaths.map((card, index) => (
                             <Card
                                 key={index}
                                 className="w-full h-40 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center cursor-pointer hover:bg-gray-100"
@@ -410,7 +417,7 @@ export default function ProductGroups() {
                                 <CardBody className="flex flex-col items-center w-full h-full relative">
                                     <div
                                         className="w-full h-full cursor-pointer hover:bg-gray-100"
-                                        onClick={() => setSelectedCardPath(card.path)}
+                                        onClick={() => setSelectedTable(card.path)}
                                     >
                                         <p className="text-5xl font-bold text-[#FC9D25] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                                             <MdPointOfSale />
@@ -423,12 +430,37 @@ export default function ProductGroups() {
                             </Card>
                         ))}
                     </div>
-
-
-
                 </>
+            )}
 
+            {selectedTable && (
+                <>
+                    <button
+                        onClick={() => setSelectedTable(null)}
+                        className="mb-4 px-4 py-2 rounded hover:bg-gray-300"
+                    >
+                        <IoIosArrowBack size={16}/>
+                    </button>
 
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-6">
+                        {mesa.map((m, index) => (
+                            <Card
+                                key={index}
+                                className="w-full h-40 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center cursor-pointer hover:bg-gray-100"
+                                onClick={() => console.log("Table clicked:", m.label)}
+                            >
+                                <CardBody className="flex flex-col items-center justify-center w-full h-full relative">
+                                    <div className="text-5xl text-[#FC9D25] mb-2">
+                                        {m.icon}
+                                    </div>
+                                    <p className="text-center text-sm text-[#191919]">
+                                        {m.label}
+                                    </p>
+                                </CardBody>
+                            </Card>
+                        ))}
+                    </div>
+                </>
             )}
         </>
     )

@@ -10,10 +10,11 @@ import { fetchSubfamily } from '@/src/lib/apisubfamily';
 import { fetchDashboard } from '@/src/lib/apidashboard';
 import { fetchClassepreco } from '@/src/lib/apiclassepreco';
 import { fetchPreco } from "@/src/lib/apipreco";
+import { fetchPosto } from "@/src/lib/apipostos";
 import { MdPointOfSale } from "react-icons/md";
 import { Card, CardBody } from "@heroui/react";
 import { useSession } from "next-auth/react"; // Import useSession
-import {MdTableBar} from "react-icons/md";
+import { MdTableBar } from "react-icons/md";
 import { IoIosArrowBack } from "react-icons/io";
 
 
@@ -39,10 +40,12 @@ export default function ProductGroups() {
     const [classeprecoWithProducts, setClasseprecoWithProducts] = useState([]);
     const [precoWithProducts, setPrecoWithProducts] = useState([]);
     const [isConfirmed, setIsConfirmed] = useState(() => JSON.parse(localStorage.getItem("isConfirmed")) || false);
-    const [selectedCardPath, setSelectedCardPath] = useState(null);
     const [selectedTable, setSelectedTable] = useState(null);
 
     const [viewType, setViewType] = useState('groups', 'families', 'subfamilies') // 'groups' | 'families' | 'subfamilies'
+
+    const [postos, setPostos] = useState([]);
+    const [selectedCardPath, setSelectedCardPath] = useState(null);
 
 
     //side bar
@@ -52,6 +55,18 @@ export default function ProductGroups() {
 
     const [showConfirm, setShowConfirm] = useState(false);
     const popoverRef = useRef(null);
+
+    useEffect(() => {
+        async function loadPostos() {
+            try {
+                const data = await fetchPosto(); // chama a função que faz o fetch
+                setPostos(data);
+            } catch (error) {
+                console.error("Erro ao buscar postos:", error);
+            }
+        }
+        loadPostos();
+    }, []);
 
     // Fecha o popover se clicar fora
     useEffect(() => {
@@ -336,11 +351,10 @@ export default function ProductGroups() {
         return <p className="text-center text-sm">Loading dashboard...</p>;
     }
 
-    const cardPaths2 = [
-        { label: "Pos1", value: dashboardData.BLIND || 0, path: "/homepage/" },
-        { label: "Pos2", value: dashboardData.SPA || 0, path: "/homepage/" },
-        { label: "Pos3", value: dashboardData.FLORBELA || 0, path: "/homepage/" },
-    ];
+    const cardPaths2 = postos.map((posto) => ({
+        label: posto.VDescricao,
+        path: `/postos/${posto.Icodi}`,
+    }));
 
     const cardPaths = [
         { label: "Room 1", value: dashboardData.BLIND || 0, path: "/homepage/" },
@@ -369,10 +383,10 @@ export default function ProductGroups() {
     }
 
     const mesa = [
-        {label: "Table 1" , path: "/homepage/" , icon: <MdTableBar /> },
-        {label: "Table 2", path: "/homepage/" , icon:<MdTableBar /> },
-        {label: "Table 3" , path: "/homepage/" , icon: <MdTableBar />},
-        {label: "Table 4", path: "/homepage/" , icon: <MdTableBar />},
+        { label: "Table 1", path: "/homepage/", icon: <MdTableBar /> },
+        { label: "Table 2", path: "/homepage/", icon: <MdTableBar /> },
+        { label: "Table 3", path: "/homepage/", icon: <MdTableBar /> },
+        { label: "Table 4", path: "/homepage/", icon: <MdTableBar /> },
     ]
 
     return (
@@ -389,7 +403,7 @@ export default function ProductGroups() {
                                 <CardBody className="flex flex-col items-center w-full h-full relative">
                                     <div
                                         className="w-full h-full cursor-pointer hover:bg-gray-100"
-                                        onClick={() => setSelectedCardPath(card.path)} // define o card selecionado
+                                        onClick={() => setSelectedCardPath(card.path)}
                                     >
                                         <p className="text-5xl font-bold text-[#FC9D25] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                                             <MdPointOfSale />
@@ -402,6 +416,7 @@ export default function ProductGroups() {
                             </Card>
                         ))}
                     </div>
+
                 </>
             )}
 
@@ -409,7 +424,7 @@ export default function ProductGroups() {
             {selectedCardPath && !selectedTable && (
                 <>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 p-6">
-                    {cardPaths.map((card, index) => (
+                        {cardPaths.map((card, index) => (
                             <Card
                                 key={index}
                                 className="w-full h-40 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center cursor-pointer hover:bg-gray-100"
@@ -439,7 +454,7 @@ export default function ProductGroups() {
                         onClick={() => setSelectedTable(null)}
                         className="mb-4 px-4 py-2 rounded hover:bg-gray-300"
                     >
-                        <IoIosArrowBack size={16}/>
+                        <IoIosArrowBack size={16} />
                     </button>
 
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-6">

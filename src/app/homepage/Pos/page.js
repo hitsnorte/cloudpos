@@ -491,7 +491,7 @@ export default function ProductGroups() {
                 >
                     {/* Header */}
                     <div className="sticky top-0 z-10 bg-[#F0F0F0] flex items-center justify-between p-5 ml-1">
-                        <h2 className="text-l font-semibold ml-1">Your Shopping Cart</h2>
+                        <h2 className="text-l font-semibold ml-1">Your order</h2>
                         <button onClick={toggleSidebar} className="text-l text-[#FC9D25]">
                             <span className="inline-block transform scale-150 font-thin mr-5">x</span>
                         </button>
@@ -500,7 +500,7 @@ export default function ProductGroups() {
                     {/* Cart Items */}
                     <div className="p-7 flex flex-col h-[calc(100%-150px)] overflow-y-auto -mt-5">
                         {cartItems.length === 0 ? (
-                            <p className="text-sm">Your Shopping Card Is Empty.</p>
+                            <p className="text-sm">Your order is empty.</p>
                         ) : (
                             <div className="bg-white rounded-l border border-white pt-2 px-4 flex flex-col">
                                 {cartItems.map((item, idx) => (
@@ -592,9 +592,11 @@ export default function ProductGroups() {
                                     <CiTrash className="text-sm" size={20} />
                                 </button>
                             </div>
-                            <button className="w-full mr-2 bg-[#FC9D25] text-white rounded py-2 text-sm hover:bg-[#e88a1c] transition flex items-center justify-center gap-2">
-                                <TiShoppingCart className="text-sm" />
-                                Payment
+                            <button className="w-1/2 mr-2 bg-[#FC9D25] text-white rounded py-2 text-sm hover:bg-[#e88a1c] transition flex items-center justify-center gap-2">
+                                Order
+                            </button>
+                            <button className="w-1/2 mr-2 bg-[#FC9D25] text-white rounded py-2 text-sm hover:bg-[#e88a1c] transition flex items-center justify-center gap-2">
+                                Cancel
                             </button>
                         </div>
                     </div>

@@ -448,8 +448,6 @@ export default function ProductGroups() {
             {/* Conteúdo restante só aparece após clicar em um card */}
             {selectedCardPath && (
                 <>
-
-
                     <div className="flex items-center justify-center space-x-4 ">
 
                         {/*  botão de selecao de groups, families e subfamilies */}

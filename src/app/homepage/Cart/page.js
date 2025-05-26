@@ -59,6 +59,7 @@ export default function ProductGroups() {
     const [showConfirm, setShowConfirm] = useState(false);
     const popoverRef = useRef(null);
 
+    const [cardPaths, setCardPaths] = useState([]);
 
     const handleConfirm = () => {
         clearCart();
@@ -336,6 +337,16 @@ export default function ProductGroups() {
                     };
                 });
 
+                if (classeprecos && dashboardData) {
+                    const dynamicCardPaths = classeprecos.map((classe) => ({
+                        label: classe.Vdesc,
+                        value: dashboardData?.[classe.Vdesc.toUpperCase()] || 0,
+                        path: "/homepage/",
+                    }));
+
+                    setCardPaths(dynamicCardPaths);  // Usa a variável aqui, no mesmo escopo
+                }
+
                 setGroupsWithProducts(structuredGroups);
                 setFamiliesWithProducts(structuredFamilies);
                 setSubfamiliesWithProducts(structuredSubfamilies);
@@ -363,24 +374,43 @@ export default function ProductGroups() {
         const fetchData = async () => {
             if (status === "authenticated" && isConfirmed) {
                 try {
-                    const data = await fetchDashboard();
-                    if (data && data.BLIND !== undefined && data.SPA !== undefined && data.FLORBELA !== undefined) {
-                        setDashboardData(data); // Store the fetched data
+                    // Busca dashboard e classeprecos em paralelo
+                    const [dashboard, classeprecos] = await Promise.all([
+                        fetchDashboard(),
+                        fetchClassepreco(),
+                    ]);
+
+                    // Verifica se dashboard tem as propriedades mínimas
+                    if (dashboard && typeof dashboard === 'object') {
+                        setDashboardData(dashboard);
                     } else {
-                        throw new Error('Invalid data received from API');
+                        throw new Error('Invalid dashboard data received');
                     }
+
+                    // Verifica se classeprecos é um array válido
+                    if (Array.isArray(classeprecos)) {
+                        // Monta cardPaths dinamicamente
+                        const dynamicCardPaths = classeprecos.map((classe) => ({
+                            label: classe.Vdesc,
+                            value: dashboard?.[classe.Vdesc.toUpperCase()] || 0,
+                            path: "/homepage/",
+                        }));
+
+                        setCardPaths(dynamicCardPaths);
+                    } else {
+                        throw new Error('Invalid classeprecos data received');
+                    }
+
                 } catch (error) {
-                    console.log('Error fetching dashboard data:', error);
-                    setDashboardData({ BLIND: 0, SPA: 0, FLORBELA: 0, });
+                    console.error('Error fetching data:', error);
+                    setDashboardData({});  // Zera dashboardData em erro
+                    setCardPaths([]);      // Zera cardPaths em erro
                 }
             }
         };
 
-        // Only fetch data if the status is authenticated and the property is confirmed
-        if (status === "authenticated" && isConfirmed) {
-            fetchData(); // Fetch dashboard data when status or isConfirmed changes
-        }
-    }, [status, isConfirmed]); // Fetch data again when the session or confirmation status changes
+        fetchData();
+    }, [status, isConfirmed]);
 
 
     if (status === "loading" || loading) {
@@ -391,11 +421,6 @@ export default function ProductGroups() {
         return <p className="text-center text-sm">Loading dashboard...</p>;
     }
 
-    const cardPaths = [
-        { label: "BLIND", value: dashboardData.BLIND || 0, path: "/homepage/" },
-        { label: "SPA", value: dashboardData.SPA || 0, path: "/homepage/" },
-        { label: "FLORBELA", value: dashboardData.FLORBELA || 0, path: "/homepage/" },
-    ];
 
     if (loading) {
         return <div className="p-6">LOADING PRODUCTS...</div>

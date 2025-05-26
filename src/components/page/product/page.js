@@ -57,7 +57,7 @@ const DataProduct = () => {
 
   const [sortConfig, setSortConfig] = useState({ key: 'VDesc', direction: 'asc' });
   const [options, setOptions] = useState({});
-  const [loading , setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   const {
     isOpen: isAddModalOpen,
@@ -500,7 +500,7 @@ const DataProduct = () => {
       const response = await fetch('/api/cloudproducts/familia', {
         headers: {
           'X-Property-ID': localStorage.getItem('selectedProperty'),
-          'X-Fam-ID':famID? famID.toString(): '',
+          'X-Fam-ID': famID ? famID.toString() : '',
         }
       });
 
@@ -530,11 +530,13 @@ const DataProduct = () => {
   // Simulação do carregamento da subfamília ao renderizar
   useEffect(() => {
     const loadSubfam = async () => {
-      await fetchSubFamilia(editProduct.VSUBFAM);
+      if (editProduct?.VSUBFAM) {
+        await fetchSubFamilia(editProduct.VSUBFAM);
+      }
     };
 
     loadSubfam();
-  }, []);
+  }, [editProduct]);
 
   const [selectedProduct, setSelectedProduct] = useState('');
 
@@ -700,11 +702,11 @@ const DataProduct = () => {
   //Ativa/Desativa as checkbox localmente , NENHUMA ALTERAÇÂO É FEITA NA BD
   const toggleIndisponivel = (id) => {
     setFilteredPrices((prevPrices) =>
-        prevPrices.map((price) =>
-            price.vCodigo === id
-                ? { ...price, Indisponivel: !price.Indisponivel }
-                : price
-        )
+      prevPrices.map((price) =>
+        price.vCodigo === id
+          ? { ...price, Indisponivel: !price.Indisponivel }
+          : price
+      )
     );
   };
 
@@ -722,7 +724,7 @@ const DataProduct = () => {
           const formatted = data.data.map(sf => ({
             value: sf.VCodSubFam,
             label: sf.VDesc,
-            familyID:sf.VCodFam,
+            familyID: sf.VCodFam,
             groupID: sf.VCodGrfam
           }));
           setOptions(formatted);
@@ -1048,170 +1050,170 @@ const DataProduct = () => {
 
               <ModalBody className="py-5 px-6">
                 {editProduct && (
-                    <form id="updateProductForm" onSubmit={handleUpdateProduct} className="space-y-6">
-                      {/* Abreviatura e tipo de produto */}
-                      <div className="flex gap-4">
-                        {/* Abreviatura*/}
-                        <div className="w-1/2">
-                          <label htmlFor="productAbbreviation" className="block text-sm font-medium text-[#191919] mb-1">
-                            Abbreviation
-                          </label>
-                          <input
-                              id="productAbreviatura"
-                              type="text"
-                              value={editProduct?.Abreviatura || ''}
-                              onChange={(e) => setEditProduct({ ...editProduct, Abreviatura: e.target.value })}
-                              placeholder="Digite a Abbreviation do produto"
-                              className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500 text-[#191919]"
-                              required
-                          />
-                        </div>
-
-                        {/* Detalhes do tipo de produto */}
-                        <div className="w-1/2 flex gap-2 items-end">
-                          {/* Tipo de produto */}
-                          <div className="flex flex-col w-1/3">
-                            <label className="text-sm font-medium text-[#191919] mb-1">Prod. Type</label>
-                            <div className="bg-gray-200 p-1 rounded text-sm text-[#191919]">
-                              {editProduct?.vtipprod || '—'}
-                            </div>
-                          </div>
-
-                          {/* Tipo de produto */}
-                          <div className="flex flex-col w-1/3">
-                            <label className="text-sm font-medium text-[#191919] mb-1">Type</label>
-                            <div className="bg-gray-200 p-1 rounded text-sm text-[#191919]">
-                              {editProduct?.ProductType || '—'}
-                            </div>
-                          </div>
-
-                          {/* Status*/}
-                          <div className="flex flex-col w-1/3 items-center">
-                            <label className="text-sm font-medium text-[#191919] mb-1">Status</label>
-                            <label className="flex items-center gap-1 text-sm text-[#191919]">
-                              <input
-                                  type="checkbox"
-                                  checked={editProduct?.activo || false}
-                                  onChange={(e) => setEditProduct({ ...editProduct, activo: e.target.checked })}
-                              />
-                              {editProduct?.activo ? 'Active' : 'Inactive'}
-                            </label>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Descrição */}
-                      <div className="w-full">
-                        <label htmlFor="productDescription" className="block text-sm font-medium text-[#191919] mb-1">
-                          Description
+                  <form id="updateProductForm" onSubmit={handleUpdateProduct} className="space-y-6">
+                    {/* Abreviatura e tipo de produto */}
+                    <div className="flex gap-4">
+                      {/* Abreviatura*/}
+                      <div className="w-1/2">
+                        <label htmlFor="productAbbreviation" className="block text-sm font-medium text-[#191919] mb-1">
+                          Abbreviation
                         </label>
-                        <textarea
-                            id="productDescription"
-                            value={editProduct?.VDESC1 || ''}
-                            onChange={(e) => setEditProduct({ ...editProduct, VDESC1: e.target.value })}
-                            placeholder="Insert product description"
-                            className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500 text-[#191919]"
+                        <input
+                          id="productAbreviatura"
+                          type="text"
+                          value={editProduct?.Abreviatura || ''}
+                          onChange={(e) => setEditProduct({ ...editProduct, Abreviatura: e.target.value })}
+                          placeholder="Digite a Abbreviation do produto"
+                          className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500 text-[#191919]"
+                          required
                         />
                       </div>
 
-                      {/* Sub-Família, Family, Group */}
-                      <div className="flex justify-between gap-4 mb-4">
-                        {/* Sub-Família */}
-                        <div className="w-1/3">
-                          <label htmlFor="subFamilia" className="text-sm font-medium text-[#191919] mb-1 block ">
-                            Subfamily
+                      {/* Detalhes do tipo de produto */}
+                      <div className="w-1/2 flex gap-2 items-end">
+                        {/* Tipo de produto */}
+                        <div className="flex flex-col w-1/3">
+                          <label className="text-sm font-medium text-[#191919] mb-1">Prod. Type</label>
+                          <div className="bg-gray-200 p-1 rounded text-sm text-[#191919]">
+                            {editProduct?.vtipprod || '—'}
+                          </div>
+                        </div>
+
+                        {/* Tipo de produto */}
+                        <div className="flex flex-col w-1/3">
+                          <label className="text-sm font-medium text-[#191919] mb-1">Type</label>
+                          <div className="bg-gray-200 p-1 rounded text-sm text-[#191919]">
+                            {editProduct?.ProductType || '—'}
+                          </div>
+                        </div>
+
+                        {/* Status*/}
+                        <div className="flex flex-col w-1/3 items-center">
+                          <label className="text-sm font-medium text-[#191919] mb-1">Status</label>
+                          <label className="flex items-center gap-1 text-sm text-[#191919]">
+                            <input
+                              type="checkbox"
+                              checked={editProduct?.activo || false}
+                              onChange={(e) => setEditProduct({ ...editProduct, activo: e.target.checked })}
+                            />
+                            {editProduct?.activo ? 'Active' : 'Inactive'}
                           </label>
-                          <Select
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Descrição */}
+                    <div className="w-full">
+                      <label htmlFor="productDescription" className="block text-sm font-medium text-[#191919] mb-1">
+                        Description
+                      </label>
+                      <textarea
+                        id="productDescription"
+                        value={editProduct?.VDESC1 || ''}
+                        onChange={(e) => setEditProduct({ ...editProduct, VDESC1: e.target.value })}
+                        placeholder="Insert product description"
+                        className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500 text-[#191919]"
+                      />
+                    </div>
+
+                    {/* Sub-Família, Family, Group */}
+                    <div className="flex justify-between gap-4 mb-4">
+                      {/* Sub-Família */}
+                      <div className="w-1/3">
+                        <label htmlFor="subFamilia" className="text-sm font-medium text-[#191919] mb-1 block ">
+                          Subfamily
+                        </label>
+                        <Select
                           inputId="subFamilia"
                           name="subFamilia"
                           options={options}
-                          value={ selectedSubfamily || null}
+                          value={selectedSubfamily || null}
                           onChange={selected => setSelectedSubfamily(selected || '')}
                           isSearchable
                           isLoading={loading}
                           placeholder="Selecione uma Subfamília"
                           className="w-full p-1"
                           classNamePrefix="select"
-                          />
-                        </div>
+                        />
+                      </div>
 
-                        {/* Familia */}
-                        <div className="w-1/3">
-                          <label htmlFor="family" className="text-sm font-medium text-[#191919] mb-1 block">
-                            Family
-                          </label>
-                          <div
-                              id="family"
-                              className="flex items-center h-[40px] px-3 p-1 bg-gray-200 rounded text-sm text-[#191919]"
-                          >
-                            {loadingFamily ? 'Loading...' : FamilyName || 'Unknown'}
-                          </div>
-                        </div>
-
-                        {/* Grupo */}
-                        <div className="w-1/3">
-                          <label htmlFor="group" className="text-sm font-medium text-[#191919] mb-1 block">
-                            Grupo
-                          </label>
-                          <div
-                              id="group"
-                              className="flex items-center w-full h-[40px] px-3 p-1 bg-gray-200 rounded text-sm text-[#191919]"
-                          >
-                            {loadingGroup ? 'Loading...' : group || 'Group is not associated'}
-                          </div>
+                      {/* Familia */}
+                      <div className="w-1/3">
+                        <label htmlFor="family" className="text-sm font-medium text-[#191919] mb-1 block">
+                          Family
+                        </label>
+                        <div
+                          id="family"
+                          className="flex items-center h-[40px] px-3 p-1 bg-gray-200 rounded text-sm text-[#191919]"
+                        >
+                          {loadingFamily ? 'Loading...' : FamilyName || 'Unknown'}
                         </div>
                       </div>
 
-                      {/* Referência e IVA */}
-                      <div className="flex justify-between gap-4">
-                        {/* Referência */}
-                        <div className="w-1/2 flex flex-col justify-end">
-                          <label htmlFor="referencia" className="block text-sm font-medium text-[#191919] mb-1">
-                            Reference
-                          </label>
-                          <input
-                              id="referencia"
-                              type="text"
-                              value={editProduct?.VREFERENCIA || ''}
-                              onChange={(e) => setEditProduct({ ...editProduct, VREFERENCIA: e.target.value })}
-                              placeholder="Insert reference"
-                              className="w-full h-[40px] px-3 relative -top-[2px] bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
-                          />
-                        </div>
-
-                        {/* IVA */}
-                        <div className="w-full">
-                          <label htmlFor="iva" className="block text-sm font-medium text-[#191919] mb-1">
-                            VAT
-                          </label>
-                          <Select
-                              inputId="iva"
-                              name="iva"
-                              options={ivaOptions.map(vat => ({
-                                value: vat.VCODI,
-                                label: vat.VDESC,
-                              }))}
-                              value={
-                                  ivaOptions
-                                      .map(vat => ({ value: vat.VCODI, label: vat.VDESC }))
-                                      .find(option => option.value === selectedIva) || null
-                              }
-                              onChange={(selectedOption) => {
-                                setSelectedIva(selectedOption ? selectedOption.value : "");
-                              }}
-                              isSearchable
-                              className="w-full p-1"
-                              classNamePrefix="select"
-                              placeholder="Select VAT"
-                          />
+                      {/* Grupo */}
+                      <div className="w-1/3">
+                        <label htmlFor="group" className="text-sm font-medium text-[#191919] mb-1 block">
+                          Grupo
+                        </label>
+                        <div
+                          id="group"
+                          className="flex items-center w-full h-[40px] px-3 p-1 bg-gray-200 rounded text-sm text-[#191919]"
+                        >
+                          {loadingGroup ? 'Loading...' : group || 'Group is not associated'}
                         </div>
                       </div>
+                    </div>
+
+                    {/* Referência e IVA */}
+                    <div className="flex justify-between gap-4">
+                      {/* Referência */}
+                      <div className="w-1/2 flex flex-col justify-end">
+                        <label htmlFor="referencia" className="block text-sm font-medium text-[#191919] mb-1">
+                          Reference
+                        </label>
+                        <input
+                          id="referencia"
+                          type="text"
+                          value={editProduct?.VREFERENCIA || ''}
+                          onChange={(e) => setEditProduct({ ...editProduct, VREFERENCIA: e.target.value })}
+                          placeholder="Insert reference"
+                          className="w-full h-[40px] px-3 relative -top-[2px] bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                        />
+                      </div>
+
+                      {/* IVA */}
+                      <div className="w-full">
+                        <label htmlFor="iva" className="block text-sm font-medium text-[#191919] mb-1">
+                          VAT
+                        </label>
+                        <Select
+                          inputId="iva"
+                          name="iva"
+                          options={ivaOptions.map(vat => ({
+                            value: vat.VCODI,
+                            label: vat.VDESC,
+                          }))}
+                          value={
+                            ivaOptions
+                              .map(vat => ({ value: vat.VCODI, label: vat.VDESC }))
+                              .find(option => option.value === selectedIva) || null
+                          }
+                          onChange={(selectedOption) => {
+                            setSelectedIva(selectedOption ? selectedOption.value : "");
+                          }}
+                          isSearchable
+                          className="w-full p-1"
+                          classNamePrefix="select"
+                          placeholder="Select VAT"
+                        />
+                      </div>
+                    </div>
 
 
-                      {/* Tabela */}
-                      <div className="overflow-x-auto border border-gray-300 rounded">
-                        <table className="min-w-full text-sm text-left text-[#191919]">
-                          <thead className="bg-[#FC9D25] text-white">
+                    {/* Tabela */}
+                    <div className="overflow-x-auto border border-gray-300 rounded">
+                      <table className="min-w-full text-sm text-left text-[#191919]">
+                        <thead className="bg-[#FC9D25] text-white">
                           <tr>
                             <th className="px-4 py-2">Class</th>
                             <th className="px-4 py-2">Property</th>
@@ -1225,8 +1227,8 @@ const DataProduct = () => {
                               <HiDotsVertical size={18} />
                             </th>
                           </tr>
-                          </thead>
-                          <tbody>
+                        </thead>
+                        <tbody>
                           {filteredPrices.map((price, index) => {
 
                             const handlePvpChange = (e) => {
@@ -1241,92 +1243,92 @@ const DataProduct = () => {
                             };
 
                             return (
-                                <tr key={index} className="bg-gray-100">
-                                  <td className="px-4 py-2">{getClassName(price.VCodClas)}</td>
-                                  <td className="px-4 py-2">{price.cexpName || '-'}</td>
-                                  <td className="px-4 py-2 min-w-[8rem]">{getPeriodDescription(price.VCodPeri)}</td>
-                                  <td className="px-4 py-2">{getHourDescription(price.VCodInthoras)}</td>
-                                  <td className="px-4 py-2">
-                                    <input
-                                        type="text"
-                                        value={price.nValUnit?.toFixed(2) || ''}
-                                        onChange={handlePvpChange}
-                                        className="border border-gray-300 rounded px-2 py-1 block w-full"
-                                    />
+                              <tr key={index} className="bg-gray-100">
+                                <td className="px-4 py-2">{getClassName(price.VCodClas)}</td>
+                                <td className="px-4 py-2">{price.cexpName || '-'}</td>
+                                <td className="px-4 py-2 min-w-[8rem]">{getPeriodDescription(price.VCodPeri)}</td>
+                                <td className="px-4 py-2">{getHourDescription(price.VCodInthoras)}</td>
+                                <td className="px-4 py-2">
+                                  <input
+                                    type="text"
+                                    value={price.nValUnit?.toFixed(2) || ''}
+                                    onChange={handlePvpChange}
+                                    className="border border-gray-300 rounded px-2 py-1 block w-full"
+                                  />
 
-                                  </td>
-                                  <td className="px-4 py-2">0.00€</td>
-                                  <td className="px-4 py-2">
-                                    <select
-                                        value={price.VCodIva ?? ''}
-                                        onChange={(e) => handleVatChange(index, Number(e.target.value))}
-                                        className="border border-gray-300 rounded px-2 py-1 w-1/2"
-                                    >
-                                      <option value="">—</option>
-                                      {ivaOptions.map((vat) => (
-                                          <option key={vat.VCODI} value={vat.VCODI}>
-                                            {vat.VDESC}
-                                          </option>
-                                      ))}
-                                    </select>
-                                  </td>
-                                  <td className="px-4 py-2 text-center">
-                                    <input type="checkbox" checked={!price.Indisponivel}
-                                            onChange={() => toggleIndisponivel(price.vCodigo)}/>
-                                  </td>
-                                  <td className="px-4 py-2">
-                                    <HiDotsVertical size={18} />
-                                  </td>
-                                </tr>
+                                </td>
+                                <td className="px-4 py-2">0.00€</td>
+                                <td className="px-4 py-2">
+                                  <select
+                                    value={price.VCodIva ?? ''}
+                                    onChange={(e) => handleVatChange(index, Number(e.target.value))}
+                                    className="border border-gray-300 rounded px-2 py-1 w-1/2"
+                                  >
+                                    <option value="">—</option>
+                                    {ivaOptions.map((vat) => (
+                                      <option key={vat.VCODI} value={vat.VCODI}>
+                                        {vat.VDESC}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </td>
+                                <td className="px-4 py-2 text-center">
+                                  <input type="checkbox" checked={!price.Indisponivel}
+                                    onChange={() => toggleIndisponivel(price.vCodigo)} />
+                                </td>
+                                <td className="px-4 py-2">
+                                  <HiDotsVertical size={18} />
+                                </td>
+                              </tr>
                             );
                           })}
-                          </tbody>
-                        </table>
-                      </div>
+                        </tbody>
+                      </table>
+                    </div>
 
-                      {/*Criado por , em: , Ultima vez alterado por: , Em:*/}
-                      <div className="flex justify-end gap-4">
-                        {/* Criado por: */}
-                        <div className="w-1/4">
-                          <label className="block text-sm font-medium text-[#191919] mb-1">
-                            Created by:
-                          </label>
-                          <div className="w-full h-[30px] px-3 bg-gray-200 rounded text-sm text-[#191919] flex items-center">
-                            {editProduct?.vcriadopor || '—'}
-                          </div>
-                        </div>
-
-                        {/* Criado em: */}
-                        <div className="w-1/4">
-                          <label className="block text-sm font-medium text-[#191919] mb-1">
-                            Created on:
-                          </label>
-                          <div className="w-full h-[30px] px-3 bg-gray-200 rounded text-sm text-[#191919] flex items-center">
-                            {formatDateOnly(editProduct?.dcriadoem)}
-                          </div>
-                        </div>
-
-                        {/* ultima vez alterado por:*/}
-                        <div className="w-1/4">
-                          <label htmlFor="vUltalpor" className="block text-sm font-medium text-[#191919] mb-1">
-                            Last changed by:
-                          </label>
-                          <div className="w-full h-[30px] px-3 bg-gray-200 rounded text-sm text-[#191919] flex items-center">
-                            {editProduct?.vultaltpor || '—'}
-                          </div>
-                        </div>
-
-                        {/* ultima vez alterado em: */}
-                        <div className="w-1/4">
-                          <label htmlFor="dAlteradoem" className="block text-sm font-medium text-[#191919] mb-1">
-                            Changed on:
-                          </label>
-                          <div className="w-full h-[30px] px-3 bg-gray-200 rounded text-sm text-[#191919] flex items-center">
-                            {formatDateOnly(editProduct?.dultaltem)}
-                          </div>
+                    {/*Criado por , em: , Ultima vez alterado por: , Em:*/}
+                    <div className="flex justify-end gap-4">
+                      {/* Criado por: */}
+                      <div className="w-1/4">
+                        <label className="block text-sm font-medium text-[#191919] mb-1">
+                          Created by:
+                        </label>
+                        <div className="w-full h-[30px] px-3 bg-gray-200 rounded text-sm text-[#191919] flex items-center">
+                          {editProduct?.vcriadopor || '—'}
                         </div>
                       </div>
-                    </form>
+
+                      {/* Criado em: */}
+                      <div className="w-1/4">
+                        <label className="block text-sm font-medium text-[#191919] mb-1">
+                          Created on:
+                        </label>
+                        <div className="w-full h-[30px] px-3 bg-gray-200 rounded text-sm text-[#191919] flex items-center">
+                          {formatDateOnly(editProduct?.dcriadoem)}
+                        </div>
+                      </div>
+
+                      {/* ultima vez alterado por:*/}
+                      <div className="w-1/4">
+                        <label htmlFor="vUltalpor" className="block text-sm font-medium text-[#191919] mb-1">
+                          Last changed by:
+                        </label>
+                        <div className="w-full h-[30px] px-3 bg-gray-200 rounded text-sm text-[#191919] flex items-center">
+                          {editProduct?.vultaltpor || '—'}
+                        </div>
+                      </div>
+
+                      {/* ultima vez alterado em: */}
+                      <div className="w-1/4">
+                        <label htmlFor="dAlteradoem" className="block text-sm font-medium text-[#191919] mb-1">
+                          Changed on:
+                        </label>
+                        <div className="w-full h-[30px] px-3 bg-gray-200 rounded text-sm text-[#191919] flex items-center">
+                          {formatDateOnly(editProduct?.dultaltem)}
+                        </div>
+                      </div>
+                    </div>
+                  </form>
                 )}
               </ModalBody>
 
@@ -1663,4 +1665,4 @@ const DataProduct = () => {
   );
 }
 
-  export default DataProduct;
+export default DataProduct;

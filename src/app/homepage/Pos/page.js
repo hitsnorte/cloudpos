@@ -546,9 +546,10 @@ export default function ProductGroups() {
                             setSelectedCardPath(null);
                             setSelectedRow(null);
                         }}
-                        className="mb-4 px-4 py-2 rounded hover:bg-gray-300"
+                        className=" ml-4 px-4 py-2 rounded bg-[#FC9D25] text-white hover:bg-[#e38d20] flex items-center gap-2"
                     >
-                        <IoIosArrowBack size={16} /> back
+                        <IoIosArrowBack size={16} />
+                        <span>Postos</span>
                     </button>
 
                     <div className="px-4 flex flex-wrap gap-6 p-6">
@@ -587,9 +588,10 @@ export default function ProductGroups() {
                         onClick={() => {
                             setSelectedRow(null); // Volta para as salas
                         }}
-                        className="mb-4 px-4 py-2 rounded hover:bg-gray-300"
+                        className=" ml-4 px-4 py-2 rounded bg-[#FC9D25] text-white hover:bg-[#e38d20] flex items-center gap-2"
                     >
-                        <IoIosArrowBack size={16} /> back
+                        <IoIosArrowBack size={16} />
+                        <span>Salas</span>
                     </button>
 
                     <div className="px-4 flex flex-wrap gap-6 p-6">

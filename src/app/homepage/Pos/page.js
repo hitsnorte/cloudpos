@@ -3,19 +3,24 @@
 import { fetchGrup } from '@/src/lib/apigroup'
 import { fetchProduct } from '@/src/lib/apiproduct'
 import { fetchFamily } from '@/src/lib/apifamily'
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useMemo } from 'react'
 import { useRouter } from "next/navigation";
 import { fetchIva } from '@/src/lib/apiiva';
 import { fetchSubfamily } from '@/src/lib/apisubfamily';
 import { fetchDashboard } from '@/src/lib/apidashboard';
+import { fetchPostos } from '@/src/lib/apipostos';
+import { fetchPostossalas } from '@/src/lib/apipostossalas';
+import { fetchSalas } from '@/src/lib/apisalas';
+import { fetchMesas } from '@/src/lib/apimesas';
 import { fetchClassepreco } from '@/src/lib/apiclassepreco';
 import { fetchPreco } from "@/src/lib/apipreco";
 import { MdPointOfSale } from "react-icons/md";
 import { Card, CardBody } from "@heroui/react";
 import { useSession } from "next-auth/react"; // Import useSession
-import {MdTableBar} from "react-icons/md";
+import { MdTableBar } from "react-icons/md";
 import { IoIosArrowBack } from "react-icons/io";
-import { TiShoppingCart } from 'react-icons/ti'
+import { TiShoppingCart } from 'react-icons/ti';
+import { FaDoorOpen } from "react-icons/fa";
 import { CiTrash } from "react-icons/ci";
 
 
@@ -56,6 +61,39 @@ export default function ProductGroups() {
     const [showConfirm, setShowConfirm] = useState(false);
     const popoverRef = useRef(null);
 
+    const [postos, setPostos] = useState([]);
+    const [salas, setSalas] = useState([]);
+    const [mesas, setMesas] = useState([]);
+    const [postosComSalas, setPostosComSalas] = useState([]);
+    const [salasComMesas, setSalasComMesas] = useState([]);
+
+
+    const cardPaths = useMemo(() => {
+        if (!postosComSalas) return [];
+        return postosComSalas.flatMap(posto =>
+            (posto.salas || []).map(sala => ({
+                label: sala.Descricao,
+                value: sala.ID_SALA,
+                path: `/homepage/${posto.VPosto}/sala/${sala.ID_SALA}`,
+            }))
+        );
+    }, [postosComSalas]);
+
+    const cardPaths3 = useMemo(() => {
+        if (!selectedRow || !salasComMesas.length) return [];
+
+        const salaId = parseInt(selectedRow.split("/").pop());
+        const salaSelecionada = salasComMesas.find(s => s.ID_SALA === salaId);
+
+        if (!salaSelecionada || !salaSelecionada.mesas) return [];
+
+        return salaSelecionada.mesas.map(mesa => ({
+            label: mesa.Descricao,
+            value: mesa.ID_Mesa,
+            path: `/mesas/${mesa.ID_Mesa}`,
+        }));
+    }, [selectedRow, salasComMesas]);
+
     // Fecha o popover se clicar fora
     useEffect(() => {
         function handleClickOutside(event) {
@@ -73,6 +111,114 @@ export default function ProductGroups() {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [showConfirm]);
 
+    useEffect(() => {
+        loadPostos();
+        loadSalas();
+        loadMesas();
+    }, []);
+
+    const loadPostos = async () => {
+        try {
+            const postos = await fetchPostos();
+
+            // Aqui pode-se fazer algum enriquecimento dos dados se necessário
+            const enrichedPostos = postos.map(posto => ({
+                ...posto,
+            }));
+
+            setPostos(enrichedPostos);
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
+    const loadSalas = async () => {
+        try {
+            const fetchedSalas = await fetchSalas();
+
+            const enrichedSalas = fetchedSalas.map(sala => ({
+                ...sala,
+            }));
+
+            setSalas(enrichedSalas);
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
+    const loadMesas = async () => {
+        try {
+            const fetchedMesas = await fetchMesas();
+
+            const enrichedMesas = fetchedMesas.map(mesa => ({
+                ...mesa,
+            }));
+            console.log("mesas: ", enrichedMesas);
+            setMesas(enrichedMesas);
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
+    useEffect(() => {
+        const loadPostosWithSalas = async () => {
+            try {
+                const [postos, salas, postosSalas] = await Promise.all([
+                    fetchPostos(),
+                    fetchSalas(),
+                    fetchPostossalas()
+                ]);
+
+                const enrichedPostos = postos.map(posto => {
+                    const relacoes = postosSalas.filter(ps => ps.Posto === posto.Icodi.toString());
+
+                    const salasRelacionadas = relacoes
+                        .sort((a, b) => a.Ordem - b.Ordem)
+                        .map(relacao => salas.find(s => s.ID_SALA === relacao.ID_Sala))
+                        .filter(Boolean);
+
+                    return {
+                        ...posto,
+                        salas: salasRelacionadas
+                    };
+                });
+
+                setPostosComSalas(enrichedPostos);
+            } catch (err) {
+                console.error("Erro ao carregar dados:", err);
+                setError("Erro ao carregar postos e salas.");
+            }
+        };
+
+        loadPostosWithSalas();
+    }, []);
+
+    useEffect(() => {
+        const loadMesasWithSalas = async () => {
+            try {
+                const [salas, mesas] = await Promise.all([
+                    fetchSalas(), // função que vai buscar as salas
+                    fetchMesas()  // função que vai buscar as mesas
+                ]);
+
+                const enrichedSalas = salas.map(sala => {
+                    const mesasDaSala = mesas.filter(mesa => mesa.ID_Sala === sala.ID_SALA);
+
+                    return {
+                        ...sala,
+                        mesas: mesasDaSala
+                    };
+                });
+
+                setSalasComMesas(enrichedSalas);
+            } catch (err) {
+                console.error("Erro ao carregar salas e mesas:", err);
+                setError("Erro ao carregar dados.");
+            }
+        };
+
+        loadMesasWithSalas();
+    }, []);
 
     //side bar carrinho
     useEffect(() => {
@@ -339,21 +485,13 @@ export default function ProductGroups() {
         return <p className="text-center text-sm">Loading dashboard...</p>;
     }
 
-    const cardPaths2 = [
-        { label: "Pos1", value: dashboardData.BLIND || 0, path: "/homepage/" },
-        { label: "Pos2", value: dashboardData.SPA || 0, path: "/homepage/" },
-        { label: "Pos3", value: dashboardData.FLORBELA || 0, path: "/homepage/" },
-    ];
+    const cardPaths2 = postos.map((posto, index) => ({
+        label: posto.VDescricao,
+        value: 0, // Coloque aqui algum valor real se houver (como dashboardData[posto.VDescricao])
+        path: `/homepage/${posto.VPosto}`, // Ajuste conforme necessidade
+    }));
 
-    const cardPaths = [
-        { label: "Room 1", value: dashboardData.BLIND || 0, path: "/homepage/" },
-        { label: "Room 2", value: dashboardData.SPA || 0, path: "/homepage/" },
-        { label: "Room 3", value: dashboardData.FLORBELA || 0, path: "/homepage/" },
-        { label: "Room 4", value: dashboardData.FLORBELA || 0, path: "/homepage/" },
-        { label: "Room 5", value: dashboardData.FLORBELA || 0, path: "/homepage/" },
-        { label: "Room 6", value: dashboardData.FLORBELA || 0, path: "/homepage/" },
-        { label: "Room 7", value: dashboardData.FLORBELA || 0, path: "/homepage/" },
-    ];
+
 
     if (loading) {
         return <div className="p-6">LOADING PRODUCTS...</div>
@@ -370,13 +508,6 @@ export default function ProductGroups() {
     if (subfamiliesWithProducts.length === 0) {
         return <div className="p-6">NO SUBFAMILIES OR PRODUCT FOUND</div>
     }
-
-    const mesa = [
-        {label: "Table 1" , path: "/homepage/" , icon: <MdTableBar /> },
-        {label: "Table 2", path: "/homepage/" , icon:<MdTableBar /> },
-        {label: "Table 3" , path: "/homepage/" , icon: <MdTableBar />},
-        {label: "Table 4", path: "/homepage/" , icon: <MdTableBar />},
-    ]
 
     return (
         <>
@@ -408,22 +539,35 @@ export default function ProductGroups() {
                 </>
             )}
 
-            {/* Conteúdo restante só aparece após clicar em um card */}
             {selectedCardPath && !selectedRow && (
                 <>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 p-6">
-                    {cardPaths.map((card, index) => (
+                    <button
+                        onClick={() => {
+                            setSelectedCardPath(null);
+                            setSelectedRow(null);
+                        }}
+                        className="mb-4 px-4 py-2 rounded hover:bg-gray-300"
+                    >
+                        <IoIosArrowBack size={16} /> back
+                    </button>
+
+                    <div className="px-4 flex flex-wrap gap-6 p-6">
+                        {cardPaths.map((card, index) => (
                             <Card
                                 key={index}
-                                className="w-full h-40 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center cursor-pointer hover:bg-gray-100"
+                                className="w-70 h-45 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center cursor-pointer hover:bg-gray-100"
+
                             >
                                 <CardBody className="flex flex-col items-center w-full h-full relative">
                                     <div
-                                        className="w-full h-full cursor-pointer hover:bg-gray-100"
-                                        onClick={() => setSelectedRow(card.path)}
+
+                                        onClick={() => {
+                                            console.log("Clicou na sala com path:", card.path);
+                                            setSelectedRow(card.path); // usar ID da sala
+                                        }}
                                     >
                                         <p className="text-5xl font-bold text-[#FC9D25] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                                            <MdPointOfSale />
+                                            <FaDoorOpen />
                                         </p>
                                         <p className="text-center h-13 text-sm text-gray-600 absolute bottom-4 left-1/2 transform -translate-x-1/2">
                                             {card.label}
@@ -436,35 +580,43 @@ export default function ProductGroups() {
                 </>
             )}
 
+            {/* Etapa 3 - MOSTRAR MESAS da sala selecionada */}
             {selectedRow && (
                 <>
                     <button
-                        onClick={() => setSelectedRow(null)}
+                        onClick={() => {
+                            setSelectedRow(null); // Volta para as salas
+                        }}
                         className="mb-4 px-4 py-2 rounded hover:bg-gray-300"
                     >
-                        <IoIosArrowBack size={16}/>
+                        <IoIosArrowBack size={16} /> back
                     </button>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-6">
-                        {mesa.map((m, index) => (
+                    <div className="px-4 flex flex-wrap gap-6 p-6">
+                        {cardPaths3.map((card, index) => (
                             <Card
                                 key={index}
-                                className="w-full h-40 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center cursor-pointer hover:bg-gray-100"
-                                onClick={() => console.log("Table clicked:", m.label)}
+                                className="w-70 h-45 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center cursor-pointer hover:bg-gray-100"
+
                             >
-                                <CardBody className="flex flex-col items-center justify-center w-full h-full relative">
-                                    <div className="text-5xl text-[#FC9D25] mb-2">
-                                        {m.icon}
+                                <CardBody className="flex flex-col items-center w-full h-full relative">
+                                    <div
+                                        onClick={() => console.log("Mesa selecionada:", card.ID_MESA)}>
+
+                                        <p className="text-5xl font-bold text-[#FC9D25] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                                            <MdTableBar />
+                                        </p>
+                                        <p className="text-center h-13 text-sm text-gray-600 absolute bottom-4 left-1/2 transform -translate-x-1/2">
+                                            {card.label}
+                                        </p>
                                     </div>
-                                    <p className="text-center text-sm text-[#191919]">
-                                        {m.label}
-                                    </p>
                                 </CardBody>
                             </Card>
                         ))}
                     </div>
                 </>
             )}
+
 
 
             <div className="relative">
@@ -476,8 +628,8 @@ export default function ProductGroups() {
                         <TiShoppingCart />
                         {cartItems.length > 0 && (
                             <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                {cartItems.reduce((total, item) => total + item.quantity, 0)}
-              </span>
+                                {cartItems.reduce((total, item) => total + item.quantity, 0)}
+                            </span>
                         )}
                     </button>
                 )}
@@ -533,8 +685,8 @@ export default function ProductGroups() {
                                                             <span className="inline-block transform scale-150 font-thin">-</span>
                                                         </button>
                                                         <span className="px-1 py-1 bg-white text-sm font-medium text-[#191919] border-gray-300">
-                              {quantities[item.id] || 1} un
-                            </span>
+                                                            {quantities[item.id] || 1} un
+                                                        </span>
                                                         <button
                                                             className="px-3 py-1 bg-white text-[#FC9D25] hover:bg-gray-300 transition"
                                                             onClick={() => {

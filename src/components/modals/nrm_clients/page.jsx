@@ -26,14 +26,14 @@ const PopUpModal = ({ onClose, onSubmit }) => {
             style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
             <div className="bg-white rounded-2xl shadow-xl w-92 max-w-md">
                 <div className="bg-[#E6AC27] rounded-t-2xl p-4 flex justify-between">
-                    <h2 className="text-xl font-semibold text-white">Insira o nrm de clientes</h2>
+                    <h2 className="text-xl font-semibold text-white">Enter the number of clients</h2>
                     <IoMdClose size={25} color='white' onClick={onClose} className='cursor-pointer' />
                 </div>
 
                 <div className="p-4">
                     <input
                         type='text'
-                        placeholder='Insira o nrm de clientes'
+                        placeholder='Enter the number of clients'
                         value={inputValue}
                         onChange={(e) => {
                             const onlyNums = e.target.value.replace(/\D/g, '');

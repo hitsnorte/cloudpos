@@ -694,7 +694,7 @@ export default function ProductGroups() {
                                         setShowModal(true);
                                     }}>
                                     <div className="text-5xl font-bold text-[#FC9D25] mb-2">
-                                        <MdTableBar />
+                                        <img src='/icons/table_icon.png' alt='table icon' width={80}/>
                                     </div>
                                     <p className="text-center text-sm text-[#191919]">
                                         {m.label}

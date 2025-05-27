@@ -26,7 +26,7 @@ export async function GET(request) {
     const { propertyServer, propertyPort } = propertyData;
 
     // Agora faz a requisição para o servidor de produtos usando a URL da propriedade
-    const tipoprodutoUrl = `http://${propertyServer}:${propertyPort}/getpostos`;
+    const tipoprodutoUrl = `http://${propertyServer}:${propertyPort}/getpostossalas`;
     const tipoprodutoResponse = await fetch(tipoprodutoUrl);
     if (!tipoprodutoResponse.ok) {
       return new Response(

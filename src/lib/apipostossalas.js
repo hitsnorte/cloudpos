@@ -1,7 +1,7 @@
-export const fetchPostos = async () => {
+export const fetchPostossalas = async () => {
     try {
         const selectedPropertyID = localStorage.getItem('selectedProperty');
-        const response = await fetch('/api/postos', {
+        const response = await fetch('/api/postossalas', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

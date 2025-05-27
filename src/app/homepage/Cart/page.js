@@ -1028,7 +1028,5 @@ export default function ProductGroups() {
                 </>
             )}
         </>
-
-
     )
 }

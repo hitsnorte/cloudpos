@@ -22,6 +22,9 @@ import { IoIosArrowBack } from "react-icons/io";
 import { TiShoppingCart } from 'react-icons/ti';
 import { FaDoorOpen } from "react-icons/fa";
 import { CiTrash } from "react-icons/ci";
+import { FaMagnifyingGlass } from "react-icons/fa6";
+import {ChevronDown, ChevronRight} from "lucide-react";
+import {Spinner} from "@nextui-org/react";
 
 
 export default function ProductGroups() {
@@ -30,15 +33,19 @@ export default function ProductGroups() {
     const [loading, setLoading] = useState(true)
     const [propertyID, setPropertyID] = useState(null)
     const [selectedProduct, setSelectedProduct] = useState(null)
+    const [count , setCount]= useState(0);
     const [cartOpen, setCartOpen] = useState(false)
     const [familiesWithProducts, setFamiliesWithProducts] = useState([]);
     const [subfamiliesWithProducts, setSubfamiliesWithProducts] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [cartItems, setCartItems] = useState(() => {
-        const saved = localStorage.getItem('cart');
-        return saved ? JSON.parse(saved) : [];
-    });
+    const getCartItems = () => tableCarts[selectedTable] || [];
+    const updateCartItems = (items) => {
+        setTableCarts((prev) => ({
+            ...prev,
+            [selectedTable]: items,
+        }));
+    };
     const [produtos, setProdutos] = useState([]);
     const [dashboardData, setDashboardData] = useState(null);
     const router = useRouter();
@@ -49,6 +56,9 @@ export default function ProductGroups() {
     const [selectedCardPath, setSelectedCardPath] = useState(null);
     const [selectedTable, setSelectedTable] = useState(null);
     const [selectedRow, setSelectedRow] = useState(null);
+    const [tableCarts, setTableCarts] = useState({});
+    const currentCart = tableCarts[selectedTable] || [];
+    const [quantities , setQuantities] = useState({});
 
     const [viewType, setViewType] = useState('groups', 'families', 'subfamilies') // 'groups' | 'families' | 'subfamilies'
 
@@ -56,7 +66,11 @@ export default function ProductGroups() {
     //side bar
     const [isOpen, setIsOpen] = useState(false);
     const toggleSidebar = () => setIsOpen(!isOpen);
-    const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const total = getCartItems().reduce(
+        (acc, item) => acc + item.price * item.quantity,
+        0
+    );
+
 
     const [showConfirm, setShowConfirm] = useState(false);
     const popoverRef = useRef(null);
@@ -67,6 +81,10 @@ export default function ProductGroups() {
     const [postosComSalas, setPostosComSalas] = useState([]);
     const [salasComMesas, setSalasComMesas] = useState([]);
 
+    const handleConfirm = () => {
+        clearCart();
+        setShowConfirm(false);
+    };
 
     useEffect(() => {
         const fetchMesas = async () => {
@@ -255,33 +273,26 @@ export default function ProductGroups() {
     }, []);
 
     //side bar carrinho
-    useEffect(() => {
-        console.log("Cart updated:", cartItems);
-    }, [cartItems]);
-
-    const [quantities, setQuantities] = useState(() => {
-        return cartItems.reduce((acc, item) => {
-            acc[item.id] = item.quantity || 1;
-            return acc;
-        }, {});
-    });
 
     useEffect(() => {
-        setQuantities(
-            cartItems.reduce((acc, item) => {
-                acc[item.id] = item.quantity || 1;
-                return acc;
-            }, {})
-        );
-    }, [cartItems]);
+        if (selectedTable && tableCarts[selectedTable]) {
+            setQuantities(
+                tableCarts[selectedTable].reduce((acc, item) => {
+                    acc[item.id] = item.quantity || 1;
+                    return acc;
+                }, {})
+            );
+        }
+    }, [tableCarts, selectedTable]);
 
     const removeItem = (id) => {
-        setCartItems((prev) => prev.filter((item) => item.id !== id));
+        const filtered = getCartItems().filter((item) => item.id !== id);
+        updateCartItems(filtered);
     };
 
+
     const clearCart = () => {
-        setCartItems([]);
-        setQuantities({});
+        console.warn("This does not work")
     };
 
 
@@ -308,35 +319,19 @@ export default function ProductGroups() {
 
     // 1. Lê o carrinho salvo do localStorage na inicialização
     useEffect(() => {
-        const saved = localStorage.getItem('cart');
+        const saved = localStorage.getItem('tableCarts');
         if (saved) {
             const parsed = JSON.parse(saved);
-            setCartItems(parsed);
-
-            const quantityMap = {};
-            parsed.forEach(item => {
-                quantityMap[item.id] = item.quantity || 1;
-            });
-            setQuantities(quantityMap);
+            setTableCarts(parsed);
         }
     }, []);
 
-    // 2. Salva automaticamente quando cartItems muda
-    useEffect(() => {
-        console.log('Saving cart to localStorage:', cartItems);
-        localStorage.setItem('cart', JSON.stringify(cartItems));
-    }, [cartItems]);
 
+    // 2. Salva automaticamente quando um cart muda
     useEffect(() => {
-        localStorage.setItem('quantities', JSON.stringify(quantities));
-    }, [quantities]);
+        localStorage.setItem('tableCarts', JSON.stringify(tableCarts));
+    }, [tableCarts]);
 
-    useEffect(() => {
-        const storedQuantities = localStorage.getItem('quantities');
-        if (storedQuantities) {
-            setQuantities(JSON.parse(storedQuantities));
-        }
-    }, []);
 
     //Busca grupos e produtos quando o propertyID estiver disponivel
     useEffect(() => {
@@ -543,9 +538,47 @@ export default function ProductGroups() {
         return <div className="p-6">NO SUBFAMILIES OR PRODUCT FOUND</div>
     }
 
+    const addToCart = (product) => {
+        if (!selectedTable) return;
+
+        const currentItems = getCartItems();
+        const existing = currentItems.find((item) => item.id === product.id);
+
+        let updatedItems;
+        if (existing) {
+            updatedItems = currentItems.map((item) =>
+                item.id === product.id
+                    ? { ...item, quantity: item.quantity + product.quantity }
+                    : item
+            );
+        } else {
+            updatedItems = [...currentItems, product];
+        }
+
+        updateCartItems(updatedItems);
+    };
+
+    const updateQuantity = (id, newQuantity) => {
+        const updatedItems = getCartItems().map((item) =>
+            item.id === id ? { ...item, quantity: newQuantity } : item
+        );
+        updateCartItems(updatedItems);
+    };
+
+    function filterByName(items) {
+        if (!searchTerm) return items;
+        return items.filter(item =>
+            item.name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }
+
+    function toggleGroup(id) {
+        setOpenGroupID(openGroupID === id ? null : id);
+    }
+
     return (
         <>
-            {!selectedCardPath && !selectedRow && (
+            {!selectedCardPath && !selectedRow && !selectedTable && (
                 <>
                     <h1 className="text-3xl font-semibold px-4">Dashboard</h1>
                     <div className="px-4 flex flex-wrap gap-6 p-6">
@@ -573,12 +606,11 @@ export default function ProductGroups() {
                 </>
             )}
 
-            {selectedCardPath && !selectedRow && (
+            {selectedCardPath && !selectedRow && !selectedTable && (
                 <>
                     <button
                         onClick={() => {
                             setSelectedCardPath(null);
-                            setSelectedRow(null);
                         }}
                         className=" ml-4 px-4 py-2 rounded bg-[#FC9D25] text-white hover:bg-[#e38d20] flex items-center gap-2"
                     >
@@ -616,13 +648,16 @@ export default function ProductGroups() {
             )}
 
             {/* Etapa 3 - MOSTRAR MESAS da sala selecionada */}
-            {selectedRow && (
+            {selectedRow && !selectedTable && (
                 <>
                     <button
-                        onClick={() => setSelectedRow(null)}
-                        className="mb-4 px-4 py-2 rounded hover:bg-gray-300"
+                        onClick={() => {
+                            setSelectedRow(null);
+                        }}
+                        className=" ml-4 px-4 py-2 rounded bg-[#FC9D25] text-white hover:bg-[#e38d20] flex items-center gap-2"
                     >
                         <IoIosArrowBack size={16} />
+                        <span>Salas</span>
                     </button>
 
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-6">
@@ -630,18 +665,19 @@ export default function ProductGroups() {
                             <Card
                                 key={index}
                                 className="w-full h-40 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center cursor-pointer hover:bg-gray-100"
-                                onClick={() => setSelectedTable(m.path)}
                             >
-                                <CardBody className="flex flex-col items-center justify-center w-full h-full relative">
-                                    <div className="text-5xl text-[#FC9D25] mb-2">
-                                        {m.icon}
+                                <CardBody className="flex flex-col items-center justify-center w-full h-full"
+                                          onClick={() => {
+                                              console.log('Selected table:', m.label);
+                                              setSelectedTable(m.path);
+                                          }}>
+                                    <div className="text-5xl font-bold text-[#FC9D25] mb-2">
+                                        <MdTableBar />
                                     </div>
                                     <p className="text-center text-sm text-[#191919]">
                                         {m.label}
                                     </p>
-                                    <p className="text-center text-xs text-gray-600 mt-1">
-                                        Total:...€
-                                    </p>
+                                    <span className="text-sm font-bold mr-2">€{total.toFixed(2)}</span>
                                 </CardBody>
                             </Card>
                         ))}
@@ -650,16 +686,357 @@ export default function ProductGroups() {
             )}
 
             <div className="relative">
+                {selectedTable && (
+                    <>
+                        <button
+                            onClick={() => {
+                                setSelectedCardPath(null);
+                                setSelectedTable(null);
+                            }}
+                            className="ml-4 px-4 py-2 rounded bg-[#FC9D25] text-white hover:bg-[#e38d20] flex items-center gap-2"
+                        >
+                            <IoIosArrowBack size={16} />
+                            <span>Mesas</span>
+                        </button>
+
+                        <div className="flex items-center justify-center space-x-4 mt-4">
+                            <button
+                                onClick={() => setViewType('groups')}
+                                className={`px-4 py-2 rounded ${viewType === 'groups' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
+                            >
+                                Groups
+                            </button>
+                            <button
+                                onClick={() => setViewType('families')}
+                                className={`px-4 py-2 rounded ${viewType === 'families' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
+                            >
+                                Families
+                            </button>
+                            <button
+                                onClick={() => setViewType('subfamilies')}
+                                className={`px-4 py-2 rounded ${viewType === 'subfamilies' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
+                            >
+                                Subfamilies
+                            </button>
+                        </div>
+
+                        <div className="py-5 px-6">
+                            <div className="mb-4 relative">
+                                <FaMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+                                <input
+                                    type="text"
+                                    placeholder="Pesquisar..."
+                                    value={searchTerm}
+                                    onChange={e => setSearchTerm(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="p-6 space-y-4">
+                            {viewType === 'groups' &&
+                                filterByName(groupsWithProducts).map(group => {
+                                    const isOpen = openGroupID === group.id;
+                                    return (
+                                        <div key={group.id} className="rounded shadow-md overflow-hidden">
+                                            <div
+                                                className="flex items-center justify-between py-3 px-4 bg-white cursor-pointer hover:bg-indigo-50 text-[#191919] transition-colors"
+                                                onClick={() => toggleGroup(group.id)}
+                                            >
+                                                <div className="flex items-center text-lg font-semibold">{group.name}</div>
+                                                <div className="text-gray-500">{isOpen ? <ChevronDown size={18} /> : <ChevronRight size={18} />}</div>
+                                            </div>
+
+                                            {isOpen && (
+                                                <div className="overflow-x-auto bg-muted/40 transition-all duration-300 ease-in-out">
+                                                    <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB]">
+                                                        <thead>
+                                                        <tr className="bg-[#FC9D25] text-white">
+                                                            <th className="border border-[#EDEBEB] px-4 py-2 text-left">Product</th>
+                                                            <th className="border border-[#EDEBEB] px-4 py-2 text-left">Price</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody className="divide-y divide-gray-300">
+                                                        {group.products.map((product, index) => (
+                                                            <tr
+                                                                key={product.id || `product-${index}`}
+                                                                className="hover:bg-indigo-50 transition-colors"
+                                                            >
+                                                                <td className="border border-[#EDEBEB] px-4 py-2 text-gray-700">
+                                                                    <span
+                                                                        className="cursor-pointer hover:underline text-[#191919]"
+                                                                        onClick={() => {
+                                                                        setSelectedProduct(product);
+                                                                        setCount(1); // caso use contador
+                                                                        }}
+                                                                    >
+                                                                        {product.name}
+                                                                    </span>
+                                                                </td>
+                                                                <td className="border border-[#EDEBEB] px-3 py-2 text-right">
+                                                                    {product.price.toFixed(2)} €
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+
+                            {viewType === 'groups' && filterByName(groupsWithProducts).map((group) => {
+                                const isOpen = openGroupID === group.id
+                                return (
+                                    <div key={group.id} className="rounded shadow-md overflow-hidden">
+                                        <div
+                                            className="flex items-center justify-between py-3 px-4 bg-white cursor-pointer hover:bg-indigo-50 text-[#191919] transition-colors"
+                                            onClick={() => toggleGroup(group.id)}
+                                        >
+                                            <div className="flex items-center text-lg font-semibold">
+                                                {group.name}
+                                            </div>
+                                            <div className="text-gray-500">
+                                                {isOpen ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                                            </div>
+                                        </div>
+
+                                        {isOpen && (
+                                            <div className="overflow-x-auto bg-muted/40 transition-all duration-300 ease-in-out">
+                                                <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB]">
+                                                    <thead>
+                                                    <tr className="bg-[#FC9D25] text-white">
+                                                        <th className="border border-[#EDEBEB] px-4 py-2 text-left">
+                                                            Product
+                                                        </th>
+                                                        <th className="border border-[#EDEBEB] px-4 py-2 text-left">
+                                                            Price
+                                                        </th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody className="divide-y divide-gray-300">
+                                                    {group.products.map((product, index) => (
+                                                        <tr
+                                                            key={product.id || `product-${index}`}
+                                                            className="hover:bg-indigo-50 transition-colors"
+                                                        >
+                                                            <td className="border border-[#EDEBEB] px-4 py-2 text-gray-700">
+                                                                <span
+                                                                    className="cursor-pointer hover:underline text-[#191919]"
+                                                                    onClick={() => {
+                                                                        setSelectedProduct(product); // abre modal
+                                                                        setCount(1); // resetar quantidade
+                                                                    }}
+
+                                                                >
+                                                                    {product.name}
+                                                                </span>
+                                                            </td>
+
+                                                            <td className="border border-[#EDEBEB] px-3 py-2 text-right">{product.price.toFixed(2)} €</td>
+                                                        </tr>
+                                                    ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        )}
+                                    </div>
+                                )
+                            })}
+
+                            {viewType === 'families' &&
+                                filterByName(familiesWithProducts).map(family => {
+                                    const isOpen = openGroupID === family.id;
+                                    return (
+                                        <div key={family.id} className="rounded shadow-md overflow-hidden">
+                                            <div
+                                                className="flex items-center justify-between py-3 px-4 bg-white cursor-pointer hover:bg-indigo-50 text-[#191919] transition-colors"
+                                                onClick={() => toggleGroup(family.id)}
+                                            >
+                                                <div className="flex items-center text-lg font-semibold">{family.name}</div>
+                                                <div className="text-gray-500">{isOpen ? <ChevronDown size={18} /> : <ChevronRight size={18} />}</div>
+                                            </div>
+
+                                            {isOpen && (
+                                                <div className="overflow-x-auto bg-muted/40 transition-all duration-300 ease-in-out">
+                                                    <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB]">
+                                                        <thead>
+                                                        <tr className="bg-[#FC9D25] text-white">
+                                                            <th className="border border-[#EDEBEB] px-4 py-2 text-left">Product</th>
+                                                            <th className="border border-[#EDEBEB] px-4 py-2 text-right">Price</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody className="divide-y divide-gray-300">
+                                                        {family.products.map((product, index) => (
+                                                            <tr
+                                                                key={product.id || `product-${index}`}
+                                                                className="hover:bg-indigo-50 transition-colors"
+                                                            >
+                                                                <td className="border border-[#EDEBEB] px-4 py-2 text-gray-700">
+                                                                    <span
+                                                                        className="cursor-pointer hover:underline text-[#191919]"
+                                                                        onClick={() => setSelectedProduct(product)}
+                                                                    >
+                                                                        {product.name}
+                                                                    </span>
+                                                                </td>
+                                                                <td className="border border-[#EDEBEB] px-4 py-2 text-right">
+                                                                    {product?.price != null && !isNaN(product.price)
+                                                                        ? `${Number(product.price).toFixed(2)} €`
+                                                                        : '—'}
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+
+                            {viewType === 'subfamilies' &&
+                                filterByName(subfamiliesWithProducts).map(sub => {
+                                    const isOpen = openGroupID === sub.id;
+                                    return (
+                                        <div key={sub.id} className="rounded shadow-md overflow-hidden">
+                                            <div
+                                                className="flex items-center justify-between py-3 px-4 bg-white cursor-pointer hover:bg-indigo-50 text-[#191919] transition-colors"
+                                                onClick={() => toggleGroup(sub.id)}
+                                            >
+                                                <div className="flex items-center text-lg font-semibold">{sub.name}</div>
+                                                <div className="text-gray-500">{isOpen ? <ChevronDown size={18} /> : <ChevronRight size={18} />}</div>
+                                            </div>
+
+                                            {isOpen && (
+                                                <div className="overflow-x-auto bg-muted/40 transition-all duration-300 ease-in-out">
+                                                    <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB]">
+                                                        <thead>
+                                                        <tr className="bg-[#FC9D25] text-white">
+                                                            <th className="border border-[#EDEBEB] px-4 py-2 text-left">Product</th>
+                                                            <th className="border border-[#EDEBEB] px-4 py-2 text-right">Price</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody className="divide-y divide-gray-300">
+                                                        {sub.products.map((product, index) => (
+                                                            <tr
+                                                                key={product.id || `product-${index}`}
+                                                                className="hover:bg-indigo-50 transition-colors"
+                                                            >
+                                                                <td className="border border-[#EDEBEB] px-4 py-2 text-gray-700">
+                                                                    <span
+                                                                        className="cursor-pointer hover:underline text-[#191919]"
+                                                                        onClick={() => setSelectedProduct(product)}
+                                                                    >
+                                                                        {product.name}
+                                                                    </span>
+                                                                </td>
+                                                                <td className="border border-[#EDEBEB] px-4 py-2 text-right">
+                                                                    {product?.price != null && !isNaN(product.price)
+                                                                        ? `${Number(product.price).toFixed(2)} €`
+                                                                        : '—'}
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                        </div>
+
+                        {selectedProduct && (
+                            <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-115 bg-white shadow-xl rounded-lg z-50">
+                                <div className="bg-[#FAFAFA] w-full ">
+                                    <div className="flex justify-between items-center mb-4 px-4 py-3 bg-[#FC9D25] rounded-t-lg">
+                                        <h2 className=" text-l font-semibold text-white ml-1 ">
+                                            Add product
+                                        </h2>
+                                    </div>
+                                    <h2 className="text-l font-semibold text-black ml-5 mb-5">
+                                        {selectedProduct.name
+                                            .toLowerCase()
+                                            .split(' ')
+                                            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                                            .join(' ')}
+                                    </h2>
+
+                                    <div className="flex items-center justify-left px-6">
+                                        {/* Preço */}
+                                        <div className="flex flex-col ">
+                                            <div className="text-xl text-[#FC9D25] font-semibold whitespace-nowrap">
+                                                €{(selectedProduct?.price).toFixed(2)}/un
+                                            </div>
+
+                                            <div className="text-sm text-black whitespace-nowrap">
+                                                Iva {selectedProduct?.iva?.toFixed(2)}%
+                                            </div>
+                                        </div>
+
+                                        {/* Seletor de quantidade */}
+                                        <div className="flex items-center rounded overflow-hidden border border-gray-200 w-max fixed ml-72 -mt-4">
+                                            <button
+                                                onClick={() => setCount((prev) => Math.max(1, prev - 1))}
+                                                className="px-4 py-1 bg-white text-[#FC9D25] hover:bg-gray-300 transition"
+                                            >
+                                                <span className="inline-block transform scale-150 font-thin">-</span>
+                                            </button>
+                                            <span className="px-2 py-1 bg-white text-sm font-medium text-[#191919] border-gray-300">
+                                            {count} un
+                                        </span>
+                                            <button
+                                                onClick={() => setCount((prev) => prev + 1)}
+                                                className="px-3.5 py-1 bg-white text-[#FC9D25] hover:bg-gray-300 transition"
+                                            >
+                                                <span className="inline-block transform scale-150 font-thin">+</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Modal de quantidades*/}
+                                    <div className="flex justify-end space-x-3 ml-8 mb-5 m-5 mr-7">
+                                        {/* Botão Close */}
+                                        <button
+                                            onClick={() => setSelectedProduct(null)}
+                                            className="px-10.5 py-1 bg-[#D3D3D3] text-white rounded-md hover:bg-gray font-medium transition duration-200"
+                                        >
+                                            Close
+                                        </button>
+
+                                        {/* Botão Save */}
+                                        <button
+                                            onClick={() => {
+                                                if (count > 0) {
+                                                    addToCart({ ...selectedProduct, quantity: count });
+                                                    setSelectedProduct(null);
+                                                }
+                                            }}
+                                            className="px-10.5 py-1 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
+                                        >
+                                            {isLoading ? <Spinner size="sm" color="white" /> : 'Save'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                    </>
+                )}
+
+                {/* Carrinho*/}
                 {!isOpen && selectedTable && (
                     <button
                         className="fixed top-6 right-15 z-50 text-3xl text-[#191919] hover:text-[#FC9D25] transition"
                         onClick={toggleSidebar}
                     >
                         <TiShoppingCart />
-                        {cartItems.length > 0 && (
+                        {currentCart.length > 0 && (
                             <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                {cartItems.reduce((total, item) => total + item.quantity, 0)}
-              </span>
+                                {currentCart.reduce((total, item) => total + item.quantity, 0)}
+                            </span>
                         )}
                     </button>
                 )}
@@ -681,55 +1058,41 @@ export default function ProductGroups() {
 
                     {/* Cart Items */}
                     <div className="p-7 flex flex-col h-[calc(100%-150px)] overflow-y-auto -mt-5">
-                        {cartItems.length === 0 ? (
+                        {getCartItems().length === 0 ? (
                             <p className="text-sm">Your order is empty.</p>
                         ) : (
                             <div className="bg-white rounded-l border border-white pt-2 px-4 flex flex-col">
-                                {cartItems.map((item, idx) => (
+                                {getCartItems().map((item, idx) => (
                                     <div
                                         key={item.id}
-                                        className={`w-full py-4 ${idx !== cartItems.length - 1 ? "border-b border-[#EDEDED]" : "pb-7"}`}
+                                        className={`w-full py-4 ${
+                                            idx !== getCartItems().length - 1 ? "border-b border-[#EDEDED]" : "pb-7"
+                                        }`}
                                     >
                                         <div className="flex justify-between items-start">
                                             <div>
                                                 <p className="font-semibold text-sm font-medium">
-                                                    {item.name.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                                                    {item.name
+                                                        .toLowerCase()
+                                                        .split(" ")
+                                                        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                                                        .join(" ")}
                                                 </p>
                                                 <div className="flex items-center justify-between mt-2 gap-4">
                                                     {/* Quantity controls */}
                                                     <div className="flex items-center rounded overflow-hidden border border-gray-200 w-max">
                                                         <button
                                                             className="px-3.5 py-1 bg-white text-[#FC9D25] hover:bg-gray-300 transition"
-                                                            onClick={() => {
-                                                                setQuantities(prev => {
-                                                                    const newQuantity = Math.max(1, (prev[item.id] || 1) - 1);
-                                                                    setCartItems(cartPrev =>
-                                                                        cartPrev.map(ci =>
-                                                                            ci.id === item.id ? { ...ci, quantity: newQuantity } : ci
-                                                                        )
-                                                                    );
-                                                                    return { ...prev, [item.id]: newQuantity };
-                                                                });
-                                                            }}
+                                                            onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
                                                         >
                                                             <span className="inline-block transform scale-150 font-thin">-</span>
                                                         </button>
                                                         <span className="px-1 py-1 bg-white text-sm font-medium text-[#191919] border-gray-300">
-                              {quantities[item.id] || 1} un
-                            </span>
+                                                            {item.quantity}
+                                                        </span>
                                                         <button
                                                             className="px-3 py-1 bg-white text-[#FC9D25] hover:bg-gray-300 transition"
-                                                            onClick={() => {
-                                                                setQuantities(prev => {
-                                                                    const newQuantity = (prev[item.id] || 1) + 1;
-                                                                    setCartItems(cartPrev =>
-                                                                        cartPrev.map(ci =>
-                                                                            ci.id === item.id ? { ...ci, quantity: newQuantity } : ci
-                                                                        )
-                                                                    );
-                                                                    return { ...prev, [item.id]: newQuantity };
-                                                                });
-                                                            }}
+                                                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
                                                         >
                                                             <span className="inline-block transform scale-150 font-thin">+</span>
                                                         </button>
@@ -748,7 +1111,7 @@ export default function ProductGroups() {
                                                     <CiTrash size={20} />
                                                 </button>
                                                 <p className="text-sm font-semibold text-right m-2 mt-2">
-                                                    €{(item.price * quantities[item.id]).toFixed(2)}
+                                                    €{(item.price * item.quantity).toFixed(2)}
                                                 </p>
                                             </div>
                                         </div>
@@ -775,10 +1138,10 @@ export default function ProductGroups() {
                                 </button>
                             </div>
                             <button className="w-1/2 mr-2 bg-[#FC9D25] text-white rounded py-2 text-sm hover:bg-[#e88a1c] transition flex items-center justify-center gap-2">
-                                Order
+                                Cancel
                             </button>
                             <button className="w-1/2 mr-2 bg-[#FC9D25] text-white rounded py-2 text-sm hover:bg-[#e88a1c] transition flex items-center justify-center gap-2">
-                                Cancel
+                                Order
                             </button>
                         </div>
                     </div>

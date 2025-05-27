@@ -23,11 +23,14 @@ import { TiShoppingCart } from 'react-icons/ti';
 import { FaDoorOpen } from "react-icons/fa";
 import { CiTrash } from "react-icons/ci";
 import { FaMagnifyingGlass } from "react-icons/fa6";
-import {ChevronDown, ChevronRight} from "lucide-react";
-import {Spinner} from "@nextui-org/react";
+import { ChevronDown, ChevronRight } from "lucide-react";
+import { Spinner } from "@nextui-org/react";
 
 //import loader
 import LoadingBackdrop from "@/src/components/loader/page";
+
+//import modal nrm clientes
+import PopUpModal from '@/src/components/modals/nrm_clients/page';
 
 export default function ProductGroups() {
     const [groupsWithProducts, setGroupsWithProducts] = useState([])
@@ -35,7 +38,7 @@ export default function ProductGroups() {
     const [loading, setLoading] = useState(true)
     const [propertyID, setPropertyID] = useState(null)
     const [selectedProduct, setSelectedProduct] = useState(null)
-    const [count , setCount]= useState(0);
+    const [count, setCount] = useState(0);
     const [cartOpen, setCartOpen] = useState(false)
     const [familiesWithProducts, setFamiliesWithProducts] = useState([]);
     const [subfamiliesWithProducts, setSubfamiliesWithProducts] = useState([]);
@@ -60,9 +63,10 @@ export default function ProductGroups() {
     const [selectedRow, setSelectedRow] = useState(null);
     const [tableCarts, setTableCarts] = useState({});
     const currentCart = tableCarts[selectedTable] || [];
-    const [quantities , setQuantities] = useState({});
+    const [quantities, setQuantities] = useState({});
 
     const [viewType, setViewType] = useState('groups', 'families', 'subfamilies') // 'groups' | 'families' | 'subfamilies'
+    const [pendingTablePath, setPendingTablePath] = useState(null);
 
 
     //side bar
@@ -82,6 +86,7 @@ export default function ProductGroups() {
     const [mesas, setMesas] = useState([]);
     const [postosComSalas, setPostosComSalas] = useState([]);
     const [salasComMesas, setSalasComMesas] = useState([]);
+    const [showModal, setShowModal] = useState(false);
 
     const handleConfirm = () => {
         clearCart();
@@ -578,6 +583,19 @@ export default function ProductGroups() {
         setOpenGroupID(openGroupID === id ? null : id);
     }
 
+    const handleClientNumberSubmit = (clientNumber) => {
+        if (clientNumber.trim() !== '') {
+            console.log("Número de clientes:", clientNumber);
+            setShowModal(false);
+            setSelectedTable(pendingTablePath); // aqui está o m.path original
+            setPendingTablePath(null); // limpa depois de usar
+        }
+    };
+
+    const handleCloseModal = () => {
+        setShowModal(false);
+    };
+
     return (
         <>
             {!selectedCardPath && !selectedRow && !selectedTable && (
@@ -669,10 +687,12 @@ export default function ProductGroups() {
                                 className="w-full h-40 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center cursor-pointer hover:bg-gray-100"
                             >
                                 <CardBody className="flex flex-col items-center justify-center w-full h-full"
-                                          onClick={() => {
-                                              console.log('Selected table:', m.label);
-                                              setSelectedTable(m.path);
-                                          }}>
+                                    onClick={() => {
+                                        console.log('Selected table:', m.label);
+                                        //   setSelectedTable(m.path);
+                                        setPendingTablePath(m.path);
+                                        setShowModal(true);
+                                    }}>
                                     <div className="text-5xl font-bold text-[#FC9D25] mb-2">
                                         <MdTableBar />
                                     </div>
@@ -685,6 +705,13 @@ export default function ProductGroups() {
                         ))}
                     </div>
                 </>
+            )}
+
+            {showModal && (
+                <PopUpModal
+                    onClose={handleCloseModal}
+                    onSubmit={handleClientNumberSubmit}
+                />
             )}
 
             <div className="relative">
@@ -753,33 +780,33 @@ export default function ProductGroups() {
                                                 <div className="overflow-x-auto bg-muted/40 transition-all duration-300 ease-in-out">
                                                     <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB]">
                                                         <thead>
-                                                        <tr className="bg-[#FC9D25] text-white">
-                                                            <th className="border border-[#EDEBEB] px-4 py-2 text-left">Product</th>
-                                                            <th className="border border-[#EDEBEB] px-4 py-2 text-left">Price</th>
-                                                        </tr>
+                                                            <tr className="bg-[#FC9D25] text-white">
+                                                                <th className="border border-[#EDEBEB] px-4 py-2 text-left">Product</th>
+                                                                <th className="border border-[#EDEBEB] px-4 py-2 text-left">Price</th>
+                                                            </tr>
                                                         </thead>
                                                         <tbody className="divide-y divide-gray-300">
-                                                        {group.products.map((product, index) => (
-                                                            <tr
-                                                                key={product.id || `product-${index}`}
-                                                                className="hover:bg-indigo-50 transition-colors"
-                                                            >
-                                                                <td className="border border-[#EDEBEB] px-4 py-2 text-gray-700">
-                                                                    <span
-                                                                        className="cursor-pointer hover:underline text-[#191919]"
-                                                                        onClick={() => {
-                                                                        setSelectedProduct(product);
-                                                                        setCount(1); // caso use contador
-                                                                        }}
-                                                                    >
-                                                                        {product.name}
-                                                                    </span>
-                                                                </td>
-                                                                <td className="border border-[#EDEBEB] px-3 py-2 text-right">
-                                                                    {product.price.toFixed(2)} €
-                                                                </td>
-                                                            </tr>
-                                                        ))}
+                                                            {group.products.map((product, index) => (
+                                                                <tr
+                                                                    key={product.id || `product-${index}`}
+                                                                    className="hover:bg-indigo-50 transition-colors"
+                                                                >
+                                                                    <td className="border border-[#EDEBEB] px-4 py-2 text-gray-700">
+                                                                        <span
+                                                                            className="cursor-pointer hover:underline text-[#191919]"
+                                                                            onClick={() => {
+                                                                                setSelectedProduct(product);
+                                                                                setCount(1); // caso use contador
+                                                                            }}
+                                                                        >
+                                                                            {product.name}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td className="border border-[#EDEBEB] px-3 py-2 text-right">
+                                                                        {product.price.toFixed(2)} €
+                                                                    </td>
+                                                                </tr>
+                                                            ))}
                                                         </tbody>
                                                     </table>
                                                 </div>
@@ -808,37 +835,37 @@ export default function ProductGroups() {
                                             <div className="overflow-x-auto bg-muted/40 transition-all duration-300 ease-in-out">
                                                 <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB]">
                                                     <thead>
-                                                    <tr className="bg-[#FC9D25] text-white">
-                                                        <th className="border border-[#EDEBEB] px-4 py-2 text-left">
-                                                            Product
-                                                        </th>
-                                                        <th className="border border-[#EDEBEB] px-4 py-2 text-left">
-                                                            Price
-                                                        </th>
-                                                    </tr>
+                                                        <tr className="bg-[#FC9D25] text-white">
+                                                            <th className="border border-[#EDEBEB] px-4 py-2 text-left">
+                                                                Product
+                                                            </th>
+                                                            <th className="border border-[#EDEBEB] px-4 py-2 text-left">
+                                                                Price
+                                                            </th>
+                                                        </tr>
                                                     </thead>
                                                     <tbody className="divide-y divide-gray-300">
-                                                    {group.products.map((product, index) => (
-                                                        <tr
-                                                            key={product.id || `product-${index}`}
-                                                            className="hover:bg-indigo-50 transition-colors"
-                                                        >
-                                                            <td className="border border-[#EDEBEB] px-4 py-2 text-gray-700">
-                                                                <span
-                                                                    className="cursor-pointer hover:underline text-[#191919]"
-                                                                    onClick={() => {
-                                                                        setSelectedProduct(product); // abre modal
-                                                                        setCount(1); // resetar quantidade
-                                                                    }}
+                                                        {group.products.map((product, index) => (
+                                                            <tr
+                                                                key={product.id || `product-${index}`}
+                                                                className="hover:bg-indigo-50 transition-colors"
+                                                            >
+                                                                <td className="border border-[#EDEBEB] px-4 py-2 text-gray-700">
+                                                                    <span
+                                                                        className="cursor-pointer hover:underline text-[#191919]"
+                                                                        onClick={() => {
+                                                                            setSelectedProduct(product); // abre modal
+                                                                            setCount(1); // resetar quantidade
+                                                                        }}
 
-                                                                >
-                                                                    {product.name}
-                                                                </span>
-                                                            </td>
+                                                                    >
+                                                                        {product.name}
+                                                                    </span>
+                                                                </td>
 
-                                                            <td className="border border-[#EDEBEB] px-3 py-2 text-right">{product.price.toFixed(2)} €</td>
-                                                        </tr>
-                                                    ))}
+                                                                <td className="border border-[#EDEBEB] px-3 py-2 text-right">{product.price.toFixed(2)} €</td>
+                                                            </tr>
+                                                        ))}
                                                     </tbody>
                                                 </table>
                                             </div>
@@ -864,32 +891,32 @@ export default function ProductGroups() {
                                                 <div className="overflow-x-auto bg-muted/40 transition-all duration-300 ease-in-out">
                                                     <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB]">
                                                         <thead>
-                                                        <tr className="bg-[#FC9D25] text-white">
-                                                            <th className="border border-[#EDEBEB] px-4 py-2 text-left">Product</th>
-                                                            <th className="border border-[#EDEBEB] px-4 py-2 text-right">Price</th>
-                                                        </tr>
+                                                            <tr className="bg-[#FC9D25] text-white">
+                                                                <th className="border border-[#EDEBEB] px-4 py-2 text-left">Product</th>
+                                                                <th className="border border-[#EDEBEB] px-4 py-2 text-right">Price</th>
+                                                            </tr>
                                                         </thead>
                                                         <tbody className="divide-y divide-gray-300">
-                                                        {family.products.map((product, index) => (
-                                                            <tr
-                                                                key={product.id || `product-${index}`}
-                                                                className="hover:bg-indigo-50 transition-colors"
-                                                            >
-                                                                <td className="border border-[#EDEBEB] px-4 py-2 text-gray-700">
-                                                                    <span
-                                                                        className="cursor-pointer hover:underline text-[#191919]"
-                                                                        onClick={() => setSelectedProduct(product)}
-                                                                    >
-                                                                        {product.name}
-                                                                    </span>
-                                                                </td>
-                                                                <td className="border border-[#EDEBEB] px-4 py-2 text-right">
-                                                                    {product?.price != null && !isNaN(product.price)
-                                                                        ? `${Number(product.price).toFixed(2)} €`
-                                                                        : '—'}
-                                                                </td>
-                                                            </tr>
-                                                        ))}
+                                                            {family.products.map((product, index) => (
+                                                                <tr
+                                                                    key={product.id || `product-${index}`}
+                                                                    className="hover:bg-indigo-50 transition-colors"
+                                                                >
+                                                                    <td className="border border-[#EDEBEB] px-4 py-2 text-gray-700">
+                                                                        <span
+                                                                            className="cursor-pointer hover:underline text-[#191919]"
+                                                                            onClick={() => setSelectedProduct(product)}
+                                                                        >
+                                                                            {product.name}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td className="border border-[#EDEBEB] px-4 py-2 text-right">
+                                                                        {product?.price != null && !isNaN(product.price)
+                                                                            ? `${Number(product.price).toFixed(2)} €`
+                                                                            : '—'}
+                                                                    </td>
+                                                                </tr>
+                                                            ))}
                                                         </tbody>
                                                     </table>
                                                 </div>
@@ -915,32 +942,32 @@ export default function ProductGroups() {
                                                 <div className="overflow-x-auto bg-muted/40 transition-all duration-300 ease-in-out">
                                                     <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB]">
                                                         <thead>
-                                                        <tr className="bg-[#FC9D25] text-white">
-                                                            <th className="border border-[#EDEBEB] px-4 py-2 text-left">Product</th>
-                                                            <th className="border border-[#EDEBEB] px-4 py-2 text-right">Price</th>
-                                                        </tr>
+                                                            <tr className="bg-[#FC9D25] text-white">
+                                                                <th className="border border-[#EDEBEB] px-4 py-2 text-left">Product</th>
+                                                                <th className="border border-[#EDEBEB] px-4 py-2 text-right">Price</th>
+                                                            </tr>
                                                         </thead>
                                                         <tbody className="divide-y divide-gray-300">
-                                                        {sub.products.map((product, index) => (
-                                                            <tr
-                                                                key={product.id || `product-${index}`}
-                                                                className="hover:bg-indigo-50 transition-colors"
-                                                            >
-                                                                <td className="border border-[#EDEBEB] px-4 py-2 text-gray-700">
-                                                                    <span
-                                                                        className="cursor-pointer hover:underline text-[#191919]"
-                                                                        onClick={() => setSelectedProduct(product)}
-                                                                    >
-                                                                        {product.name}
-                                                                    </span>
-                                                                </td>
-                                                                <td className="border border-[#EDEBEB] px-4 py-2 text-right">
-                                                                    {product?.price != null && !isNaN(product.price)
-                                                                        ? `${Number(product.price).toFixed(2)} €`
-                                                                        : '—'}
-                                                                </td>
-                                                            </tr>
-                                                        ))}
+                                                            {sub.products.map((product, index) => (
+                                                                <tr
+                                                                    key={product.id || `product-${index}`}
+                                                                    className="hover:bg-indigo-50 transition-colors"
+                                                                >
+                                                                    <td className="border border-[#EDEBEB] px-4 py-2 text-gray-700">
+                                                                        <span
+                                                                            className="cursor-pointer hover:underline text-[#191919]"
+                                                                            onClick={() => setSelectedProduct(product)}
+                                                                        >
+                                                                            {product.name}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td className="border border-[#EDEBEB] px-4 py-2 text-right">
+                                                                        {product?.price != null && !isNaN(product.price)
+                                                                            ? `${Number(product.price).toFixed(2)} €`
+                                                                            : '—'}
+                                                                    </td>
+                                                                </tr>
+                                                            ))}
                                                         </tbody>
                                                     </table>
                                                 </div>
@@ -987,8 +1014,8 @@ export default function ProductGroups() {
                                                 <span className="inline-block transform scale-150 font-thin">-</span>
                                             </button>
                                             <span className="px-2 py-1 bg-white text-sm font-medium text-[#191919] border-gray-300">
-                                            {count} un
-                                        </span>
+                                                {count} un
+                                            </span>
                                             <button
                                                 onClick={() => setCount((prev) => prev + 1)}
                                                 className="px-3.5 py-1 bg-white text-[#FC9D25] hover:bg-gray-300 transition"
@@ -1067,9 +1094,8 @@ export default function ProductGroups() {
                                 {getCartItems().map((item, idx) => (
                                     <div
                                         key={item.id}
-                                        className={`w-full py-4 ${
-                                            idx !== getCartItems().length - 1 ? "border-b border-[#EDEDED]" : "pb-7"
-                                        }`}
+                                        className={`w-full py-4 ${idx !== getCartItems().length - 1 ? "border-b border-[#EDEDED]" : "pb-7"
+                                            }`}
                                     >
                                         <div className="flex justify-between items-start">
                                             <div>

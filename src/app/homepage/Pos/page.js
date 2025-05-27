@@ -449,17 +449,14 @@ export default function ProductGroups() {
                         {mesa.map((m, index) => (
                             <Card
                                 key={index}
-                                className="w-full h-40 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center cursor-pointer hover:bg-gray-100 relative"
+                                className="w-full h-40 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center cursor-pointer hover:bg-gray-100"
                                 onClick={() => setSelectedTable(m.path)}
                             >
-
-                                <div className="absolute top-2 right-2 w-4 h-4 bg-red-500 rounded-full z-10"></div>
-
                                 <CardBody className="flex flex-col items-center justify-center w-full h-full relative">
                                     <div className="text-5xl text-[#FC9D25] mb-2">
                                         {m.icon}
                                     </div>
-                                    <p className="text-center text-m text-[#191919]">
+                                    <p className="text-center text-sm text-[#191919]">
                                         {m.label}
                                     </p>
                                     {/* Total  */}
@@ -469,7 +466,6 @@ export default function ProductGroups() {
                                 </CardBody>
                             </Card>
                         ))}
-
                     </div>
                 </>
             )}
@@ -594,18 +590,17 @@ export default function ProductGroups() {
                             {showConfirm && <div className="fixed inset-0 bg-opacity-30 z-40" />}
                             <div className="relative z-50 inline-block">
                                 <button
-                                    onClick={() => {}}
+                                    onClick={() => setShowConfirm(true)}
                                     className="w-12 ml-2 border border-[#ff0000] text-[#ff0000] rounded py-2 text-sm hover:bg-[#fff4e6] transition flex items-center justify-center gap-2"
                                 >
                                     <CiTrash className="text-sm" size={20} />
                                 </button>
                             </div>
-                            <button className="w-1/2 mr-2 bg-[#FC9D25] text-white rounded py-2 text-sm hover:bg-[#e88a1c] transition flex items-center justify-center gap-2"
-                                    onClick={toggleSidebar}>
-                                Cancel
-                            </button>
                             <button className="w-1/2 mr-2 bg-[#FC9D25] text-white rounded py-2 text-sm hover:bg-[#e88a1c] transition flex items-center justify-center gap-2">
                                 Order
+                            </button>
+                            <button className="w-1/2 mr-2 bg-[#FC9D25] text-white rounded py-2 text-sm hover:bg-[#e88a1c] transition flex items-center justify-center gap-2">
+                                Cancel
                             </button>
                         </div>
                     </div>

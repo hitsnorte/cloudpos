@@ -43,7 +43,7 @@ export default function ProductGroups() {
     const [isConfirmed, setIsConfirmed] = useState(() => JSON.parse(localStorage.getItem("isConfirmed")) || false);
     const [selectedCardPath, setSelectedCardPath] = useState(null);
     const [selectedTable, setSelectedTable] = useState(null);
-    const [selectedRow, setSelectedRow] = useState(null);
+    const [selectedRoom, setSelectedRoom] = useState(null);
 
     const [viewType, setViewType] = useState('groups', 'families', 'subfamilies') // 'groups' | 'families' | 'subfamilies'
 
@@ -380,7 +380,7 @@ export default function ProductGroups() {
 
     return (
         <>
-            {!selectedCardPath && !selectedRow && (
+            {!selectedCardPath && !selectedRoom && (
                 <>
                     <h1 className="text-3xl font-semibold px-4">Dashboard</h1>
                     <div className="px-4 flex flex-wrap gap-6 p-6">
@@ -409,7 +409,7 @@ export default function ProductGroups() {
             )}
 
             {/* Conteúdo restante só aparece após clicar em um card */}
-            {selectedCardPath && !selectedRow && (
+            {selectedCardPath && !selectedRoom && (
                 <>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 p-6">
                     {cardPaths.map((card, index) => (
@@ -420,7 +420,7 @@ export default function ProductGroups() {
                                 <CardBody className="flex flex-col items-center w-full h-full relative">
                                     <div
                                         className="w-full h-full cursor-pointer hover:bg-gray-100"
-                                        onClick={() => setSelectedRow(card.path)}
+                                        onClick={() => setSelectedRoom(card.path)}
                                     >
                                         <p className="text-5xl font-bold text-[#FC9D25] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                                             <MdPointOfSale />
@@ -436,10 +436,10 @@ export default function ProductGroups() {
                 </>
             )}
 
-            {selectedRow && (
+            {selectedRoom && (
                 <>
                     <button
-                        onClick={() => setSelectedRow(null)}
+                        onClick={() => setSelectedRoom(null)}
                         className="mb-4 px-4 py-2 rounded hover:bg-gray-300"
                     >
                         <IoIosArrowBack size={16}/>
@@ -449,26 +449,34 @@ export default function ProductGroups() {
                         {mesa.map((m, index) => (
                             <Card
                                 key={index}
-                                className="w-full h-40 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center cursor-pointer hover:bg-gray-100"
-                                onClick={() => console.log("Table clicked:", m.label)}
+                                className="w-full h-40 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center cursor-pointer hover:bg-gray-100 relative"
+                                onClick={() => setSelectedTable(m.path)}
                             >
+
+                                <div className="absolute top-2 right-2 w-4 h-4 bg-red-500 rounded-full z-10"></div>
+
                                 <CardBody className="flex flex-col items-center justify-center w-full h-full relative">
                                     <div className="text-5xl text-[#FC9D25] mb-2">
                                         {m.icon}
                                     </div>
-                                    <p className="text-center text-sm text-[#191919]">
+                                    <p className="text-center text-m text-[#191919]">
                                         {m.label}
+                                    </p>
+                                    {/* Total  */}
+                                    <p className="text-center text-xs text-gray-600 mt-1">
+                                        Total:...€
                                     </p>
                                 </CardBody>
                             </Card>
                         ))}
+
                     </div>
                 </>
             )}
 
 
             <div className="relative">
-                {!isOpen && (
+                {!isOpen && selectedTable && (
                     <button
                         className="fixed top-6 right-15 z-50 text-3xl text-[#191919] hover:text-[#FC9D25] transition"
                         onClick={toggleSidebar}
@@ -586,17 +594,18 @@ export default function ProductGroups() {
                             {showConfirm && <div className="fixed inset-0 bg-opacity-30 z-40" />}
                             <div className="relative z-50 inline-block">
                                 <button
-                                    onClick={() => setShowConfirm(true)}
+                                    onClick={() => {}}
                                     className="w-12 ml-2 border border-[#ff0000] text-[#ff0000] rounded py-2 text-sm hover:bg-[#fff4e6] transition flex items-center justify-center gap-2"
                                 >
                                     <CiTrash className="text-sm" size={20} />
                                 </button>
                             </div>
-                            <button className="w-1/2 mr-2 bg-[#FC9D25] text-white rounded py-2 text-sm hover:bg-[#e88a1c] transition flex items-center justify-center gap-2">
-                                Order
+                            <button className="w-1/2 mr-2 bg-[#FC9D25] text-white rounded py-2 text-sm hover:bg-[#e88a1c] transition flex items-center justify-center gap-2"
+                                    onClick={toggleSidebar}>
+                                Cancel
                             </button>
                             <button className="w-1/2 mr-2 bg-[#FC9D25] text-white rounded py-2 text-sm hover:bg-[#e88a1c] transition flex items-center justify-center gap-2">
-                                Cancel
+                                Order
                             </button>
                         </div>
                     </div>

@@ -23,6 +23,8 @@ import { TiShoppingCart } from 'react-icons/ti';
 import { FaDoorOpen } from "react-icons/fa";
 import { CiTrash } from "react-icons/ci";
 
+//import loader
+import LoadingBackdrop from "@/src/components/loader/page";
 
 export default function ProductGroups() {
     const [groupsWithProducts, setGroupsWithProducts] = useState([])
@@ -512,7 +514,7 @@ export default function ProductGroups() {
 
 
     if (status === "loading" || loading) {
-        return <p className="text-center text-sm">Carregando...</p>;
+        return <LoadingBackdrop open={true} />;
     }
 
     if (!dashboardData) {

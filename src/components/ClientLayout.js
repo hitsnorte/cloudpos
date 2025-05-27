@@ -5,6 +5,9 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import LayoutWrapper from "@/src/components/Layout/LayoutWrapper";
 
+//import loader
+import LoadingBackdrop from "@/src/components/loader/page";
+
 export default function ClientLayout({ children }) {
     const { data: session, status } = useSession();
     const pathname = usePathname();
@@ -27,14 +30,9 @@ export default function ClientLayout({ children }) {
     }, [status, pathname, router]);
 
     // Show loading screen while checking auth status
-    if (loading || status === "loading") {
-        return (
-            <div className="flex items-center justify-center min-h-screen">
-                <p className="text-xl">Loading...</p>
-            </div>
-        );
+    if (status === "loading" || loading) {
+        return <LoadingBackdrop open={true} />;
     }
-
     // Render login page directly
     if (pathname === "/login") {
         return children;

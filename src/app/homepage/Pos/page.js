@@ -25,6 +25,7 @@ import { CiTrash } from "react-icons/ci";
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import {ChevronDown, ChevronRight} from "lucide-react";
 import {Spinner} from "@nextui-org/react";
+import { FaUser } from "react-icons/fa";
 
 //import loader
 import LoadingBackdrop from "@/src/components/loader/page";

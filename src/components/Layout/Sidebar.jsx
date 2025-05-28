@@ -75,11 +75,11 @@ export default function Sidebar({ mobileOpen, setMobileOpen, expanded, setExpand
                 {/* Footer with User Info */}
                 <div className="border-t border-gray-200 shadow-sm flex p-3 w-full relative">
                   {/* User Avatar */}
-                  <div className="flex justify-center items-center bg-gray-200 p-3 rounded-lg">
+                  <div className="flex justify-center items-center bg-orange-200 p-3 rounded-lg">
                     {session?.user?.image ? (
                         <Image src={session.user.image} alt="User Avatar" width={30} height={30} className="rounded-full" />
                     ) : (
-                        <FaUser size={20} color="gray" />
+                        <FaUser size={20} color="#FF9500" />
                     )}
                   </div>
 

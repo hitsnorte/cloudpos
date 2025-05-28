@@ -578,11 +578,24 @@ export default function ProductGroups() {
         setOpenGroupID(openGroupID === id ? null : id);
     }
 
+    console.log('total' , total)
+
+    const getTotalForTable = (table) => {
+        const cart = tableCarts[table] || [];
+        return cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
+    };
+
+    const getQuantityForTable = (table) => {
+        const cart = tableCarts[table] || [];
+        return cart.reduce((acc, item) => acc + item.quantity, 0);
+    };
+
+
     return (
         <>
             {!selectedCardPath && !selectedRow && !selectedTable && (
                 <>
-                    <h1 className="text-3xl font-semibold px-4">Dashboard</h1>
+                    <h1 className="text-3xl font-semibold px-4">Outlets</h1>
                     <div className="px-4 flex flex-wrap gap-6 p-6">
                         {cardPaths2.map((card, index) => (
                             <Card
@@ -617,7 +630,7 @@ export default function ProductGroups() {
                         className=" ml-4 px-4 py-2 rounded bg-[#FC9D25] text-white hover:bg-[#e38d20] flex items-center gap-2"
                     >
                         <IoIosArrowBack size={16} />
-                        <span>Postos</span>
+                        <span>Outlets</span>
                     </button>
 
                     <div className="px-4 flex flex-wrap gap-6 p-6">
@@ -659,28 +672,34 @@ export default function ProductGroups() {
                         className=" ml-4 px-4 py-2 rounded bg-[#FC9D25] text-white hover:bg-[#e38d20] flex items-center gap-2"
                     >
                         <IoIosArrowBack size={16} />
-                        <span>Salas</span>
+                        <span>Rooms</span>
                     </button>
 
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-6">
                         {cardPaths3.map((m, index) => (
                             <Card
                                 key={index}
-                                className="w-full h-40 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center cursor-pointer hover:bg-gray-100"
+                                className="relative w-full h-40 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center cursor-pointer hover:bg-gray-100"
                             >
-                                <CardBody className="flex flex-col items-center justify-center w-full h-full"
-                                          onClick={() => {
-                                              console.log('Selected table:', m.label);
-                                              setSelectedTable(m.path);
-                                          }}>
+                                <CardBody
+                                    className="flex flex-col items-center justify-center w-full h-full"
+                                    onClick={() => setSelectedTable(m.path)}
+                                >
                                     <div className="text-5xl font-bold text-[#FC9D25] mb-2">
                                         <MdTableBar />
                                     </div>
-                                    <p className="text-center text-sm text-[#191919]">
-                                        {m.label}
-                                    </p>
-                                    <span className="text-sm font-bold mr-2">€{total.toFixed(2)}</span>
+                                    <p className="text-center text-sm text-[#191919]">{m.label}</p>
+                                    {getTotalForTable(m.path) > 0 && (
+                                        <span>{getTotalForTable(m.path).toFixed(2)}€</span>
+                                    )}
                                 </CardBody>
+
+                                {/* Badge no canto superior direito */}
+                                {getQuantityForTable(m.path) > 0 && (
+                                    <span className="absolute top-2 right-2 bg-red-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                                        {getQuantityForTable(m.path)}
+                                        </span>
+                                )}
                             </Card>
                         ))}
                     </div>
@@ -698,7 +717,7 @@ export default function ProductGroups() {
                             className="ml-4 px-4 py-2 rounded bg-[#FC9D25] text-white hover:bg-[#e38d20] flex items-center gap-2"
                         >
                             <IoIosArrowBack size={16} />
-                            <span>Mesas</span>
+                            <span>Tables</span>
                         </button>
 
                         <div className="flex items-center justify-center space-x-4 mt-4">

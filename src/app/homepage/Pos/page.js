@@ -614,7 +614,7 @@ export default function ProductGroups() {
         <>
             {!selectedCardPath && !selectedRow && !selectedTable && (
                 <>
-                    <h1 className="text-3xl font-semibold px-4">Dashboard</h1>
+                    <h1 className="text-3xl font-semibold px-4">Outlets</h1>
                     <div className="px-4 flex flex-wrap gap-6 p-6">
                         {cardPaths2.map((card, index) => (
                             <Card
@@ -642,15 +642,19 @@ export default function ProductGroups() {
 
             {selectedCardPath && !selectedRow && !selectedTable && (
                 <>
-                    <button
-                        onClick={() => {
-                            setSelectedCardPath(null);
-                        }}
-                        className=" ml-4 px-4 py-2 rounded bg-[#FC9D25] text-white hover:bg-[#e38d20] flex items-center gap-2"
-                    >
-                        <IoIosArrowBack size={16} />
-                        <span>Postos</span>
-                    </button>
+                    <div className="flex items-center gap-4 px-4">
+                        <button
+                            onClick={() => {
+                                setSelectedCardPath(null);
+                            }}
+                            className="px-4 py-2 rounded bg-[#FC9D25] text-white hover:bg-[#e38d20] flex items-center gap-2"
+                        >
+                            <IoIosArrowBack size={16} />
+                            <span>Postos</span>
+                        </button>
+
+                        <h1 className="text-3xl font-semibold">Rooms</h1>
+                    </div>
 
                     <div className="px-4 flex flex-wrap gap-6 p-6">
                         {cardPaths.map((card, index) => (
@@ -684,15 +688,18 @@ export default function ProductGroups() {
             {/* Etapa 3 - MOSTRAR MESAS da sala selecionada */}
             {selectedRow && !selectedTable && (
                 <>
-                    <button
-                        onClick={() => {
-                            setSelectedRow(null);
-                        }}
-                        className=" ml-4 px-4 py-2 rounded bg-[#FC9D25] text-white hover:bg-[#e38d20] flex items-center gap-2"
-                    >
-                        <IoIosArrowBack size={16} />
-                        <span>Salas</span>
-                    </button>
+                    <div className="flex items-center gap-4 px-4">
+                        <button
+                            onClick={() => {
+                                setSelectedRow(null);
+                            }}
+                            className="px-4 py-2 rounded bg-[#FC9D25] text-white hover:bg-[#e38d20] flex items-center gap-2"
+                        >
+                            <IoIosArrowBack size={16} />
+                            <span>Rooms</span>
+                        </button>
+                        <h1 className="text-3xl font-semibold">Tables</h1>
+                    </div>
 
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-6">
                         {cardPaths3.map((m, index) => (
@@ -734,14 +741,17 @@ export default function ProductGroups() {
                         ))}
                     </div>
                 </>
-            )}
+            )
+            }
 
-            {showModal && (
-                <PopUpModal
-                    onClose={handleCloseModal}
-                    onSubmit={handleClientNumberSubmit}
-                />
-            )}
+            {
+                showModal && (
+                    <PopUpModal
+                        onClose={handleCloseModal}
+                        onSubmit={handleClientNumberSubmit}
+                    />
+                )
+            }
 
             <div className="relative">
                 {selectedTable && (

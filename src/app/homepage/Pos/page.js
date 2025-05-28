@@ -29,6 +29,10 @@ import {Spinner} from "@nextui-org/react";
 //import loader
 import LoadingBackdrop from "@/src/components/loader/page";
 
+//import modal nrm clientes
+import PopUpModal from '@/src/components/modals/nrm_clients/page';
+
+
 export default function ProductGroups() {
     const [groupsWithProducts, setGroupsWithProducts] = useState([])
     const [openGroupID, setOpenGroupID] = useState(null)
@@ -82,6 +86,8 @@ export default function ProductGroups() {
     const [mesas, setMesas] = useState([]);
     const [postosComSalas, setPostosComSalas] = useState([]);
     const [salasComMesas, setSalasComMesas] = useState([]);
+    const [showModal, setShowModal] = useState(false);
+
 
     const handleConfirm = () => {
         clearCart();
@@ -589,6 +595,19 @@ export default function ProductGroups() {
         return cart.reduce((acc, item) => acc + item.quantity, 0);
     };
 
+    const handleClientNumberSubmit = (clientNumber) => {
+        if (clientNumber.trim() !== '') {
+            console.log("Número de clientes:", clientNumber);
+            setShowModal(false);
+            setSelectedTable(pendingTablePath); // aqui está o m.path original
+            setPendingTablePath(null); // limpa depois de usar
+        }
+    };
+
+    const handleCloseModal = () => {
+        setShowModal(false);
+    };
+
     return (
         <>
             {!selectedCardPath && !selectedRow && !selectedTable && (
@@ -708,6 +727,13 @@ export default function ProductGroups() {
                 </>
             )}
 
+            {showModal && (
+                <PopUpModal
+                    onClose={handleCloseModal}
+                    onSubmit={handleClientNumberSubmit}
+                />
+            )}
+
             <div className="relative">
                 {selectedTable && (
                     <>
@@ -786,15 +812,15 @@ export default function ProductGroups() {
                                                                 className="hover:bg-indigo-50 transition-colors"
                                                             >
                                                                 <td className="border border-[#EDEBEB] px-4 py-2 text-gray-700">
-                                                                    <span
-                                                                        className="cursor-pointer hover:underline text-[#191919]"
-                                                                        onClick={() => {
-                                                                        setSelectedProduct(product);
-                                                                        setCount(1); // caso use contador
-                                                                        }}
-                                                                    >
-                                                                        {product.name}
-                                                                    </span>
+                                                                        <span
+                                                                            className="cursor-pointer hover:underline text-[#191919]"
+                                                                            onClick={() => {
+                                                                                setSelectedProduct(product);
+                                                                                setCount(1); // caso use contador
+                                                                            }}
+                                                                        >
+                                                                            {product.name}
+                                                                        </span>
                                                                 </td>
                                                                 <td className="border border-[#EDEBEB] px-3 py-2 text-right">
                                                                     {product.price.toFixed(2)} €
@@ -845,16 +871,16 @@ export default function ProductGroups() {
                                                             className="hover:bg-indigo-50 transition-colors"
                                                         >
                                                             <td className="border border-[#EDEBEB] px-4 py-2 text-gray-700">
-                                                                <span
-                                                                    className="cursor-pointer hover:underline text-[#191919]"
-                                                                    onClick={() => {
-                                                                        setSelectedProduct(product); // abre modal
-                                                                        setCount(1); // resetar quantidade
-                                                                    }}
+                                                                    <span
+                                                                        className="cursor-pointer hover:underline text-[#191919]"
+                                                                        onClick={() => {
+                                                                            setSelectedProduct(product); // abre modal
+                                                                            setCount(1); // resetar quantidade
+                                                                        }}
 
-                                                                >
-                                                                    {product.name}
-                                                                </span>
+                                                                    >
+                                                                        {product.name}
+                                                                    </span>
                                                             </td>
 
                                                             <td className="border border-[#EDEBEB] px-3 py-2 text-right">{product.price.toFixed(2)} €</td>
@@ -897,12 +923,12 @@ export default function ProductGroups() {
                                                                 className="hover:bg-indigo-50 transition-colors"
                                                             >
                                                                 <td className="border border-[#EDEBEB] px-4 py-2 text-gray-700">
-                                                                    <span
-                                                                        className="cursor-pointer hover:underline text-[#191919]"
-                                                                        onClick={() => setSelectedProduct(product)}
-                                                                    >
-                                                                        {product.name}
-                                                                    </span>
+                                                                        <span
+                                                                            className="cursor-pointer hover:underline text-[#191919]"
+                                                                            onClick={() => setSelectedProduct(product)}
+                                                                        >
+                                                                            {product.name}
+                                                                        </span>
                                                                 </td>
                                                                 <td className="border border-[#EDEBEB] px-4 py-2 text-right">
                                                                     {product?.price != null && !isNaN(product.price)
@@ -948,12 +974,12 @@ export default function ProductGroups() {
                                                                 className="hover:bg-indigo-50 transition-colors"
                                                             >
                                                                 <td className="border border-[#EDEBEB] px-4 py-2 text-gray-700">
-                                                                    <span
-                                                                        className="cursor-pointer hover:underline text-[#191919]"
-                                                                        onClick={() => setSelectedProduct(product)}
-                                                                    >
-                                                                        {product.name}
-                                                                    </span>
+                                                                        <span
+                                                                            className="cursor-pointer hover:underline text-[#191919]"
+                                                                            onClick={() => setSelectedProduct(product)}
+                                                                        >
+                                                                            {product.name}
+                                                                        </span>
                                                                 </td>
                                                                 <td className="border border-[#EDEBEB] px-4 py-2 text-right">
                                                                     {product?.price != null && !isNaN(product.price)
@@ -1008,8 +1034,8 @@ export default function ProductGroups() {
                                                 <span className="inline-block transform scale-150 font-thin">-</span>
                                             </button>
                                             <span className="px-2 py-1 bg-white text-sm font-medium text-[#191919] border-gray-300">
-                                            {count} un
-                                        </span>
+                                                {count} un
+                                            </span>
                                             <button
                                                 onClick={() => setCount((prev) => prev + 1)}
                                                 className="px-3.5 py-1 bg-white text-[#FC9D25] hover:bg-gray-300 transition"
@@ -1088,8 +1114,7 @@ export default function ProductGroups() {
                                 {getCartItems().map((item, idx) => (
                                     <div
                                         key={item.id}
-                                        className={`w-full py-4 ${
-                                            idx !== getCartItems().length - 1 ? "border-b border-[#EDEDED]" : "pb-7"
+                                        className={`w-full py-4 ${idx !== getCartItems().length - 1 ? "border-b border-[#EDEDED]" : "pb-7"
                                         }`}
                                     >
                                         <div className="flex justify-between items-start">

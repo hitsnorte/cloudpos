@@ -31,6 +31,8 @@ import {
     Input,
 } from '@nextui-org/react';
 
+//import loader
+import LoadingBackdrop from "@/src/components/loader/page";
 
 export default function ProductGroups() {
     const [groupsWithProducts, setGroupsWithProducts] = useState([])
@@ -490,16 +492,15 @@ export default function ProductGroups() {
 
 
     if (status === "loading" || loading) {
-        return <p className="text-center text-sm">Carregando...</p>;
+        return <LoadingBackdrop open={true} />;
     }
 
     if (!dashboardData) {
-        return <p className="text-center text-sm">Loading dashboard...</p>;
+       return <LoadingBackdrop open={true} />;
     }
 
-
     if (loading) {
-        return <div className="p-6">LOADING PRODUCTS...</div>
+        return <LoadingBackdrop open={true} />;
     }
 
     if (groupsWithProducts.length === 0) {
@@ -1210,8 +1211,6 @@ export default function ProductGroups() {
             )
             }
         </>
-
-
     )
 }
 

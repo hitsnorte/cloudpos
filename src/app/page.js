@@ -6,6 +6,9 @@ import { useSession } from "next-auth/react"; // Import useSession
 import { useEffect, useState } from "react";
 import { fetchDashboard } from '@/src/lib/apidashboard';
 
+//import loader
+import LoadingBackdrop from "@/src/components/loader/page";
+
 export default function App() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -51,9 +54,9 @@ export default function App() {
   }, [status, isConfirmed]); // Fetch data again when the session or confirmation status changes
 
   // While loading
-  if (status === "loading") {
-    return <p className="text-center text-lg">Loading...</p>;
-  }
+      if (status === "loading") {
+        return <LoadingBackdrop open={true} />;
+    }
 
   if (!session) {
     return null; // Prevent showing the page before redirecting to login

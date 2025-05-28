@@ -17,7 +17,6 @@ import { fetchPreco } from "@/src/lib/apipreco";
 import { MdPointOfSale } from "react-icons/md";
 import { Card, CardBody } from "@heroui/react";
 import { useSession } from "next-auth/react"; // Import useSession
-import { MdTableBar } from "react-icons/md";
 import { IoIosArrowBack } from "react-icons/io";
 import { TiShoppingCart } from 'react-icons/ti';
 import { FaDoorOpen } from "react-icons/fa";

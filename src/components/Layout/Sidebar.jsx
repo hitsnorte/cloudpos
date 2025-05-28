@@ -1,5 +1,7 @@
 "use client";
-import { ChevronDown, ChevronUp, ChevronLast, ChevronFirst, X } from "lucide-react";
+import { ChevronDown, ChevronUp, X } from "lucide-react";
+import { MdKeyboardArrowRight, MdKeyboardArrowLeft } from "react-icons/md";
+
 import { createContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import SidebarMenu from "./SidebarMenu";
@@ -11,7 +13,7 @@ export const SidebarContext = createContext();
 
 export default function Sidebar({ mobileOpen, setMobileOpen, expanded, setExpanded }) {
   const router = useRouter();
-  const { data: session } = useSession(); // ✅ Corrected placement of useSession()
+  const { data: session } = useSession(); 
   const [isMobile, setIsMobile] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
@@ -35,7 +37,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen, expanded, setExpand
 
       {(isMobile && mobileOpen) || !isMobile ? (
             <aside
-                className={`h-screen fixed top-0 left-0 bg-white border-r border-gray-200 shadow-sm z-50 
+                className={`h-screen fixed top-0 left-0 bg-white border-r border-gray-200 shadow-sm z-20 
             transition-all duration-300 ease-in-out 
             ${isMobile ? "w-screen" : expanded ? "w-[250px]" : "w-[80px]"}`}
             >
@@ -54,7 +56,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen, expanded, setExpand
                         onClick={() => setExpanded((curr) => !curr)}
                         className="absolute right-[-10px] top-5 p-1.5 rounded-lg bg-gray-50 hover:bg-gray-100 shadow-md"
                     >
-                      {expanded ? <ChevronFirst size={15} /> : <ChevronLast size={15} />}
+                      {expanded ? <MdKeyboardArrowLeft size={20} /> : <MdKeyboardArrowRight size={20} />}
                     </button>
                 )}
 
@@ -75,11 +77,11 @@ export default function Sidebar({ mobileOpen, setMobileOpen, expanded, setExpand
                 {/* Footer with User Info */}
                 <div className="border-t border-gray-200 shadow-sm flex p-3 w-full relative">
                   {/* User Avatar */}
-                  <div className="flex justify-center items-center bg-gray-200 p-3 rounded-lg">
+                  <div className="flex justify-center items-center bg-orange-200 p-3 rounded-lg">
                     {session?.user?.image ? (
                         <Image src={session.user.image} alt="User Avatar" width={30} height={30} className="rounded-full" />
                     ) : (
-                        <FaUser size={20} color="gray" />
+                        <FaUser size={20} color="#FF9500" />
                     )}
                   </div>
 

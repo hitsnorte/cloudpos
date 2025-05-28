@@ -17,7 +17,6 @@ import { fetchPreco } from "@/src/lib/apipreco";
 import { MdPointOfSale } from "react-icons/md";
 import { Card, CardBody } from "@heroui/react";
 import { useSession } from "next-auth/react"; // Import useSession
-import { MdTableBar } from "react-icons/md";
 import { IoIosArrowBack } from "react-icons/io";
 import { TiShoppingCart } from 'react-icons/ti';
 import { FaDoorOpen } from "react-icons/fa";
@@ -25,6 +24,7 @@ import { CiTrash } from "react-icons/ci";
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import {ChevronDown, ChevronRight} from "lucide-react";
 import {Spinner} from "@nextui-org/react";
+import { FaUser } from "react-icons/fa";
 
 //import loader
 import LoadingBackdrop from "@/src/components/loader/page";

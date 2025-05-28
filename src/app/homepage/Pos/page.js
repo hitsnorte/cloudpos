@@ -17,7 +17,6 @@ import { fetchPreco } from "@/src/lib/apipreco";
 import { MdPointOfSale } from "react-icons/md";
 import { Card, CardBody } from "@heroui/react";
 import { useSession } from "next-auth/react"; // Import useSession
-import { MdTableBar } from "react-icons/md";
 import { IoIosArrowBack } from "react-icons/io";
 import { TiShoppingCart } from 'react-icons/ti';
 import { FaDoorOpen } from "react-icons/fa";
@@ -25,6 +24,7 @@ import { CiTrash } from "react-icons/ci";
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { Spinner } from "@nextui-org/react";
+import { FaUser } from "react-icons/fa";
 
 //import loader
 import LoadingBackdrop from "@/src/components/loader/page";
@@ -686,19 +686,25 @@ export default function ProductGroups() {
                                 key={index}
                                 className="w-full h-40 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center cursor-pointer hover:bg-gray-100"
                             >
-                                <CardBody className="flex flex-col items-center justify-center w-full h-full"
+                                <CardBody
+                                    className="relative flex flex-col items-center justify-center w-full h-full"
                                     onClick={() => {
                                         console.log('Selected table:', m.label);
-                                        //   setSelectedTable(m.path);
                                         setPendingTablePath(m.path);
                                         setShowModal(true);
-                                    }}>
-                                    <div className="text-5xl font-bold text-[#FC9D25] mb-2">
-                                        <img src='/icons/table_icon.png' alt='table icon' width={80}/>
+                                    }}
+                                >
+                                    {/* pax*/}
+                                    <div className="absolute top-2 left-2 text-lg font-light text-black">
+                                        <div>
+                                            <FaUser size={12} color='#FC9D25'/>
+                                        </div>
                                     </div>
-                                    <p className="text-center text-sm text-[#191919]">
-                                        {m.label}
-                                    </p>
+                                    {/* imagem tabela */}
+                                    <div className="mb-2">
+                                        <img src="/icons/table_icon.png" alt="table icon" width={80} className="mx-auto"/>
+                                    </div>
+                                    <p className="text-center text-sm text-[#191919]">{m.label}</p>
                                     <span className="text-sm font-bold mr-2">€{total.toFixed(2)}</span>
                                 </CardBody>
                             </Card>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { IoMdClose } from "react-icons/io";
 import { FaRegKeyboard } from "react-icons/fa6";
-import { FaRegArrowAltCircleUp } from "react-icons/fa";
+import { BiExit } from "react-icons/bi";
 
 const PopUpModal = ({ onClose, onSubmit }) => {
     const [inputValue, setInputValue] = useState('');
@@ -69,7 +69,7 @@ const PopUpModal = ({ onClose, onSubmit }) => {
                                 className='p-2 w-20 h-20 rounded-lg bg-[#94c465] flex justify-center items-center cursor-pointer'
                                 onClick={handleSubmit}
                             >
-                                <FaRegArrowAltCircleUp color='white' size={30} />
+                                <BiExit color='white' size={30} />
                             </div>
                         </div>
 

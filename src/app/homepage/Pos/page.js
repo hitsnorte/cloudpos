@@ -578,19 +578,7 @@ export default function ProductGroups() {
         setOpenGroupID(openGroupID === id ? null : id);
     }
 
-    const handleClientNumberSubmit = (clientNumber) => {
-        if (clientNumber.trim() !== '') {
-            console.log("Número de clientes:", clientNumber);
-            setShowModal(false);
-            setSelectedTable(pendingTablePath); // aqui está o m.path original
-            setPendingTablePath(null); // limpa depois de usar
-        }
-    };
-
-    const handleCloseModal = () => {
-        setShowModal(false);
-    };
-
+    // Função para calcular total por mesa
     const getTotalForTable = (table) => {
         const cart = tableCarts[table] || [];
         return cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
@@ -600,7 +588,6 @@ export default function ProductGroups() {
         const cart = tableCarts[table] || [];
         return cart.reduce((acc, item) => acc + item.quantity, 0);
     };
-
 
     return (
         <>
@@ -703,8 +690,18 @@ export default function ProductGroups() {
                                     <p className="text-center text-sm text-[#191919]">
                                         {m.label}
                                     </p>
-                                    <span className="text-sm font-bold mr-2">€{total.toFixed(2)}</span>
+                                    {getTotalForTable(m.path) > 0 && (
+                                        <span>Total: {getTotalForTable(m.path).toFixed(2)}€</span>
+                                    )}
                                 </CardBody>
+
+                                {/* Badge no canto superior direito */}
+                                {getQuantityForTable(m.path) > 0 && (
+                                    <span className="absolute top-2 right-2 bg-red-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                                        {getQuantityForTable(m.path)}
+                                    </span>
+                                )}
+
                             </Card>
                         ))}
                     </div>

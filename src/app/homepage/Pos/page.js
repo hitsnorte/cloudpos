@@ -14,7 +14,6 @@ import { fetchSalas } from '@/src/lib/apisalas';
 import { fetchMesas } from '@/src/lib/apimesas';
 import { fetchClassepreco } from '@/src/lib/apiclassepreco';
 import { fetchPreco } from "@/src/lib/apipreco";
-import { fetchPosto } from "@/src/lib/apipostos";
 import { MdPointOfSale } from "react-icons/md";
 import { Card, CardBody } from "@heroui/react";
 import { useSession } from "next-auth/react"; // Import useSession
@@ -47,13 +46,11 @@ export default function ProductGroups() {
     const [classeprecoWithProducts, setClasseprecoWithProducts] = useState([]);
     const [precoWithProducts, setPrecoWithProducts] = useState([]);
     const [isConfirmed, setIsConfirmed] = useState(() => JSON.parse(localStorage.getItem("isConfirmed")) || false);
+    const [selectedCardPath, setSelectedCardPath] = useState(null);
     const [selectedTable, setSelectedTable] = useState(null);
     const [selectedRow, setSelectedRow] = useState(null);
 
     const [viewType, setViewType] = useState('groups', 'families', 'subfamilies') // 'groups' | 'families' | 'subfamilies'
-
-    const [postos, setPostos] = useState([]);
-    const [selectedCardPath, setSelectedCardPath] = useState(null);
 
 
     //side bar
@@ -64,44 +61,11 @@ export default function ProductGroups() {
     const [showConfirm, setShowConfirm] = useState(false);
     const popoverRef = useRef(null);
 
+    const [postos, setPostos] = useState([]);
     const [salas, setSalas] = useState([]);
     const [mesas, setMesas] = useState([]);
     const [postosComSalas, setPostosComSalas] = useState([]);
     const [salasComMesas, setSalasComMesas] = useState([]);
-
-
-    useEffect(() => {
-        const fetchMesas = async () => {
-            try {
-                const res = await fetch('/api/mesas', {
-                    headers: {
-                        'X-Property-ID': localStorage.getItem('selectedProperty'),
-                    },
-                });
-
-                if (!res.ok) throw new Error('Erro ao buscar mesas');
-                const data = await res.json();
-
-
-                const mesasData = data?.data || [];
-
-                // Agrupa mesas por salas
-                const grouped = mesasData.reduce((acc, mesa) => {
-                    const salaId = mesa.ID_SALA;
-                    if (!acc[salaId]) acc[salaId] = { ID_SALA: salaId, mesas: [] };
-                    acc[salaId].mesas.push(mesa);
-                    return acc;
-                }, {});
-
-                setSalasComMesas(Object.values(grouped));
-                setMesas(mesasData);
-            } catch (err) {
-                console.error(err);
-            }
-        };
-
-        fetchMesas();
-    }, []);
 
 
     const cardPaths = useMemo(() => {
@@ -559,7 +523,7 @@ export default function ProductGroups() {
                                 <CardBody className="flex flex-col items-center w-full h-full relative">
                                     <div
                                         className="w-full h-full cursor-pointer hover:bg-gray-100"
-                                        onClick={() => setSelectedCardPath(card.path)}
+                                        onClick={() => setSelectedCardPath(card.path)} // define o card selecionado
                                     >
                                         <p className="text-5xl font-bold text-[#FC9D25] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                                             <MdPointOfSale />
@@ -572,7 +536,6 @@ export default function ProductGroups() {
                             </Card>
                         ))}
                     </div>
-
                 </>
             )}
 
@@ -622,29 +585,33 @@ export default function ProductGroups() {
             {selectedRow && (
                 <>
                     <button
-                        onClick={() => setSelectedRow(null)}
-                        className="mb-4 px-4 py-2 rounded hover:bg-gray-300"
+                        onClick={() => {
+                            setSelectedRow(null); // Volta para as salas
+                        }}
+                        className=" ml-4 px-4 py-2 rounded bg-[#FC9D25] text-white hover:bg-[#e38d20] flex items-center gap-2"
                     >
                         <IoIosArrowBack size={16} />
+                        <span>Salas</span>
                     </button>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-6">
-                        {cardPaths3.map((m, index) => (
+                    <div className="px-4 flex flex-wrap gap-6 p-6">
+                        {cardPaths3.map((card, index) => (
                             <Card
                                 key={index}
-                                className="w-full h-40 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center cursor-pointer hover:bg-gray-100"
-                                onClick={() => setSelectedTable(m.path)}
+                                className="w-70 h-45 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center cursor-pointer hover:bg-gray-100"
+
                             >
-                                <CardBody className="flex flex-col items-center justify-center w-full h-full relative">
-                                    <div className="text-5xl text-[#FC9D25] mb-2">
-                                        {m.icon}
+                                <CardBody className="flex flex-col items-center w-full h-full relative">
+                                    <div
+                                        onClick={() => console.log("Mesa selecionada:", card.ID_MESA)}>
+
+                                        <p className="text-5xl font-bold text-[#FC9D25] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                                            <MdTableBar />
+                                        </p>
+                                        <p className="text-center h-13 text-sm text-gray-600 absolute bottom-4 left-1/2 transform -translate-x-1/2">
+                                            {card.label}
+                                        </p>
                                     </div>
-                                    <p className="text-center text-sm text-[#191919]">
-                                        {m.label}
-                                    </p>
-                                    <p className="text-center text-xs text-gray-600 mt-1">
-                                        Total:...€
-                                    </p>
                                 </CardBody>
                             </Card>
                         ))}
@@ -652,8 +619,10 @@ export default function ProductGroups() {
                 </>
             )}
 
+
+
             <div className="relative">
-                {!isOpen && selectedTable && (
+                {!isOpen && (
                     <button
                         className="fixed top-6 right-15 z-50 text-3xl text-[#191919] hover:text-[#FC9D25] transition"
                         onClick={toggleSidebar}

@@ -13,13 +13,22 @@ import { fetchSubfamily } from '@/src/lib/apisubfamily';
 import { fetchDashboard } from '@/src/lib/apidashboard';
 import { fetchClassepreco } from '@/src/lib/apiclassepreco';
 import { CiTrash } from "react-icons/ci";
-import { FaTrash } from "react-icons/fa";
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@heroui/react";
+import { FaArrowUp } from "react-icons/fa";
 import { fetchPreco } from "@/src/lib/apipreco";
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import { Card, CardBody } from "@heroui/react";
 import { useSession } from "next-auth/react"; // Import useSession
+import { Plus } from "lucide-react";
 import {
+    Modal,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+    useDisclosure,
     Spinner,
+    Input,
 } from '@nextui-org/react';
 
 
@@ -73,6 +82,23 @@ export default function ProductGroups() {
         setCount(1);
     };
 
+    const {
+        isOpen: isAddModalOpen,
+        onOpen: onAddModalOpen,
+        onClose: onAddModalClose,
+    } = useDisclosure();
+
+    // butao + do teclado
+    const [inputValue, setInputValue] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
+    const [obs, setObs] = useState("");
+
+    const handleKeyPress = (val) => {
+        setInputValue((prev) => prev + val);
+    };
+
+    const handleClear = () => setInputValue("");
+
     const addToCart = (product) => {
         setCartItems((prevItems) => {
             const existingItem = prevItems.find((item) => item.id === product.id);
@@ -90,6 +116,7 @@ export default function ProductGroups() {
             }
         });
     };
+
     const filterByName = (items) => {
         if (!searchTerm.trim()) return items;
 
@@ -103,6 +130,55 @@ export default function ProductGroups() {
     const toggleGroup = (id) => {
         setOpenGroupID((prev) => (prev === id ? null : id))
     }
+
+    const handleOk = async () => {
+        if (!inputValue) return;
+
+        try {
+            const produtos = await fetchProduct(inputValue); // <- chamada direta da função importada
+
+            const produto = produtos.find(p => String(p.VPRODUTO) === String(inputValue));
+
+            if (produto) {
+                const alreadyInCart = cartItems.some(item => item.id === produto.VPRODUTO);
+
+                if (!alreadyInCart) {
+                    setCartItems(prev => [
+                        ...prev,
+                        {
+                            id: produto.VPRODUTO,
+                            name: produto.VDESC1,
+                            price: 1, // ajuste conforme necessário
+                            quantity: 1,
+                        },
+                    ]);
+                    setQuantities(prev => ({ ...prev, [produto.VPRODUTO]: 1 }));
+                } else {
+                    setQuantities(prev => {
+                        const newQuantity = (prev[produto.VPRODUTO] || 1) + 1;
+                        setCartItems(cartPrev =>
+                            cartPrev.map(item =>
+                                item.id === produto.VPRODUTO
+                                    ? { ...item, quantity: newQuantity }
+                                    : item
+                            )
+                        );
+                        return { ...prev, [produto.VPRODUTO]: newQuantity };
+                    });
+                }
+
+                setInputValue("");
+                onAddModalClose();
+            } else {
+                setErrorMessage("Produto não encontrado.");
+                setTimeout(() => setErrorMessage(""), 2000); // limpa a mensagem após 2 segundos
+            }
+        } catch (error) {
+            console.error("Erro ao buscar produto:", error);
+            alert("Erro ao buscar produto.");
+        }
+    };
+
 
     // Fecha o popover se clicar fora
     useEffect(() => {
@@ -504,7 +580,7 @@ export default function ProductGroups() {
                         )}
                     </div>
 
-                    <div className="py-5 px-6 " >
+                    <div className="py-5 px-6 -mb-4" >
                         {/* Campo de pesquisa */}
                         <div className="mb-4 relative">
                             <FaMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
@@ -517,6 +593,111 @@ export default function ProductGroups() {
                             />
                         </div>
                     </div>
+
+                    <Dropdown>
+                        <DropdownTrigger>
+                            <div className="flex justify-end mr-6 -mb-2">
+                                <button
+                                    onClick={onAddModalOpen}
+                                    className=" bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
+                                    < Plus size={25} />
+                                </button>
+                            </div>
+                        </DropdownTrigger>
+                    </Dropdown>
+
+                    <Modal
+                        isOpen={isAddModalOpen}
+                        onOpenChange={onAddModalClose}
+                        size="md"
+                        placement="center"
+                        className="w-300 bg-white shadow-xl rounded-lg"
+                        hideCloseButton={true}
+                    >
+                        <ModalContent>
+                            {(onClose) => (
+                                <>
+                                    <ModalHeader className="rounded bg-[#FC9D25] flex justify-between items-center">
+                                        <div className="text-xl font-bold text-white">Enter the PLU</div>
+                                        <Button
+                                            onClick={onClose}
+                                            className="text-white bg-transparent border-0 text-2xl p-0"
+                                            aria-label="Close"
+                                        >
+                                            &times; {/* Unicode for "×" sign */}
+                                        </Button>
+                                    </ModalHeader>
+                                    <ModalBody className="py-5 px-6">
+                                        {errorMessage && (
+                                            <div className="text-center text-red-600 font-semibold text-lg mb-4">
+                                                {errorMessage}
+                                            </div>
+                                        )}
+                                        <Input
+                                            placeholder="PLU"
+                                            value={inputValue}
+                                            onChange={(e) => {
+                                                const onlyNums = e.target.value.replace(/\D/g, ""); // Remove tudo que não for dígito
+                                                setInputValue(onlyNums);
+                                            }}
+                                            className="mb-4"
+                                            classNames={{
+                                                inputWrapper: "bg-gray-200 px-3 py-2 border border-gray-300",
+                                                input: "text-gray-800",
+                                            }}
+                                        />
+
+                                        <div className="grid grid-cols-4 gap-2 ">
+                                            {[7, 8, 9].map((n) => (
+                                                <button
+                                                    key={n}
+                                                    onClick={() => handleKeyPress(n)}
+                                                    className="bg-gray-200 w-full aspect-square rounded text-lg font-medium btn"
+                                                >
+                                                    {n}
+                                                </button>
+                                            ))}
+
+                                            <button onClick={handleClear} className="btn w-full bg-red-500 text-white font-bold rounded text-lg row-span-2">
+                                                C
+                                            </button>
+
+                                            {[4, 5, 6].map((n) => (
+                                                <button key={n} onClick={() => handleKeyPress(n)} className="bg-gray-200 w-full aspect-square rounded text-lg font-medium btn">
+                                                    {n}
+                                                </button>
+                                            ))}
+
+
+                                            {[1, 2, 3].map((n) => (
+                                                <button key={n} onClick={() => handleKeyPress(n)} className="bg-gray-200 w-full aspect-square rounded text-lg font-medium btn">
+                                                    {n}
+                                                </button>
+                                            ))}
+                                            <button onClick={handleOk} className="btn w-full bg-green-500 rounded text-lg text-white row-span-2">
+                                                OK
+                                            </button>
+
+                                            {[0, "00"].map((n, idx) => (
+                                                <button
+                                                    key={n}
+                                                    onClick={() => handleKeyPress(n)}
+                                                    className={`bg-gray-200 w-full rounded text-lg font-medium btn ${idx === 0 ? "col-span-2 py-3" : "aspect-square"}`}
+                                                >
+                                                    {n}
+                                                </button>
+
+                                            ))}
+                                        </div>
+
+                                    </ModalBody>
+
+                                </>
+                            )}
+                        </ModalContent>
+                    </Modal>
+
+
 
                     {/*  botão do carrinho */}
                     <div className="relative">
@@ -1026,9 +1207,11 @@ export default function ProductGroups() {
                     </div>
 
                 </>
-            )}
+            )
+            }
         </>
 
 
     )
 }
+

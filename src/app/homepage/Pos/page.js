@@ -87,7 +87,7 @@ export default function ProductGroups() {
     const [postosComSalas, setPostosComSalas] = useState([]);
     const [salasComMesas, setSalasComMesas] = useState([]);
     const [showModal, setShowModal] = useState(false);
-
+    const [pendingTablePath, setPendingTablePath] = useState(null);
 
     const handleConfirm = () => {
         clearCart();
@@ -701,14 +701,19 @@ export default function ProductGroups() {
                                 <CardBody className="flex flex-col items-center justify-center w-full h-full"
                                           onClick={() => {
                                               console.log('Selected table:', m.label);
-                                              setSelectedTable(m.path);
-                                          }}>
-                                    <div className="text-5xl font-bold text-[#FC9D25] mb-2">
-                                        <MdTableBar />
+                                              setPendingTablePath(m.path);
+                                              setShowModal(true);
+                                          }}
+                                >
+                                    {/* imagem tabela */}
+                                    <div className="mb-2">
+                                        <img src="/icons/table_icon.png" alt="table icon" width={80} className="mx-auto"/>
                                     </div>
+
                                     <p className="text-center text-sm text-[#191919]">
                                         {m.label}
                                     </p>
+
                                     {getTotalForTable(m.path) > 0 && (
                                         <span>Total: {getTotalForTable(m.path).toFixed(2)}€</span>
                                     )}

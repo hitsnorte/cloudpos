@@ -119,13 +119,33 @@ export default function ProductGroups() {
         });
     };
 
-    const filterByName = (items) => {
-        if (!searchTerm.trim()) return items;
+    // filtro pesquisa por item.name e por produtos
+    const filterByName = (groups) => {
+        if (!searchTerm.trim()) return groups;
 
-        return items
-            .map((item) =>
-                item.name.toLowerCase().includes(searchTerm.toLowerCase()) ? item : null
-            )
+        const term = searchTerm.toLowerCase();
+
+        return groups
+            .map(group => {
+                const nameMatches = group.name?.toLowerCase().includes(term);
+
+                const filteredProducts = group.products.filter(
+                    product =>
+                        product?.name?.toLowerCase().includes(term) ||
+                        product?.VDESC1?.toLowerCase().includes(term)
+                );
+
+                if (nameMatches || filteredProducts.length > 0) {
+                    return {
+                        ...group,
+                        // Se o nome do grupo for correspondente, mantém todos os produtos;
+                        // caso contrário, retorna só os produtos que deram match
+                        products: nameMatches ? group.products : filteredProducts,
+                    };
+                }
+
+                return null;
+            })
             .filter(Boolean);
     };
 
@@ -496,7 +516,7 @@ export default function ProductGroups() {
     }
 
     if (!dashboardData) {
-       return <LoadingBackdrop open={true} />;
+        return <LoadingBackdrop open={true} />;
     }
 
     if (loading) {
@@ -574,10 +594,11 @@ export default function ProductGroups() {
                         {selectedCardPath && (
                             <button
                                 onClick={() => setSelectedCardPath(null)}
-                                className="fixed top-6 right-378 bg-[#FC9D25] text-white px-4 py-2 rounded "
+                                className="fixed top-6 left-74 bg-[#FC9D25] text-white px-4 py-2 rounded"
                             >
                                 Dashboard
                             </button>
+
                         )}
                     </div>
 

@@ -659,7 +659,7 @@ export default function ProductGroups() {
                                                 </button>
                                             ))}
 
-                                            <button onClick={handleClear} className="btn w-full bg-red-500 text-white font-bold rounded text-lg row-span-2">
+                                            <button onClick={handleClear} className="btn w-full bg-red-400 text-white font-bold rounded text-lg row-span-2">
                                                 C
                                             </button>
 
@@ -675,7 +675,7 @@ export default function ProductGroups() {
                                                     {n}
                                                 </button>
                                             ))}
-                                            <button onClick={handleOk} className="btn w-full bg-green-500 rounded text-lg text-white row-span-2">
+                                            <button onClick={handleOk} className="btn w-full bg-[#94c465] rounded text-lg text-white row-span-2">
                                                 OK
                                             </button>
 

@@ -233,6 +233,25 @@ export default function ProductGroups() {
     });
 
     useEffect(() => {
+        let filtered = [];
+
+        if (viewType === 'groups') {
+            filtered = filterByName(groupsWithProducts);
+        } else if (viewType === 'families') {
+            filtered = filterByName(familiesWithProducts);
+        } else if (viewType === 'subfamilies') {
+            filtered = filterByName(subfamiliesWithProducts);
+        }
+
+        // Se houver termo de pesquisa e resultados, abre só o primeiro
+        if (searchTerm.trim() && filtered.length > 0) {
+            setOpenGroupID(filtered[0].id); // abre só esse
+        } else {
+            setOpenGroupID(null); // fecha todos se não há match
+        }
+    }, [searchTerm, viewType, groupsWithProducts, familiesWithProducts, subfamiliesWithProducts]);
+
+    useEffect(() => {
         setQuantities(
             cartItems.reduce((acc, item) => {
                 acc[item.id] = item.quantity || 1;

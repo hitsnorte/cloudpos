@@ -328,6 +328,26 @@ export default function ProductGroups() {
         fetchPropertyID()
     }, [])
 
+    useEffect(() => {
+        let filtered = [];
+
+        if (viewType === 'groups') {
+            filtered = filterByName(groupsWithProducts);
+        } else if (viewType === 'families') {
+            filtered = filterByName(familiesWithProducts);
+        } else if (viewType === 'subfamilies') {
+            filtered = filterByName(subfamiliesWithProducts);
+        }
+
+        // Se houver termo de pesquisa e resultados, abre só o primeiro
+        if (searchTerm.trim() && filtered.length > 0) {
+            setOpenGroupID(filtered[0].id); // abre só esse
+        } else {
+            setOpenGroupID(null); // fecha todos se não há match
+        }
+    }, [searchTerm, viewType, groupsWithProducts, familiesWithProducts, subfamiliesWithProducts]);
+
+
 
     // 1. Lê o carrinho salvo do localStorage na inicialização
     useEffect(() => {
@@ -616,12 +636,32 @@ export default function ProductGroups() {
         updateCartItems(updatedItems);
     };
 
-    function filterByName(items) {
-        if (!searchTerm) return items;
-        return items.filter(item =>
-            item.name.toLowerCase().includes(searchTerm.toLowerCase())
-        );
+    function filterByName(groups) {
+        if (!searchTerm.trim()) return groups;
+
+        const term = searchTerm.toLowerCase();
+
+        return groups
+            .map(group => {
+                const nameMatches = group.name?.toLowerCase().includes(term);
+                const filteredProducts = group.products.filter(
+                    product =>
+                        product?.name?.toLowerCase().includes(term) ||
+                        product?.VDESC1?.toLowerCase().includes(term)
+                );
+
+                if (nameMatches || filteredProducts.length > 0) {
+                    return {
+                        ...group,
+                        products: nameMatches ? group.products : filteredProducts,
+                    };
+                }
+
+                return null;
+            })
+            .filter(Boolean);
     }
+
 
     function toggleGroup(id) {
         setOpenGroupID(openGroupID === id ? null : id);

@@ -132,52 +132,52 @@ export default function ProductGroups() {
         fetchMesas();
     }, []);
 
-    const selectedPostoVPosto = useMemo(() => {
-        if (!selectedCardPath) return null;
-        const parts = selectedCardPath.split("/");
-        return parts[parts.length - 1]; // extrai o VPosto (ex: "posto1")
-    }, [selectedCardPath]);
+   const selectedPostoVPosto = useMemo(() => {
+    if (!selectedCardPath) return null;
+    const parts = selectedCardPath.split("/");
+    return parts[parts.length - 1]; // extrai o VPosto (ex: "posto1")
+}, [selectedCardPath]);
 
-    const cardPaths = useMemo(() => {
-        if (!postosComSalas || !selectedPostoVPosto) return [];
+const cardPaths = useMemo(() => {
+    if (!postosComSalas || !selectedPostoVPosto) return [];
 
-        const posto = postosComSalas.find(p => p.VPosto === selectedPostoVPosto);
-        if (!posto || !posto.salas) return [];
+    const posto = postosComSalas.find(p => p.VPosto === selectedPostoVPosto);
+    if (!posto || !posto.salas) return [];
 
-        return posto.salas.map(sala => ({
-            label: sala.Descricao,
-            value: sala.ID_SALA,
-            path: `/homepage/${posto.VPosto}/sala/${sala.ID_SALA}`,
-        }));
-    }, [postosComSalas, selectedPostoVPosto]);
+    return posto.salas.map(sala => ({
+        label: sala.Descricao,
+        value: sala.ID_SALA,
+        path: `/homepage/${posto.VPosto}/sala/${sala.ID_SALA}`,
+    }));
+}, [postosComSalas, selectedPostoVPosto]);
 
 
-    const cardPaths3 = useMemo(() => {
-        if (!selectedRow || !salasComMesas.length || !postosComSalas.length) return [];
+const cardPaths3 = useMemo(() => {
+    if (!selectedRow || !salasComMesas.length || !postosComSalas.length) return [];
 
-        const salaId = parseInt(selectedRow.split("/").pop());
+    const salaId = parseInt(selectedRow.split("/").pop());
 
-        // Encontrar a sala selecionada
-        const salaSelecionada = salasComMesas.find(s => s.ID_SALA === salaId);
-        if (!salaSelecionada || !salaSelecionada.mesas) return [];
+    // Encontrar a sala selecionada
+    const salaSelecionada = salasComMesas.find(s => s.ID_SALA === salaId);
+    if (!salaSelecionada || !salaSelecionada.mesas) return [];
 
-        // Encontrar o posto que contém essa sala
-        const postoQueContemSala = postosComSalas.find(posto =>
-            posto.salas?.some(sala => sala.ID_SALA === salaId)
-        );
+    // Encontrar o posto que contém essa sala
+    const postoQueContemSala = postosComSalas.find(posto =>
+        posto.salas?.some(sala => sala.ID_SALA === salaId)
+    );
 
-        const postoId = postoQueContemSala?.Icodi ?? null;
-        if (!postoId) return [];
+    const postoId = postoQueContemSala?.Icodi ?? null;
+    if (!postoId) return [];
 
-        return salaSelecionada.mesas.map(mesa => ({
-            label: mesa.Descricao,
-            value: mesa.ID_Mesa,
-            path: `/mesas/${mesa.ID_Mesa}`,
-            Posto: String(postoId),      // compatível com mesasEmUso
-            ID_sala: salaId,
-            ID_Mesa: mesa.ID_Mesa,
-        }));
-    }, [selectedRow, salasComMesas, postosComSalas]);
+    return salaSelecionada.mesas.map(mesa => ({
+        label: mesa.Descricao,
+        value: mesa.ID_Mesa,
+        path: `/mesas/${mesa.ID_Mesa}`,
+        Posto: String(postoId),      // compatível com mesasEmUso
+        ID_sala: salaId,
+        ID_Mesa: mesa.ID_Mesa,
+    }));
+}, [selectedRow, salasComMesas, postosComSalas]);
 
 
 
@@ -611,7 +611,7 @@ export default function ProductGroups() {
         }
     };
 
-
+    
 
     if (status === "loading" || loading) {
         return <LoadingBackdrop open={true} />;
@@ -825,15 +825,17 @@ export default function ProductGroups() {
                                 Number(mesa.ID_Mesa) === Number(m.ID_Mesa)
                             );
 
-                            const postoResponsavel = getPostoByMesa(m); // 🔥 Aqui está o posto da mesa
+                            console.log("Mesa:", m.label, {
+                                mesaAtiva,
+                                mesaComparada: mesasEmUso.find(mesa => String(mesa.Posto) === String(m.Posto))
+                            });
 
                             return (
                                 <Card
                                     key={index}
                                     className="w-full h-40 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center cursor-pointer hover:bg-gray-100"
                                 >
-                                    <CardBody
-                                        className="flex flex-col items-center justify-center w-full h-full"
+                                    <CardBody className="flex flex-col items-center justify-center w-full h-full"
                                         onClick={() => {
                                             setPendingTablePath(m.path);
                                             setShowModal(true);
@@ -844,13 +846,6 @@ export default function ProductGroups() {
                                         </div>
 
                                         <p className="text-center text-sm text-[#191919]">{m.label}</p>
-
-                                        {/* ✅ Nome do Posto */}
-                                        {postoResponsavel && (
-                                            <p className="text-sm text-blue-600 font-medium">
-                                                {postoResponsavel.Nome || `Posto ${postoResponsavel.Icodi}`}
-                                            </p>
-                                        )}
 
                                         {mesaAtiva && (
                                             <p className="text-sm text-green-600 font-semibold">mesa em uso</p>

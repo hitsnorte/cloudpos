@@ -17,6 +17,7 @@ import { MdPointOfSale } from "react-icons/md";
 function SidebarItem({ icon, text, submenu }) {
     const { expanded } = useContext(SidebarContext);
     const [open, setOpen] = useState(false);
+    const [cexp, setCexp] = useState("");
 
     return (
         <li className="relative">
@@ -92,7 +93,7 @@ export default function SidebarMenu() {
             icon: <TiShoppingCart size={20} />,
             submenu: [
                 { href: "/homepage/Cart", text: "Cart", icon: <TiShoppingCart size={18} /> },
-                { href: "/homepage/Pos", text: "POS", icon: <MdPointOfSale  size={18} /> },
+                { href: "/homepage/Pos/outlets", text: "POS", icon: <MdPointOfSale  size={18} /> },
             ],
 
         },
@@ -140,7 +141,7 @@ export default function SidebarMenu() {
             className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-[#FC9D25]"
         >
             <option value="" >
-                Select a property
+                Select exploration ctr.
             </option>
             {properties.map((property) => (
                 <option key={property.id} value={property.id}>
@@ -189,7 +190,7 @@ export default function SidebarMenu() {
                     ))}
                 </>
             ) : (
-                <p className="mt-4 text-gray-500 text-center">Select a property to continue...</p>
+                <p className="mt-4 text-gray-500 text-center">Select exploration center to continue...</p>
             )}
         </div>
     );

@@ -545,8 +545,6 @@ const cardPaths3 = useMemo(() => {
         fetchData();
     }, [propertyID]);
 
-
-
     // If the property is not confirmed, redirect to homepage
     useEffect(() => {
         if (!isConfirmed) {

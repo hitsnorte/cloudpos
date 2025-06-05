@@ -626,9 +626,9 @@ export default function ProductGroups() {
                     </div>
 
 
-                    <div className="py-5 px-6 -mb-4" >
-                        {/* Campo de pesquisa */}
-                        <div className="mb-4 relative">
+                    <div className="flex items-center justify-between space-x-4 flex-wrap md:flex-nowrap mt-4">
+                        {/* Search input container */}
+                        <div className="relative flex-1 min-w-[200px] md:min-w-auto">
                             <FaMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
                             <input
                                 type="text"
@@ -638,19 +638,19 @@ export default function ProductGroups() {
                                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
                             />
                         </div>
-                    </div>
 
-                    <Dropdown>
-                        <DropdownTrigger>
-                            <div className="flex justify-end mr-6 -mb-2">
+                        {/* Plus button */}
+                        <Dropdown>
+                            <DropdownTrigger>
                                 <button
                                     onClick={onAddModalOpen}
-                                    className=" bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
-                                    < Plus size={25} />
+                                    className="bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded mt-2 md:mt-0"
+                                >
+                                    <Plus size={25} />
                                 </button>
-                            </div>
-                        </DropdownTrigger>
-                    </Dropdown>
+                            </DropdownTrigger>
+                        </Dropdown>
+                    </div>
 
                     <Modal
                         isOpen={isAddModalOpen}

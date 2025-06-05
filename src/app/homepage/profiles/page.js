@@ -143,7 +143,7 @@ const ProfilesTable = () => {
         };
 
         // 4. Mostra no console p/ debug
-        console.log("Enviado para API:", updatedProfile);
+        // console.log("Enviado para API:", updatedProfile);
 
         try {
             const response = await fetch(

@@ -47,7 +47,7 @@ export default function LayoutWrapper({ children }) {
       {/* Overlay no Mobile quando Sidebar estiver aberta */}
       {isMobile && mobileOpen && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40" 
+          className="fixed inset-0 bg-opacity-90 z-40"
           onClick={() => setMobileOpen(false)}
         ></div>
       )}

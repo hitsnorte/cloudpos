@@ -55,7 +55,7 @@ function SidebarSubItem({ href, text, icon, expanded }) {
 
 export default function SidebarMenu() {
     const { data: session } = useSession();
-    const { expanded, isMobile } = useContext(SidebarContext); // ✅ Pulling isMobile from context
+    const { expanded, isMobile } = useContext(SidebarContext);
 
     const [selectedProperty, setSelectedProperty] = useState(() => localStorage.getItem("selectedProperty") || "");
     const [tempSelectedProperty, setTempSelectedProperty] = useState(null);
@@ -186,9 +186,6 @@ export default function SidebarMenu() {
             {(session && selectedProperty && isConfirmed) ? (
                 <>
                     {Object.entries(menuItems).map(([key, value]) => (
-                        <SidebarItem key={key} text={key} icon={value.icon} submenu={value.submenu} />
-                    ))}
-                    {isMobile && Object.entries(shoppingCartItems).map(([key, value]) => (
                         <SidebarItem key={key} text={key} icon={value.icon} submenu={value.submenu} />
                     ))}
                 </>

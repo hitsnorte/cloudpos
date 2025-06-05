@@ -134,13 +134,15 @@ export default function ProductGroups() {
 
     const cardPaths = useMemo(() => {
         if (!postosComSalas) return [];
-        return postosComSalas.flatMap(posto =>
-            (posto.salas || []).map(sala => ({
-                label: sala.Descricao,
-                value: sala.ID_SALA,
-                path: `/homepage/${posto.VPosto}/sala/${sala.ID_SALA}`,
-            }))
-        );
+        return postosComSalas
+            .filter(p => p.salas && p.salas.length > 0) // Removido o filtro por `trabalhaComSalas`
+            .flatMap(posto =>
+                posto.salas.map(sala => ({
+                    label: sala.Descricao,
+                    value: sala.ID_SALA,
+                    path: `/homepage/${posto.VPosto}/sala/${sala.ID_SALA}`,
+                }))
+            );
     }, [postosComSalas]);
 
     const cardPaths3 = useMemo(() => {
@@ -233,13 +235,23 @@ export default function ProductGroups() {
                     fetchPostossalas()
                 ]);
 
-                const enrichedPostos = postos.map(posto => {
-                    const relacoes = postosSalas.filter(ps => ps.Posto === posto.Icodi.toString());
+                console.log("Postos:", postos);
+                console.log("Salas:", salas);
+                console.log("PostosSalas:", postosSalas);
+
+                const postosFiltrados = postos; // <- usar todos os postos
+                console.log("Postos com trabalhaComSalas === true:", postosFiltrados);
+
+                const enrichedPostos = postosFiltrados.map(posto => {
+                    const relacoes = postosSalas.filter(ps => Number(ps.Posto) === posto.Icodi);
+                    console.log(`Relações para posto ${posto.Icodi}:`, relacoes);
 
                     const salasRelacionadas = relacoes
                         .sort((a, b) => a.Ordem - b.Ordem)
                         .map(relacao => salas.find(s => s.ID_SALA === relacao.ID_Sala))
                         .filter(Boolean);
+
+                    console.log(`Salas para posto ${posto.Icodi}:`, salasRelacionadas);
 
                     return {
                         ...posto,
@@ -247,6 +259,7 @@ export default function ProductGroups() {
                     };
                 });
 
+                console.log("Postos enriquecidos:", enrichedPostos);
                 setPostosComSalas(enrichedPostos);
             } catch (err) {
                 console.error("Erro ao carregar dados:", err);
@@ -256,6 +269,9 @@ export default function ProductGroups() {
 
         loadPostosWithSalas();
     }, []);
+
+
+
 
     useEffect(() => {
         const loadMesasWithSalas = async () => {
@@ -559,6 +575,10 @@ export default function ProductGroups() {
                 }
             });
 
+            console.log("🔍 Resposta da API bruta:", response);         // <-- Aqui!
+            console.log("📦 response.data:", response.data);
+
+
             if (response.data && response.data.response) {
                 console.log("Resposta da API ATIVAS:", response.data.response);
                 return response;
@@ -571,9 +591,7 @@ export default function ProductGroups() {
         }
     };
 
-    useEffect(() => {
-        fetchActiveTables();
-    }, []);
+    
 
 
 
@@ -587,7 +605,7 @@ export default function ProductGroups() {
 
     const cardPaths2 = postos.map((posto, index) => ({
         label: posto.VDescricao,
-        value: 0, // Coloque aqui algum valor real se houver (como dashboardData[posto.VDescricao])
+        value: posto.VCODI, // Coloque aqui algum valor real se houver (como dashboardData[posto.VDescricao])
         path: `/homepage/${posto.VPosto}`, // Ajuste conforme necessidade
     }));
 

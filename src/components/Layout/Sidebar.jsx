@@ -13,7 +13,7 @@ export const SidebarContext = createContext();
 
 export default function Sidebar({ mobileOpen, setMobileOpen, expanded, setExpanded }) {
   const router = useRouter();
-  const { data: session } = useSession(); 
+  const { data: session } = useSession();
   const [isMobile, setIsMobile] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
@@ -30,22 +30,33 @@ export default function Sidebar({ mobileOpen, setMobileOpen, expanded, setExpand
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  }, [setMobileOpen]);
+
+  console.log("Sidebar rendered", {
+    mobileOpen,
+    expanded,
+    isMobile,
+    showUserMenu,
+  });
+
 
   return (
-      <SidebarContext.Provider value={{ expanded: isMobile ? true : expanded, isMobile }}>
-
-      {(isMobile && mobileOpen) || !isMobile ? (
+      <SidebarContext.Provider value={{ expanded: isMobile ? true : expanded}}>
+        {(isMobile && mobileOpen) || !isMobile ? (
             <aside
-                className={`h-screen fixed top-0 left-0 bg-white border-r border-gray-200 shadow-sm z-20 
-            transition-all duration-300 ease-in-out 
-            ${isMobile ? "w-screen" : expanded ? "w-[250px]" : "w-[80px]"}`}
+                className={`h-screen fixed top-0 bg-white border-gray-200 shadow-sm z-20 
+                      transition-all duration-300 ease-in-out z-[9999]
+                      ${isMobile ? "right-0 w-screen border-l" : "left-0 " + (expanded ? "w-[250px] border-r" : "w-[80px] border-r")}`}
             >
               <nav className="h-full flex flex-col relative w-full">
                 {/* Header */}
                 <div className="p-4 pb-2 flex items-center">
                   <Image src="/logo/cloudPos-logo.png" alt="CloudPos Logo" width={35} height={35} />
-                  <p className={`font-bold transition-all ml-3 ${expanded || isMobile ? "opacity-100 w-auto" : "opacity-0 w-0 overflow-hidden"}`}>
+                  <p
+                      className={`font-bold transition-all ml-3 ${
+                          expanded || isMobile ? "opacity-100 w-auto" : "opacity-0 w-0 overflow-hidden"
+                      }`}
+                  >
                     CloudPos
                   </p>
                 </div>
@@ -60,6 +71,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen, expanded, setExpand
                     </button>
                 )}
 
+                {/* Mobile Close Button */}
                 {isMobile && (
                     <button
                         onClick={() => setMobileOpen(false)}
@@ -86,12 +98,20 @@ export default function Sidebar({ mobileOpen, setMobileOpen, expanded, setExpand
                   </div>
 
                   {/* User Info & Dropdown Toggle */}
-                  <div className={`flex justify-between items-center overflow-hidden transition-all ${expanded || isMobile ? "w-full ml-3" : "w-0"}`}>
+                  <div
+                      className={`flex justify-between items-center overflow-hidden transition-all duration-300 ${
+                          expanded || isMobile ? "w-full ml-3" : "w-0"
+                      }`}
+                  >
                     <div className="leading-4">
                       <h4 className="font-semibold">{session?.user?.name || "Guest User"}</h4>
                       <span className="text-xs text-gray-600">{session?.user?.email || "No email available"}</span>
                     </div>
-                    <button onClick={() => setShowUserMenu((prev) => !prev)} className="ml-2 text-gray-600 hover:text-black">
+                    <button
+                        onClick={() => setShowUserMenu((prev) => !prev)}
+                        className="ml-2 text-gray-600 hover:text-black"
+                        aria-label="Toggle user menu"
+                    >
                       {showUserMenu ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                     </button>
                   </div>
@@ -121,15 +141,15 @@ export default function Sidebar({ mobileOpen, setMobileOpen, expanded, setExpand
                         </button>
 
                         <button
-                        onClick={() => {
-                          localStorage.removeItem("selectedPropertyID");
-                          localStorage.removeItem("selectedProperty");
-                          signOut({ callbackUrl: "/login" });
-                        }}
-                        className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                      >
-                        Logout
-                      </button>
+                            onClick={() => {
+                              localStorage.removeItem("selectedPropertyID");
+                              localStorage.removeItem("selectedProperty");
+                              signOut({ callbackUrl: "/login" });
+                            }}
+                            className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                        >
+                          Logout
+                        </button>
                       </div>
                   )}
                 </div>

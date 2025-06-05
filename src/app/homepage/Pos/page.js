@@ -93,6 +93,7 @@ export default function ProductGroups() {
     const [pendingTablePath, setPendingTablePath] = useState(null);
     const [clientNumber, setClienteNumber] = useState(null);
 
+    const [mesasEmUso, setMesasEmUso] = useState([]);
     const handleConfirm = () => {
         clearCart();
         setShowConfirm(false);
@@ -131,34 +132,54 @@ export default function ProductGroups() {
         fetchMesas();
     }, []);
 
+    const selectedPostoVPosto = useMemo(() => {
+        if (!selectedCardPath) return null;
+        const parts = selectedCardPath.split("/");
+        return parts[parts.length - 1]; // extrai o VPosto (ex: "posto1")
+    }, [selectedCardPath]);
 
     const cardPaths = useMemo(() => {
-        if (!postosComSalas) return [];
-        return postosComSalas
-            .filter(p => p.salas && p.salas.length > 0) // Removido o filtro por `trabalhaComSalas`
-            .flatMap(posto =>
-                posto.salas.map(sala => ({
-                    label: sala.Descricao,
-                    value: sala.ID_SALA,
-                    path: `/homepage/${posto.VPosto}/sala/${sala.ID_SALA}`,
-                }))
-            );
-    }, [postosComSalas]);
+        if (!postosComSalas || !selectedPostoVPosto) return [];
+
+        const posto = postosComSalas.find(p => p.VPosto === selectedPostoVPosto);
+        if (!posto || !posto.salas) return [];
+
+        return posto.salas.map(sala => ({
+            label: sala.Descricao,
+            value: sala.ID_SALA,
+            path: `/homepage/${posto.VPosto}/sala/${sala.ID_SALA}`,
+        }));
+    }, [postosComSalas, selectedPostoVPosto]);
+
 
     const cardPaths3 = useMemo(() => {
-        if (!selectedRow || !salasComMesas.length) return [];
+        if (!selectedRow || !salasComMesas.length || !postosComSalas.length) return [];
 
         const salaId = parseInt(selectedRow.split("/").pop());
-        const salaSelecionada = salasComMesas.find(s => s.ID_SALA === salaId);
 
+        // Encontrar a sala selecionada
+        const salaSelecionada = salasComMesas.find(s => s.ID_SALA === salaId);
         if (!salaSelecionada || !salaSelecionada.mesas) return [];
+
+        // Encontrar o posto que contém essa sala
+        const postoQueContemSala = postosComSalas.find(posto =>
+            posto.salas?.some(sala => sala.ID_SALA === salaId)
+        );
+
+        const postoId = postoQueContemSala?.Icodi ?? null;
+        if (!postoId) return [];
 
         return salaSelecionada.mesas.map(mesa => ({
             label: mesa.Descricao,
             value: mesa.ID_Mesa,
             path: `/mesas/${mesa.ID_Mesa}`,
+            Posto: String(postoId),      // compatível com mesasEmUso
+            ID_sala: salaId,
+            ID_Mesa: mesa.ID_Mesa,
         }));
-    }, [selectedRow, salasComMesas]);
+    }, [selectedRow, salasComMesas, postosComSalas]);
+
+
 
     // Fecha o popover se clicar fora
     useEffect(() => {
@@ -562,36 +583,33 @@ export default function ProductGroups() {
 
         if (!propertyID) {
             console.warn("Nenhuma propriedade encontrada no localStorage!");
-            return;
+            return null;
         }
-        if (!propertyID) {
-            console.warn("propertyID ausente ou inválido!");
-            return;
-        }
+
         try {
-            const response = await axios.get(`/api/mesas_produtos/get_mesas_ativas`, {
+            const response = await axios.get(`/api/mesas_produtos/get_mesas_em_uso`, {
                 headers: {
                     'X-Property-ID': propertyID
                 }
             });
 
-            console.log("🔍 Resposta da API bruta:", response);         // <-- Aqui!
-            console.log("📦 response.data:", response.data);
+            console.log("Dados principais da API:", response.data);
 
-
-            if (response.data && response.data.response) {
-                console.log("Resposta da API ATIVAS:", response.data.response);
-                return response;
+            // Armazena o array diretamente no estado
+            if (Array.isArray(response.data)) {
+                setMesasEmUso(response.data);
+            } else {
+                console.log("Resposta inesperada da API:", response.data);
+                setMesasEmUso([]);
             }
 
-            throw new Error("Nenhuma resposta válida da API.");
+            return response;
         } catch (error) {
             console.error("Erro ao buscar detalhes da propriedade:", error);
+            setMesasEmUso([]); // limpa o estado em caso de erro
             return null;
         }
     };
-
-    
 
 
 
@@ -605,10 +623,9 @@ export default function ProductGroups() {
 
     const cardPaths2 = postos.map((posto, index) => ({
         label: posto.VDescricao,
-        value: posto.VCODI, // Coloque aqui algum valor real se houver (como dashboardData[posto.VDescricao])
+        value: posto.Icodi,
         path: `/homepage/${posto.VPosto}`, // Ajuste conforme necessidade
     }));
-
 
 
     if (loading) {
@@ -801,43 +818,57 @@ export default function ProductGroups() {
                     </div>
 
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-6">
-                        {cardPaths3.map((m, index) => (
-                            <Card
-                                key={index}
-                                className="w-full h-40 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center cursor-pointer hover:bg-gray-100"
-                            >
-                                <CardBody className="flex flex-col items-center justify-center w-full h-full"
-                                    onClick={() => {
-                                        console.log('Selected table:', m.label);
-                                        setPendingTablePath(m.path);
-                                        setShowModal(true);
-                                    }}
+                        {cardPaths3.map((m, index) => {
+                            const mesaAtiva = mesasEmUso.find(mesa =>
+                                String(mesa.Posto) === String(m.Posto) &&
+                                Number(mesa.ID_sala) === Number(m.ID_sala) &&
+                                Number(mesa.ID_Mesa) === Number(m.ID_Mesa)
+                            );
+
+                            const postoResponsavel = getPostoByMesa(m); // 🔥 Aqui está o posto da mesa
+
+                            return (
+                                <Card
+                                    key={index}
+                                    className="w-full h-40 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center cursor-pointer hover:bg-gray-100"
                                 >
-                                    {/* imagem tabela */}
-                                    <div className="mb-2">
-                                        <img src="/icons/table_icon.png" alt="table icon" width={80} className="mx-auto" />
-                                    </div>
+                                    <CardBody
+                                        className="flex flex-col items-center justify-center w-full h-full"
+                                        onClick={() => {
+                                            setPendingTablePath(m.path);
+                                            setShowModal(true);
+                                        }}
+                                    >
+                                        <div className="mb-2">
+                                            <img src="/icons/table_icon.png" alt="table icon" width={80} className="mx-auto" />
+                                        </div>
 
-                                    <p className="text-center text-sm text-[#191919]">
-                                        {m.label}
-                                    </p>
+                                        <p className="text-center text-sm text-[#191919]">{m.label}</p>
 
-                                    {getTotalForTable(m.path) > 0 && (
-                                        <span>Total: {getTotalForTable(m.path).toFixed(2)}€</span>
-                                    )}
-                                </CardBody>
+                                        {/* ✅ Nome do Posto */}
+                                        {postoResponsavel && (
+                                            <p className="text-sm text-blue-600 font-medium">
+                                                {postoResponsavel.Nome || `Posto ${postoResponsavel.Icodi}`}
+                                            </p>
+                                        )}
 
-                                {getQuantityForTable(m.path) > 0 && (
-                                    <>
-                                        {/* Badge no canto superior direito */}
+                                        {mesaAtiva && (
+                                            <p className="text-sm text-green-600 font-semibold">mesa em uso</p>
+                                        )}
+
+                                        {getTotalForTable(m.path) > 0 && (
+                                            <span>Total: {getTotalForTable(m.path).toFixed(2)}€</span>
+                                        )}
+                                    </CardBody>
+
+                                    {getQuantityForTable(m.path) > 0 && (
                                         <span className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 p-2 flex items-center justify-center">
                                             {getQuantityForTable(m.path)} | <FaUser size={15} /> x {clientNumber}
                                         </span>
-                                    </>
-                                )}
-
-                            </Card>
-                        ))}
+                                    )}
+                                </Card>
+                            );
+                        })}
                     </div>
                 </>
             )

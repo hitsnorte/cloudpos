@@ -184,9 +184,18 @@ export default function SidebarMenu() {
 
             {(session && selectedProperty && isConfirmed) ? (
                 <>
-                    {Object.entries(menuItems).map(([key, value]) => (
-                        <SidebarItem key={key} text={key} icon={value.icon} submenu={value.submenu} />
-                    ))}
+                    {Object.entries(menuItems).map(([key, value]) => {
+                        // Show only "Shopping" on mobile, and everything on desktop
+                        if (isMobile && key !== "Shopping") return null;
+                        return (
+                            <SidebarItem
+                                key={key}
+                                text={key}
+                                icon={value.icon}
+                                submenu={value.submenu}
+                            />
+                        );
+                    })}
                 </>
             ) : (
                 <p className="mt-4 text-gray-500 text-center">Select a property to continue...</p>

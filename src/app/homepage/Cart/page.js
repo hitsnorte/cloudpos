@@ -20,6 +20,7 @@ import { FaMagnifyingGlass } from "react-icons/fa6";
 import { Card, CardBody } from "@heroui/react";
 import { useSession } from "next-auth/react"; // Import useSession
 import { Plus } from "lucide-react";
+import { IoIosArrowBack } from "react-icons/io";
 import {
     Modal,
     ModalContent,
@@ -589,37 +590,41 @@ export default function ProductGroups() {
             {/* Conteúdo restante só aparece após clicar em um card */}
             {selectedCardPath && (
                 <>
-                    <div className="flex items-center justify-center space-x-4 ">
+                    <div className="grid grid-cols-2 gap-4 sm:flex sm:items-center sm:justify-center sm:space-x-4">
+                        {/*Botão de retorno para a dashboard*/}
+                        {selectedCardPath && (
+                            <button
+                                onClick={() => setSelectedCardPath(null)}
+                                className="flex items-center gap-x-2 px-4 py-2 bg-[#FC9D25] text-white rounded"
+                            >
+                                <IoIosArrowBack size={16} />
+                                <span>Dashboard</span>
+                            </button>
+                        )}
 
-                        {/*  botão de selecao de groups, families e subfamilies */}
+                        {/* botão de selecao de groups, families e subfamilies */}
                         <button
                             onClick={() => setViewType('groups')}
                             className={`px-4 py-2 rounded ${viewType === 'groups' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
                         >
                             Groups
                         </button>
+
                         <button
                             onClick={() => setViewType('families')}
                             className={`px-4 py-2 rounded ${viewType === 'families' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
                         >
                             Families
                         </button>
+
                         <button
                             onClick={() => setViewType('subfamilies')}
                             className={`px-4 py-2 rounded ${viewType === 'subfamilies' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
                         >
                             Subfamilies
                         </button>
-                        {selectedCardPath && (
-                            <button
-                                onClick={() => setSelectedCardPath(null)}
-                                className="fixed top-6 left-74 bg-[#FC9D25] text-white px-4 py-2 rounded"
-                            >
-                                Dashboard
-                            </button>
-
-                        )}
                     </div>
+
 
                     <div className="py-5 px-6 -mb-4" >
                         {/* Campo de pesquisa */}
@@ -745,7 +750,7 @@ export default function ProductGroups() {
                         {/* Botão Carrinho */}
                         {!isOpen && (
                             <button
-                                className="fixed top-6 right-15 z-50 text-3xl text-[#191919] hover:text-[#FC9D25] transition"
+                                className=" fixed top-6 right-15 z-50 text-3xl text-[#191919] hover:text-[#FC9D25] transition"
                                 onClick={toggleSidebar}
                             >
                                 <TiShoppingCart />

@@ -112,10 +112,12 @@ const ProfilesTable = () => {
             firstName: newProfile.firstName,
             secondName: newProfile.secondName,
             email: newProfile.email,
-            password: showPasswordFields ? newPassword : undefined, // Only send password if it's being changed
-            currentPassword: currentPassword, // Send currentPassword for verification
+            password: showPasswordFields ? newPassword : undefined,
+            currentPassword: currentPassword,
             propertyIDs: newProfile.propertyIDs,
+            propertyTags: newProfile.propertyTags, // <-- ADICIONAR ISTO
         };
+
 
         try {
             if (currentProfile) {
@@ -525,50 +527,50 @@ const ProfilesTable = () => {
             <div className="overflow-x-auto bg-muted/40">
                 <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB] mx-auto">
                     <thead>
-                    <tr className="bg-[#FC9D25] text-white">
-                        <th className="border border-[#EDEBEB] w-[50px] px-2 py-2 text-center">
-                            <FaGear size={20} />
-                        </th>
-                        <th className="border border-[#EDEBEB] px-4 py-2 text-left">ID</th>
-                        <th className="border border-[#EDEBEB] px-4 py-2 text-left">First Name</th>
-                        <th className="border border-[#EDEBEB] px-4 py-2 text-left">Last Name</th>
-                        <th className="border border-[#EDEBEB] px-4 py-2 text-left">Email</th>
-                    </tr>
+                        <tr className="bg-[#FC9D25] text-white">
+                            <th className="border border-[#EDEBEB] w-[50px] px-2 py-2 text-center">
+                                <FaGear size={20} />
+                            </th>
+                            <th className="border border-[#EDEBEB] px-4 py-2 text-left">ID</th>
+                            <th className="border border-[#EDEBEB] px-4 py-2 text-left">First Name</th>
+                            <th className="border border-[#EDEBEB] px-4 py-2 text-left">Last Name</th>
+                            <th className="border border-[#EDEBEB] px-4 py-2 text-left">Email</th>
+                        </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-300">
-                    {profiles.length > 0 ? (
-                        paginatedProfiles.map((profile, index) => (
-                            <tr key={profile.id || `profile-${index}`} className="hover:bg-gray-100">
-                                <td className="border border-[#EDEBEB] w-[50px] px-2 py-2 text-center">
-                                    <Dropdown>
-                                        <DropdownTrigger>
-                                            <Button variant="bordered" className="p-1">
-                                                <HiDotsVertical size={18} />
-                                            </Button>
-                                        </DropdownTrigger>
-                                        <DropdownMenu aria-label="Actions" className="bg-white shadow-lg rounded-md p-1">
-                                            <DropdownItem key="edit" onPress={() => openEditModal(profile)}>
-                                                Edit
-                                            </DropdownItem>
-                                            <DropdownItem key="delete" onPress={() => openDeleteModal(profile)}>
-                                                Delete
-                                            </DropdownItem>
-                                        </DropdownMenu>
-                                    </Dropdown>
+                        {profiles.length > 0 ? (
+                            paginatedProfiles.map((profile, index) => (
+                                <tr key={profile.id || `profile-${index}`} className="hover:bg-gray-100">
+                                    <td className="border border-[#EDEBEB] w-[50px] px-2 py-2 text-center">
+                                        <Dropdown>
+                                            <DropdownTrigger>
+                                                <Button variant="bordered" className="p-1">
+                                                    <HiDotsVertical size={18} />
+                                                </Button>
+                                            </DropdownTrigger>
+                                            <DropdownMenu aria-label="Actions" className="bg-white shadow-lg rounded-md p-1">
+                                                <DropdownItem key="edit" onPress={() => openEditModal(profile)}>
+                                                    Edit
+                                                </DropdownItem>
+                                                <DropdownItem key="delete" onPress={() => openDeleteModal(profile)}>
+                                                    Delete
+                                                </DropdownItem>
+                                            </DropdownMenu>
+                                        </Dropdown>
+                                    </td>
+                                    <td className="border border-[#EDEBEB] px-4 py-2">{profile.userID}</td>
+                                    <td className="border border-[#EDEBEB] px-4 py-2">{profile.firstName}</td>
+                                    <td className="border border-[#EDEBEB] px-4 py-2">{profile.secondName}</td>
+                                    <td className="border border-[#EDEBEB] px-4 py-2">{profile.email}</td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan="5" className="text-center py-4 text-gray-500">
+                                    No profiles found.
                                 </td>
-                                <td className="border border-[#EDEBEB] px-4 py-2">{profile.userID}</td>
-                                <td className="border border-[#EDEBEB] px-4 py-2">{profile.firstName}</td>
-                                <td className="border border-[#EDEBEB] px-4 py-2">{profile.secondName}</td>
-                                <td className="border border-[#EDEBEB] px-4 py-2">{profile.email}</td>
                             </tr>
-                        ))
-                    ) : (
-                        <tr>
-                            <td colSpan="5" className="text-center py-4 text-gray-500">
-                                No profiles found.
-                            </td>
-                        </tr>
-                    )}
+                        )}
                     </tbody>
                 </table>
             </div>
@@ -600,8 +602,8 @@ const ProfilesTable = () => {
                     </button>
 
                     <span className="px-3 py-0.5 bg-white">
-            {currentPage}
-        </span>
+                        {currentPage}
+                    </span>
 
                     <button
                         onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}

@@ -26,6 +26,9 @@ import { ChevronDown, ChevronRight } from "lucide-react";
 import { Spinner } from "@nextui-org/react";
 import { FaUser } from "react-icons/fa";
 
+//import axios
+import axios from "axios";
+
 //import loader
 import LoadingBackdrop from "@/src/components/loader/page";
 
@@ -34,13 +37,13 @@ import PopUpModal from '@/src/components/modals/nrm_clients/page';
 
 
 export default function ProductGroups() {
-    const [groupsWithProducts, setGroupsWithProducts] = useState([])
-    const [openGroupID, setOpenGroupID] = useState(null)
-    const [loading, setLoading] = useState(true)
-    const [propertyID, setPropertyID] = useState(null)
-    const [selectedProduct, setSelectedProduct] = useState(null)
+    const [groupsWithProducts, setGroupsWithProducts] = useState([]);
+    const [openGroupID, setOpenGroupID] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [propertyID, setPropertyID] = useState(null);
+    const [selectedProduct, setSelectedProduct] = useState(null);
     const [count, setCount] = useState(0);
-    const [cartOpen, setCartOpen] = useState(false)
+    const [cartOpen, setCartOpen] = useState(false);
     const [familiesWithProducts, setFamiliesWithProducts] = useState([]);
     const [subfamiliesWithProducts, setSubfamiliesWithProducts] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
@@ -88,7 +91,9 @@ export default function ProductGroups() {
     const [salasComMesas, setSalasComMesas] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [pendingTablePath, setPendingTablePath] = useState(null);
+    const [clientNumber, setClienteNumber] = useState(null);
 
+    const [mesasEmUso, setMesasEmUso] = useState([]);
     const handleConfirm = () => {
         clearCart();
         setShowConfirm(false);
@@ -127,32 +132,54 @@ export default function ProductGroups() {
         fetchMesas();
     }, []);
 
+   const selectedPostoVPosto = useMemo(() => {
+    if (!selectedCardPath) return null;
+    const parts = selectedCardPath.split("/");
+    return parts[parts.length - 1]; // extrai o VPosto (ex: "posto1")
+}, [selectedCardPath]);
 
-    const cardPaths = useMemo(() => {
-        if (!postosComSalas) return [];
-        return postosComSalas.flatMap(posto =>
-            (posto.salas || []).map(sala => ({
-                label: sala.Descricao,
-                value: sala.ID_SALA,
-                path: `/homepage/${posto.VPosto}/sala/${sala.ID_SALA}`,
-            }))
-        );
-    }, [postosComSalas]);
+const cardPaths = useMemo(() => {
+    if (!postosComSalas || !selectedPostoVPosto) return [];
 
-    const cardPaths3 = useMemo(() => {
-        if (!selectedRow || !salasComMesas.length) return [];
+    const posto = postosComSalas.find(p => p.VPosto === selectedPostoVPosto);
+    if (!posto || !posto.salas) return [];
 
-        const salaId = parseInt(selectedRow.split("/").pop());
-        const salaSelecionada = salasComMesas.find(s => s.ID_SALA === salaId);
+    return posto.salas.map(sala => ({
+        label: sala.Descricao,
+        value: sala.ID_SALA,
+        path: `/homepage/${posto.VPosto}/sala/${sala.ID_SALA}`,
+    }));
+}, [postosComSalas, selectedPostoVPosto]);
 
-        if (!salaSelecionada || !salaSelecionada.mesas) return [];
 
-        return salaSelecionada.mesas.map(mesa => ({
-            label: mesa.Descricao,
-            value: mesa.ID_Mesa,
-            path: `/mesas/${mesa.ID_Mesa}`,
-        }));
-    }, [selectedRow, salasComMesas]);
+const cardPaths3 = useMemo(() => {
+    if (!selectedRow || !salasComMesas.length || !postosComSalas.length) return [];
+
+    const salaId = parseInt(selectedRow.split("/").pop());
+
+    // Encontrar a sala selecionada
+    const salaSelecionada = salasComMesas.find(s => s.ID_SALA === salaId);
+    if (!salaSelecionada || !salaSelecionada.mesas) return [];
+
+    // Encontrar o posto que contém essa sala
+    const postoQueContemSala = postosComSalas.find(posto =>
+        posto.salas?.some(sala => sala.ID_SALA === salaId)
+    );
+
+    const postoId = postoQueContemSala?.Icodi ?? null;
+    if (!postoId) return [];
+
+    return salaSelecionada.mesas.map(mesa => ({
+        label: mesa.Descricao,
+        value: mesa.ID_Mesa,
+        path: `/mesas/${mesa.ID_Mesa}`,
+        Posto: String(postoId),      // compatível com mesasEmUso
+        ID_sala: salaId,
+        ID_Mesa: mesa.ID_Mesa,
+    }));
+}, [selectedRow, salasComMesas, postosComSalas]);
+
+
 
     // Fecha o popover se clicar fora
     useEffect(() => {
@@ -324,6 +351,26 @@ export default function ProductGroups() {
         fetchPropertyID()
     }, [])
 
+    useEffect(() => {
+        let filtered = [];
+
+        if (viewType === 'groups') {
+            filtered = filterByName(groupsWithProducts);
+        } else if (viewType === 'families') {
+            filtered = filterByName(familiesWithProducts);
+        } else if (viewType === 'subfamilies') {
+            filtered = filterByName(subfamiliesWithProducts);
+        }
+
+        // Se houver termo de pesquisa e resultados, abre só o primeiro
+        if (searchTerm.trim() && filtered.length > 0) {
+            setOpenGroupID(filtered[0].id); // abre só esse
+        } else {
+            setOpenGroupID(null); // fecha todos se não há match
+        }
+    }, [searchTerm, viewType, groupsWithProducts, familiesWithProducts, subfamiliesWithProducts]);
+
+
 
     // 1. Lê o carrinho salvo do localStorage na inicialização
     useEffect(() => {
@@ -343,10 +390,7 @@ export default function ProductGroups() {
 
     //Busca grupos e produtos quando o propertyID estiver disponivel
     useEffect(() => {
-        if (!propertyID) {
-
-            return
-        }
+        if (!propertyID) return;
 
         const fetchData = async () => {
             setLoading(true);
@@ -361,6 +405,7 @@ export default function ProductGroups() {
                     fetchIva(),
                 ]);
 
+                // Mapear IVA
                 const ivaMap = new Map();
                 ivas.forEach((iva) => {
                     ivaMap.set(String(iva.VCODI), {
@@ -368,30 +413,45 @@ export default function ProductGroups() {
                         description: iva.VDESC,
                     });
                 });
+
+                // Criar mapa de preços SOMENTE para classe 3
                 const precoMap = new Map();
-                precos.forEach((preco) => {
-                    const key = String(preco.VCodprod).trim();  // usar VCodprod (mesmo que VPRODUTO na api produtos)
-                    const value = parseFloat(String(preco.npreco).replace(',', '.')) || 0;
-                    precoMap.set(key, value);
+                const produtosClasse3 = new Set();
+
+                precos.forEach(preco => {
+                    if (String(preco.VCodClas) === "1") {
+                        const key = String(preco.VCodprod).trim();
+                        precoMap.set(key, parseFloat(String(preco.npreco).replace(',', '.')) || 0);
+                        produtosClasse3.add(key); // só adicionamos classe 3
+                    }
                 });
 
-                const structuredGroups = groups.map((group) => {
-                    const productsForGroup = products
-                        .filter((p) => String(p.VCodGrfam) === String(group.VCodGrFam))
-                        .map((p, index) => {
-                            const id = p?.VPRODUTO ? String(p.VPRODUTO) : `product-${index}`;
-                            const name = p?.VDESC1?.trim() || 'Unnamed Product';
-                            const price = precoMap.get(String(p.VPRODUTO)) || 0;
-                            const iva = ivaMap.get(String(p.VCodIva)) || { percentage: 0, description: "IVA desconhecido" };
+                // Função auxiliar para verificar se o produto tem preço da classe 3
+                const isProdutoClasse3 = (produto) => {
+                    const id = String(produto.VPRODUTO || produto.VCodProd || produto.vCodigo).trim();
+                    return produtosClasse3.has(id);
+                };
 
-                            return {
-                                id,
-                                name,
-                                price,
-                                iva: iva.percentage,
-                                ivaDescription: iva.description,
-                            };
-                        });
+                // Função auxiliar para mapear um produto
+                const mapProduto = (produto) => {
+                    const id = String(produto.VPRODUTO || produto.VCodProd || produto.vCodigo).trim();
+                    const preco = precoMap.get(id) || 0;
+                    const iva = ivaMap.get(String(produto.VCodIva)) || { percentage: 0, description: "IVA desconhecido" };
+
+                    return {
+                        id,
+                        name: produto.VDESC1?.trim() || produto.VdescProd?.trim() || 'Unnamed Product',
+                        price: preco,
+                        iva: iva.percentage,
+                        ivaDescription: iva.description,
+                        VCodClas: 1, // classe 1 apenas
+                    };
+                };
+
+                const structuredGroups = groups.map(group => {
+                    const productsForGroup = products
+                        .filter(p => String(p.VCodGrfam) === String(group.VCodGrFam) && isProdutoClasse3(p))
+                        .map(mapProduto);
 
                     return {
                         id: String(group.VCodGrFam),
@@ -400,15 +460,10 @@ export default function ProductGroups() {
                     };
                 });
 
-                // Processa famílias
-                const structuredFamilies = families.map((family) => {
+                const structuredFamilies = families.map(family => {
                     const productsForFamily = products
-                        .filter((p) => String(p.VCodFam) === String(family.VCodFam))
-                        .map((p, index) => ({
-                            id: p?.VCodProd ? String(p.VCodProd) : `product-${index}`,
-                            name: p?.VDESC1?.trim() || 'Unnamed Product',
-
-                        }));
+                        .filter(p => String(p.VCodFam) === String(family.VCodFam) && isProdutoClasse3(p))
+                        .map(mapProduto);
 
                     return {
                         id: String(family.VCodFam),
@@ -417,14 +472,11 @@ export default function ProductGroups() {
                     };
                 });
 
-                // Subfamílias
-                const structuredSubfamilies = subfamilies.map((subfamily) => {
+                const structuredSubfamilies = subfamilies.map(subfamily => {
                     const productsForSubfamily = products
-                        .filter((p) => String(p.VCodSubFam) === String(subfamily.VCodSubFam))
-                        .map((p, index) => ({
-                            id: p?.VCodProd ? String(p.VCodProd) : `product-${index}`,
-                            name: p?.VDESC1?.trim() || 'Unnamed Product',
-                        }));
+                        .filter(p => String(p.VCodSubFam) === String(subfamily.VCodSubFam) && isProdutoClasse3(p))
+                        .map(mapProduto);
+
                     return {
                         id: String(subfamily.VCodSubFam),
                         name: subfamily.VDesc,
@@ -432,14 +484,12 @@ export default function ProductGroups() {
                     };
                 });
 
-
-                //classepreco
-                const structuredClassePrecos = classeprecos.map((classepreco) => {
+                const structuredClassePrecos = classeprecos.map(classepreco => {
                     const productsForClassepreco = products
-                        .filter((p) => String(p.Vcodi) === String(classepreco.Vcodi))
-                        .map((p, index) => ({
-                            id: p?.VCodProd ? String(p.VCodProd) : `product-${index}`,
-                            name: p?.VDESC1?.trim() || 'Unnamed Product',
+                        .filter(p => String(p.Vcodi) === String(classepreco.Vcodi) && isProdutoClasse3(p))
+                        .map(p => ({
+                            id: String(p.VCodProd),
+                            name: p.VDESC1?.trim() || 'Unnamed Product',
                         }));
 
                     return {
@@ -449,24 +499,23 @@ export default function ProductGroups() {
                     };
                 });
 
-                //preco
-                const structuredPrecos = precos.map((preco) => {
-                    const productsForPreco = products
-                        .filter((p) => String(p.vCodigo) == String(preco.vCodigo))
-                        .map((p, index) => ({
-                            id: p?.VCodProd ? String(p.VCodProd) : `product-${index}`,
-                            name: p?.VdescProd?.trim() || 'Unnamed Product',
-                            price: parseFloat(p?.npreco) || 0, // Garantir número, não string
-                        }));
+                const structuredPrecos = [...produtosClasse3].map((prodId) => {
+                    const produto = products.find(p => String(p.VCodProd || p.VPRODUTO || p.vCodigo).trim() === prodId);
+                    const preco = precoMap.get(prodId) || 0;
 
                     return {
-                        id: String(preco.vCodigo),
-                        name: preco.VdescProd,
-                        price: preco.npreco,
-                        products: productsForPreco,
+                        id: prodId,
+                        name: produto?.VDESC1?.trim() || produto?.VdescProd?.trim() || 'Unnamed Product',
+                        price: preco,
+                        products: [{
+                            id: prodId,
+                            name: produto?.VDESC1?.trim() || produto?.VdescProd?.trim() || 'Unnamed Product',
+                            price: preco,
+                        }],
                     };
                 });
 
+                // Atualiza os estados
                 setGroupsWithProducts(structuredGroups);
                 setFamiliesWithProducts(structuredFamilies);
                 setSubfamiliesWithProducts(structuredSubfamilies);
@@ -481,6 +530,8 @@ export default function ProductGroups() {
 
         fetchData();
     }, [propertyID]);
+
+
 
     // If the property is not confirmed, redirect to homepage
     useEffect(() => {
@@ -513,6 +564,42 @@ export default function ProductGroups() {
         }
     }, [status, isConfirmed]); // Fetch data again when the session or confirmation status changes
 
+    const fetchActiveTables = async () => {
+        const propertyID = localStorage.getItem('selectedProperty');
+
+        if (!propertyID) {
+            console.warn("Nenhuma propriedade encontrada no localStorage!");
+            return null;
+        }
+
+        try {
+            const response = await axios.get(`/api/mesas_produtos/get_mesas_em_uso`, {
+                headers: {
+                    'X-Property-ID': propertyID
+                }
+            });
+
+            console.log("Dados principais da API:", response.data);
+
+            // Armazena o array diretamente no estado
+            if (Array.isArray(response.data)) {
+                setMesasEmUso(response.data);
+            } else {
+                console.log("Resposta inesperada da API:", response.data);
+                setMesasEmUso([]);
+            }
+
+            return response;
+        } catch (error) {
+            console.error("Erro ao buscar detalhes da propriedade:", error);
+            setMesasEmUso([]); // limpa o estado em caso de erro
+            return null;
+        }
+    };
+
+    useEffect(() => {
+        fetchActiveTables();
+    }, []);
 
     if (status === "loading" || loading) {
         return <LoadingBackdrop open={true} />;
@@ -524,10 +611,9 @@ export default function ProductGroups() {
 
     const cardPaths2 = postos.map((posto, index) => ({
         label: posto.VDescricao,
-        value: 0, // Coloque aqui algum valor real se houver (como dashboardData[posto.VDescricao])
+        value: posto.Icodi,
         path: `/homepage/${posto.VPosto}`, // Ajuste conforme necessidade
     }));
-
 
 
     if (loading) {
@@ -573,12 +659,32 @@ export default function ProductGroups() {
         updateCartItems(updatedItems);
     };
 
-    function filterByName(items) {
-        if (!searchTerm) return items;
-        return items.filter(item =>
-            item.name.toLowerCase().includes(searchTerm.toLowerCase())
-        );
+    function filterByName(groups) {
+        if (!searchTerm.trim()) return groups;
+
+        const term = searchTerm.toLowerCase();
+
+        return groups
+            .map(group => {
+                const nameMatches = group.name?.toLowerCase().includes(term);
+                const filteredProducts = group.products.filter(
+                    product =>
+                        product?.name?.toLowerCase().includes(term) ||
+                        product?.VDESC1?.toLowerCase().includes(term)
+                );
+
+                if (nameMatches || filteredProducts.length > 0) {
+                    return {
+                        ...group,
+                        products: nameMatches ? group.products : filteredProducts,
+                    };
+                }
+
+                return null;
+            })
+            .filter(Boolean);
     }
+
 
     function toggleGroup(id) {
         setOpenGroupID(openGroupID === id ? null : id);
@@ -598,6 +704,7 @@ export default function ProductGroups() {
     const handleClientNumberSubmit = (clientNumber) => {
         if (clientNumber.trim() !== '') {
             console.log("Número de clientes:", clientNumber);
+            setClienteNumber(clientNumber);
             setShowModal(false);
             setSelectedTable(pendingTablePath); // aqui está o m.path original
             setPendingTablePath(null); // limpa depois de usar
@@ -607,7 +714,6 @@ export default function ProductGroups() {
     const handleCloseModal = () => {
         setShowModal(false);
     };
-
     return (
         <>
             {!selectedCardPath && !selectedRow && !selectedTable && (
@@ -700,41 +806,52 @@ export default function ProductGroups() {
                     </div>
 
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-6">
-                        {cardPaths3.map((m, index) => (
-                            <Card
-                                key={index}
-                                className="w-full h-40 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center cursor-pointer hover:bg-gray-100"
-                            >
-                                <CardBody className="flex flex-col items-center justify-center w-full h-full"
-                                    onClick={() => {
-                                        console.log('Selected table:', m.label);
-                                        setPendingTablePath(m.path);
-                                        setShowModal(true);
-                                    }}
+                        {cardPaths3.map((m, index) => {
+                            const mesaAtiva = mesasEmUso.find(mesa =>
+                                String(mesa.Posto) === String(m.Posto) &&
+                                Number(mesa.ID_sala) === Number(m.ID_sala) &&
+                                Number(mesa.ID_Mesa) === Number(m.ID_Mesa)
+                            );
+
+                            console.log("Mesa:", m.label, {
+                                mesaAtiva,
+                                mesaComparada: mesasEmUso.find(mesa => String(mesa.Posto) === String(m.Posto))
+                            });
+
+                            return (
+                                <Card
+                                    key={index}
+                                    className="w-full h-40 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center cursor-pointer hover:bg-gray-100"
                                 >
-                                    {/* imagem tabela */}
-                                    <div className="mb-2">
-                                        <img src="/icons/table_icon.png" alt="table icon" width={80} className="mx-auto" />
-                                    </div>
+                                    <CardBody className="flex flex-col items-center justify-center w-full h-full"
+                                        onClick={() => {
+                                            setPendingTablePath(m.path);
+                                            setShowModal(true);
+                                        }}
+                                    >
+                                        <div className="mb-2">
+                                            <img src="/icons/table_icon.png" alt="table icon" width={80} className="mx-auto" />
+                                        </div>
 
-                                    <p className="text-center text-sm text-[#191919]">
-                                        {m.label}
-                                    </p>
+                                        <p className="text-center text-sm text-[#191919]">{m.label}</p>
 
-                                    {getTotalForTable(m.path) > 0 && (
-                                        <span>Total: {getTotalForTable(m.path).toFixed(2)}€</span>
+                                        {mesaAtiva && (
+                                            <p className="text-sm text-green-600 font-semibold">mesa em uso</p>
+                                        )}
+
+                                        {getTotalForTable(m.path) > 0 && (
+                                            <span>Total: {getTotalForTable(m.path).toFixed(2)}€</span>
+                                        )}
+                                    </CardBody>
+
+                                    {getQuantityForTable(m.path) > 0 && (
+                                        <span className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 p-2 flex items-center justify-center">
+                                            {getQuantityForTable(m.path)} | <FaUser size={15} /> x {clientNumber}
+                                        </span>
                                     )}
-                                </CardBody>
-
-                                {/* Badge no canto superior direito */}
-                                {getQuantityForTable(m.path) > 0 && (
-                                    <span className="absolute top-2 right-2 bg-red-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                                        {getQuantityForTable(m.path)}
-                                    </span>
-                                )}
-
-                            </Card>
-                        ))}
+                                </Card>
+                            );
+                        })}
                     </div>
                 </>
             )
@@ -798,8 +915,18 @@ export default function ProductGroups() {
                         </div>
 
                         <div className="p-6 space-y-4">
-                            {viewType === 'groups' &&
-                                filterByName(groupsWithProducts).map(group => {
+
+                            {viewType === 'groups' && (() => {
+                                const filtered = filterByName(groupsWithProducts)
+                                    .filter(group => group.products && group.products.length > 0);
+                                if (filtered.length === 0) {
+                                    return (
+                                        <div className="text-center text-gray-500 py-8">
+                                            No groups or products found.
+                                        </div>
+                                    );
+                                }
+                                return filtered.map((group) => {
                                     const isOpen = openGroupID === group.id;
                                     return (
                                         <div key={group.id} className="rounded shadow-md overflow-hidden">
@@ -807,8 +934,12 @@ export default function ProductGroups() {
                                                 className="flex items-center justify-between py-3 px-4 bg-white cursor-pointer hover:bg-indigo-50 text-[#191919] transition-colors"
                                                 onClick={() => toggleGroup(group.id)}
                                             >
-                                                <div className="flex items-center text-lg font-semibold">{group.name}</div>
-                                                <div className="text-gray-500">{isOpen ? <ChevronDown size={18} /> : <ChevronRight size={18} />}</div>
+                                                <div className="flex items-center text-lg font-semibold uppercase">
+                                                    {group.name}
+                                                </div>
+                                                <div className="text-gray-500">
+                                                    {isOpen ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                                                </div>
                                             </div>
 
                                             {isOpen && (
@@ -816,8 +947,15 @@ export default function ProductGroups() {
                                                     <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB]">
                                                         <thead>
                                                             <tr className="bg-[#FC9D25] text-white">
-                                                                <th className="border border-[#EDEBEB] px-4 py-2 text-left">Product</th>
-                                                                <th className="border border-[#EDEBEB] px-4 py-2 text-left">Price</th>
+                                                                <th className="border border-[#EDEBEB] px-4 py-2 text-left">
+                                                                    Product
+                                                                </th>
+                                                                <th className="border border-[#EDEBEB] px-4 py-2 text-left">
+                                                                    Price
+                                                                </th>
+                                                                <th className="border border-[#EDEBEB] px-4 py-2 text-left">
+                                                                    VCodClas
+                                                                </th>
                                                             </tr>
                                                         </thead>
                                                         <tbody className="divide-y divide-gray-300">
@@ -830,15 +968,16 @@ export default function ProductGroups() {
                                                                         <span
                                                                             className="cursor-pointer hover:underline text-[#191919]"
                                                                             onClick={() => {
-                                                                                setSelectedProduct(product);
-                                                                                setCount(1); // caso use contador
+                                                                                setSelectedProduct(product); // abre modal
+                                                                                setCount(1); // resetar quantidade
                                                                             }}
                                                                         >
                                                                             {product.name}
                                                                         </span>
                                                                     </td>
+                                                                    <td className="border border-[#EDEBEB] px-3 py-2 text-right">{product.price.toFixed(2)} €</td>
                                                                     <td className="border border-[#EDEBEB] px-3 py-2 text-right">
-                                                                        {product.price.toFixed(2)} €
+                                                                        {product.VCodClas ?? '—'}
                                                                     </td>
                                                                 </tr>
                                                             ))}
@@ -848,69 +987,20 @@ export default function ProductGroups() {
                                             )}
                                         </div>
                                     );
-                                })}
+                                });
+                            })()}
 
-                            {viewType === 'groups' && filterByName(groupsWithProducts).map((group) => {
-                                const isOpen = openGroupID === group.id
-                                return (
-                                    <div key={group.id} className="rounded shadow-md overflow-hidden">
-                                        <div
-                                            className="flex items-center justify-between py-3 px-4 bg-white cursor-pointer hover:bg-indigo-50 text-[#191919] transition-colors"
-                                            onClick={() => toggleGroup(group.id)}
-                                        >
-                                            <div className="flex items-center text-lg font-semibold">
-                                                {group.name}
-                                            </div>
-                                            <div className="text-gray-500">
-                                                {isOpen ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
-                                            </div>
+                            {viewType === 'families' && (() => {
+                                const filtered = filterByName(familiesWithProducts)
+                                    .filter(family => family.products && family.products.length > 0);
+                                if (filtered.length === 0) {
+                                    return (
+                                        <div className="text-center text-gray-500 py-8">
+                                            No families or products found.
                                         </div>
-
-                                        {isOpen && (
-                                            <div className="overflow-x-auto bg-muted/40 transition-all duration-300 ease-in-out">
-                                                <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB]">
-                                                    <thead>
-                                                        <tr className="bg-[#FC9D25] text-white">
-                                                            <th className="border border-[#EDEBEB] px-4 py-2 text-left">
-                                                                Product
-                                                            </th>
-                                                            <th className="border border-[#EDEBEB] px-4 py-2 text-left">
-                                                                Price
-                                                            </th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody className="divide-y divide-gray-300">
-                                                        {group.products.map((product, index) => (
-                                                            <tr
-                                                                key={product.id || `product-${index}`}
-                                                                className="hover:bg-indigo-50 transition-colors"
-                                                            >
-                                                                <td className="border border-[#EDEBEB] px-4 py-2 text-gray-700">
-                                                                    <span
-                                                                        className="cursor-pointer hover:underline text-[#191919]"
-                                                                        onClick={() => {
-                                                                            setSelectedProduct(product); // abre modal
-                                                                            setCount(1); // resetar quantidade
-                                                                        }}
-
-                                                                    >
-                                                                        {product.name}
-                                                                    </span>
-                                                                </td>
-
-                                                                <td className="border border-[#EDEBEB] px-3 py-2 text-right">{product.price.toFixed(2)} €</td>
-                                                            </tr>
-                                                        ))}
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        )}
-                                    </div>
-                                )
-                            })}
-
-                            {viewType === 'families' &&
-                                filterByName(familiesWithProducts).map(family => {
+                                    );
+                                }
+                                return filtered.map(family => {
                                     const isOpen = openGroupID === family.id;
                                     return (
                                         <div key={family.id} className="rounded shadow-md overflow-hidden">
@@ -918,7 +1008,7 @@ export default function ProductGroups() {
                                                 className="flex items-center justify-between py-3 px-4 bg-white cursor-pointer hover:bg-indigo-50 text-[#191919] transition-colors"
                                                 onClick={() => toggleGroup(family.id)}
                                             >
-                                                <div className="flex items-center text-lg font-semibold">{family.name}</div>
+                                                <div className="flex items-center text-lg font-semibold uppercase">{family.name}</div>
                                                 <div className="text-gray-500">{isOpen ? <ChevronDown size={18} /> : <ChevronRight size={18} />}</div>
                                             </div>
 
@@ -929,6 +1019,7 @@ export default function ProductGroups() {
                                                             <tr className="bg-[#FC9D25] text-white">
                                                                 <th className="border border-[#EDEBEB] px-4 py-2 text-left">Product</th>
                                                                 <th className="border border-[#EDEBEB] px-4 py-2 text-right">Price</th>
+                                                                <th className="border border-[#EDEBEB] px-4 py-2 text-left">VCodClas</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody className="divide-y divide-gray-300">
@@ -945,10 +1036,11 @@ export default function ProductGroups() {
                                                                             {product.name}
                                                                         </span>
                                                                     </td>
-                                                                    <td className="border border-[#EDEBEB] px-4 py-2 text-right">
-                                                                        {product?.price != null && !isNaN(product.price)
-                                                                            ? `${Number(product.price).toFixed(2)} €`
-                                                                            : '—'}
+                                                                    <td className="border border-[#EDEBEB] px-3 py-2 text-right">
+                                                                        {typeof product.price === 'number' ? product.price.toFixed(2) + ' €' : '—'}
+                                                                    </td>
+                                                                    <td className="border border-[#EDEBEB] px-3 py-2 text-right">
+                                                                        {product.VCodClas ?? '—'}
                                                                     </td>
                                                                 </tr>
                                                             ))}
@@ -958,10 +1050,20 @@ export default function ProductGroups() {
                                             )}
                                         </div>
                                     );
-                                })}
+                                });
+                            })()}
 
-                            {viewType === 'subfamilies' &&
-                                filterByName(subfamiliesWithProducts).map(sub => {
+                            {viewType === 'subfamilies' && (() => {
+                                const filtered = filterByName(subfamiliesWithProducts)
+                                    .filter(sub => sub.products && sub.products.length > 0);
+                                if (filtered.length === 0) {
+                                    return (
+                                        <div className="text-center text-gray-500 py-8">
+                                            No subfamilies or products found.
+                                        </div>
+                                    );
+                                }
+                                return filtered.map(sub => {
                                     const isOpen = openGroupID === sub.id;
                                     return (
                                         <div key={sub.id} className="rounded shadow-md overflow-hidden">
@@ -969,7 +1071,7 @@ export default function ProductGroups() {
                                                 className="flex items-center justify-between py-3 px-4 bg-white cursor-pointer hover:bg-indigo-50 text-[#191919] transition-colors"
                                                 onClick={() => toggleGroup(sub.id)}
                                             >
-                                                <div className="flex items-center text-lg font-semibold">{sub.name}</div>
+                                                <div className="flex items-center text-lg font-semibold uppercase">{sub.name}</div>
                                                 <div className="text-gray-500">{isOpen ? <ChevronDown size={18} /> : <ChevronRight size={18} />}</div>
                                             </div>
 
@@ -980,6 +1082,9 @@ export default function ProductGroups() {
                                                             <tr className="bg-[#FC9D25] text-white">
                                                                 <th className="border border-[#EDEBEB] px-4 py-2 text-left">Product</th>
                                                                 <th className="border border-[#EDEBEB] px-4 py-2 text-right">Price</th>
+                                                                <th className="border border-[#EDEBEB] px-4 py-2 text-left">
+                                                                    VCodClas
+                                                                </th>
                                                             </tr>
                                                         </thead>
                                                         <tbody className="divide-y divide-gray-300">
@@ -1001,6 +1106,9 @@ export default function ProductGroups() {
                                                                             ? `${Number(product.price).toFixed(2)} €`
                                                                             : '—'}
                                                                     </td>
+                                                                    <td className="border border-[#EDEBEB] px-3 py-2 text-right">
+                                                                        {product.VCodClas ?? '—'}
+                                                                    </td>
                                                                 </tr>
                                                             ))}
                                                         </tbody>
@@ -1009,7 +1117,8 @@ export default function ProductGroups() {
                                             )}
                                         </div>
                                     );
-                                })}
+                                });
+                            })()}
                         </div>
 
                         {selectedProduct && (

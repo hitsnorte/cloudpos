@@ -17,6 +17,7 @@ import { MdPointOfSale } from "react-icons/md";
 function SidebarItem({ icon, text, submenu }) {
     const { expanded } = useContext(SidebarContext);
     const [open, setOpen] = useState(false);
+    const [cexp, setCexp] = useState("");
 
     return (
         <li className="relative">
@@ -54,7 +55,7 @@ function SidebarSubItem({ href, text, icon, expanded }) {
 
 export default function SidebarMenu() {
     const { data: session } = useSession();
-    const { expanded, isMobile } = useContext(SidebarContext); // ✅ Pulling isMobile from context
+    const { expanded, isMobile } = useContext(SidebarContext);
 
     const [selectedProperty, setSelectedProperty] = useState(() => localStorage.getItem("selectedProperty") || "");
     const [tempSelectedProperty, setTempSelectedProperty] = useState(null);
@@ -92,7 +93,7 @@ export default function SidebarMenu() {
             icon: <TiShoppingCart size={20} />,
             submenu: [
                 { href: "/homepage/Cart", text: "Cart", icon: <TiShoppingCart size={18} /> },
-                { href: "/homepage/Pos", text: "POS", icon: <MdPointOfSale  size={18} /> },
+                { href: "/homepage/Pos/outlets", text: "POS", icon: <MdPointOfSale  size={18} /> },
             ],
 
         },
@@ -140,7 +141,7 @@ export default function SidebarMenu() {
             className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-[#FC9D25]"
         >
             <option value="" >
-                Select a property
+                Select exploration ctr.
             </option>
             {properties.map((property) => (
                 <option key={property.id} value={property.id}>
@@ -184,15 +185,21 @@ export default function SidebarMenu() {
 
             {(session && selectedProperty && isConfirmed) ? (
                 <>
-                    {Object.entries(menuItems).map(([key, value]) => (
-                        <SidebarItem key={key} text={key} icon={value.icon} submenu={value.submenu} />
-                    ))}
-                    {isMobile && Object.entries(shoppingCartItems).map(([key, value]) => (
-                        <SidebarItem key={key} text={key} icon={value.icon} submenu={value.submenu} />
-                    ))}
+                    {Object.entries(menuItems).map(([key, value]) => {
+                        // Show only "Shopping" on mobile, and everything on desktop
+                        if (isMobile && key !== "Shopping") return null;
+                        return (
+                            <SidebarItem
+                                key={key}
+                                text={key}
+                                icon={value.icon}
+                                submenu={value.submenu}
+                            />
+                        );
+                    })}
                 </>
             ) : (
-                <p className="mt-4 text-gray-500 text-center">Select a property to continue...</p>
+                <p className="mt-4 text-gray-500 text-center">Select exploration center to continue...</p>
             )}
         </div>
     );

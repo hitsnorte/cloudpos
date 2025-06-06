@@ -1,8 +1,16 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Backdrop from '@mui/material/Backdrop';
 
 const LoadingBackdrop = ({ open }) => {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    // Evita renderizar até o componente estar montado no cliente
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) return null;
 
   return (
     <Backdrop

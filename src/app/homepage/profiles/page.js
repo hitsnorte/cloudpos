@@ -46,6 +46,7 @@ const ProfilesTable = () => {
     const [passwordError, setPasswordError] = useState('');
     const [showPasswordFields, setShowPasswordFields] = useState(false);
 
+
     const totalPages = Math.ceil(profiles.length / itemsPerPage);
 
     // Fetch profiles and properties as before
@@ -53,7 +54,9 @@ const ProfilesTable = () => {
         try {
             const response = await fetch('/api/user');
             const data = await response.json();
-            setProfiles(data.users || data);
+
+            const users = Array.isArray(data) ? data : data.users;
+            setProfiles(users || []);
         } catch (error) {
             console.error("Error fetching profiles:", error);
         }
@@ -73,6 +76,8 @@ const ProfilesTable = () => {
         fetchProfiles();
         fetchProperties();
     }, []);
+
+
 
     const handleInputChange = (e) => {
         setNewProfile({
@@ -102,13 +107,31 @@ const ProfilesTable = () => {
     const handleSubmitProfile = async (e) => {
         e.preventDefault();
 
-        // Check if the new password and confirm password match
-        if (showPasswordFields && newPassword !== confirmPassword) {
-            setPasswordError('Passwords do not match');
+        // 1. Confirma password & modo (criar / editar)
+        const isCreating = !currentProfile;
+
+        if (isCreating && !newProfile.password) {
+            alert("Define uma palavra-passe para o novo utilizador.");
             return;
         }
 
+        if (!isCreating && showPasswordFields && newPassword !== confirmPassword) {
+            setPasswordError("Passwords do not match");
+            return;
+        }
+
+        // 2. Garante arrays válidos
+        const ids = Array.isArray(newProfile.propertyIDs) ? newProfile.propertyIDs : [];
+        const tags = Array.isArray(newProfile.propertyTags) ? newProfile.propertyTags : [];
+
+        if (ids.length === 0 || tags.length === 0 || ids.length !== tags.length) {
+            alert("É obrigatório indicar pelo menos uma propriedade e respectiva tag.");
+            return;
+        }
+
+        // 3. Monta o payload
         const updatedProfile = {
+<<<<<<< HEAD
             firstName: newProfile.firstName,
             secondName: newProfile.secondName,
             email: newProfile.email,
@@ -118,38 +141,48 @@ const ProfilesTable = () => {
             propertyTags: newProfile.propertyTags, // <-- ADICIONAR ISTO
         };
 
+=======
+            firstName: newProfile.firstName?.trim(),
+            secondName: newProfile.secondName?.trim(),
+            email: newProfile.email?.trim(),
+            password: isCreating
+                ? newProfile.password
+                : (showPasswordFields ? newPassword : undefined),
+            currentPassword: isCreating ? undefined : currentPassword,
+            propertyIDs: ids,
+            propertyTags: tags,
+        };
+
+        // 4. Mostra no console p/ debug
+        // console.log("Enviado para API:", updatedProfile);
+>>>>>>> 2f52f11a9741481db3d52f3a5a7481a34ab47bb2
 
         try {
-            if (currentProfile) {
-                // If editing an existing profile, make a PUT request
-                const response = await fetch(`/api/user/${currentProfile.userID}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
+            const response = await fetch(
+                isCreating ? "/api/user" : `/api/user/${currentProfile.userID}`,
+                {
+                    method: isCreating ? "POST" : "PUT",
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(updatedProfile),
-                });
+                }
+            );
 
-                if (!response.ok) throw new Error("Failed to edit profile");
-
-                onCloseEditProfileModal();
-            } else {
-                // If adding a new profile, make a POST request
-                const response = await fetch('/api/user', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(updatedProfile),
-                });
-
-                if (!response.ok) throw new Error("Failed to add profile");
-
-                onCloseAddProfileModal();
+            if (!response.ok) {
+                const { error } = await response.json();
+                throw new Error(error || "Erro no servidor");
             }
 
-            fetchProfiles(); // Refresh profile list after submitting
+            await fetchProfiles(); // Atualiza a lista no frontend
+
+            setTimeout(() => {
+                isCreating ? onCloseAddProfileModal() : onCloseEditProfileModal();
+            }, 200);
         } catch (error) {
             console.error("Error with profile:", error);
             alert(error.message);
         }
     };
+
 
 
     const openEditModal = (profile) => {

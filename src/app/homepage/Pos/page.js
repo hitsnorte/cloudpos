@@ -256,13 +256,23 @@ const cardPaths3 = useMemo(() => {
                     fetchPostossalas()
                 ]);
 
-                const enrichedPostos = postos.map(posto => {
-                    const relacoes = postosSalas.filter(ps => ps.Posto === posto.Icodi.toString());
+                console.log("Postos:", postos);
+                console.log("Salas:", salas);
+                console.log("PostosSalas:", postosSalas);
+
+                const postosFiltrados = postos; // <- usar todos os postos
+                console.log("Postos com trabalhaComSalas === true:", postosFiltrados);
+
+                const enrichedPostos = postosFiltrados.map(posto => {
+                    const relacoes = postosSalas.filter(ps => Number(ps.Posto) === posto.Icodi);
+                    console.log(`Relações para posto ${posto.Icodi}:`, relacoes);
 
                     const salasRelacionadas = relacoes
                         .sort((a, b) => a.Ordem - b.Ordem)
                         .map(relacao => salas.find(s => s.ID_SALA === relacao.ID_Sala))
                         .filter(Boolean);
+
+                    console.log(`Salas para posto ${posto.Icodi}:`, salasRelacionadas);
 
                     return {
                         ...posto,
@@ -270,6 +280,7 @@ const cardPaths3 = useMemo(() => {
                     };
                 });
 
+                console.log("Postos enriquecidos:", enrichedPostos);
                 setPostosComSalas(enrichedPostos);
             } catch (err) {
                 console.error("Erro ao carregar dados:", err);
@@ -279,6 +290,9 @@ const cardPaths3 = useMemo(() => {
 
         loadPostosWithSalas();
     }, []);
+
+
+
 
     useEffect(() => {
         const loadMesasWithSalas = async () => {
@@ -531,8 +545,6 @@ const cardPaths3 = useMemo(() => {
         fetchData();
     }, [propertyID]);
 
-
-
     // If the property is not confirmed, redirect to homepage
     useEffect(() => {
         if (!isConfirmed) {
@@ -597,9 +609,7 @@ const cardPaths3 = useMemo(() => {
         }
     };
 
-    useEffect(() => {
-        fetchActiveTables();
-    }, []);
+    
 
     if (status === "loading" || loading) {
         return <LoadingBackdrop open={true} />;

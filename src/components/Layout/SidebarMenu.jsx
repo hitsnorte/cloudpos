@@ -19,6 +19,7 @@ function SidebarItem({ icon, text, submenu }) {
     const [open, setOpen] = useState(false);
     const [cexp, setCexp] = useState("");
 
+
     return (
         <li className="relative">
             <div
@@ -63,31 +64,31 @@ export default function SidebarMenu() {
     const [properties, setProperties] = useState([]);
 
     const menuItems = {
-           "Store Settings": {
-      icon: <LuFolderCog  size={20} />, 
-      submenu: [
-        { href: "/", text: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> }, 
-        { href: "/homepage/grupos", text: "Groups", icon: <FaLayerGroup  size={18} /> }, 
-        { href: "/homepage/family", text: "Families", icon: <MdFamilyRestroom size={18} /> },
-        { href: "/homepage/subfamilia", text: "SubFamilies", icon: <GiFamilyTree size={18} /> },
-        { href: "/homepage/product", text: "Products", icon: <FaProductHunt size={18} /> },
-        { href: "/homepage/Iva", text: "VAT", icon: <IoPricetags size={18} /> },
-        { href: "/homepage/unit", text: "Unit", icon: <FaUnity  size={18} /> },
-            ], 
+        "Store Settings": {
+            icon: <LuFolderCog  size={20} />,
+            submenu: [
+                { href: "/", text: "Dashboard", icon: <TbLayoutDashboardFilled size={18} /> },
+                { href: "/homepage/grupos", text: "Groups", icon: <FaLayerGroup  size={18} /> },
+                { href: "/homepage/family", text: "Families", icon: <MdFamilyRestroom size={18} /> },
+                { href: "/homepage/subfamilia", text: "SubFamilies", icon: <GiFamilyTree size={18} /> },
+                { href: "/homepage/product", text: "Products", icon: <FaProductHunt size={18} /> },
+                { href: "/homepage/Iva", text: "VAT", icon: <IoPricetags size={18} /> },
+                { href: "/homepage/unit", text: "Unit", icon: <FaUnity  size={18} /> },
+            ],
 
         },
 
-    
-      "Store Price": {
-      icon: <LuFolderCog  size={20} />, 
-      submenu: [
-        { href: "/homepage/classepreco", text: "Price classes", icon: <MdClass  size={18} /> }, 
-        { href: "/homepage/season", text: "Seasons", icon: <CiViewTimeline  size={18} /> }, 
-        // { ref: "/homepage/exploration center", label: "exploration center", icon: <MdFamilyRestroom size={18} /> },
-        { href: "/homepage/hour", text: "Hours", icon: <FaHourglassEnd size={18} /> },
-            ], 
-      },
-    
+
+        "Store Price": {
+            icon: <LuFolderCog  size={20} />,
+            submenu: [
+                { href: "/homepage/classepreco", text: "Price classes", icon: <MdClass  size={18} /> },
+                { href: "/homepage/season", text: "Seasons", icon: <CiViewTimeline  size={18} /> },
+                // { ref: "/homepage/exploration center", label: "exploration center", icon: <MdFamilyRestroom size={18} /> },
+                { href: "/homepage/hour", text: "Hours", icon: <FaHourglassEnd size={18} /> },
+            ],
+        },
+
 
         "Shopping": {
             icon: <TiShoppingCart size={20} />,
@@ -126,29 +127,29 @@ export default function SidebarMenu() {
     return (
         <div className="p-3">
             <select
-            id="selectProperty"
-            value={tempSelectedProperty || ""}
-            onChange={(e) => {
-                const newPropertyID = e.target.value;
+                id="selectProperty"
+                value={tempSelectedProperty || ""}
+                onChange={(e) => {
+                    const newPropertyID = e.target.value;
 
-                if (newPropertyID !== selectedProperty) {
-                    setIsConfirmed(false);
-                }
+                    if (newPropertyID !== selectedProperty) {
+                        setIsConfirmed(false);
+                    }
 
-                setTempSelectedProperty(newPropertyID);
-            }}
-            required
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-[#FC9D25]"
-        >
-            <option value="" >
-                Select exploration ctr.
-            </option>
-            {properties.map((property) => (
-                <option key={property.id} value={property.id}>
-                    {property.name}
+                    setTempSelectedProperty(newPropertyID);
+                }}
+                required
+                className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-[#FC9D25]"
+            >
+                <option value="" >
+                    Select exploration ctr.
                 </option>
-            ))}
-        </select>
+                {properties.map((property) => (
+                    <option key={property.id} value={property.id}>
+                        {property.name}
+                    </option>
+                ))}
+            </select>
 
 
 
@@ -186,8 +187,8 @@ export default function SidebarMenu() {
             {(session && selectedProperty && isConfirmed) ? (
                 <>
                     {Object.entries(menuItems).map(([key, value]) => {
-                        // Show only "Shopping" on mobile, and everything on desktop
-                        if (isMobile && key !== "Shopping") return null;
+                        const isHiddenOnMobile = ["Store Settings", "Store Price"].includes(key);
+                        if (isMobile && isHiddenOnMobile) return null;
                         return (
                             <SidebarItem
                                 key={key}

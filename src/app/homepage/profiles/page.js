@@ -131,17 +131,6 @@ const ProfilesTable = () => {
 
         // 3. Monta o payload
         const updatedProfile = {
-<<<<<<< HEAD
-            firstName: newProfile.firstName,
-            secondName: newProfile.secondName,
-            email: newProfile.email,
-            password: showPasswordFields ? newPassword : undefined,
-            currentPassword: currentPassword,
-            propertyIDs: newProfile.propertyIDs,
-            propertyTags: newProfile.propertyTags, // <-- ADICIONAR ISTO
-        };
-
-=======
             firstName: newProfile.firstName?.trim(),
             secondName: newProfile.secondName?.trim(),
             email: newProfile.email?.trim(),
@@ -155,7 +144,6 @@ const ProfilesTable = () => {
 
         // 4. Mostra no console p/ debug
         // console.log("Enviado para API:", updatedProfile);
->>>>>>> 2f52f11a9741481db3d52f3a5a7481a34ab47bb2
 
         try {
             const response = await fetch(

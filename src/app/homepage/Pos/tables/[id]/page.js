@@ -73,10 +73,25 @@ export default function Tables() {
         }
     };
 
+    const handleBack = () => {
+        const postoId = localStorage.getItem("postoId");
+        if (postoId) {
+            router.push(`/homepage/Pos/rooms/${postoId}`);
+        } else {
+            router.back(); // fallback
+        }
+    };
     return (
         <>
-            <h1 className="text-3xl font-semibold">Tables</h1>
-
+            <div className="flex items-center px-6 mt-4 mb-2">
+                <button
+                    onClick={handleBack}
+                    className="px-3 -ml-2 py-1 bg-[#FC9D25] text-white rounded hover:bg-gray-300 transition"
+                >
+                    ← Rooms
+                </button>
+                <h1 className="text-3xl font-semibold ml-3">Tables</h1>
+            </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-6">
                 {tables.map((table, index) => (
                     <div

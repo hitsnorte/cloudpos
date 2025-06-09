@@ -9,17 +9,16 @@ export default function CustomPagination({
   setPage,
   children,
 }) {
-  // Helper to disable prev/next at edges
   const isFirst = page === 1;
   const isLast = page === pages || pages === 0;
 
   return (
     <>
       <div className="w-full bg-[#EDEBEB] border-t border-[#DADADA] flex justify-end items-center px-10 py-4 fixed bottom-0 left-0 z-10">
-        <span className="text-sm text-default-600 mr-3">Itens por página</span>
+        <span className="text-sm text-default-600 mr-3">Items per page:</span>
         <select
           value={rowsPerPage}
-          onChange={handleChangeRowsPerPage}
+          onChange={handleChangeRowsPerPage} // Pass the event directly
           className="py-2 px-4 rounded bg-transparent text-sm text-default-600 mr-10 border border-[#EDEBEB] focus:ring-2 focus:ring-[#FC9D25] focus:outline-none min-w-[60px]"
           style={{ fontSize: "1rem" }}
         >

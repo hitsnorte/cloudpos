@@ -1,411 +1,214 @@
-'use client'; // Necessário para componentes client-side no App Router
+'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from "react";
 import { HiDotsVertical } from "react-icons/hi";
+import { FaSearch } from "react-icons/fa";
 import { FaGear } from "react-icons/fa6";
 import { Plus } from "lucide-react";
-import { HiAdjustmentsHorizontal } from "react-icons/hi2";
-import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
-import { FaMagnifyingGlass } from "react-icons/fa6";
-import { fetchGrup, createGrup, deleteGrup, updateGrupt } from '@/src/lib/apigroup';
 import {
+  Button,
   Modal,
   ModalContent,
   ModalHeader,
   ModalBody,
   ModalFooter,
-  useDisclosure,
-  Spinner,
-} from '@nextui-org/react';
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@heroui/react";
-
-const PAGE_SIZES = [25, 50, 150, 250];
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem
+} from "@nextui-org/react";
+import CustomPagination from "@/src/components/table/page";
 
 const DataGrupo = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [editIsOpen, setEditIsOpen] = useState(false);
+
   const [groups, setGroups] = useState([]);
-  const [sortField, setSortField] = useState('id');
-  const [sortOrder, setSortOrder] = useState('asc');
-  const [error, setError] = useState(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [newGroup, setNewGroup] = useState({ group_name: '' });
-  const [editGroup, setEditGroup] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [groupToDelete, setGroupToDelete] = useState(null);
+  const [selectedGroup, setSelectedGroup] = useState(null);
 
+  const [newGroup, setNewGroup] = useState({ group_name: "" });
 
+  const [loading, setLoading] = useState(false);
 
-  const [itemsPerPage, setItemsPerPage] = useState(50);
+  const [itemsPerPage, setItemsPerPage] = useState(15);
   const [currentPage, setCurrentPage] = useState(1);
-
-  const [sortConfig, setSortConfig] = useState({ key: 'VDesc', direction: 'asc' });
-
-  const {
-    isOpen: isAddModalOpen,
-    onOpen: onAddModalOpen,
-    onClose: onAddModalClose,
-  } = useDisclosure();
-  const {
-    isOpen: isEditModalOpen,
-    onOpen: onEditModalOpen,
-    onClose: onEditModalClose,
-  } = useDisclosure();
-  const {
-    isOpen: isDeleteModalOpen,
-    onOpen: onDeleteModalOpen,
-    onClose: onDeleteModalClose,
-  } = useDisclosure();
-  const {
-    isOpen: isSelectModalOpen,
-    onOpen: onSelectModalOpen,
-    onClose: onSelectModalClose,
-  } = useDisclosure();
-
-  const loadColumnVisibility = () => {
-    const savedVisibility = localStorage.getItem('columnVisibility');
-    if (savedVisibility) {
-      return JSON.parse(savedVisibility);
-    }
-    return {
-      codGrp: true, // estado padrão
-      description: true,
-      createdIn: true,
-    };
-  };
-
-  const saveColumnVisibility = () => {
-    localStorage.setItem('columnVisibility', JSON.stringify(columnVisibility));
-  };
-
-  const toggleColumn = (column) => {
-    setColumnVisibility((prev) => {
-      const newVisibility = { ...prev, [column]: !prev[column] };
-      localStorage.setItem('columnVisibility', JSON.stringify(newVisibility)); // Atualiza no localStorage
-      return newVisibility;
-    });
-  };
-
-  // Agora você pode usar a loadColumnVisibility ao inicializar o state
-  const [columnVisibility, setColumnVisibility] = useState(loadColumnVisibility());
-
-  const filteredGroups = groups.filter((group) =>
-    Object.values(group).some((value) =>
-      String(value).toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
-
-
-
-  const columns = [
-    { key: 'codGrp', label: 'Cod Grp' },
-    { key: 'description', label: 'Description' },
-    { key: 'createdIn', label: 'Created In' },
-  ];
-
-  const [columnSearchTerm, setColumnSearchTerm] = useState('');
-
-  const filteredColumns = columns.filter((col) =>
-    col.label.toLowerCase().includes(columnSearchTerm.toLowerCase())
-  );
-
-  const totalPages = Math.ceil(filteredGroups.length / itemsPerPage);
-
-  const paginatedGroups = filteredGroups.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
-  const sortedGroups = useMemo(() => {
-    if (!paginatedGroups || !Array.isArray(paginatedGroups)) return [];
-
-    const sorted = [...paginatedGroups].sort((a, b) => {
-      if (!sortConfig.key) return 0;
-
-      let aValue = a[sortConfig.key];
-      let bValue = b[sortConfig.key];
-
-      if (sortConfig.key === 'DCriadoEm') {
-        aValue = new Date(aValue);
-        bValue = new Date(bValue);
-      } else {
-        aValue = aValue?.toString().toLowerCase();
-        bValue = bValue?.toString().toLowerCase();
-      }
-
-      if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
-      if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
-      return 0;
-    });
-
-    return sorted;
-  }, [paginatedGroups, sortConfig]);
-
-
-
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchInput, setSearchInput] = useState('');
 
   useEffect(() => {
-    loadGroups();
+    fetchGroups();
   }, []);
 
-  const loadGroups = async () => {
+  const fetchGroups = async () => {
     try {
-      const grupos = await fetchGrup();
-      setGroups(grupos);
-    } catch (err) {
-      setError(err.message);
+      const res = await fetch("/api/get_groups");
+      if (!res.ok) throw new Error("Failed to fetch groups");
+      const data = await res.json();
+      const sortedGroups = data.sort((a, b) => a.group_name.localeCompare(b.group_name));
+      setGroups(sortedGroups);
+    } catch (error) {
+      console.error("Error fetching groups:", error);
     }
   };
 
-  const handleSort = (key) => {
-    setSortConfig((prevConfig) => ({
-      key,
-      direction: prevConfig.key === key && prevConfig.direction === 'asc' ? 'desc' : 'asc',
-    }));
+  const onOpen = () => setIsOpen(true);
+  const onClose = () => setIsOpen(false);
+
+  const onEditOpen = (group) => {
+    setSelectedGroup(group);
+    setEditIsOpen(true);
   };
 
-
-  // const filteredGroups = groups.filter((group) => {
-  //   const searchLower = searchTerm.toLowerCase();
-  //   return (
-  //     group.id.toString().includes(searchLower) ||
-  //     group.group_name.toString().toLowerCase().includes(searchLower)
-  //   );
-  // });
+  const onEditClose = () => {
+    setSelectedGroup(null);
+    setEditIsOpen(false);
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewGroup((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleEditInputChange = (e) => {
+    const { name, value } = e.target;
+    setSelectedGroup((prev) => ({ ...prev, [name]: value }));
+  };
+
   const handleAddGroup = async (e) => {
     e.preventDefault();
-    if (!newGroup.group_name) {
-      setError('Preencha o nome do grupo.');
-      return;
-    }
+    setLoading(true);
+    try {
+      const res = await fetch("/api/get_groups", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ group_name_api: newGroup.group_name }), // Use group_name_api
+      });
 
-    const groupExists = groups.some(
-      (group) => group.group_name.toLowerCase() === newGroup.group_name.toLowerCase()
-    );
-    if (groupExists) {
-      setError('Este grupo já existe. Por favor, use um nome diferente.');
-      return;
+      if (!res.ok) throw new Error("Failed to add group");
+
+      await fetchGroups();
+      setNewGroup({ group_name: "" });
+      onClose();
+    } catch (error) {
+      console.error("Error adding group:", error);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const handleEditGroup = async (e) => {
+    e.preventDefault();
+    setLoading(true);
 
     try {
-      setIsLoading(true);
-      const groupData = { group_name: newGroup.group_name };
-      const createdGroup = await createGrup(groupData);
-      setGroups([...groups, createdGroup]);
-      setNewGroup({ group_name: '' });
-      setError(null); // Limpa o erro após sucesso
-      onAddModalClose();
-    } catch (err) {
-      setError(err.message);
+      const res = await fetch(`/api/get_groups/${selectedGroup.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          group_name: selectedGroup.group_name
+        }),
+      });
+
+      if (!res.ok) throw new Error("Failed to update group");
+
+      await fetchGroups();
+      onEditClose();
+    } catch (error) {
+      console.error("Error updating group:", error);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const handleDeleteGroup = async () => {
-    if (groupToDelete) {
-      setIsLoading(true);
-      try {
-        await deleteGrup(groupToDelete);
-        setGroups(groups.filter((group) => group.id !== groupToDelete));
-        setGroupToDelete(null);
-        onDeleteModalClose();
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
-      }
-    }
+  const handleCloseModal = () => {
+    setNewGroup({ group_name: "" });
+    onClose();
   };
 
-  const handleEditGroup = (group) => {
-    setEditGroup({ ...group });
-    onEditModalOpen();
-  };
+  const filteredGroups = groups.filter((group) => {
+    const search = searchTerm.toLowerCase();
+    return (
+      (group.id && String(group.id).toLowerCase().includes(search)) ||
+      (group.group_name && group.group_name.toLowerCase().includes(search))
+    );
+  });
 
-  const handleUpdateGroup = (id, newDesc) => {
-    setGroups(prevGroups => {
-      return prevGroups.map(group =>
-        group.VCodGrFam === id ? { ...group, VDesc: newDesc } : group
-      );
-    });
-    console.log(`Grupo ${id} atualizado para: ${newDesc}`);
-  };
+  const paginatedGroups = filteredGroups.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
-
+  const totalPages = Math.ceil(filteredGroups.length / itemsPerPage);
 
   return (
     <div className="p-4">
-      <div className="w-full">
-        {/* Campo de pesquisa */}
-        <div className="mb-4 relative">
-          <FaMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
-          <input
-            type="text"
-            placeholder="Pesquisar..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
-          />
+      {/* Header with Search and Add */}
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold">All Groups</h2>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onOpen}
+            className="bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded"
+          >
+            <Plus size={25} />
+          </button>
         </div>
       </div>
 
-      {/* button add*/}
-      <Dropdown>
-        <DropdownTrigger>
-          <button
-            onClick={onAddModalOpen}
-            className="absolute top-4 right-25 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
-            < Plus size={25} />
-          </button>
-        </DropdownTrigger>
-      </Dropdown>
+      {/* SearchBar */}
+      <div className="flex mb-4 items-center gap-2">
+        <input
+          type="text"
+          placeholder="Search by ID or Group Name..."
+          value={searchInput}
+          onChange={(e) => {
+            setSearchInput(e.target.value);
+            setSearchTerm(e.target.value);
+            setCurrentPage(1);
+          }}
+          className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-[#FC9D25]"
+        />
+      </div>
 
-      {/* button adjustments*/}
-      <Dropdown>
-        <DropdownTrigger>
-          <button
-            onClick={onSelectModalOpen}
-            className="absolute top-4 right-10 bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
-            <HiAdjustmentsHorizontal size={25} />
-          </button>
-        </DropdownTrigger>
-      </Dropdown>
-
-
-
-
-      {/* Modal para adjustments do grupo */}
-      <Modal
-        isOpen={isSelectModalOpen}
-        onOpenChange={onSelectModalClose}
-        size="sm"
-        placement="center"
-        className="w-100 bg-white shadow-xl rounded-lg"
-        hideCloseButton={true}
-      >
-
+      {/* Add Group Modal */}
+      <Modal isOpen={isOpen} onOpenChange={onClose} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="rounded bg-[#FC9D25] flex justify-between items-center">
-                <div className="text-xl font-bold text-white">Select Column</div>
-                <Button
-                  onClick={onClose}
-                  className="text-white bg-transparent border-0 text-2xl p-0"
-                  aria-label="Close"
-                >
-                  &times; {/* Unicode for "×" sign */}
-                </Button>
-              </ModalHeader>
-              <ModalBody className="py-5 px-6">
-                <div className="w-88">
-                  {/* Campo de pesquisa  */}
-                  <div className="mb-4 relative">
-                    <FaMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
-                    <input
-                      type="text"
-                      placeholder="Pesquisar..."
-                      value={columnSearchTerm}
-                      onChange={(e) => setColumnSearchTerm(e.target.value)}
-                      className="w-full max-w-md pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
-                    />
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  {filteredColumns.map((col) => (
-                    <div key={col.key} className="flex items-center rounded border border-black p-1">
-                      <input
-                        type="checkbox"
-                        checked={columnVisibility[col.key]}
-                        onChange={() => toggleColumn(col.key)}
-                        className="mr-2"
-                      />
-                      <label className="text-sm">{col.label}</label>
-                    </div>
-                  ))}
-                </div>
-              </ModalBody>
-
-              <ModalFooter className="w-102 border-t border-gray-200 pt-2 px-8">
-                <Button
-                  type="submit"
-                  form="selectGroupForm"
-                  className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
-                  disabled={isLoading}
-                  onClick={() => {
-                    saveColumnVisibility(); // Salvar as configurações
-                    window.location.reload(); // Recarregar a página
-                  }}
-                >
-                  {isLoading ? <Spinner size="sm" color="white" /> : 'Save'}
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
-
-      {/* Modal para adicionar grupo */}
-      <Modal
-        isOpen={isAddModalOpen}
-        onOpenChange={onAddModalClose}
-        size="md"
-        placement="center"
-        className="w-100 bg-white shadow-xl rounded-lg"
-        hideCloseButton={true}
-      >
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader className="rounded bg-[#FC9D25] flex justify-between items-center">
+              <ModalHeader className="relative rounded bg-[#FC9D25] flex justify-between items-center px-6 py-3">
                 <div className="text-xl font-bold text-white">New Group</div>
-                <Button
-                  onClick={onClose}
-                  className="text-white bg-transparent border-0 text-2xl p-0"
-                  aria-label="Close"
+                <button
+                  type="button"
+                  onClick={handleCloseModal}
+                  className="absolute right-4 top-3 text-white text-2xl font-bold hover:text-gray-200"
                 >
-                  &times; {/* Unicode for "×" sign */}
-                </Button>
+                  &times;
+                </button>
               </ModalHeader>
-              <ModalBody className="py-5 px-6">
+              <ModalBody className="py-5 px-6 bg-[#FAFAFA]">
                 <form id="addGroupForm" onSubmit={handleAddGroup} className="space-y-6">
                   <div>
-                    <label
-                      htmlFor="newGroupDescription"
-                      className="block text-sm font-medium text-gray-400 mb-1"
-                    >
-                      Description
+                    <label htmlFor="group_name" className="block text-sm font-medium text-[#191919] mb-1">
+                      Group Name
                     </label>
                     <input
-                      id="newGroupName"
+                      id="group_name"
                       type="text"
                       name="group_name"
                       value={newGroup.group_name}
                       onChange={handleInputChange}
-                      placeholder="Digite o nome da descriçao"
-                      className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                      className="w-full p-2 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
                       required
                     />
-                    {error && (
-                      <p className="text-red-500 text-sm mt-1">{error}</p>
-                    )}
                   </div>
                 </form>
               </ModalBody>
-              <ModalFooter className="w-102 border-t border-gray-200 pt-2 px-8">
-                <Button
-                  type="submit"
-                  form="addGroupForm"
-                  className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
-                  disabled={isLoading}
-                  onClick={() => window.location.reload()} // Recarrega a página ao clicar
-                >
-                  {isLoading ? <Spinner size="sm" color="white" /> : 'Save'}
+              <ModalFooter className="border-t border-[#EDEBEB] bg-[#FAFAFA] pt-2 px-8">
+                <Button onPress={handleCloseModal} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">
+                  Cancel
+                </Button>
+                <Button type="submit" form="addGroupForm" className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray-600 transition" disabled={loading}>
+                  {loading ? "Saving..." : "Save"}
                 </Button>
               </ModalFooter>
             </>
@@ -413,61 +216,47 @@ const DataGrupo = () => {
         </ModalContent>
       </Modal>
 
-      {/* Modal para editar grupo */}
-      <Modal
-        isOpen={isEditModalOpen}
-        onOpenChange={onEditModalClose}
-        size="md"
-        placement="center"
-        className="w-100 bg-white shadow-xl rounded-lg"
-        hideCloseButton={true}
-      >
+      {/* Edit Group Modal */}
+      <Modal isOpen={editIsOpen} onOpenChange={onEditClose} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
         <ModalContent>
-          {(onClose) => (
+          {(onEditClose) => (
             <>
-              <ModalHeader className="rounded bg-[#FC9D25] flex justify-between items-center">
-                <h3 className="text-xl flex justify-left items-left font-bold text-white">Edit group</h3>
-                <Button
-                  onClick={onClose}
-                  className="text-white bg-transparent border-0 text-2xl p-0"
-                  aria-label="Close"
+              <ModalHeader className="relative rounded bg-[#FC9D25] flex justify-between items-center px-6 py-3">
+                <div className="text-xl font-bold text-white">Edit Group</div>
+                <button
+                  type="button"
+                  onClick={onEditClose}
+                  className="absolute right-4 top-3 text-white text-2xl font-bold hover:text-gray-200"
                 >
-                  &times; {/* Unicode for "×" sign */}
-                </Button>
+                  &times;
+                </button>
               </ModalHeader>
-              <ModalBody className="py-5 px-6">
-                {editGroup && (
-                  <form id="updateGroupForm" onSubmit={handleUpdateGroup} className="space-y-6">
+              <ModalBody className="py-5 px-6 bg-[#FAFAFA]">
+                {selectedGroup && (
+                  <form id="editGroupForm" onSubmit={handleEditGroup} className="space-y-6">
                     <div>
-                      <label htmlFor="groupDescription" className="block text-sm font-medium text-gray-400 mb-1">
-                        Description
+                      <label htmlFor="group_name" className="block text-sm font-medium text-[#191919] mb-1">
+                        Group Name
                       </label>
                       <input
-                        id="groupDesc"
+                        id="group_name"
                         type="text"
-                        value={editGroup ? editGroup.VDesc : ''}
-                        onChange={(e) =>
-                          setEditGroup({ ...editGroup, VDesc: e.target.value })
-                        }
-                        placeholder="Digite a nova descrição"
-                        className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                        name="group_name"
+                        value={selectedGroup.group_name}
+                        onChange={handleEditInputChange}
+                        className="w-full p-2 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
                         required
                       />
-                      {error && (
-                        <p className="text-red-500 text-sm mt-1">{error}</p>
-                      )}
                     </div>
                   </form>
                 )}
               </ModalBody>
-              <ModalFooter className="w-102 border-t border-gray-200 pt-2 px-8">
-                <Button
-                  type="submit"
-                  form="updateGroupForm"
-                  className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
-                  onClick={() => handleUpdateGroup(editGroup.VCodGrFam, editGroup.VDesc)}
-                >
-                  Save
+              <ModalFooter className="border-t border-[#EDEBEB] bg-[#FAFAFA] pt-2 px-8">
+                <Button onPress={onEditClose} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">
+                  Cancel
+                </Button>
+                <Button type="submit" form="editGroupForm" className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray-600 transition" disabled={loading}>
+                  {loading ? "Saving..." : "Save"}
                 </Button>
               </ModalFooter>
             </>
@@ -475,167 +264,80 @@ const DataGrupo = () => {
         </ModalContent>
       </Modal>
 
-      {/* Modal para excluir grupo */}
-      <Modal
-        isOpen={isDeleteModalOpen}
-        onOpenChange={onDeleteModalClose}
-        size="md"
-        placement="center"
-        className="bg-white shadow-xl rounded-lg"
-      >
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader className="flex justify-center items-center border-b border-gray-200 pb-2">
-                <h3 className="text-lg font-semibold text-gray-900">Confirm Deletion</h3>
-              </ModalHeader>
-              <ModalBody className="py-6 px-8">
-                {isLoading ? (
-                  <div className="flex justify-center items-center">
-                    <Spinner size="lg" />
-                    <span className="ml-2">Excluding...</span>
-                  </div>
-                ) : (
-                  <p className="text-center text-gray-700">Are u sure u want to exclude the Group?</p>
-                )}
-              </ModalBody>
-              <ModalFooter className="flex justify-end border-t border-gray-200 pt-4 px-8">
-                <Button
-                  onPress={onClose}
-                  className="px-6 py-2 bg-black text-white rounded-md hover:bg-gray-800 font-medium"
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  onPress={() => {
-                    handleDeleteGroup(groupToDelete);
-                    onClose();
-                  }}
-                  className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 font-medium ml-3"
-                >
-                  Exclude
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
-
-      {/* Tabela */}
-      <div className="overflow-x-auto sm:flex sm:flex-col bg-muted/40">
-
-        <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB] mx-auto">
-          <thead>
-            <tr>
-              <th className="border-collapse border border-[#EDEBEB] !w-[1px] px-1 sm:px-5 py-2 bg-[#FC9D25]">
-                <div className="flex items-center justify-center">
-                  <FaGear size={20} color="white" />
-                </div>
-              </th>
-              {columnVisibility.codGrp && (
-                <th className="uppercase border-collapse border border-[#EDEBEB] w-10 px-1 sm:px-5 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-                  <div className="flex items-left justify-left">Cod Grp</div>
-                </th>
-              )}
-              {columnVisibility.description && (
-                <th onClick={() => handleSort('VDesc')} className="uppercase border-collapse border border-[#EDEBEB] w-400 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-                  <div className="flex items-left justify-left">
-                    Description
-                    {sortConfig.key === 'VDesc' && (
-                      <span className="ml-auto">
-                        {sortConfig.direction === 'asc' ? (
-                          <ArrowUpIcon className="inline-block w-4 h-4 text-white" />
-                        ) : (
-                          <ArrowDownIcon className="inline-block w-4 h-4 text-white" />
-                        )}
-                      </span>
-                    )}
-                  </div>
-                </th>
-              )}
-              {columnVisibility.createdIn && (
-                <th className="uppercase border-collapse border border-[#EDEBEB] w-20 sm:px-4 py-2 bg-[#FC9D25] text-[#FAFAFA] text-sm">
-                  <div className="flex items-left justify-left">Created In</div>
-                </th>
-              )}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-300">
-            {sortedGroups.map((group) => (
-              <tr key={group.VCodGrFam} className="hover:bg-gray-200">
-                {/* Ações */}
-                <td className="border border-[#EDEBEB] px-1 py-1 text-center">
-                  <Dropdown>
-                    <DropdownTrigger>
-                      <Button variant="bordered">
-                        <HiDotsVertical size={18} />
-                      </Button>
-                    </DropdownTrigger>
-                    <DropdownMenu aria-label="Dynamic Actions" placement="bottom-end" className="bg-white shadow-lg rounded-md p-1">
-                      <DropdownItem key="edit" onPress={() => handleEditGroup(group)}>
-                        Edit
-                      </DropdownItem>
-                    </DropdownMenu>
-                  </Dropdown>
+      {/* Groups Table */}
+      <div className="mt-5">
+        {loading ? (
+          <div className="text-center py-8">Loading...</div>
+        ) : paginatedGroups.length > 0 ? (
+          <table className="w-full text-left mb-5 min-w-full md:min-w-0 border-collapse">
+            <thead>
+              <tr className="bg-[#FC9D25] text-white h-12">
+                <td className="pl-2 pr-2 w-8 border-r border-[#e6e6e6]">
+                  <FaGear size={18} color="white" />
                 </td>
-
-                {/* Dados do Produto */}
-                {columnVisibility.codGrp && (
-                  <td className="border border-[#EDEBEB] px-3 py-2 text-right">{group.VCodGrFam}</td>
-                )}
-                {columnVisibility.description && (
-                  <td className="border border-[#EDEBEB] px-3 py-2 text-left">{group.VDesc}</td>
-                )}
-                {columnVisibility.createdIn && (
-                  <td className="border border-[#EDEBEB] px-4 py-2 text-right">
-                    {new Date(group.DCriadoEm).toLocaleDateString('pt-BR')}
-                  </td>
-                )}
-
-
+                <td className="pl-2 pr-2 w-16 text-right border-r border-[#e6e6e6] uppercase">ID</td>
+                <td className="pl-2 pr-2 border-r border-[#e6e6e6] uppercase">Group Name</td>
               </tr>
-            ))}
-          </tbody>
-        </table>
-        <div className="flex fixed bottom-0 left-0 items-center gap-2 w-full px-4 py-3 bg-gray-200 justify-end">
-          <span className="px-2 py-1">Items per page</span>
+            </thead>
+            <tbody>
+              {paginatedGroups.map((group, index) => (
+                <tr
+                  key={group.id || index}
+                  className="h-10 border-b border-[#e8e6e6] text-textPrimaryColor text-left transition-colors duration-150 hover:bg-[#FC9D25]/20"
+                >
+                  <td className="pl-1 flex items-start border-r border-[#e6e6e6] relative z-10">
+                    <Dropdown>
+                      <DropdownTrigger>
+                        <Button
+                          variant="light"
+                          className="flex justify-center items-center w-auto min-w-0 p-0 m-0 relative"
+                        >
+                          <HiDotsVertical size={20} className="text-textPrimaryColor" />
+                        </Button>
+                      </DropdownTrigger>
+                      <DropdownMenu
+                        aria-label="Actions"
+                        closeOnSelect={true}
+                        className="min-w-[150px] bg-white rounded-lg shadow-xl py-2 px-1 border border-gray-100"
+                      >
+                        <DropdownItem
+                          key="edit"
+                          className="px-4 py-2 text-base text-gray-700 hover:bg-gray-200 hover:text-gray-900 rounded transition-colors cursor-pointer"
+                          onPress={() => onEditOpen(group)}
+                        >
+                          Edit
+                        </DropdownItem>
+                      </DropdownMenu>
+                    </Dropdown>
+                  </td>
+                  <td className="pl-2 pr-2 w-16 text-right border-r border-[#e6e6e6]">{group.id}</td>
+                  <td className="pl-2 pr-2">{group.group_name}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p className="text-textLabelColor">No groups available</p>
+        )}
+      </div>
 
-          <select
-            value={itemsPerPage}
-            onChange={(e) => {
-              setItemsPerPage(Number(e.target.value));
-              setCurrentPage(1);
-            }}
-            className="border p-2 rounded px-2 py-1 w-16"
-          >
-            {PAGE_SIZES.map((size) => (
-              <option key={size} value={size}>{size}</option>
-            ))}
-          </select>
-
-          {/* Agrupamento do controle de paginação */}
-          <div className="flex items-center border rounded-lg overflow-hidden ml-4">
-            <button
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-              className={`px-3 py-0.5 ${currentPage === 1 ? 'bg-white text-black cursor-not-allowed' : 'bg-white hover:bg-gray-100'}`}
-            >
-              &lt;
-            </button>
-
-            <span className="px-3 py-0.5 bg-white">
-              {currentPage}
-            </span>
-
-            <button
-              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages}
-              className={`px-3 py-0.5 ${currentPage === totalPages ? 'bg-white text-black cursor-not-allowed' : 'bg-white hover:bg-gray-100'}`}
-            >
-              &gt;
-            </button>
-          </div>
-        </div>
+      {/* Pagination */}
+      <div className="bottom-0 w-full bg-white p-0 m-0 pagination-container">
+        <CustomPagination
+          page={currentPage}
+          pages={totalPages}
+          rowsPerPage={itemsPerPage}
+          handleChangeRowsPerPage={(newSize) => {
+            setItemsPerPage(newSize);
+            setCurrentPage(1);
+          }}
+          items={paginatedGroups}
+          setPage={setCurrentPage}
+          dataCSVButton={paginatedGroups.map((item) => ({
+            ID: item.id,
+            Name: item.group_name,
+          }))}
+        />
       </div>
     </div>
   );

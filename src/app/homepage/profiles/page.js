@@ -1,336 +1,257 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import { HiDotsVertical } from "react-icons/hi";
-import { FaSearch } from "react-icons/fa";
 import { FaGear } from "react-icons/fa6";
 import { Plus } from "lucide-react";
-import Select from "react-select";
-import { Button, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/react";
 import {
+    Button,
     Modal,
     ModalContent,
     ModalHeader,
     ModalBody,
     ModalFooter,
-    useDisclosure,
-} from '@nextui-org/react';
+    Dropdown,
+    DropdownTrigger,
+    DropdownMenu,
+    DropdownItem
+} from "@nextui-org/react";
+import CustomPagination from "@/src/components/table/page";
 
 const ProfilesTable = () => {
-    const { isOpen: isAddProfileModalOpen, onOpen: onOpenAddProfileModal, onClose: onCloseAddProfileModal } = useDisclosure();
-    const { isOpen: isEditProfileModalOpen, onOpen: onOpenEditProfileModal, onClose: onCloseEditProfileModal } = useDisclosure();
-    const { isOpen: isDeleteUserModalOpen, onOpen: onOpenDeleteUserModal, onClose: onCloseDeleteUserModal } = useDisclosure();
+    const [isOpen, setIsOpen] = useState(false);
+    const [editIsOpen, setEditIsOpen] = useState(false);
 
-    const [searchTerm, setSearchTerm] = useState('');
-    const [searchInput, setSearchInput] = useState('');
-    const [itemsPerPage, setItemsPerPage] = useState(15);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [deleteConfirmationEmail, setDeleteConfirmationEmail] = useState('');
-    const [userToDelete, setUserToDelete] = useState(null);
     const [profiles, setProfiles] = useState([]);
-    const [properties, setProperties] = useState([]);
-    const [currentProfile, setCurrentProfile] = useState(null);
+    const [selectedProfile, setSelectedProfile] = useState(null);
+
     const [newProfile, setNewProfile] = useState({
-        firstName: '',
-        secondName: '',
-        email: '',
-        password: '',
-        propertyIDs: [],
-        propertyTags: [],
+        firstName: "",
+        secondName: "",
+        email: "",
+        password: "",
     });
 
-    // Password management state
-    const [currentPassword, setCurrentPassword] = useState('');
-    const [newPassword, setNewPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [passwordError, setPasswordError] = useState('');
-    const [showPasswordFields, setShowPasswordFields] = useState(false);
+    const [loading, setLoading] = useState(false);
 
+    const [itemsPerPage, setItemsPerPage] = useState(15);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [searchInput, setSearchInput] = useState('');
 
-    const totalPages = Math.ceil(profiles.length / itemsPerPage);
+    useEffect(() => {
+        fetchProfiles();
+    }, []);
 
-    // Fetch profiles and properties as before
     const fetchProfiles = async () => {
         try {
-            const response = await fetch('/api/user');
-            const data = await response.json();
-
-            const users = Array.isArray(data) ? data : data.users;
-            setProfiles(users || []);
+            const res = await fetch("/api/user");
+            if (!res.ok) throw new Error("Failed to fetch profiles");
+            const data = await res.json();
+            setProfiles(data.users || []);
         } catch (error) {
             console.error("Error fetching profiles:", error);
         }
     };
 
-    const fetchProperties = async () => {
-        try {
-            const response = await fetch('/api/properties');
-            const data = await response.json();
-            setProperties(data || []);
-        } catch (error) {
-            console.error("Error fetching properties:", error);
-        }
+    const onOpen = () => setIsOpen(true);
+    const onClose = () => setIsOpen(false);
+
+    const onEditOpen = (profile) => {
+        setSelectedProfile(profile);
+        setEditIsOpen(true);
     };
 
-    useEffect(() => {
-        fetchProfiles();
-        fetchProperties();
-    }, []);
-
-
+    const onEditClose = () => {
+        setSelectedProfile(null);
+        setEditIsOpen(false);
+    };
 
     const handleInputChange = (e) => {
-        setNewProfile({
-            ...newProfile,
-            [e.target.name]: e.target.value
-        });
+        const { name, value } = e.target;
+        setNewProfile((prev) => ({ ...prev, [name]: value }));
     };
 
-    const propertyOptions = properties.map(property => ({
-        value: property.propertyID,
-        label: `${property.propertyName} (${property.propertyTag})`,
-        tag: property.propertyTag
-    }));
-
-    const handlePropertyChange = (selectedOptions) => {
-        const selectedIDs = selectedOptions.map(option => option.value);
-        const selectedTags = selectedOptions.map(option => option.tag);
-
-        setNewProfile(prevProfile => ({
-            ...prevProfile,
-            propertyIDs: selectedIDs,
-            propertyTags: selectedTags,
-        }));
+    const handleEditInputChange = (e) => {
+        const { name, value } = e.target;
+        setSelectedProfile((prev) => ({ ...prev, [name]: value }));
     };
 
-    // Handle profile submit (add or edit)
-    const handleSubmitProfile = async (e) => {
+    const handleAddProfile = async (e) => {
         e.preventDefault();
-
-        // 1. Confirma password & modo (criar / editar)
-        const isCreating = !currentProfile;
-
-        if (isCreating && !newProfile.password) {
-            alert("Define uma palavra-passe para o novo utilizador.");
-            return;
-        }
-
-        if (!isCreating && showPasswordFields && newPassword !== confirmPassword) {
-            setPasswordError("Passwords do not match");
-            return;
-        }
-
-        // 2. Garante arrays válidos
-        const ids = Array.isArray(newProfile.propertyIDs) ? newProfile.propertyIDs : [];
-        const tags = Array.isArray(newProfile.propertyTags) ? newProfile.propertyTags : [];
-
-        if (ids.length === 0 || tags.length === 0 || ids.length !== tags.length) {
-            alert("É obrigatório indicar pelo menos uma propriedade e respectiva tag.");
-            return;
-        }
-
-        // 3. Monta o payload
-        const updatedProfile = {
-            firstName: newProfile.firstName?.trim(),
-            secondName: newProfile.secondName?.trim(),
-            email: newProfile.email?.trim(),
-            password: isCreating
-                ? newProfile.password
-                : (showPasswordFields ? newPassword : undefined),
-            currentPassword: isCreating ? undefined : currentPassword,
-            propertyIDs: ids,
-            propertyTags: tags,
-        };
-
-        // 4. Mostra no console p/ debug
-        // console.log("Enviado para API:", updatedProfile);
-
+        setLoading(true);
         try {
-            const response = await fetch(
-                isCreating ? "/api/user" : `/api/user/${currentProfile.userID}`,
-                {
-                    method: isCreating ? "POST" : "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(updatedProfile),
-                }
-            );
-
-            if (!response.ok) {
-                const { error } = await response.json();
-                throw new Error(error || "Erro no servidor");
-            }
-
-            await fetchProfiles(); // Atualiza a lista no frontend
-
-            setTimeout(() => {
-                isCreating ? onCloseAddProfileModal() : onCloseEditProfileModal();
-            }, 200);
-        } catch (error) {
-            console.error("Error with profile:", error);
-            alert(error.message);
-        }
-    };
-
-
-
-    const openEditModal = (profile) => {
-        setCurrentProfile(profile); // Set profile to edit
-        setNewProfile({
-            firstName: profile.firstName,
-            secondName: profile.secondName,
-            email: profile.email,
-            password: '',
-            propertyIDs: profile.propertyIDs || [],
-            propertyTags: profile.propertyTags || [],
-        });
-        onOpenEditProfileModal();
-    };
-
-    const handleCloseAddProfileModal = () => {
-        setNewProfile({
-            firstName: '',
-            secondName: '',
-            email: '',
-            password: '',
-            propertyIDs: [],
-            propertyTags: [],
-        });
-        onCloseAddProfileModal();
-    };
-
-    const openAddModal = () => {
-        setNewProfile({
-            firstName: '',
-            secondName: '',
-            email: '',
-            password: '',
-            propertyIDs: [],
-            propertyTags: [],
-        });
-        onOpenAddProfileModal();
-    };
-
-    // New password validation and toggle function
-    const handlePasswordChange = async (e) => {
-        e.preventDefault();
-
-        // Validate password change logic
-        if (newPassword !== confirmPassword) {
-            setPasswordError("Passwords do not match.");
-            return;
-        }
-
-        if (newPassword === '') {
-            setPasswordError("New password cannot be empty.");
-            return;
-        }
-
-        // Password update logic (you'd typically call an API to update the password here)
-        try {
-            const response = await fetch(`/api/user/${currentProfile.userID}/password`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ currentPassword, newPassword }),
+            const res = await fetch("/api/user", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(newProfile),
             });
 
-            if (!response.ok) throw new Error("Failed to update password");
+            if (!res.ok) throw new Error("Failed to add profile");
 
-            alert('Password changed successfully');
-            setShowPasswordFields(false);
-            setPasswordError('');
-            onCloseEditProfileModal();
+            await fetchProfiles();
+            setNewProfile({ firstName: "", secondName: "", email: "", password: "" });
+            onClose();
         } catch (error) {
-            console.error("Error changing password:", error);
-            setPasswordError("Failed to change password.");
+            console.error("Error adding profile:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleEditProfile = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+
+        try {
+            const res = await fetch(`/api/user/${selectedProfile.userID}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(selectedProfile),
+            });
+
+            if (!res.ok) throw new Error("Failed to update profile");
+
+            await fetchProfiles();
+            onEditClose();
+        } catch (error) {
+            console.error("Error updating profile:", error);
+        } finally {
+            setLoading(false);
         }
     };
 
     const filteredProfiles = profiles.filter((profile) => {
-        const fullName = `${profile.firstName} ${profile.secondName}`.toLowerCase();
-        return fullName.includes(searchTerm.toLowerCase());
+        const search = searchTerm.toLowerCase();
+        return (
+            (profile.userID && String(profile.userID).toLowerCase().includes(search)) ||
+            (profile.firstName && profile.firstName.toLowerCase().includes(search)) ||
+            (profile.secondName && profile.secondName.toLowerCase().includes(search)) ||
+            (profile.email && profile.email.toLowerCase().includes(search))
+        );
     });
 
-    const sortedProfiles = [...filteredProfiles].sort((a, b) => {
-        const fullNameA = `${a.firstName} ${a.secondName}`.toLowerCase();
-        const fullNameB = `${b.firstName} ${b.secondName}`.toLowerCase();
-        return fullNameA.localeCompare(fullNameB);
-    });
-
-    const paginatedProfiles = sortedProfiles.slice(
+    const paginatedProfiles = filteredProfiles.slice(
         (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage,
+        currentPage * itemsPerPage
     );
 
-    const handleDeleteConfirmation = async () => {
-        if (deleteConfirmationEmail !== userToDelete.email) {
-            alert("The email does not match. Please enter the correct email.");
-            return;
-        }
-
-        try {
-            const response = await fetch(`/api/user/${userToDelete.userID}`, {
-                method: 'DELETE',
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to delete user');
-            }
-
-            alert('User deleted successfully');
-            onCloseDeleteUserModal();
-            fetchProfiles(); // Refresh á tabela depois de pagar perfil
-        } catch (error) {
-            console.error('Error deleting user:', error);
-        }
-    };
-
+    const totalPages = Math.ceil(filteredProfiles.length / itemsPerPage);
 
     return (
         <div className="p-4">
-            {/* Header */}
-            <div className="flex justify-between items-center mb-6">
+            {/* Header with Search and Add */}
+            <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold">All Profiles</h2>
                 <div className="flex items-center gap-2">
                     <button
-                        onClick={() => {
-                            setSearchTerm(searchInput);
-                            setCurrentPage(1);
-                        }}
-                        className="p-2 bg-[#FAFAFA] text-[#191919] rounded hover:bg-[#EDEBEB] transition"
-                        aria-label="Search"
+                        onClick={onOpen}
+                        className="bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded"
                     >
-                        <FaSearch size={25} />
+                        <Plus size={25} />
                     </button>
-
-                    <Dropdown>
-                        <DropdownTrigger>
-                            <button
-                                onClick={onOpenAddProfileModal}
-                                className="bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded"
-                            >
-                                <Plus size={25} />
-                            </button>
-                        </DropdownTrigger>
-                        <DropdownMenu aria-label="Actions" className="bg-white shadow-lg rounded-md p-1">
-                            <DropdownItem key="add" onPress={onOpenAddProfileModal}>Add Profile</DropdownItem>
-                        </DropdownMenu>
-                    </Dropdown>
                 </div>
             </div>
 
             {/* SearchBar */}
-            <div className="mb-6 flex flex-col items-start gap-2">
+            <div className="flex mb-4 items-center gap-2">
                 <input
                     type="text"
-                    placeholder="Search by name..."
+                    placeholder="Search by ID, First Name, Last Name, or Email..."
                     value={searchInput}
-                    onChange={(e) => setSearchInput(e.target.value)}
+                    onChange={(e) => {
+                        setSearchInput(e.target.value);
+                        setSearchTerm(e.target.value);
+                        setCurrentPage(1);
+                    }}
                     className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-[#FC9D25]"
                 />
             </div>
 
+            {/* Profiles Table */}
+            <div className="mt-5">
+                {loading ? (
+                    <div className="text-center py-8">Loading...</div>
+                ) : paginatedProfiles.length > 0 ? (
+                    <table className="w-full text-left mb-5 min-w-full md:min-w-0 border-collapse">
+                        <thead>
+                            <tr className="bg-[#FC9D25] text-white h-12">
+                                <td className="pl-2 pr-2 w-8 border-r border-[#e6e6e6]">
+                                    <FaGear size={18} color="white" />
+                                </td>
+                                <td className="pl-2 pr-2 w-16 text-right border-r border-[#e6e6e6] uppercase">ID</td>
+                                <td className="pl-2 pr-2 w-32 border-r border-[#e6e6e6] uppercase">First Name</td>
+                                <td className="pl-2 pr-2 w-32 border-r border-[#e6e6e6] uppercase">Last Name</td>
+                                <td className="pl-2 pr-2 border-r border-[#e6e6e6] uppercase">Email</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {paginatedProfiles.map((profile, index) => (
+                                <tr
+                                    key={profile.userID || index}
+                                    className="h-10 border-b border-[#e8e6e6] text-textPrimaryColor text-left transition-colors duration-150 hover:bg-[#FC9D25]/20"
+                                >
+                                    <td className="pl-1 flex items-start border-r border-[#e6e6e6] relative z-10">
+                                        <Dropdown>
+                                            <DropdownTrigger>
+                                                <Button
+                                                    variant="light"
+                                                    className="flex justify-center items-center w-auto min-w-0 p-0 m-0 relative"
+                                                >
+                                                    <HiDotsVertical size={20} className="text-textPrimaryColor" />
+                                                </Button>
+                                            </DropdownTrigger>
+                                            <DropdownMenu
+                                                aria-label="Actions"
+                                                closeOnSelect={true}
+                                                className="min-w-[150px] bg-white rounded-lg shadow-xl py-2 px-1 border border-gray-100"
+                                            >
+                                                <DropdownItem
+                                                    key="edit"
+                                                    className="px-4 py-2 text-base text-gray-700 hover:bg-gray-200 hover:text-gray-900 rounded transition-colors cursor-pointer"
+                                                    onPress={() => onEditOpen(profile)}
+                                                >
+                                                    Edit
+                                                </DropdownItem>
+                                            </DropdownMenu>
+                                        </Dropdown>
+                                    </td>
+                                    <td className="pl-2 pr-2 w-16 text-right border-r border-[#e6e6e6]">{profile.userID}</td>
+                                    <td className="pl-2 pr-2 w-32 border-r border-[#e6e6e6]">{profile.firstName}</td>
+                                    <td className="pl-2 pr-2 w-32 border-r border-[#e6e6e6]">{profile.secondName}</td>
+                                    <td className="pl-2 pr-2">{profile.email}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                ) : (
+                    <p className="text-textLabelColor">No profiles available</p>
+                )}
+            </div>
+
+            {/* Pagination */}
+            <div className="bottom-0 w-full bg-white p-0 m-0 pagination-container">
+                <CustomPagination
+                    page={currentPage}
+                    pages={totalPages}
+                    rowsPerPage={itemsPerPage}
+                    handleChangeRowsPerPage={(newSize) => {
+                        setItemsPerPage(newSize);
+                        setCurrentPage(1);
+                    }}
+                    items={paginatedProfiles}
+                    setPage={setCurrentPage}
+                    dataCSVButton={paginatedProfiles.map((item) => ({
+                        ID: item.userID,
+                        FirstName: item.firstName,
+                        LastName: item.secondName,
+                        Email: item.email,
+                    }))}
+                />
+            </div>
+
             {/* Modal de adição */}
-            <Modal isOpen={isAddProfileModalOpen} onOpenChange={handleCloseAddProfileModal} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
+            <Modal isOpen={isOpen} onOpenChange={setIsOpen} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
                 <ModalContent>
                     {(onClose) => (
                         <>
@@ -338,14 +259,14 @@ const ProfilesTable = () => {
                                 <div className="text-xl font-bold text-white">New Profile</div>
                                 <button
                                     type="button"
-                                    onClick={handleCloseAddProfileModal}
+                                    onClick={() => setIsOpen(false)}
                                     className="absolute right-4 top-3 text-white text-2xl font-bold hover:text-gray-200"
                                 >
                                     &times;
                                 </button>
                             </ModalHeader>
                             <ModalBody className="py-5 px-6 bg-white">
-                                <form id="addProfileForm" onSubmit={handleSubmitProfile} className="space-y-6">
+                                <form id="addProfileForm" onSubmit={handleAddProfile} className="space-y-6">
                                     {["firstName", "secondName", "email", "password"].map((field, index) => (
                                         <div key={index}>
                                             <label htmlFor={field} className="block text-sm font-medium text-[#191919] mb-1">
@@ -362,26 +283,10 @@ const ProfilesTable = () => {
                                             />
                                         </div>
                                     ))}
-
-                                    {/* Select de propriedades */}
-                                    <div>
-                                        <label htmlFor="propertyIDs" className="block text-sm font-medium text-[#191919] mb-1">
-                                            Select Properties
-                                        </label>
-                                        <Select
-                                            id="propertyIDs"
-                                            name="propertyIDs"
-                                            options={propertyOptions}
-                                            value={propertyOptions.filter(option => newProfile.propertyIDs.includes(option.value))}
-                                            onChange={handlePropertyChange}
-                                            isMulti
-                                            isSearchable
-                                        />
-                                    </div>
                                 </form>
                             </ModalBody>
                             <ModalFooter className="border-t border-gray-200 pt-2 px-8 bg-[#FAFAFA]">
-                                <Button onPress={handleCloseAddProfileModal} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">
+                                <Button onPress={() => setIsOpen(false)} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">
                                     Cancel
                                 </Button>
                                 <Button type="submit" form="addProfileForm" className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray-600 transition">
@@ -394,20 +299,20 @@ const ProfilesTable = () => {
             </Modal>
 
             {/* Modal de edição */}
-            <Modal isOpen={isEditProfileModalOpen} onOpenChange={onCloseEditProfileModal} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
+            <Modal isOpen={editIsOpen} onOpenChange={setEditIsOpen} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
                 <ModalContent>
                     <ModalHeader className="relative rounded bg-[#FC9D25] flex justify-between items-center px-6 py-3">
                         <div className="text-xl font-bold text-white">Edit Profile</div>
                         <button
                             type="button"
-                            onClick={onCloseEditProfileModal}
+                            onClick={() => setEditIsOpen(false)}
                             className="absolute right-4 top-3 text-white text-2xl font-bold hover:text-gray-200"
                         >
                             &times;
                         </button>
                     </ModalHeader>
                     <ModalBody className="py-5 px-6 bg-white">
-                        <form id="editProfileForm" onSubmit={handleSubmitProfile} className="space-y-6">
+                        <form id="editProfileForm" onSubmit={handleEditProfile} className="space-y-6">
                             {["firstName", "secondName", "email"].map((field, index) => (
                                 <div key={index}>
                                     <label htmlFor={`edit-${field}`} className="block text-sm font-medium text-[#191919] mb-1">
@@ -417,90 +322,16 @@ const ProfilesTable = () => {
                                         id={`edit-${field}`}
                                         type={field === "password" ? "password" : "text"}
                                         name={field}
-                                        value={newProfile[field]}
-                                        onChange={handleInputChange}
+                                        value={selectedProfile ? selectedProfile[field] : ''}
+                                        onChange={handleEditInputChange}
                                         className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
                                     />
                                 </div>
                             ))}
-
-                            {/* Toggle Change Password */}
-                            <div>
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPasswordFields(!showPasswordFields)}
-                                    className="w-full p-2 bg-[#FC9D25] text-white rounded-md text-center"
-                                >
-                                    {showPasswordFields ? 'Cancel Password Change' : 'Change Password'}
-                                </button>
-                            </div>
-
-                            {showPasswordFields && (
-                                <div>
-                                    <div>
-                                        <label htmlFor="currentPassword" className="block text-sm font-medium text-[#191919] mb-1">
-                                            Current Password
-                                        </label>
-                                        <input
-                                            id="currentPassword"
-                                            type="password"
-                                            name="currentPassword"
-                                            value={currentPassword}
-                                            onChange={(e) => setCurrentPassword(e.target.value)}
-                                            className="w-full p-2 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
-                                            required
-                                        />
-                                    </div>
-                                    <div>
-                                        <label htmlFor="newPassword" className="block text-sm font-medium text-[#191919] mb-1">
-                                            New Password
-                                        </label>
-                                        <input
-                                            id="newPassword"
-                                            type="password"
-                                            name="newPassword"
-                                            value={newPassword}
-                                            onChange={(e) => setNewPassword(e.target.value)}
-                                            className="w-full p-2 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
-                                            required
-                                        />
-                                    </div>
-                                    <div>
-                                        <label htmlFor="confirmPassword" className="block text-sm font-medium text-[#191919] mb-1">
-                                            Confirm New Password
-                                        </label>
-                                        <input
-                                            id="confirmPassword"
-                                            type="password"
-                                            name="confirmPassword"
-                                            value={confirmPassword}
-                                            onChange={(e) => setConfirmPassword(e.target.value)}
-                                            className="w-full p-2 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
-                                            required
-                                        />
-                                    </div>
-                                    {passwordError && <p className="text-red-500 text-sm">{passwordError}</p>}
-                                </div>
-                            )}
-
-                            <div>
-                                <label htmlFor="edit-propertyIDs" className="block text-sm font-medium text-[#191919] mb-1">
-                                    Select Properties
-                                </label>
-                                <Select
-                                    id="edit-propertyIDs"
-                                    name="propertyIDs"
-                                    options={propertyOptions}
-                                    value={propertyOptions.filter(option => newProfile.propertyIDs.includes(option.value))}
-                                    onChange={handlePropertyChange}
-                                    isMulti
-                                    isSearchable
-                                />
-                            </div>
                         </form>
                     </ModalBody>
                     <ModalFooter className="border-t border-gray-200 pt-2 px-8 bg-[#FAFAFA]">
-                        <Button onPress={onCloseEditProfileModal} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">
+                        <Button onPress={() => setEditIsOpen(false)} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">
                             Cancel
                         </Button>
                         <Button type="submit" form="editProfileForm" className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray-600 transition">
@@ -509,132 +340,6 @@ const ProfilesTable = () => {
                     </ModalFooter>
                 </ModalContent>
             </Modal>
-
-            {/*Modal de apagar users*/}
-            <Modal isOpen={isDeleteUserModalOpen} onOpenChange={onCloseDeleteUserModal} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
-                <ModalContent>
-                    <ModalHeader className="relative rounded bg-[#FC9D25] flex justify-between items-center px-6 py-3">
-                        <div className="text-xl font-bold text-white">Confirm Delete User</div>
-                        <button
-                            type="button"
-                            onClick={onCloseDeleteUserModal}
-                            className="absolute right-4 top-3 text-white text-2xl font-bold hover:text-gray-200"
-                        >
-                            &times;
-                        </button>
-                    </ModalHeader>
-                    <ModalBody className="py-5 px-6 bg-[#FAFAFA]">
-                        <p className="text-[#191919]">To confirm the deletion of this user, please type their email:</p>
-                        <input
-                            type="email"
-                            value={deleteConfirmationEmail}
-                            onChange={(e) => setDeleteConfirmationEmail(e.target.value)}
-                            placeholder="User email"
-                            className="w-full p-2 bg-gray-200 rounded mt-2"
-                        />
-                    </ModalBody>
-                    <ModalFooter className="border-t border-[#EDEBEB] bg-[#FAFAFA] pt-2 px-8">
-                        <Button onPress={onCloseDeleteUserModal} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">
-                            Cancel
-                        </Button>
-                        <Button onPress={handleDeleteConfirmation} className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray-600 transition">
-                            Delete
-                        </Button>
-                    </ModalFooter>
-                </ModalContent>
-            </Modal>
-
-            {/* Tabela */}
-            <div className="overflow-x-auto bg-muted/40">
-                <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB] mx-auto">
-                    <thead>
-                        <tr className="bg-[#FC9D25] text-white">
-                            <th className="border border-[#EDEBEB] w-[50px] px-2 py-2 text-center">
-                                <FaGear size={20} />
-                            </th>
-                            <th className="border border-[#EDEBEB] px-4 py-2 text-left">ID</th>
-                            <th className="border border-[#EDEBEB] px-4 py-2 text-left">First Name</th>
-                            <th className="border border-[#EDEBEB] px-4 py-2 text-left">Last Name</th>
-                            <th className="border border-[#EDEBEB] px-4 py-2 text-left">Email</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-300">
-                        {profiles.length > 0 ? (
-                            paginatedProfiles.map((profile, index) => (
-                                <tr key={profile.id || `profile-${index}`} className="hover:bg-gray-100">
-                                    <td className="border border-[#EDEBEB] w-[50px] px-2 py-2 text-center">
-                                        <Dropdown>
-                                            <DropdownTrigger>
-                                                <Button variant="bordered" className="p-1">
-                                                    <HiDotsVertical size={18} />
-                                                </Button>
-                                            </DropdownTrigger>
-                                            <DropdownMenu aria-label="Actions" className="bg-white shadow-lg rounded-md p-1">
-                                                <DropdownItem key="edit" onPress={() => openEditModal(profile)}>
-                                                    Edit
-                                                </DropdownItem>
-                                                <DropdownItem key="delete" onPress={() => openDeleteModal(profile)}>
-                                                    Delete
-                                                </DropdownItem>
-                                            </DropdownMenu>
-                                        </Dropdown>
-                                    </td>
-                                    <td className="border border-[#EDEBEB] px-4 py-2">{profile.userID}</td>
-                                    <td className="border border-[#EDEBEB] px-4 py-2">{profile.firstName}</td>
-                                    <td className="border border-[#EDEBEB] px-4 py-2">{profile.secondName}</td>
-                                    <td className="border border-[#EDEBEB] px-4 py-2">{profile.email}</td>
-                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan="5" className="text-center py-4 text-gray-500">
-                                    No profiles found.
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
-
-            {/* Paginação */}
-            <div className="flex fixed bottom-0 left-0 items-center gap-2 w-full px-4 py-3 bg-[#EDEBEB] justify-end">
-                <span className="px-2 py-1">Items per page</span>
-
-                <select
-                    value={itemsPerPage}
-                    onChange={(e) => {
-                        setItemsPerPage(Number(e.target.value));
-                        setCurrentPage(1);
-                    }}
-                    className="border p-2 rounded px-2 py-1 w-16"
-                >
-                    {[5, 10, 20, 50].map((size) => (
-                        <option key={size} value={size}>{size}</option>
-                    ))}
-                </select>
-
-                <div className="flex items-center border rounded-lg overflow-hidden ml-4">
-                    <button
-                        onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                        disabled={currentPage === 1}
-                        className={`px-3 py-0.5 ${currentPage === 1 ? 'bg-white text-black cursor-not-allowed' : 'bg-white hover:bg-gray-100'}`}
-                    >
-                        &lt;
-                    </button>
-
-                    <span className="px-3 py-0.5 bg-white">
-                        {currentPage}
-                    </span>
-
-                    <button
-                        onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                        disabled={currentPage === totalPages}
-                        className={`px-3 py-0.5 ${currentPage === totalPages ? 'bg-white text-black cursor-not-allowed' : 'bg-white hover:bg-gray-100'}`}
-                    >
-                        &gt;
-                    </button>
-                </div>
-            </div>
         </div>
     );
 };

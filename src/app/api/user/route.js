@@ -12,8 +12,13 @@ export async function POST(req) {
         let { firstName, secondName, email, password, propertyIDs, propertyTags } = body;
 
         // Valida campos necessários
-        if (!firstName || !secondName || !email || !password || !propertyIDs || !propertyTags) {
-            return NextResponse.json({ error: "All fields (including propertyIDs and propertyTags) are required" }, { status: 400 });
+        if (!firstName || !secondName || !email || !password ||
+            !Array.isArray(propertyIDs) || propertyIDs.length === 0 ||
+            !Array.isArray(propertyTags) || propertyTags.length === 0) {
+            return NextResponse.json(
+                { error: "All fields (including non-empty propertyIDs and propertyTags arrays) are required" },
+                { status: 400 }
+            );
         }
 
         // Converte inputs para os formatos corretos
@@ -69,9 +74,16 @@ export async function POST(req) {
 // Busca todos os users na bd
 export async function GET() {
     try {
-        const users = await prisma.cloud_users.findMany();
-        return NextResponse.json(users, { status: 200 });
+        const users = await prisma.cloud_users.findMany({
+            include: {
+                cloud_userProperties: true, // ou outra associação que precisas
+            },
+            orderBy: { userID: 'desc' }, // opcional: mais recentes primeiro
+        });
+
+        return NextResponse.json({ users });
     } catch (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        console.error("Erro ao buscar perfis:", error);
+        return NextResponse.json({ error: "Erro ao buscar utilizadores" }, { status: 500 });
     }
 }

@@ -132,52 +132,52 @@ export default function ProductGroups() {
         fetchMesas();
     }, []);
 
-   const selectedPostoVPosto = useMemo(() => {
-    if (!selectedCardPath) return null;
-    const parts = selectedCardPath.split("/");
-    return parts[parts.length - 1]; // extrai o VPosto (ex: "posto1")
-}, [selectedCardPath]);
+    const selectedPostoVPosto = useMemo(() => {
+        if (!selectedCardPath) return null;
+        const parts = selectedCardPath.split("/");
+        return parts[parts.length - 1]; // extrai o VPosto (ex: "posto1")
+    }, [selectedCardPath]);
 
-const cardPaths = useMemo(() => {
-    if (!postosComSalas || !selectedPostoVPosto) return [];
+    const cardPaths = useMemo(() => {
+        if (!postosComSalas || !selectedPostoVPosto) return [];
 
-    const posto = postosComSalas.find(p => p.VPosto === selectedPostoVPosto);
-    if (!posto || !posto.salas) return [];
+        const posto = postosComSalas.find(p => p.VPosto === selectedPostoVPosto);
+        if (!posto || !posto.salas) return [];
 
-    return posto.salas.map(sala => ({
-        label: sala.Descricao,
-        value: sala.ID_SALA,
-        path: `/homepage/${posto.VPosto}/sala/${sala.ID_SALA}`,
-    }));
-}, [postosComSalas, selectedPostoVPosto]);
+        return posto.salas.map(sala => ({
+            label: sala.Descricao,
+            value: sala.ID_SALA,
+            path: `/homepage/${posto.VPosto}/sala/${sala.ID_SALA}`,
+        }));
+    }, [postosComSalas, selectedPostoVPosto]);
 
 
-const cardPaths3 = useMemo(() => {
-    if (!selectedRow || !salasComMesas.length || !postosComSalas.length) return [];
+    const cardPaths3 = useMemo(() => {
+        if (!selectedRow || !salasComMesas.length || !postosComSalas.length) return [];
 
-    const salaId = parseInt(selectedRow.split("/").pop());
+        const salaId = parseInt(selectedRow.split("/").pop());
 
-    // Encontrar a sala selecionada
-    const salaSelecionada = salasComMesas.find(s => s.ID_SALA === salaId);
-    if (!salaSelecionada || !salaSelecionada.mesas) return [];
+        // Encontrar a sala selecionada
+        const salaSelecionada = salasComMesas.find(s => s.ID_SALA === salaId);
+        if (!salaSelecionada || !salaSelecionada.mesas) return [];
 
-    // Encontrar o posto que contém essa sala
-    const postoQueContemSala = postosComSalas.find(posto =>
-        posto.salas?.some(sala => sala.ID_SALA === salaId)
-    );
+        // Encontrar o posto que contém essa sala
+        const postoQueContemSala = postosComSalas.find(posto =>
+            posto.salas?.some(sala => sala.ID_SALA === salaId)
+        );
 
-    const postoId = postoQueContemSala?.Icodi ?? null;
-    if (!postoId) return [];
+        const postoId = postoQueContemSala?.Icodi ?? null;
+        if (!postoId) return [];
 
-    return salaSelecionada.mesas.map(mesa => ({
-        label: mesa.Descricao,
-        value: mesa.ID_Mesa,
-        path: `/mesas/${mesa.ID_Mesa}`,
-        Posto: String(postoId),      // compatível com mesasEmUso
-        ID_sala: salaId,
-        ID_Mesa: mesa.ID_Mesa,
-    }));
-}, [selectedRow, salasComMesas, postosComSalas]);
+        return salaSelecionada.mesas.map(mesa => ({
+            label: mesa.Descricao,
+            value: mesa.ID_Mesa,
+            path: `/mesas/${mesa.ID_Mesa}`,
+            Posto: String(postoId),      // compatível com mesasEmUso
+            ID_sala: salaId,
+            ID_Mesa: mesa.ID_Mesa,
+        }));
+    }, [selectedRow, salasComMesas, postosComSalas]);
 
 
 
@@ -247,6 +247,25 @@ const cardPaths3 = useMemo(() => {
         }
     };
 
+    const params = useParams();
+
+    useEffect(() => {
+    const storedMesa = localStorage.getItem('selectedMesa');
+    if (storedMesa) {
+      const mesaObj = JSON.parse(storedMesa);
+      console.log('Mesa do localStorage:', mesaObj);
+
+      // Se o ID_Mesa bate com o parâmetro da URL
+      if (mesaObj.ID_Mesa?.toString() === params.id) {
+        setSelectedTable(mesaObj);
+      } else {
+        console.warn('ID_Mesa não bate com params.id', mesaObj.ID_Mesa, params.id);
+      }
+    } else {
+      console.warn('Nenhuma mesa encontrada no localStorage');
+    }
+  }, [params.id]);
+
     useEffect(() => {
         const loadPostosWithSalas = async () => {
             try {
@@ -256,13 +275,23 @@ const cardPaths3 = useMemo(() => {
                     fetchPostossalas()
                 ]);
 
-                const enrichedPostos = postos.map(posto => {
-                    const relacoes = postosSalas.filter(ps => ps.Posto === posto.Icodi.toString());
+                console.log("Postos:", postos);
+                console.log("Salas:", salas);
+                console.log("PostosSalas:", postosSalas);
+
+                const postosFiltrados = postos; // <- usar todos os postos
+                console.log("Postos com trabalhaComSalas === true:", postosFiltrados);
+
+                const enrichedPostos = postosFiltrados.map(posto => {
+                    const relacoes = postosSalas.filter(ps => Number(ps.Posto) === posto.Icodi);
+                    console.log(`Relações para posto ${posto.Icodi}:`, relacoes);
 
                     const salasRelacionadas = relacoes
                         .sort((a, b) => a.Ordem - b.Ordem)
                         .map(relacao => salas.find(s => s.ID_SALA === relacao.ID_Sala))
                         .filter(Boolean);
+
+                    console.log(`Salas para posto ${posto.Icodi}:`, salasRelacionadas);
 
                     return {
                         ...posto,
@@ -270,6 +299,7 @@ const cardPaths3 = useMemo(() => {
                     };
                 });
 
+                console.log("Postos enriquecidos:", enrichedPostos);
                 setPostosComSalas(enrichedPostos);
             } catch (err) {
                 console.error("Erro ao carregar dados:", err);
@@ -279,6 +309,9 @@ const cardPaths3 = useMemo(() => {
 
         loadPostosWithSalas();
     }, []);
+
+
+
 
     useEffect(() => {
         const loadMesasWithSalas = async () => {
@@ -531,8 +564,6 @@ const cardPaths3 = useMemo(() => {
         fetchData();
     }, [propertyID]);
 
-
-
     // If the property is not confirmed, redirect to homepage
     useEffect(() => {
         if (!isConfirmed) {
@@ -597,9 +628,7 @@ const cardPaths3 = useMemo(() => {
         }
     };
 
-    useEffect(() => {
-        fetchActiveTables();
-    }, []);
+
 
     if (status === "loading" || loading) {
         return <LoadingBackdrop open={true} />;
@@ -714,6 +743,9 @@ const cardPaths3 = useMemo(() => {
     const handleCloseModal = () => {
         setShowModal(false);
     };
+
+
+
     return (
         <>
             {!selectedCardPath && !selectedRow && !selectedTable && (
@@ -870,15 +902,16 @@ const cardPaths3 = useMemo(() => {
                 {selectedTable && (
                     <>
                         <button
-                            onClick={() => {
-                                setSelectedCardPath(null);
-                                setSelectedTable(null);
-                            }}
-                            className="ml-4 px-4 py-2 rounded bg-[#FC9D25] text-white hover:bg-[#e38d20] flex items-center gap-2"
-                        >
-                            <IoIosArrowBack size={16} />
-                            <span>Mesas</span>
-                        </button>
+          onClick={() => {
+            localStorage.removeItem('selectedMesa');
+            setSelectedTable(null);
+            router.back();
+          }}
+          className="absolute ml-4 mt-4 px-4 py-2 rounded bg-[#FC9D25] text-white hover:bg-[#e38d20] flex items-center gap-2 z-20"
+        >
+          <IoIosArrowBack size={16} />
+          <span>Mesas</span>
+        </button>
 
                         <div className="flex items-center justify-center space-x-4 mt-4">
                             <button

@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { FaMagnifyingGlass } from 'react-icons/fa6'; // Certifique-se de importar isso
-
 import { fetchGrup } from '@/src/lib/apigroup'
 import { fetchProduct } from '@/src/lib/apiproduct'
 import { fetchFamily } from '@/src/lib/apifamily'
@@ -10,10 +9,8 @@ import { fetchIva } from '@/src/lib/apiiva';
 import { fetchSubfamily } from '@/src/lib/apisubfamily';
 import { fetchClassepreco } from '@/src/lib/apiclassepreco';
 import { fetchPreco } from "@/src/lib/apipreco";
-
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { TiShoppingCart } from 'react-icons/ti';
-
 import AddProductModal from '@/src/components/modals/POS/addProduct/page';
 import CartPage from '@/src/components/modals/POS/cart/page';
 

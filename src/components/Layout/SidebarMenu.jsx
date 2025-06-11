@@ -12,13 +12,10 @@ import { useSession } from "next-auth/react";
 import {TiShoppingCart} from "react-icons/ti";
 import { MdPointOfSale } from "react-icons/md";
 
-
-
 function SidebarItem({ icon, text, submenu }) {
     const { expanded } = useContext(SidebarContext);
     const [open, setOpen] = useState(false);
     const [cexp, setCexp] = useState("");
-
 
     return (
         <li className="relative">
@@ -57,7 +54,6 @@ function SidebarSubItem({ href, text, icon, expanded }) {
 export default function SidebarMenu() {
     const { data: session } = useSession();
     const { expanded, isMobile } = useContext(SidebarContext);
-
     const [selectedProperty, setSelectedProperty] = useState(() => localStorage.getItem("selectedProperty") || "");
     const [tempSelectedProperty, setTempSelectedProperty] = useState(null);
     const [isConfirmed, setIsConfirmed] = useState(() => JSON.parse(localStorage.getItem("isConfirmed")) || false);
@@ -78,7 +74,6 @@ export default function SidebarMenu() {
 
         },
 
-
         "Store Price": {
             icon: <LuFolderCog  size={20} />,
             submenu: [
@@ -88,7 +83,6 @@ export default function SidebarMenu() {
                 { href: "/homepage/hour", text: "Hours", icon: <FaHourglassEnd size={18} /> },
             ],
         },
-
 
         "Shopping": {
             icon: <TiShoppingCart size={20} />,
@@ -184,11 +178,11 @@ export default function SidebarMenu() {
                 </div>
             )}
 
-            {(session && selectedProperty && isConfirmed) ? (
+            {session && selectedProperty && isConfirmed ? (
                 <>
                     {Object.entries(menuItems).map(([key, value]) => {
-                        const isHiddenOnMobile = ["Store Settings", "Store Price"].includes(key);
-                        if (isMobile && isHiddenOnMobile) return null;
+                        // Show only "Shopping" on mobile, and everything on desktop
+                        if (isMobile && key !== "Shopping") return null;
                         return (
                             <SidebarItem
                                 key={key}
@@ -200,7 +194,9 @@ export default function SidebarMenu() {
                     })}
                 </>
             ) : (
-                <p className="mt-4 text-gray-500 text-center">Select exploration center to continue...</p>
+                <p className="mt-4 text-gray-500 text-center">
+                    Select exploration center to continue...
+                </p>
             )}
         </div>
     );

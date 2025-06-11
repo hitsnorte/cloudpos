@@ -11,6 +11,7 @@ import { fetchClassepreco } from '@/src/lib/apiclassepreco';
 import { fetchPreco } from "@/src/lib/apipreco";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { TiShoppingCart } from 'react-icons/ti';
+import { IoIosArrowBack } from "react-icons/io"
 import AddProductModal from '@/src/components/modals/POS/addProduct/page';
 import CartPage from '@/src/components/modals/POS/cart/page';
 
@@ -276,7 +277,17 @@ export default function Cart() {
     };
 
     const [currentCart, setCurrentCart] = useState([]);
+    const handleBackToTables = () => {
+        const previousPage = localStorage.getItem("previousPage");
+        console.log("Previous Page:", previousPage);
 
+        if (previousPage) {
+            localStorage.removeItem("previousPage");
+            router.push(previousPage);
+        } else {
+            router.back();
+        }
+    };
 
     // Carregar produtos do localStorage ao abrir o carrinho
     useEffect(() => {

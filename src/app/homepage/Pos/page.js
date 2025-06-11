@@ -100,6 +100,24 @@ export default function ProductGroups() {
     };
 
     useEffect(() => {
+        const mesa = localStorage.getItem('selectedMesa');
+        if (mesa) {
+            try {
+                setSelectedTable(JSON.parse(mesa));
+            } catch (err) {
+                console.error('Erro ao ler mesa do localStorage:', err);
+            }
+        }
+    }, []);
+
+    useEffect(() => {
+        const mesa = localStorage.getItem('selectedMesa');
+        if (mesa) {
+            setSelectedTable(JSON.parse(mesa));
+        }
+    }, []);
+
+    useEffect(() => {
         const fetchMesas = async () => {
             try {
                 const res = await fetch('/api/mesas', {
@@ -247,24 +265,6 @@ export default function ProductGroups() {
         }
     };
 
-    const params = useParams();
-
-    useEffect(() => {
-    const storedMesa = localStorage.getItem('selectedMesa');
-    if (storedMesa) {
-      const mesaObj = JSON.parse(storedMesa);
-      console.log('Mesa do localStorage:', mesaObj);
-
-      // Se o ID_Mesa bate com o parâmetro da URL
-      if (mesaObj.ID_Mesa?.toString() === params.id) {
-        setSelectedTable(mesaObj);
-      } else {
-        console.warn('ID_Mesa não bate com params.id', mesaObj.ID_Mesa, params.id);
-      }
-    } else {
-      console.warn('Nenhuma mesa encontrada no localStorage');
-    }
-  }, [params.id]);
 
     useEffect(() => {
         const loadPostosWithSalas = async () => {
@@ -901,37 +901,29 @@ export default function ProductGroups() {
             <div className="relative">
                 {selectedTable && (
                     <>
-                        <button
-          onClick={() => {
-            localStorage.removeItem('selectedMesa');
-            setSelectedTable(null);
-            router.back();
-          }}
-          className="absolute ml-4 mt-4 px-4 py-2 rounded bg-[#FC9D25] text-white hover:bg-[#e38d20] flex items-center gap-2 z-20"
-        >
-          <IoIosArrowBack size={16} />
-          <span>Mesas</span>
-        </button>
+                        <div className="flex items-center justify-between mt-4 px-6">
+                            
 
-                        <div className="flex items-center justify-center space-x-4 mt-4">
-                            <button
-                                onClick={() => setViewType('groups')}
-                                className={`px-4 py-2 rounded ${viewType === 'groups' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
-                            >
-                                Groups
-                            </button>
-                            <button
-                                onClick={() => setViewType('families')}
-                                className={`px-4 py-2 rounded ${viewType === 'families' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
-                            >
-                                Families
-                            </button>
-                            <button
-                                onClick={() => setViewType('subfamilies')}
-                                className={`px-4 py-2 rounded ${viewType === 'subfamilies' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
-                            >
-                                Subfamilies
-                            </button>
+                            <div className="flex space-x-4">
+                                <button
+                                    onClick={() => setViewType('groups')}
+                                    className={`px-4 py-2 rounded ${viewType === 'groups' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
+                                >
+                                    Groups
+                                </button>
+                                <button
+                                    onClick={() => setViewType('families')}
+                                    className={`px-4 py-2 rounded ${viewType === 'families' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
+                                >
+                                    Families
+                                </button>
+                                <button
+                                    onClick={() => setViewType('subfamilies')}
+                                    className={`px-4 py-2 rounded ${viewType === 'subfamilies' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
+                                >
+                                    Subfamilies
+                                </button>
+                            </div>
                         </div>
 
                         <div className="py-5 px-6">

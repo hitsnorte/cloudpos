@@ -12,6 +12,8 @@ export default function Tables() {
     const [selectedTable, setSelectedTable] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [clientNumber, setClienteNumber] = useState(null);
+    const [tempTable, setTempTable] = useState(null);
+
     const params = useParams();
     const router = useRouter();
 
@@ -61,17 +63,18 @@ export default function Tables() {
     };
 
     const handleClientNumberSubmit = (clientNumber) => {
-        if (clientNumber.trim() !== '' && selectedTable) {
-            console.log("Número de clientes:", clientNumber);
-            setClienteNumber(clientNumber);
-            setShowModal(false);
+    if (clientNumber.trim() !== '' && tempTable) {
+        console.log("Número de clientes:", clientNumber);
+        setClienteNumber(clientNumber);
+        setShowModal(false);
 
-            setTimeout(() => {
-                localStorage.setItem("selectedMesa", JSON.stringify(selectedTable));
-                router.push(`/homepage/Pos/cart/${selectedTable.ID_Mesa}`);
-            }, 300);
-        }
-    };
+        setTimeout(() => {
+            localStorage.setItem("selectedMesa", JSON.stringify(tempTable));
+            localStorage.setItem("previousPage", window.location.pathname);
+            router.push(`/homepage/Pos/cart/${tempTable.ID_Mesa}`);
+        }, 300);
+    }
+};
 
     const handleBack = () => {
         const postoId = localStorage.getItem("postoId");
@@ -81,6 +84,8 @@ export default function Tables() {
             router.back(); // fallback
         }
     };
+
+
     return (
         <>
             <div className="flex items-center px-6 mt-4 mb-2">
@@ -98,6 +103,7 @@ export default function Tables() {
                         key={index}
                         onClick={() => {
                             setSelectedTable(table); // <- adiciona isso
+                            setTempTable(table); // ← armazena temporariamente
                             setShowModal(true);
                         }}
                         className="w-full h-40 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center cursor-pointer hover:bg-gray-100 transition"

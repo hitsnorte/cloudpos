@@ -785,7 +785,7 @@ export default function ProductGroups() {
                             </div>
 
                             {/* Conteúdo do Carrinho */}
-                            <div className="p-7 flex flex-col h-[calc(100%-150px)] overflow-y-auto  -mt-5">
+                            <div className="items p-7 flex flex-col h-[calc(100%-150px)] overflow-y-auto  -mt-5">
                                 {cartItems.length === 0 ? (
                                     <p className="text-sm">Your Shopping Cart is Empty.</p>
                                 ) : (

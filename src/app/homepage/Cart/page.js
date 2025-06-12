@@ -754,7 +754,7 @@ export default function ProductGroups() {
                                 className="fixed bottom-6 right-6 md:top-6 md:right-15 md:bottom-auto text-3xl text-[#191919] hover:text-[#FC9D25] transition z-50"
                                 onClick={toggleSidebar}
                             >
-                            <TiShoppingCart />
+                                <TiShoppingCart />
                                 {cartItems.length > 0 && (
                                     <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                                         {cartItems.reduce((total, item) => total + item.quantity, 0)}
@@ -773,19 +773,19 @@ export default function ProductGroups() {
 
                         {/* Sidebar Carrinho */}
                         <div
-                            className={`cart fixed top-0 right-0 h-full w-[400px] max-w-full bg-[#F0F0F0] shadow-lg transition-transform duration-300 z-40 ${isOpen ? 'translate-x-0' : 'translate-x-full'
+                            className={`cart fixed top-0 right-0 h-full w-[400px] max-w-full bg-[#F0F0F0] z-[9999] shadow-lg transition-transform duration-300 z-40 ${isOpen ? 'translate-x-0' : 'translate-x-full'
                                 }`}
                         >
                             {/* Cabeçalho */}
                             <div className="sticky top-0 z-10 bg-[#F0F0F0] flex items-center justify-between p-5 ml-1 mb-4">
-                                <h2 className="text-l font-semibold ml-1">Your Shopping Cart</h2>
+                                <h2 className="text-l font-semibold ml-1 mt-5">Your Shopping Cart</h2>
                                 <button onClick={toggleSidebar} className="text-l text-[#FC9D25]">
                                     <span className="inline-block transform scale-150 font-thin mr-5">x</span>
                                 </button>
                             </div>
 
                             {/* Conteúdo do Carrinho */}
-                            <div className="items p-7 flex flex-col h-[calc(100%-150px)] overflow-y-auto">
+                            <div className="flex-1 overflow-y-auto px-4 py-2">
                                 {cartItems.length === 0 ? (
                                     <p className="text-sm">Your Shopping Cart is Empty.</p>
                                 ) : (

@@ -773,7 +773,7 @@ export default function ProductGroups() {
 
                         {/* Sidebar Carrinho */}
                         <div
-                            className={`cart fixed top-0 right-0 h-full w-[400px] max-w-full bg-[#F0F0F0] shadow-lg transition-transform duration-300 z-40 ${isOpen ? 'translate-x-0' : 'translate-x-full'
+                            className={`cart fixed top-0 right-0 h-full w-[400px] max-w-full bg-[#F0F0F0] z-[9999] shadow-lg transition-transform duration-300 ${isOpen ? 'translate-x-0' : 'translate-x-full'
                                 }`}
                         >
                             {/* Cabeçalho */}

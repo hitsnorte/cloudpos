@@ -145,22 +145,22 @@ export default function CartPage({
                 <div className="absolute bottom-0 w-full bg-white p-3 border-white">
                     <div className="flex justify-between mb-2">
                         <span className="text-sm font-bold ml-2">Total:</span>
-                        <span className="text-sm font-bold mr-2">€{total.toFixed(2)}</span>
+                        <span className="text-sm font-bold mr-1">€{total.toFixed(2)}</span>
                     </div>
                     <div className="flex gap-3">
                         {showConfirm && <div className="fixed inset-0 bg-opacity-30 z-40" />}
                         <div className="relative z-50 inline-block">
                             <button
                                 onClick={() => setShowConfirm(true)}
-                                className="w-12 ml-2 border border-[#ff0000] text-[#ff0000] rounded py-2 text-sm hover:bg-[#fff4e6] transition flex items-center justify-center gap-2"
+                                className="w-12 ml-2 border border-[#ff0000] text-[#ff0000] rounded py-2 text-sm hover:bg-[#fff4e6] transition flex items-center justify-center gap-1"
                             >
                                 <CiTrash className="text-sm" size={20} />
                             </button>
                         </div>
-                        <button className="w-1/2 mr-2 bg-[#FC9D25] text-white rounded py-2 text-sm hover:bg-[#e88a1c] transition flex items-center justify-center gap-2">
+                        <button className="w-50  bg-[#FC9D25] text-white rounded py-2 text-sm hover:bg-[#e88a1c] transition flex items-center justify-center gap-1">
                             Cancel
                         </button>
-                        <button className="w-1/2 mr-2 bg-[#FC9D25] text-white rounded py-2 text-sm hover:bg-[#e88a1c] transition flex items-center justify-center gap-2">
+                        <button className="w-50  bg-[#FC9D25] text-white rounded py-2 text-sm hover:bg-[#e88a1c] transition flex items-center justify-center gap-1">
                             Order
                         </button>
                     </div>

@@ -902,7 +902,6 @@ export default function ProductGroups() {
                 {selectedTable && (
                     <>
                         <div className="flex items-center justify-between mt-4 px-6">
-                            
 
                             <div className="flex space-x-4">
                                 <button
@@ -1258,7 +1257,7 @@ export default function ProductGroups() {
                     </div>
 
                     {/* Cart Items */}
-                    <div className="p-7 flex flex-col h-[calc(100%-150px)] overflow-y-auto -mt-5">
+                    <div className="items p-7 flex flex-col h-[calc(100%-150px)] overflow-y-auto ">
                         {getCartItems().length === 0 ? (
                             <p className="text-sm">Your order is empty.</p>
                         ) : (

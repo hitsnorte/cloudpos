@@ -47,22 +47,20 @@ export default function CartPage({
             )}
 
             <div
-                className={`cart fixed top-0 -right-4 h-full w-[400px] max-w-full bg-[#F0F0F0] shadow-lg transition-transform duration-300 z-40 overflow-hidden flex flex-col ${
-                    isOpen ? "translate-x-0" : "translate-x-[100%]"
+                className={`cart fixed top-0 right-0 h-full w-[400px] max-w-full bg-[#F0F0F0] shadow-lg transition-transform duration-300 z-40 ${
+                    isOpen ? "translate-x-0" : "translate-x-full"
                 }`}
             >
-                {/* Header */}
-                <div className=" header flex items-center justify-between p-5 ml-1">
+            {/* Header */}
+                <div className="sticky top-0 z-10 bg-[#F0F0F0] flex items-center justify-between p-5 ml-1">
                     <h2 className="text-l font-semibold ml-1">Your order</h2>
                     <button onClick={toggleSidebar} className="text-l text-[#FC9D25]">
-                        <span className="inline-block transform scale-150 font-thin mr-5">
-                            x
-                        </span>
+                        <span className="inline-block transform scale-150 font-thin mr-5">x</span>
                     </button>
                 </div>
 
                 {/* Cart Items */}
-                <div className="p-7 flex flex-col h-[calc(100%-150px)] overflow-y-auto -mt-5">
+                <div className="items p-7 flex flex-col h-[calc(100%-150px)] overflow-y-auto ">
                     {getCartItems().length === 0 ? (
                         <p className="text-sm">Your order is empty.</p>
                     ) : (

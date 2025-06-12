@@ -2,4 +2,8 @@
     .cart {
         width: 100%;
     }
+
+    .items{
+        margin-top: 60px;
+    }
 }

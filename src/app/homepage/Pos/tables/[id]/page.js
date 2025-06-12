@@ -14,6 +14,24 @@ export default function Tables() {
     const [clientNumber, setClienteNumber] = useState(null);
     const params = useParams();
     const router = useRouter();
+    const [postoId, setPostoId] = useState(null); // ✅ correto em JS
+
+    useEffect(() => {
+        // Certifica-te que está a correr no cliente
+        const savedPostoId = typeof window !== 'undefined'
+            ? localStorage.getItem('selectedPostoId')
+            : null;
+
+        setPostoId(savedPostoId);
+    }, []);
+
+    const handleBack = () => {
+        if (postoId) {
+            router.push(`/homepage/Pos/rooms/${postoId}`);
+        } else {
+            alert('Não foi possível encontrar o Posto ID.');
+        }
+    };
 
     useEffect(() => {
         const storedID = localStorage.getItem('selectedProperty');
@@ -76,7 +94,12 @@ export default function Tables() {
     return (
         <>
             <h1 className="text-3xl font-semibold">Tables</h1>
-
+            <button
+                onClick={handleBack}
+                className="mb-6 px-4 py-2 bg-[#FC9D25] text-white rounded hover:bg-[#e38d1f] transition"
+            >
+                ← Voltar para Rooms
+            </button>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-6">
                 {tables.map((table, index) => (
                     <div

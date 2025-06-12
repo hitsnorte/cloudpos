@@ -69,6 +69,7 @@ export default function Rooms() {
                         key={index}
                         onClick={() => {
                             localStorage.setItem("selectedSala", JSON.stringify(room));
+                            localStorage.setItem("selectedPostoId", params.id.toString()); // ← esta linha basta
                             router.push(`/homepage/Pos/tables/${room.ID_SALA}`);
                         }}
                         className="w-72 h-48 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition"

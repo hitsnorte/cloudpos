@@ -52,7 +52,7 @@ export default function CartPage({
                 }`}
             >
             {/* Header */}
-                <div className="sticky top-0 z-10 bg-[#F0F0F0] flex items-center justify-between p-5 ml-1">
+                <div className=" header sticky z-10 bg-[#F0F0F0] flex items-center justify-between p-5 ml-1">
                     <h2 className="text-l font-semibold ml-1">Your order</h2>
                     <button onClick={toggleSidebar} className="text-l text-[#FC9D25]">
                         <span className="inline-block transform scale-150 font-thin mr-5">x</span>

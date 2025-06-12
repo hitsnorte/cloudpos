@@ -60,16 +60,28 @@ export default function Rooms() {
         fetchFilteredRooms();
     }, [propertyID, params?.postoId]);
 
+    const handleBack = () => {
+        router.push('/homepage/Pos/outlets');
+    };
+
     return (
         <>
-            <h1 className="text-3xl font-semibold px-4">Rooms</h1>
+            <div className="flex items-center px-6 mt-4 mb-2">
+                <button
+                    onClick={handleBack}
+                    className="px-3 -ml-2 py-1 bg-[#FC9D25] text-white rounded hover:bg-gray-300 transition"
+                >
+                    ← Outlets
+                </button>
+                <h1 className="text-3xl font-semibold ml-4">Rooms</h1>
+            </div>
             <div className="px-4 flex flex-wrap gap-6 p-6">
                 {rooms.map((room, index) => (
                     <div
                         key={index}
                         onClick={() => {
                             localStorage.setItem("selectedSala", JSON.stringify(room));
-                            localStorage.setItem("selectedPostoId", params.id.toString()); // ← esta linha basta
+                            localStorage.setItem("postoId", params.id); // ← adicione isto
                             router.push(`/homepage/Pos/tables/${room.ID_SALA}`);
                         }}
                         className="w-72 h-48 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition"

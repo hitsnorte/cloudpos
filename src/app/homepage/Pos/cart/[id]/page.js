@@ -1,8 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { FaMagnifyingGlass } from 'react-icons/fa6'; // Certifique-se de importar isso
-
 import { fetchGrup } from '@/src/lib/apigroup'
 import { fetchProduct } from '@/src/lib/apiproduct'
 import { fetchFamily } from '@/src/lib/apifamily'
@@ -10,10 +9,9 @@ import { fetchIva } from '@/src/lib/apiiva';
 import { fetchSubfamily } from '@/src/lib/apisubfamily';
 import { fetchClassepreco } from '@/src/lib/apiclassepreco';
 import { fetchPreco } from "@/src/lib/apipreco";
-
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { TiShoppingCart } from 'react-icons/ti';
-
+import { IoIosArrowBack } from "react-icons/io"
 import AddProductModal from '@/src/components/modals/POS/addProduct/page';
 import CartPage from '@/src/components/modals/POS/cart/page';
 
@@ -39,6 +37,9 @@ export default function Cart() {
     const [posto, setPosto] = useState(null);
     const [sala, setSala] = useState(null);
     const [mesa, setMesa] = useState(null);
+
+    const router = useRouter();
+
 
     useEffect(() => {
         const storedPosto = JSON.parse(localStorage.getItem("selectedPosto"));
@@ -280,6 +281,17 @@ export default function Cart() {
 
     const [currentCart, setCurrentCart] = useState([]);
 
+    const handleBackToTables = () => {
+        const previousPage = localStorage.getItem("previousPage");
+        console.log("Previous Page:", previousPage);
+
+        if (previousPage) {
+            localStorage.removeItem("previousPage");
+            router.push(previousPage);
+        } else {
+            router.back();
+        }
+    };
 
     // Carregar produtos do localStorage ao abrir o carrinho
     useEffect(() => {
@@ -318,17 +330,17 @@ export default function Cart() {
     return (
         <>
             <div className="flex items-center justify-center space-x-4 mt-4">
-                    <button
-                        className="fixed top-6 right-15 z-20 text-3xl text-[#191919] hover:text-[#FC9D25] transition"
-                        onClick={() => setIsCartOpen(true)}
-                    >
-                        <TiShoppingCart />
-                        {currentCart.length > 0 && (
-                            <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                                {currentCart.reduce((total, item) => total + item.quantity, 0)}
-                            </span>
-                        )}
-                    </button>
+                <button
+                    className="fixed top-6 right-15 z-20 text-3xl text-[#191919] hover:text-[#FC9D25] transition"
+                    onClick={() => setIsCartOpen(true)}
+                >
+                    <TiShoppingCart />
+                    {currentCart.length > 0 && (
+                        <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                            {currentCart.reduce((total, item) => total + item.quantity, 0)}
+                        </span>
+                    )}
+                </button>
 
                 {isCartOpen && (
                     <CartPage
@@ -339,24 +351,55 @@ export default function Cart() {
                         removeItem={removeItem}
                     />
                 )}
-                <button
-                    onClick={() => setViewType('groups')}
-                    className={`px-4 py-2 rounded ${viewType === 'groups' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
-                >
-                    Groups
-                </button>
-                <button
-                    onClick={() => setViewType('families')}
-                    className={`px-4 py-2 rounded ${viewType === 'families' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
-                >
-                    Families
-                </button>
-                <button
-                    onClick={() => setViewType('subfamilies')}
-                    className={`px-4 py-2 rounded ${viewType === 'subfamilies' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
-                >
-                    Subfamilies
-                </button>
+
+                <div className="flex items-center justify-between w-full px-4 relative">
+                    {/* Botão "Mesas" à esquerda */}
+                    <div className="flex-1">
+                        <button
+                            onClick={handleBackToTables}
+                            className="px-4 py-2 ml-2 rounded bg-[#FC9D25] text-white hover:bg-[#e38d20] flex items-center gap-2"
+                        >
+                            <IoIosArrowBack size={16} />
+                            <span>Mesas</span>
+                        </button>
+                    </div>
+
+                    {/* Botões centrais */}
+                    <div className="flex-1 flex justify-center">
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => setViewType('groups')}
+                                className={`px-4 py-2 rounded ${viewType === 'groups'
+                                        ? 'bg-[#FC9D25] text-white'
+                                        : 'bg-gray-200 text-[#191919]'
+                                    }`}
+                            >
+                                Groups
+                            </button>
+                            <button
+                                onClick={() => setViewType('families')}
+                                className={`px-4 py-2 rounded ${viewType === 'families'
+                                        ? 'bg-[#FC9D25] text-white'
+                                        : 'bg-gray-200 text-[#191919]'
+                                    }`}
+                            >
+                                Families
+                            </button>
+                            <button
+                                onClick={() => setViewType('subfamilies')}
+                                className={`px-4 py-2 rounded ${viewType === 'subfamilies'
+                                        ? 'bg-[#FC9D25] text-white'
+                                        : 'bg-gray-200 text-[#191919]'
+                                    }`}
+                            >
+                                Subfamilies
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Espaço à direita para balancear visualmente */}
+                    <div className="flex-1" />
+                </div>
             </div>
 
             <div className="py-5 px-6">

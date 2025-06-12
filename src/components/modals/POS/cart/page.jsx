@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { TiShoppingCart } from "react-icons/ti";
 import { CiTrash } from "react-icons/ci";
+import "./style.css";
 
 export default function CartPage({
     currentCart,
@@ -26,7 +27,7 @@ export default function CartPage({
             {/* Carrinho */}
             {!isOpen && selectedTable && (
                 <button
-                    className="fixed top-6 right-15 z-50 text-3xl text-[#191919] hover:text-[#FC9D25] transition"
+                    className="fixed bottom-6 right-6 md:top-6 md:right-15 md:bottom-auto text-3xl text-[#191919] hover:text-[#FC9D25] transition z-50"
                     onClick={toggleSidebar}
                 >
                     <TiShoppingCart />
@@ -46,11 +47,12 @@ export default function CartPage({
             )}
 
             <div
-                className={`fixed top-0 -right-4 h-full w-[400px] max-w-full bg-[#F0F0F0] shadow-lg transition-transform duration-300 z-40 overflow-hidden ${isOpen ? "translate-x-0" : "translate-x-[100%]"
-                    }`}
+                className={`cart fixed top-0 -right-4 h-full w-[400px] max-w-full bg-[#F0F0F0] shadow-lg transition-transform duration-300 z-40 overflow-hidden flex flex-col ${
+                    isOpen ? "translate-x-0" : "translate-x-[100%]"
+                }`}
             >
                 {/* Header */}
-                <div className="sticky top-0 z-10 bg-[#F0F0F0] flex items-center justify-between p-5 ml-1">
+                <div className=" header flex items-center justify-between p-5 ml-1">
                     <h2 className="text-l font-semibold ml-1">Your order</h2>
                     <button onClick={toggleSidebar} className="text-l text-[#FC9D25]">
                         <span className="inline-block transform scale-150 font-thin mr-5">

@@ -100,6 +100,24 @@ export default function ProductGroups() {
     };
 
     useEffect(() => {
+        const mesa = localStorage.getItem('selectedMesa');
+        if (mesa) {
+            try {
+                setSelectedTable(JSON.parse(mesa));
+            } catch (err) {
+                console.error('Erro ao ler mesa do localStorage:', err);
+            }
+        }
+    }, []);
+
+    useEffect(() => {
+        const mesa = localStorage.getItem('selectedMesa');
+        if (mesa) {
+            setSelectedTable(JSON.parse(mesa));
+        }
+    }, []);
+
+    useEffect(() => {
         const fetchMesas = async () => {
             try {
                 const res = await fetch('/api/mesas', {
@@ -132,52 +150,52 @@ export default function ProductGroups() {
         fetchMesas();
     }, []);
 
-   const selectedPostoVPosto = useMemo(() => {
-    if (!selectedCardPath) return null;
-    const parts = selectedCardPath.split("/");
-    return parts[parts.length - 1]; // extrai o VPosto (ex: "posto1")
-}, [selectedCardPath]);
+    const selectedPostoVPosto = useMemo(() => {
+        if (!selectedCardPath) return null;
+        const parts = selectedCardPath.split("/");
+        return parts[parts.length - 1]; // extrai o VPosto (ex: "posto1")
+    }, [selectedCardPath]);
 
-const cardPaths = useMemo(() => {
-    if (!postosComSalas || !selectedPostoVPosto) return [];
+    const cardPaths = useMemo(() => {
+        if (!postosComSalas || !selectedPostoVPosto) return [];
 
-    const posto = postosComSalas.find(p => p.VPosto === selectedPostoVPosto);
-    if (!posto || !posto.salas) return [];
+        const posto = postosComSalas.find(p => p.VPosto === selectedPostoVPosto);
+        if (!posto || !posto.salas) return [];
 
-    return posto.salas.map(sala => ({
-        label: sala.Descricao,
-        value: sala.ID_SALA,
-        path: `/homepage/${posto.VPosto}/sala/${sala.ID_SALA}`,
-    }));
-}, [postosComSalas, selectedPostoVPosto]);
+        return posto.salas.map(sala => ({
+            label: sala.Descricao,
+            value: sala.ID_SALA,
+            path: `/homepage/${posto.VPosto}/sala/${sala.ID_SALA}`,
+        }));
+    }, [postosComSalas, selectedPostoVPosto]);
 
 
-const cardPaths3 = useMemo(() => {
-    if (!selectedRow || !salasComMesas.length || !postosComSalas.length) return [];
+    const cardPaths3 = useMemo(() => {
+        if (!selectedRow || !salasComMesas.length || !postosComSalas.length) return [];
 
-    const salaId = parseInt(selectedRow.split("/").pop());
+        const salaId = parseInt(selectedRow.split("/").pop());
 
-    // Encontrar a sala selecionada
-    const salaSelecionada = salasComMesas.find(s => s.ID_SALA === salaId);
-    if (!salaSelecionada || !salaSelecionada.mesas) return [];
+        // Encontrar a sala selecionada
+        const salaSelecionada = salasComMesas.find(s => s.ID_SALA === salaId);
+        if (!salaSelecionada || !salaSelecionada.mesas) return [];
 
-    // Encontrar o posto que contém essa sala
-    const postoQueContemSala = postosComSalas.find(posto =>
-        posto.salas?.some(sala => sala.ID_SALA === salaId)
-    );
+        // Encontrar o posto que contém essa sala
+        const postoQueContemSala = postosComSalas.find(posto =>
+            posto.salas?.some(sala => sala.ID_SALA === salaId)
+        );
 
-    const postoId = postoQueContemSala?.Icodi ?? null;
-    if (!postoId) return [];
+        const postoId = postoQueContemSala?.Icodi ?? null;
+        if (!postoId) return [];
 
-    return salaSelecionada.mesas.map(mesa => ({
-        label: mesa.Descricao,
-        value: mesa.ID_Mesa,
-        path: `/mesas/${mesa.ID_Mesa}`,
-        Posto: String(postoId),      // compatível com mesasEmUso
-        ID_sala: salaId,
-        ID_Mesa: mesa.ID_Mesa,
-    }));
-}, [selectedRow, salasComMesas, postosComSalas]);
+        return salaSelecionada.mesas.map(mesa => ({
+            label: mesa.Descricao,
+            value: mesa.ID_Mesa,
+            path: `/mesas/${mesa.ID_Mesa}`,
+            Posto: String(postoId),      // compatível com mesasEmUso
+            ID_sala: salaId,
+            ID_Mesa: mesa.ID_Mesa,
+        }));
+    }, [selectedRow, salasComMesas, postosComSalas]);
 
 
 
@@ -246,6 +264,7 @@ const cardPaths3 = useMemo(() => {
             setError(err.message);
         }
     };
+
 
     useEffect(() => {
         const loadPostosWithSalas = async () => {
@@ -609,7 +628,7 @@ const cardPaths3 = useMemo(() => {
         }
     };
 
-    
+
 
     if (status === "loading" || loading) {
         return <LoadingBackdrop open={true} />;
@@ -724,6 +743,9 @@ const cardPaths3 = useMemo(() => {
     const handleCloseModal = () => {
         setShowModal(false);
     };
+
+
+
     return (
         <>
             {!selectedCardPath && !selectedRow && !selectedTable && (
@@ -879,36 +901,29 @@ const cardPaths3 = useMemo(() => {
             <div className="relative">
                 {selectedTable && (
                     <>
-                        <button
-                            onClick={() => {
-                                setSelectedCardPath(null);
-                                setSelectedTable(null);
-                            }}
-                            className="ml-4 px-4 py-2 rounded bg-[#FC9D25] text-white hover:bg-[#e38d20] flex items-center gap-2"
-                        >
-                            <IoIosArrowBack size={16} />
-                            <span>Mesas</span>
-                        </button>
+                        <div className="flex items-center justify-between mt-4 px-6">
+                            
 
-                        <div className="flex items-center justify-center space-x-4 mt-4">
-                            <button
-                                onClick={() => setViewType('groups')}
-                                className={`px-4 py-2 rounded ${viewType === 'groups' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
-                            >
-                                Groups
-                            </button>
-                            <button
-                                onClick={() => setViewType('families')}
-                                className={`px-4 py-2 rounded ${viewType === 'families' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
-                            >
-                                Families
-                            </button>
-                            <button
-                                onClick={() => setViewType('subfamilies')}
-                                className={`px-4 py-2 rounded ${viewType === 'subfamilies' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
-                            >
-                                Subfamilies
-                            </button>
+                            <div className="flex space-x-4">
+                                <button
+                                    onClick={() => setViewType('groups')}
+                                    className={`px-4 py-2 rounded ${viewType === 'groups' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
+                                >
+                                    Groups
+                                </button>
+                                <button
+                                    onClick={() => setViewType('families')}
+                                    className={`px-4 py-2 rounded ${viewType === 'families' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
+                                >
+                                    Families
+                                </button>
+                                <button
+                                    onClick={() => setViewType('subfamilies')}
+                                    className={`px-4 py-2 rounded ${viewType === 'subfamilies' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
+                                >
+                                    Subfamilies
+                                </button>
+                            </div>
                         </div>
 
                         <div className="py-5 px-6">
@@ -1212,7 +1227,7 @@ const cardPaths3 = useMemo(() => {
                 {/* Carrinho*/}
                 {!isOpen && selectedTable && (
                     <button
-                        className="fixed top-6 right-15 z-50 text-3xl text-[#191919] hover:text-[#FC9D25] transition"
+                        className="fixed bottom-6 right-6 md:top-6 md:right-15 md:bottom-auto text-3xl text-[#191919] hover:text-[#FC9D25] transition z-50"
                         onClick={toggleSidebar}
                     >
                         <TiShoppingCart />
@@ -1225,11 +1240,14 @@ const cardPaths3 = useMemo(() => {
                 )}
 
                 {isOpen && (
-                    <div className="fixed inset-0 bg-black/40 z-30" onClick={toggleSidebar}></div>
+                    <div
+                        className="fixed inset-0 z-30 bg-[#F0F0F0] md:bg-black/40 block md:block"
+                        onClick={toggleSidebar}
+                    />
                 )}
 
                 <div
-                    className={`fixed top-0 right-0 h-full w-[400px] max-w-full bg-[#F0F0F0] shadow-lg transition-transform duration-300 z-40 ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
+                    className={`fixed top-0 right-0 h-full w-[400px] max-w-full bg-[#F0F0F0] shadow-lg transition-transform duration-300 z-40 ${isOpen ? 'translate-x-0' : 'translate-x-full'}` }
                 >
                     {/* Header */}
                     <div className="sticky top-0 z-10 bg-[#F0F0F0] flex items-center justify-between p-5 ml-1">

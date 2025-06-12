@@ -21,6 +21,7 @@ import { Card, CardBody } from "@heroui/react";
 import { useSession } from "next-auth/react"; // Import useSession
 import { Plus } from "lucide-react";
 import { IoIosArrowBack } from "react-icons/io";
+import "./style.css";
 import {
     Modal,
     ModalContent,
@@ -750,10 +751,10 @@ export default function ProductGroups() {
                         {/* Botão Carrinho */}
                         {!isOpen && (
                             <button
-                                className=" fixed top-6 right-15 z-50 text-3xl text-[#191919] hover:text-[#FC9D25] transition"
+                                className="fixed bottom-6 right-6 md:top-6 md:right-15 md:bottom-auto text-3xl text-[#191919] hover:text-[#FC9D25] transition z-50"
                                 onClick={toggleSidebar}
                             >
-                                <TiShoppingCart />
+                            <TiShoppingCart />
                                 {cartItems.length > 0 && (
                                     <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                                         {cartItems.reduce((total, item) => total + item.quantity, 0)}
@@ -761,20 +762,22 @@ export default function ProductGroups() {
                                 )}
                             </button>
                         )}
+
                         {/* Overlay escuro */}
                         {isOpen && (
                             <div
-                                className="fixed inset-0 bg-black/40 z-30"
+                                className="fixed inset-0 z-30 bg-[#F0F0F0] md:bg-black/40 block md:block"
                                 onClick={toggleSidebar}
-                            ></div>
+                            />
                         )}
+
                         {/* Sidebar Carrinho */}
                         <div
-                            className={`fixed top-0 right-0 h-full w-[400px] max-w-full bg-[#F0F0F0] shadow-lg transition-transform duration-300 z-40 ${isOpen ? 'translate-x-0' : 'translate-x-full'
+                            className={`cart fixed top-0 right-0 h-full w-[400px] max-w-full bg-[#F0F0F0] shadow-lg transition-transform duration-300 z-40 ${isOpen ? 'translate-x-0' : 'translate-x-full'
                                 }`}
                         >
                             {/* Cabeçalho */}
-                            <div className="sticky top-0 z-10 bg-[#F0F0F0] flex items-center justify-between p-5 ml-1">
+                            <div className="sticky top-0 z-10 bg-[#F0F0F0] flex items-center justify-between p-5 ml-1 mb-4">
                                 <h2 className="text-l font-semibold ml-1">Your Shopping Cart</h2>
                                 <button onClick={toggleSidebar} className="text-l text-[#FC9D25]">
                                     <span className="inline-block transform scale-150 font-thin mr-5">x</span>
@@ -784,7 +787,7 @@ export default function ProductGroups() {
                             {/* Conteúdo do Carrinho */}
                             <div className="p-7 flex flex-col h-[calc(100%-150px)] overflow-y-auto  -mt-5">
                                 {cartItems.length === 0 ? (
-                                    <p className="text-sm">Your Shopping Card Is Empty.</p>
+                                    <p className="text-sm">Your Shopping Cart is Empty.</p>
                                 ) : (
                                     <div className="bg-white rounded-l border border-white pt-2 px-4 flex flex-col">
                                         {cartItems.map((item, idx) => (
@@ -1016,74 +1019,81 @@ export default function ProductGroups() {
                         </div>
                     )}
 
-                    {/* Modal do carrinho */}
+
                     {cartOpen && (
-                        <div className="fixed top-16 right-16">
-                            <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-4 relative">
-                                <button
-                                    onClick={toggleCart}
-                                    className="absolute top-4 right-4 text-[#191919] text-lg"
-                                >
-                                    X
-                                </button>
-
-                                <h2 className="text-xl font-semibold text-[#191919] mb-7">Your Cart</h2>
-                                {cartItems.length === 0 ? (
-                                    <p className="text-[#191919] text-left">No products added.</p>
-                                ) : (
-                                    <ul className="space-y-2">
-                                        {cartItems.map((item, index) => (
-                                            <li
-                                                key={item.id || `item-${index}`}
-                                                className="flex justify-between items-center border-b pb-2"
-                                            >
-                                                <div>
-                                                    <p className="font-medium text-[#191919] px-5">
-                                                        {item.name} - <span className="text-[#FC9D25] font-semibold">{item.price.toFixed(2)}€</span>
-                                                    </p>
-
-                                                    <div className="px-5 text-sm text-gray-500 flex items-center gap-2">
-                                                        Qty:
-                                                        <input
-                                                            type="number"
-                                                            min="1"
-                                                            value={item.count}
-                                                            onChange={(e) => {
-                                                                const newCount = parseInt(e.target.value);
-                                                                if (newCount >= 1) {
-                                                                    setCartItems((prev) =>
-                                                                        prev.map((ci) =>
-                                                                            ci.id === item.id ? { ...ci, count: newCount } : ci
-                                                                        )
-                                                                    );
-                                                                }
-                                                            }}
-                                                            className="w-16 border rounded px-2 py-1 text-center"
-                                                        />
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-[#FC9D25] font-bold">...€</span>
-                                                    <button
-                                                        onClick={() => {
-                                                            setCartItems((prev) =>
-                                                                prev.filter((ci) => ci.id !== item.id)
-                                                            );
-                                                        }}
-                                                        className="text-red-500 hover:text-red-700 transition"
-                                                    >
-                                                        <IoTrashBinOutline size={20} />
-                                                    </button>
-                                                </div>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                )}
+                        <>
+                            {/* Fundo mobile */}
+                            <div className="fixed inset-0 bg-white opacity-80 z-40 ">
+                                <span className="text-white text-2xl">Overlay Visible</span>
                             </div>
-                        </div>
-                    )}
 
+                            {/* Modal do carrinho */}
+                            <div className="fixed top-16 right-16 z-50 sm:right-4 sm:left-4 sm:top-10">
+                                <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-4 relative">
+                                    <button
+                                        onClick={toggleCart}
+                                        className="absolute top-4 right-4 text-[#191919] text-lg"
+                                    >
+                                        X
+                                    </button>
+
+                                    <h2 className="text-xl font-semibold text-[#191919] mb-7">Your Cart</h2>
+                                    {cartItems.length === 0 ? (
+                                        <p className="text-[#191919] text-left">No products added.</p>
+                                    ) : (
+                                        <ul className="space-y-2">
+                                            {cartItems.map((item, index) => (
+                                                <li
+                                                    key={item.id || `item-${index}`}
+                                                    className="flex justify-between items-center border-b pb-2"
+                                                >
+                                                    <div>
+                                                        <p className="font-medium text-[#191919] px-5">
+                                                            {item.name} - <span className="text-[#FC9D25] font-semibold">{item.price.toFixed(2)}€</span>
+                                                        </p>
+
+                                                        <div className="px-5 text-sm text-gray-500 flex items-center gap-2">
+                                                            Qty:
+                                                            <input
+                                                                type="number"
+                                                                min="1"
+                                                                value={item.count}
+                                                                onChange={(e) => {
+                                                                    const newCount = parseInt(e.target.value);
+                                                                    if (newCount >= 1) {
+                                                                        setCartItems((prev) =>
+                                                                            prev.map((ci) =>
+                                                                                ci.id === item.id ? { ...ci, count: newCount } : ci
+                                                                            )
+                                                                        );
+                                                                    }
+                                                                }}
+                                                                className="w-16 border rounded px-2 py-1 text-center"
+                                                            />
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-[#FC9D25] font-bold">...€</span>
+                                                        <button
+                                                            onClick={() => {
+                                                                setCartItems((prev) =>
+                                                                    prev.filter((ci) => ci.id !== item.id)
+                                                                );
+                                                            }}
+                                                            className="text-red-500 hover:text-red-700 transition"
+                                                        >
+                                                            <IoTrashBinOutline size={20} />
+                                                        </button>
+                                                    </div>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                </div>
+                            </div>
+                        </>
+                    )}
 
                     <div className="p-6 space-y-4">
                         {viewType === 'groups' && filterByName(groupsWithProducts).map((group) => {

@@ -12,26 +12,10 @@ export default function Tables() {
     const [selectedTable, setSelectedTable] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [clientNumber, setClienteNumber] = useState(null);
+    const [tempTable, setTempTable] = useState(null);
+
     const params = useParams();
     const router = useRouter();
-    const [postoId, setPostoId] = useState(null); // ✅ correto em JS
-
-    useEffect(() => {
-        // Certifica-te que está a correr no cliente
-        const savedPostoId = typeof window !== 'undefined'
-            ? localStorage.getItem('selectedPostoId')
-            : null;
-
-        setPostoId(savedPostoId);
-    }, []);
-
-    const handleBack = () => {
-        if (postoId) {
-            router.push(`/homepage/Pos/rooms/${postoId}`);
-        } else {
-            alert('Não foi possível encontrar o Posto ID.');
-        }
-    };
 
     useEffect(() => {
         const storedID = localStorage.getItem('selectedProperty');
@@ -79,33 +63,47 @@ export default function Tables() {
     };
 
     const handleClientNumberSubmit = (clientNumber) => {
-        if (clientNumber.trim() !== '' && selectedTable) {
-            console.log("Número de clientes:", clientNumber);
-            setClienteNumber(clientNumber);
-            setShowModal(false);
+    if (clientNumber.trim() !== '' && tempTable) {
+        console.log("Número de clientes:", clientNumber);
+        setClienteNumber(clientNumber);
+        setShowModal(false);
 
-            setTimeout(() => {
-                localStorage.setItem("selectedMesa", JSON.stringify(selectedTable));
-                router.push(`/homepage/Pos/cart/${selectedTable.ID_Mesa}`);
-            }, 300);
+        setTimeout(() => {
+            localStorage.setItem("selectedMesa", JSON.stringify(tempTable));
+            localStorage.setItem("previousPage", window.location.pathname);
+            router.push(`/homepage/Pos/cart/${tempTable.ID_Mesa}`);
+        }, 300);
+    }
+};
+
+    const handleBack = () => {
+        const postoId = localStorage.getItem("postoId");
+        if (postoId) {
+            router.push(`/homepage/Pos/rooms/${postoId}`);
+        } else {
+            router.back(); // fallback
         }
     };
 
+
     return (
         <>
-            <h1 className="text-3xl font-semibold">Tables</h1>
-            <button
-                onClick={handleBack}
-                className="mb-6 px-4 py-2 bg-[#FC9D25] text-white rounded hover:bg-[#e38d1f] transition"
-            >
-                ← Voltar para Rooms
-            </button>
+            <div className="flex items-center px-6 mt-4 mb-2">
+                <button
+                    onClick={handleBack}
+                    className="px-3 -ml-2 py-1 bg-[#FC9D25] text-white rounded hover:bg-gray-300 transition"
+                >
+                    ← Rooms
+                </button>
+                <h1 className="text-3xl font-semibold ml-3">Tables</h1>
+            </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-6">
                 {tables.map((table, index) => (
                     <div
                         key={index}
                         onClick={() => {
                             setSelectedTable(table); // <- adiciona isso
+                            setTempTable(table); // ← armazena temporariamente
                             setShowModal(true);
                         }}
                         className="w-full h-40 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center cursor-pointer hover:bg-gray-100 transition"

@@ -785,7 +785,7 @@ export default function ProductGroups() {
                             </div>
 
                             {/* Conteúdo do Carrinho */}
-                            <div className="flex-1 overflow-y-auto px-4 py-2">
+                            <div className="flex-1 overflow-y-auto h-[calc(100%-150px)] px-4 py-2" style={{ maxHeight: 'calc(100vh - 200px)' }}>
                                 {cartItems.length === 0 ? (
                                     <p className="text-sm">Your Shopping Cart is Empty.</p>
                                 ) : (

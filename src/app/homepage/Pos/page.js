@@ -1182,7 +1182,7 @@ export default function ProductGroups() {
                                                 <span className="inline-block transform scale-150 font-thin">-</span>
                                             </button>
                                             <span className="px-2 py-1 bg-white text-sm font-medium text-[#191919] border-gray-300">
-                                                {count} un
+                                                {count}
                                             </span>
                                             <button
                                                 onClick={() => setCount((prev) => prev + 1)}

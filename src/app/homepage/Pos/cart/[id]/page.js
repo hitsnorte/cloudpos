@@ -352,71 +352,65 @@ export default function Cart() {
                     />
                 )}
 
-                <div className="flex items-center justify-between w-full px-4 relative">
-                    {/* Botão "Mesas" à esquerda */}
-                    <div className="flex-1">
-                        <button
-                            onClick={handleBackToTables}
-                            className="px-4 py-2 ml-2 rounded bg-[#FC9D25] text-white hover:bg-[#e38d20] flex items-center gap-2"
-                        >
-                            <IoIosArrowBack size={16} />
-                            <span>Mesas</span>
-                        </button>
-                    </div>
+                <div className="grid grid-cols-2 gap-4 md:flex md:items-center md:justify-center md:space-x-4">
+                    {/* Mesas button */}
+                    <button
+                        onClick={handleBackToTables}
+                        className="flex items-center gap-x-2 px-4 py-2 bg-[#FC9D25] text-white rounded justify-center"
+                    >
+                        <IoIosArrowBack size={16} />
+                        <span>Mesas</span>
+                    </button>
 
-                    {/* Botões centrais */}
-                    <div className="flex-1 flex justify-center">
-                        <div className="flex gap-2">
-                            <button
-                                onClick={() => setViewType('groups')}
-                                className={`px-4 py-2 rounded ${viewType === 'groups'
-                                    ? 'bg-[#FC9D25] text-white'
-                                    : 'bg-gray-200 text-[#191919]'
-                                    }`}
-                            >
-                                Groups
-                            </button>
-                            <button
-                                onClick={() => setViewType('families')}
-                                className={`px-4 py-2 rounded ${viewType === 'families'
-                                    ? 'bg-[#FC9D25] text-white'
-                                    : 'bg-gray-200 text-[#191919]'
-                                    }`}
-                            >
-                                Families
-                            </button>
-                            <button
-                                onClick={() => setViewType('subfamilies')}
-                                className={`px-4 py-2 rounded ${viewType === 'subfamilies'
-                                    ? 'bg-[#FC9D25] text-white'
-                                    : 'bg-gray-200 text-[#191919]'
-                                    }`}
-                            >
-                                Subfamilies
-                            </button>
-                        </div>
-                    </div>
+                    {/* Groups */}
+                    <button
+                        onClick={() => setViewType('groups')}
+                        className={`px-4 py-2 rounded ${
+                            viewType === 'groups' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'
+                        }`}
+                    >
+                        Groups
+                    </button>
 
-                    {/* Espaço à direita para balancear visualmente */}
-                    <div className="flex-1" />
+                    {/* Families */}
+                    <button
+                        onClick={() => setViewType('families')}
+                        className={`px-4 py-2 rounded ${
+                            viewType === 'families' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'
+                        }`}
+                    >
+                        Families
+                    </button>
+
+                    {/* Subfamilies */}
+                    <button
+                        onClick={() => setViewType('subfamilies')}
+                        className={`px-4 py-2 rounded ${
+                            viewType === 'subfamilies' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'
+                        }`}
+                    >
+                        Subfamilies
+                    </button>
+
+                    {/* Optional: Empty div for right spacing on md and above */}
+                    <div className="hidden md:block flex-1" />
                 </div>
             </div>
 
-            <div className="py-5 px-6">
-                <div className="mb-4 relative">
+            <div className="flex items-center justify-between space-x-4 flex-wrap md:flex-nowrap mt-4">
+                <div className="relative flex-1 min-w-[200px] md:min-w-auto">
                     <FaMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
                     <input
                         type="text"
                         placeholder="Pesquisar..."
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2"
                     />
                 </div>
             </div>
 
             <div className="p-6 space-y-4">
-
                 {viewType === 'groups' && (() => {
                     const filtered = filterByName(groupsWithProducts)
                         .filter(group => group.products && group.products.length > 0);

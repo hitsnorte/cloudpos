@@ -745,7 +745,6 @@ export default function ProductGroups() {
                     </Modal>
 
 
-
                     {/*  botão do carrinho */}
                     <div className="relative">
                         {/* Botão Carrinho */}

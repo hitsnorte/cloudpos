@@ -152,7 +152,7 @@ const DataSeason = () => {
     <div className="p-4">
       {/* Header with Search and Add */}
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">Periods</h2>
+        <h2 className="text-xl font-bold">Seasons</h2>
         <div className="flex items-center gap-2">
           <button
             onClick={onOpen}

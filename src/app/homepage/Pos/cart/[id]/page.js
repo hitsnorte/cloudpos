@@ -331,7 +331,7 @@ export default function Cart() {
         <>
             <div className="flex items-center justify-center space-x-4 mt-4">
                 <button
-                    className="fixed top-6 right-15 z-20 text-3xl text-[#191919] hover:text-[#FC9D25] transition"
+                    className="fixed bottom-6 right-6 md:top-6 md:right-15 md:bottom-auto text-3xl text-[#191919] hover:text-[#FC9D25] transition z-50"
                     onClick={() => setIsCartOpen(true)}
                 >
                     <TiShoppingCart />
@@ -370,8 +370,8 @@ export default function Cart() {
                             <button
                                 onClick={() => setViewType('groups')}
                                 className={`px-4 py-2 rounded ${viewType === 'groups'
-                                        ? 'bg-[#FC9D25] text-white'
-                                        : 'bg-gray-200 text-[#191919]'
+                                    ? 'bg-[#FC9D25] text-white'
+                                    : 'bg-gray-200 text-[#191919]'
                                     }`}
                             >
                                 Groups
@@ -379,8 +379,8 @@ export default function Cart() {
                             <button
                                 onClick={() => setViewType('families')}
                                 className={`px-4 py-2 rounded ${viewType === 'families'
-                                        ? 'bg-[#FC9D25] text-white'
-                                        : 'bg-gray-200 text-[#191919]'
+                                    ? 'bg-[#FC9D25] text-white'
+                                    : 'bg-gray-200 text-[#191919]'
                                     }`}
                             >
                                 Families
@@ -388,8 +388,8 @@ export default function Cart() {
                             <button
                                 onClick={() => setViewType('subfamilies')}
                                 className={`px-4 py-2 rounded ${viewType === 'subfamilies'
-                                        ? 'bg-[#FC9D25] text-white'
-                                        : 'bg-gray-200 text-[#191919]'
+                                    ? 'bg-[#FC9D25] text-white'
+                                    : 'bg-gray-200 text-[#191919]'
                                     }`}
                             >
                                 Subfamilies

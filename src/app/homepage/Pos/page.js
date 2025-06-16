@@ -898,11 +898,10 @@ export default function ProductGroups() {
                 )
             }
 
-            <div className="relative">
+            <div className="w-full overflow-x-visible">
                 {selectedTable && (
                     <>
-                        <div className="flex items-center justify-between mt-4 px-6">
-
+                        <div className="grid grid-cols-2 gap-4 sm:flex sm:items-center sm:justify-center sm:space-x-4">
                             <div className="flex space-x-4">
                                 <button
                                     onClick={() => setViewType('groups')}
@@ -925,8 +924,8 @@ export default function ProductGroups() {
                             </div>
                         </div>
 
-                        <div className="py-5 px-6">
-                            <div className="mb-4 relative">
+                        <div className="flex items-center justify-between space-x-4 flex-wrap md:flex-nowrap mt-4">
+                            <div className="relative flex-1 min-w-[200px] md:min-w-auto">
                                 <FaMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
                                 <input
                                     type="text"
@@ -939,7 +938,6 @@ export default function ProductGroups() {
                         </div>
 
                         <div className="p-6 space-y-4">
-
                             {viewType === 'groups' && (() => {
                                 const filtered = filterByName(groupsWithProducts)
                                     .filter(group => group.products && group.products.length > 0);
@@ -967,8 +965,8 @@ export default function ProductGroups() {
                                             </div>
 
                                             {isOpen && (
-                                                <div className="overflow-x-auto bg-muted/40 transition-all duration-300 ease-in-out">
-                                                    <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB]">
+                                                <div className=" w-fulloverflow-x-auto bg-muted/40 transition-all duration-300 ease-in-out">
+                                                    <table className="w-full table-auto border-collapse border border-[#EDEBEB]">
                                                         <thead>
                                                             <tr className="bg-[#FC9D25] text-white">
                                                                 <th className="border border-[#EDEBEB] px-4 py-2 text-left">
@@ -1037,8 +1035,8 @@ export default function ProductGroups() {
                                             </div>
 
                                             {isOpen && (
-                                                <div className="overflow-x-auto bg-muted/40 transition-all duration-300 ease-in-out">
-                                                    <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB]">
+                                                <div className="w-full overflow-x-auto bg-muted/40 transition-all duration-300 ease-in-out">
+                                                    <table className="w-full table-auto bg-[#FAFAFA] border-collapse border border-[#EDEBEB]">
                                                         <thead>
                                                             <tr className="bg-[#FC9D25] text-white">
                                                                 <th className="border border-[#EDEBEB] px-4 py-2 text-left">Product</th>
@@ -1100,8 +1098,8 @@ export default function ProductGroups() {
                                             </div>
 
                                             {isOpen && (
-                                                <div className="overflow-x-auto bg-muted/40 transition-all duration-300 ease-in-out">
-                                                    <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB]">
+                                                <div className="w-full overflow-x-auto bg-muted/40 transition-all duration-300 ease-in-out">
+                                                    <table className="w-full table-auto bg-[#FAFAFA] border-collapse border border-[#EDEBEB]">
                                                         <thead>
                                                             <tr className="bg-[#FC9D25] text-white">
                                                                 <th className="border border-[#EDEBEB] px-4 py-2 text-left">Product</th>

@@ -329,7 +329,7 @@ export default function Cart() {
 
     return (
         <>
-            <div className="flex items-center justify-center space-x-4 mt-4">
+            <div className="relative">
                 <button
                     className="fixed bottom-6 right-6 md:top-6 md:right-15 md:bottom-auto text-3xl text-[#191919] hover:text-[#FC9D25] transition z-50"
                     onClick={() => setIsCartOpen(true)}

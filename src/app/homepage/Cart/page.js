@@ -754,7 +754,7 @@ export default function ProductGroups() {
                                 className="fixed bottom-6 right-6 md:top-6 md:right-15 md:bottom-auto text-3xl text-[#191919] hover:text-[#FC9D25] transition z-50"
                                 onClick={toggleSidebar}
                             >
-                            <TiShoppingCart />
+                                <TiShoppingCart />
                                 {cartItems.length > 0 && (
                                     <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                                         {cartItems.reduce((total, item) => total + item.quantity, 0)}

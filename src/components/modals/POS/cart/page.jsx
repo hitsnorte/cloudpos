@@ -44,11 +44,11 @@ export default function CartPage({
                     <div
                         className="fixed inset-0 z-30 bg-[#F0F0F0] md:bg-black/40 block md:block"
                         onClick={toggleSidebar}
-                    ></div>
+                    />
                 )}
 
                 <div
-                    className={`cart fixed top-0 right-0 h-full w-[400px] max-w-full bg-[#F0F0F0] shadow-lg transition-transform duration-300 z-[9999] ${isOpen ? "translate-x-0" : "translate-x-full"
+                    className={`cart fixed top-0 right-0 h-full w-[400px] max-w-full bg-[#F0F0F0] z-[9999] shadow-lg transition-transform duration-300 ${isOpen ? 'translate-x-0' : 'translate-x-full'
                         }`}
                 >
                     {/* Header */}
@@ -68,10 +68,7 @@ export default function CartPage({
                                 {getCartItems().map((item, idx) => (
                                     <div
                                         key={item.id}
-                                        className={`w-full py-4 ${idx !== getCartItems().length - 1
-                                            ? "border-b border-[#EDEDED]"
-                                            : "pb-7"
-                                            }`}
+                                        className={`w-full py-4 ${idx !== getCartItems.length - 1 ? "border-b border-[#EDEDED]" : "pb-7"}`}
                                     >
                                         <div className="flex justify-between items-start">
                                             <div>

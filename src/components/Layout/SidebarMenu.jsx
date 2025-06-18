@@ -181,8 +181,9 @@ export default function SidebarMenu() {
             {session && selectedProperty && isConfirmed ? (
                 <>
                     {Object.entries(menuItems).map(([key, value]) => {
-                        // Show only "Shopping" on mobile, and everything on desktop
-                        if (isMobile && key !== "Shopping") return null;
+                        const isHiddenOnMobile = ["Store Settings", "Store Price"].includes(key);
+                        if (isMobile && isHiddenOnMobile) return null;
+
                         return (
                             <SidebarItem
                                 key={key}

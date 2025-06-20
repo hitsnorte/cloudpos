@@ -404,7 +404,7 @@ export default function Cart() {
                         {/* Subfamilies */}
                         <button
                             onClick={() => setViewType('subfamilies')}
-                            className={`px-4 py-2 rounded ${viewType === 'subfamilies' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
+                            className={`w-30 px-4 py-2 rounded ${viewType === 'subfamilies' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
                         >
                             Subfamilies
                         </button>

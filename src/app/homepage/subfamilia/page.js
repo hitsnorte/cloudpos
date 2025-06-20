@@ -187,7 +187,7 @@ const DataSubfamilia = () => {
     <div className="p-4">
       {/* Header with Search and Add */}
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">All Subfamilias</h2>
+        <h2 className="text-xl font-bold">All Subfamilies</h2>
         <button
           onClick={() => setNewSubfamilia({ nome: '' })}
           className="bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded"

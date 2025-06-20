@@ -27,6 +27,8 @@ export default function Tables() {
         }
     }, []);
 
+
+
     useEffect(() => {
         if (!propertyID || !params?.id) {
             console.log("Aguardando propertyID e id da sala...");
@@ -63,18 +65,24 @@ export default function Tables() {
     };
 
     const handleClientNumberSubmit = (clientNumber) => {
-    if (clientNumber.trim() !== '' && tempTable) {
-        console.log("Número de clientes:", clientNumber);
-        setClienteNumber(clientNumber);
-        setShowModal(false);
+        if (clientNumber.trim() !== '' && tempTable) {
+            console.log("Número de clientes:", clientNumber);
+            setClienteNumber(clientNumber);
+            setShowModal(false);
 
-        setTimeout(() => {
+            // ⚠️ Limpa primeiro qualquer mesa anterior (opcional mas ajuda a debugar)
+            console.log("TempTable para guardar:", tempTable);
+            localStorage.removeItem("selectedMesa");
             localStorage.setItem("selectedMesa", JSON.stringify(tempTable));
+            console.log("selectedMesa guardado:", localStorage.getItem("selectedMesa"));
             localStorage.setItem("previousPage", window.location.pathname);
-            router.push(`/homepage/Pos/cart/${tempTable.ID_Mesa}`);
-        }, 300);
-    }
-};
+
+            // ✅ Aguarda uma iteração do event loop para garantir que o localStorage está atualizado
+            setTimeout(() => {
+                router.push(`/homepage/Pos/cart/${tempTable.ID_Mesa}`);
+            }, 0);
+        }
+    };
 
     const handleBack = () => {
         const postoId = localStorage.getItem("postoId");

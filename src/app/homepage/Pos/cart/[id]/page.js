@@ -14,6 +14,10 @@ import { TiShoppingCart } from 'react-icons/ti';
 import { IoIosArrowBack } from "react-icons/io"
 import AddProductModal from '@/src/components/modals/POS/addProduct/page';
 import CartPage from '@/src/components/modals/POS/cart/page';
+import { fetchPostos } from '@/src/lib/apipostos';
+import { fetchMesas } from '@/src/lib/apimesas';
+import { fetchSalas } from '@/src/lib/apisalas';
+import { fetchPostossalas } from '@/src/lib/apipostossalas';
 
 export default function Cart() {
     const [propertyID, setPropertyID] = useState(null);
@@ -32,7 +36,8 @@ export default function Cart() {
     const [count, setCount] = useState(0);
 
     const params = useParams();
-    const selectedTable = params?.id;
+    const [selectedTable, setSelectedTable] = useState(null);
+
 
     const [posto, setPosto] = useState(null);
     const [sala, setSala] = useState(null);
@@ -40,6 +45,10 @@ export default function Cart() {
 
     const router = useRouter();
 
+    useEffect(() => {
+        if (!params?.id) return;
+        setSelectedTable({ ID_Mesa: params.id }); // ou buscar mais info da mesa aqui
+    }, [params?.id]);
 
     useEffect(() => {
         const storedPosto = JSON.parse(localStorage.getItem("selectedPosto"));
@@ -279,6 +288,7 @@ export default function Cart() {
         setCurrentCart(existingCart);
     };
 
+
     const [currentCart, setCurrentCart] = useState([]);
 
     const handleBackToTables = () => {
@@ -352,49 +362,55 @@ export default function Cart() {
                     />
                 )}
 
-                <div className="grid grid-cols-2 gap-4 md:flex md:items-center md:justify-center md:space-x-4">
-                    {/* Mesas button */}
-                    <button
-                        onClick={handleBackToTables}
-                        className="flex items-center gap-x-2 px-4 py-2 bg-[#FC9D25] text-white rounded justify-center"
-                    >
-                        <IoIosArrowBack size={16} />
-                        <span>Mesas</span>
-                    </button>
+                <div className="w-full px-4 py-2">
+                    {/* Título com o Posto */}
+                    {mesa ? (
+                        <h2 className="text-lg text-center mb-4">
+                            Posto: {posto?.VDescricao || posto?.Nome || 'Posto não definido'}
+                        </h2>
+                    ) : (
+                        <h2 className="text-lg font-semibold text-center mb-4">
+                            Nenhuma mesa selecionada
+                        </h2>
+                    )}
 
-                    {/* Groups */}
-                    <button
-                        onClick={() => setViewType('groups')}
-                        className={`px-4 py-2 rounded ${
-                            viewType === 'groups' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'
-                        }`}
-                    >
-                        Groups
-                    </button>
+                    {/* Botões */}
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4 max-w-md mx-auto">
+                        {/* Mesas button */}
+                        <button
+                            onClick={handleBackToTables}
+                            className="flex items-left justify-center gap-x-2 px-4 py-2 bg-[#FC9D25] text-white rounded"
+                        >
+                            <IoIosArrowBack size={21} />
+                            <span>Mesas</span>
+                        </button>
 
-                    {/* Families */}
-                    <button
-                        onClick={() => setViewType('families')}
-                        className={`px-4 py-2 rounded ${
-                            viewType === 'families' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'
-                        }`}
-                    >
-                        Families
-                    </button>
+                        {/* Groups */}
+                        <button
+                            onClick={() => setViewType('groups')}
+                            className={`px-4 py-2 rounded ${viewType === 'groups' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
+                        >
+                            Groups
+                        </button>
 
-                    {/* Subfamilies */}
-                    <button
-                        onClick={() => setViewType('subfamilies')}
-                        className={`px-4 py-2 rounded ${
-                            viewType === 'subfamilies' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'
-                        }`}
-                    >
-                        Subfamilies
-                    </button>
+                        {/* Families */}
+                        <button
+                            onClick={() => setViewType('families')}
+                            className={`px-4 py-2 rounded ${viewType === 'families' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
+                        >
+                            Families
+                        </button>
 
-                    {/* Optional: Empty div for right spacing on md and above */}
-                    <div className="hidden md:block flex-1" />
+                        {/* Subfamilies */}
+                        <button
+                            onClick={() => setViewType('subfamilies')}
+                            className={`px-4 py-2 rounded ${viewType === 'subfamilies' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
+                        >
+                            Subfamilies
+                        </button>
+                    </div>
                 </div>
+
             </div>
 
             <div className="flex items-center justify-between space-x-4 flex-wrap md:flex-nowrap mt-4">

@@ -35,6 +35,9 @@ const DataGrupo = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchInput, setSearchInput] = useState('');
 
+
+  const [sortConfig, setSortConfig] = useState({ key: 'group_name', direction: 'asc' });
+
   useEffect(() => {
     fetchGroups();
   }, []);
@@ -133,10 +136,21 @@ const DataGrupo = () => {
     );
   });
 
-  const paginatedGroups = filteredGroups.slice(
+  const sortedGroups = [...filteredGroups].sort((a, b) => {
+    const { key, direction } = sortConfig;
+    const aVal = a[key]?.toString().toLowerCase();
+    const bVal = b[key]?.toString().toLowerCase();
+
+    if (aVal < bVal) return direction === 'asc' ? -1 : 1;
+    if (aVal > bVal) return direction === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  const paginatedGroups = sortedGroups.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
 
   const totalPages = Math.ceil(filteredGroups.length / itemsPerPage);
 
@@ -275,8 +289,28 @@ const DataGrupo = () => {
                 <td className="pl-2 pr-2 w-8 border-r border-[#e6e6e6]">
                   <FaGear size={18} color="white" />
                 </td>
-                <td className="pl-2 pr-2 w-16 text-right border-r border-[#e6e6e6] uppercase">ID</td>
-                <td className="pl-2 pr-2 border-r border-[#e6e6e6] uppercase">Group Name</td>
+                <td
+                  className="pl-2 pr-2 w-16 text-left border-r border-[#e6e6e6] uppercase cursor-pointer"
+                  onClick={() =>
+                    setSortConfig((prev) => ({
+                      key: 'id',
+                      direction: prev.key === 'id' && prev.direction === 'asc' ? 'desc' : 'asc',
+                    }))
+                  }
+                >
+                  ID {sortConfig.key === 'id' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
+                </td>
+                <td
+                  className="pl-2 pr-2 border-r border-[#e6e6e6] uppercase cursor-pointer"
+                  onClick={() =>
+                    setSortConfig((prev) => ({
+                      key: 'group_name',
+                      direction: prev.key === 'group_name' && prev.direction === 'asc' ? 'desc' : 'asc',
+                    }))
+                  }
+                >
+                  Group Name {sortConfig.key === 'group_name' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
+                </td>
               </tr>
             </thead>
             <tbody>

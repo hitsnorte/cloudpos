@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { HiDotsVertical } from "react-icons/hi";
 import { FaGear } from "react-icons/fa6";
 import { Plus } from "lucide-react";
@@ -35,6 +35,8 @@ const DataProduct = () => {
 
   const [itemsPerPage, setItemsPerPage] = useState(25);
   const [currentPage, setCurrentPage] = useState(1);
+
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
 
   useEffect(() => {
     loadProducts();
@@ -192,10 +194,45 @@ const DataProduct = () => {
     )
   );
 
-  const paginatedProducts = filteredProducts.slice(
+  const sortedProducts = useMemo(() => {
+    if (!sortConfig.key) return filteredProducts;
+
+    const sorted = [...filteredProducts].sort((a, b) => {
+      const aValue = a[sortConfig.key];
+      const bValue = b[sortConfig.key];
+
+      const isNumeric = typeof aValue === 'number' || !isNaN(Number(aValue));
+
+      if (isNumeric) {
+        return sortConfig.direction === 'asc'
+          ? Number(aValue) - Number(bValue)
+          : Number(bValue) - Number(aValue);
+      } else {
+        return sortConfig.direction === 'asc'
+          ? String(aValue).localeCompare(String(bValue))
+          : String(bValue).localeCompare(String(aValue));
+      }
+    });
+
+    return sorted;
+  }, [filteredProducts, sortConfig]);
+
+  const paginatedProducts = sortedProducts.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  const handleSort = (key) => {
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        return {
+          key,
+          direction: prev.direction === 'asc' ? 'desc' : 'asc',
+        };
+      }
+      return { key, direction: 'asc' };
+    });
+  };
 
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
@@ -229,17 +266,30 @@ const DataProduct = () => {
           <table className="w-full text-left mb-5 border-collapse">
             <thead>
               <tr className="bg-[#FC9D25] text-white h-12">
-                <td className="pl-2 pr-2 w-8 border-r border-[#e6e6e6]">
+                <th className="pl-2 pr-2 w-8 border-r border-[#e6e6e6]">
                   <FaGear size={18} color="white" />
-                </td>
-                <td className="pl-2 pr-2 w-16 text-right border-r border-[#e6e6e6] uppercase">Cod Prod</td>
-                <td className="pl-2 pr-2 w-32 border-r border-[#e6e6e6] uppercase">Description</td>
-                <td className="pl-2 pr-2 border-r border-[#e6e6e6] uppercase">Cod SubFam</td>
-                <td className="pl-2 pr-2 border-r border-[#e6e6e6] uppercase">Desc SubFam</td>
-                <td className="pl-2 pr-2 border-r border-[#e6e6e6] uppercase">Cod Fam</td>
-                <td className="pl-2 pr-2 border-r border-[#e6e6e6] uppercase">Desc Fam</td>
-                <td className="pl-2 pr-2 border-r border-[#e6e6e6] uppercase">Cod Grp</td>
-                <td className="pl-2 pr-2 uppercase">Desc Grp</td>
+                </th>
+                {[
+                  { label: 'Cod prod', key: 'VPRODUTO', align: 'text-left', width: 'w-16' },
+                  { label: 'Description', key: 'VDESC1', align: 'text-left', width: 'w-32' },
+                  { label: 'Cod subfam', key: 'VSUBFAM', align: 'text-left' },
+                  { label: 'Desc subfam', key: 'VDescSubfamily', align: 'text-left' },
+                  { label: 'Cod fam', key: 'VCodFam', align: 'text-left' },
+                  { label: 'Desc fam', key: 'VDescFamily', align: 'text-left' },
+                  { label: 'Cod grp', key: 'VCodGrfam', align: 'text-left' },
+                  { label: 'Desc grp', key: 'VDescGroup', align: 'text-left' },
+                ].map(({ label, key, align, width }) => (
+                  <th
+                    key={key}
+                    onClick={() => handleSort(key)}
+                    className={`pl-2 pr-2 ${width || ''} border-r border-[#e6e6e6] uppercase cursor-pointer select-none font-light ${align}`}
+                  >
+                    {label}
+                    {sortConfig.key === key && (
+                      <span className="ml-1">{sortConfig.direction === 'asc' ? '▲' : '▼'}</span>
+                    )}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>

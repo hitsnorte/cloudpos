@@ -34,15 +34,17 @@ const DataFamily = () => {
   const [itemsPerPage, setItemsPerPage] = useState(25);
   const [currentPage, setCurrentPage] = useState(1);
 
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+
   useEffect(() => {
     loadFamilies();
   }, []);
 
   const handleChangeRowsPerPage = (event) => {
-  const newSize = parseInt(event.target.value, 10);
-  setItemsPerPage(newSize);
-  setCurrentPage(1); // Reset to the first page
-};
+    const newSize = parseInt(event.target.value, 10);
+    setItemsPerPage(newSize);
+    setCurrentPage(1); // Reset to the first page
+  };
 
   const loadFamilies = async () => {
     try {
@@ -77,7 +79,7 @@ const DataFamily = () => {
     const { name, value } = e.target;
     setNewFamily((prev) => ({ ...prev, [name]: value }));
   };
-  
+
 
   const handleAddFamily = async (e) => {
     e.preventDefault();
@@ -150,10 +152,45 @@ const DataFamily = () => {
     )
   );
 
-  const paginatedFamilies = filteredFamilies.slice(
+  const sortedFamilies = useMemo(() => {
+    if (!sortConfig.key) return filteredFamilies;
+
+    const sorted = [...filteredFamilies].sort((a, b) => {
+      const aValue = a[sortConfig.key];
+      const bValue = b[sortConfig.key];
+
+      const isNumeric = typeof aValue === 'number' || !isNaN(Number(aValue));
+
+      if (isNumeric) {
+        return sortConfig.direction === 'asc'
+          ? Number(aValue) - Number(bValue)
+          : Number(bValue) - Number(aValue);
+      } else {
+        return sortConfig.direction === 'asc'
+          ? String(aValue).localeCompare(String(bValue))
+          : String(bValue).localeCompare(String(aValue));
+      }
+    });
+
+    return sorted;
+  }, [filteredFamilies, sortConfig]);
+
+  const paginatedFamilies = sortedFamilies.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  const handleSort = (key) => {
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        return {
+          key,
+          direction: prev.direction === 'asc' ? 'desc' : 'asc',
+        };
+      }
+      return { key, direction: 'asc' };
+    });
+  };
 
   const totalPages = Math.ceil(filteredFamilies.length / itemsPerPage);
 
@@ -187,14 +224,28 @@ const DataFamily = () => {
           <table className="w-full text-left mb-5 border-collapse mb-13">
             <thead>
               <tr className="bg-[#FC9D25] text-white h-12">
-                <td className="pl-2 pr-2 w-8 border-r border-[#e6e6e6]">
+                <th className="pl-2 pr-2 w-8 border-r border-[#e6e6e6] ">
                   <FaGear size={18} color="white" />
-                </td>
-                <td className="pl-2 pr-2 w-16 text-right border-r border-[#e6e6e6] uppercase">Cod Fam</td>
-                <td className="pl-2 pr-2 w-32 border-r border-[#e6e6e6] uppercase">Description</td>
-                <td className="pl-2 pr-2 border-r border-[#e6e6e6] uppercase">Created In</td>
-                <td className="pl-2 pr-2 border-r border-[#e6e6e6] uppercase">Cod Grp Fam</td>
-                <td className="pl-2 pr-2 border-r border-[#e6e6e6] uppercase">Desc Grp</td>
+                </th>
+                {[
+                  { label: 'Cod Fam', key: 'VCodFam', align: 'text-left ', width: 'w-16' },
+                  { label: 'Description', key: 'VDesc', align: 'text-left', width: 'w-32' },
+                  { label: 'Created In', key: 'DCriadoEm', align: 'text-left' },
+                  { label: 'Cod Grp Fam', key: 'VCodGrFam', align: 'text-left' },
+                  { label: 'Desc Grp', key: 'VDescGroup', align: 'text-left' },
+                ].map(({ label, key, align, width }) => (
+                  <th
+                    key={key}
+                    onClick={() => handleSort(key)}
+                    style={{ fontWeight: 300 }}
+                    className={`pl-2 pr-2 ${width || ''} border-r border-[#e6e6e6] uppercase cursor-pointer select-none ${align}`}
+                  >
+                    {label}
+                    {sortConfig.key === key && (
+                      <span className="ml-1">{sortConfig.direction === 'asc' ? '▲' : '▼'}</span>
+                    )}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
@@ -237,12 +288,12 @@ const DataFamily = () => {
       {/* Pagination */}
       <div className="bottom-0 w-full bg-white p-0 m-0 pagination-container">
         <CustomPagination
-  page={currentPage}
-  pages={totalPages}
-  rowsPerPage={itemsPerPage}
-  handleChangeRowsPerPage={handleChangeRowsPerPage}
-  setPage={setCurrentPage}
-/>
+          page={currentPage}
+          pages={totalPages}
+          rowsPerPage={itemsPerPage}
+          handleChangeRowsPerPage={handleChangeRowsPerPage}
+          setPage={setCurrentPage}
+        />
       </div>
     </div>
   );

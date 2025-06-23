@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { HiDotsVertical } from "react-icons/hi";
 import { FaSearch } from "react-icons/fa";
 import { FaGear } from "react-icons/fa6";
@@ -38,6 +38,8 @@ const DataSeason = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchInput, setSearchInput] = useState("");
+
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
 
   useEffect(() => {
     fetchPeriods();
@@ -141,10 +143,45 @@ const DataSeason = () => {
     );
   });
 
-  const paginatedPeriods = filteredPeriods.slice(
+  const sortedPeriods = useMemo(() => {
+    if (!sortConfig.key) return filteredPeriods;
+
+    const sorted = [...filteredPeriods].sort((a, b) => {
+      const aValue = a[sortConfig.key];
+      const bValue = b[sortConfig.key];
+
+      const isNumeric = typeof aValue === 'number' || !isNaN(Number(aValue));
+
+      if (isNumeric) {
+        return sortConfig.direction === 'asc'
+          ? Number(aValue) - Number(bValue)
+          : Number(bValue) - Number(aValue);
+      } else {
+        return sortConfig.direction === 'asc'
+          ? String(aValue).localeCompare(String(bValue))
+          : String(bValue).localeCompare(String(aValue));
+      }
+    });
+
+    return sorted;
+  }, [filteredPeriods, sortConfig]);
+
+  const paginatedPeriods = sortedPeriods.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  const handleSort = (key) => {
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        return {
+          key,
+          direction: prev.direction === 'asc' ? 'desc' : 'asc',
+        };
+      }
+      return { key, direction: 'asc' };
+    });
+  };
 
   const totalPages = Math.ceil(filteredPeriods.length / itemsPerPage);
 
@@ -280,12 +317,31 @@ const DataSeason = () => {
           <table className="w-full text-left mb-5 min-w-full md:min-w-0 border-collapse">
             <thead>
               <tr className="bg-[#FC9D25] text-white h-12">
-                <td className="pl-2 pr-2 w-8 border-r border-[#e6e6e6]">
+                <th className="pl-2 pr-2 w-8 border-r border-[#e6e6e6]">
                   <FaGear size={18} color="white" />
-                </td>
-                <td className="pl-2 pr-2 w-16 text-right border-r border-[#e6e6e6] uppercase">ID</td>
-                <td className="pl-2 pr-2 w-32 border-r border-[#e6e6e6] uppercase">Description</td>
-                <td className="pl-2 pr-2 border-r border-[#e6e6e6] uppercase">Classe Preco</td>
+                </th>
+                <th
+                  className="pl-2 pr-2 w-16 text-left border-r border-[#e6e6e6] uppercase select-none"
+                  style={{ fontWeight: 300 }}
+                  onClick={() => handleSort('vcodi')}
+                >
+                  ID {sortConfig.key === 'vcodi' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
+                </th>
+                <th
+                  className="pl-2 pr-2 w-32 border-r border-[#e6e6e6] uppercase select-none"
+                  style={{ fontWeight: 300 }}
+                  onClick={() => handleSort('Vdesc')}
+                >
+                  Description {sortConfig.key === 'Vdesc' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
+
+                </th>
+                <th
+                  className="pl-2 pr-2 border-r border-[#e6e6e6] uppercase select-none"
+                  style={{ fontWeight: 300 }}
+                  onClick={() => handleSort('classePrecoDesc')}
+                >
+                  Classe Preco {sortConfig.key === 'classePrecoDesc' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
+                </th>
               </tr>
             </thead>
             <tbody>

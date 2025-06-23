@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { HiDotsVertical } from "react-icons/hi";
-import { FaSearch } from "react-icons/fa";
 import { FaGear } from "react-icons/fa6";
 import { Plus } from "lucide-react";
 import {
@@ -138,13 +137,25 @@ const DataGrupo = () => {
 
   const sortedGroups = [...filteredGroups].sort((a, b) => {
     const { key, direction } = sortConfig;
-    const aVal = a[key]?.toString().toLowerCase();
-    const bVal = b[key]?.toString().toLowerCase();
+
+    let aVal = a[key];
+    let bVal = b[key];
+
+    // Tenta converter para número se ambos forem numéricos
+    const isNumeric = !isNaN(aVal) && !isNaN(bVal);
+    if (isNumeric) {
+      aVal = Number(aVal);
+      bVal = Number(bVal);
+    } else {
+      aVal = aVal?.toString().toLowerCase();
+      bVal = bVal?.toString().toLowerCase();
+    }
 
     if (aVal < bVal) return direction === 'asc' ? -1 : 1;
     if (aVal > bVal) return direction === 'asc' ? 1 : -1;
     return 0;
   });
+
 
   const paginatedGroups = sortedGroups.slice(
     (currentPage - 1) * itemsPerPage,

@@ -6,11 +6,6 @@ import { FaGear } from "react-icons/fa6";
 import { Plus } from "lucide-react";
 import {
   Button,
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
   Dropdown,
   DropdownTrigger,
   DropdownMenu,

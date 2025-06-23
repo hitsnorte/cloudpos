@@ -19,7 +19,6 @@ import {
 } from "@nextui-org/react";
 import CustomPagination from "@/src/components/table/page";
 import { fetchHour, createHour } from '@/src/lib/apihour';
-import { fetchPeriod } from '@/src/lib/apiseason';
 
 const DataHour = () => {
     const [isOpen, setIsOpen] = useState(false);

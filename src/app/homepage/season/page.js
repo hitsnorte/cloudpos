@@ -21,7 +21,6 @@ import CustomPagination from "@/src/components/table/page";
 import { fetchPeriod, createPeriod } from "@/src/lib/apiseason";
 import { fetchClassepreco } from "@/src/lib/apiclassepreco";
 import { fetchClacexp } from "@/src/lib/apiclacexp";
-import axios from "axios";
 
 const DataSeason = () => {
   const [isOpen, setIsOpen] = useState(false);

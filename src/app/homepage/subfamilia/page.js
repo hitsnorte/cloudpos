@@ -6,11 +6,6 @@ import { FaGear } from "react-icons/fa6";
 import { Plus } from "lucide-react";
 import {
   Button,
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
   Dropdown,
   DropdownTrigger,
   DropdownMenu,
@@ -24,7 +19,6 @@ import { fetchGrup } from '@/src/lib/apigroup';
 const DataSubfamilia = () => {
   const [subfamilias, setSubfamilias] = useState([]);
   const [families, setFamilies] = useState([]);
-  const [groups, setGroups] = useState([]);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [newSubfamilia, setNewSubfamilia] = useState({ nome: '' });

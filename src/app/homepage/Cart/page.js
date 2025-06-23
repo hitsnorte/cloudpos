@@ -51,7 +51,6 @@ export default function ProductGroups() {
         const saved = localStorage.getItem('cart');
         return saved ? JSON.parse(saved) : [];
     });
-    const [produtos, setProdutos] = useState([]);
     const [dashboardData, setDashboardData] = useState(null);
     const router = useRouter();
     const { data: session, status } = useSession();
@@ -80,11 +79,6 @@ export default function ProductGroups() {
     };
 
     const toggleCart = () => setCartOpen(prev => !prev);
-
-    const closeModal = () => {
-        setSelectedProduct(null);
-        setCount(1);
-    };
 
     const {
         isOpen: isAddModalOpen,

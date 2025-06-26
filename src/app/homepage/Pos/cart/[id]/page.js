@@ -14,10 +14,6 @@ import { TiShoppingCart } from 'react-icons/ti';
 import { IoIosArrowBack } from "react-icons/io"
 import AddProductModal from '@/src/components/modals/POS/addProduct/page';
 import CartPage from '@/src/components/modals/POS/cart/page';
-import { fetchPostos } from '@/src/lib/apipostos';
-import { fetchMesas } from '@/src/lib/apimesas';
-import { fetchSalas } from '@/src/lib/apisalas';
-import { fetchPostossalas } from '@/src/lib/apipostossalas';
 
 export default function Cart() {
     const [propertyID, setPropertyID] = useState(null);

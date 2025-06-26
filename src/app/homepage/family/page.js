@@ -6,11 +6,6 @@ import { FaGear } from "react-icons/fa6";
 import { Plus } from "lucide-react";
 import {
   Button,
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
   Dropdown,
   DropdownTrigger,
   DropdownMenu,
@@ -22,7 +17,6 @@ import { fetchGrup } from '@/src/lib/apigroup';
 
 const DataFamily = () => {
   const [families, setFamilies] = useState([]);
-  const [groups, setGroups] = useState([]);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [newFamily, setNewFamily] = useState({ family_name: '' });
@@ -228,7 +222,7 @@ const DataFamily = () => {
                   <FaGear size={18} color="white" />
                 </th>
                 {[
-                  { label: 'Cod Fam', key: 'VCodFam', align: 'text-left ', width: 'w-16' },
+                  { label: 'Cod Fam', key: 'VCodFam', align: 'text-right ', width: 'w-16' },
                   { label: 'Description', key: 'VDesc', align: 'text-left', width: 'w-32' },
                   { label: 'Created In', key: 'DCriadoEm', align: 'text-left' },
                   { label: 'Cod Grp Fam', key: 'VCodGrFam', align: 'text-left' },

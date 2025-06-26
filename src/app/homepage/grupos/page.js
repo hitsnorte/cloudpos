@@ -301,7 +301,7 @@ const DataGrupo = () => {
                   <FaGear size={18} color="white" />
                 </td>
                 <td
-                  className="pl-2 pr-2 w-16 text-left border-r border-[#e6e6e6] uppercase cursor-pointer"
+                  className="pl-2 pr-2 w-16 text-right border-r border-[#e6e6e6] uppercase cursor-pointer"
                   onClick={() =>
                     setSortConfig((prev) => ({
                       key: 'id',

@@ -222,7 +222,7 @@ const DataFamily = () => {
                   <FaGear size={18} color="white" />
                 </th>
                 {[
-                  { label: 'Cod Fam', key: 'VCodFam', align: 'text-left ', width: 'w-16' },
+                  { label: 'Cod Fam', key: 'VCodFam', align: 'text-right ', width: 'w-16' },
                   { label: 'Description', key: 'VDesc', align: 'text-left', width: 'w-32' },
                   { label: 'Created In', key: 'DCriadoEm', align: 'text-left' },
                   { label: 'Cod Grp Fam', key: 'VCodGrFam', align: 'text-left' },

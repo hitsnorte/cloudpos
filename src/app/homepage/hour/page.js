@@ -301,7 +301,7 @@ const DataHour = () => {
                                     <FaGear size={18} color="white" />
                                 </th>
                                 <th
-                                    className="pl-2 pr-2 w-16 text-left border-r border-[#e6e6e6] uppercase select-none"
+                                    className="pl-2 pr-2 w-16 text-right border-r border-[#e6e6e6] uppercase select-none"
                                     style={{ fontWeight: 300 }}
                                     onClick={() => handleSort('Vcodi')}
 

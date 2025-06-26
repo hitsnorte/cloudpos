@@ -265,7 +265,7 @@ const DataProduct = () => {
                   <FaGear size={18} color="white" />
                 </th>
                 {[
-                  { label: 'Cod prod', key: 'VPRODUTO', align: 'text-left', width: 'w-16' },
+                  { label: 'Cod prod', key: 'VPRODUTO', align: 'text-right', width: 'w-16' },
                   { label: 'Description', key: 'VDESC1', align: 'text-left', width: 'w-32' },
                   { label: 'Cod subfam', key: 'VSUBFAM', align: 'text-left' },
                   { label: 'Desc subfam', key: 'VDescSubfamily', align: 'text-left' },

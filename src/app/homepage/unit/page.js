@@ -296,7 +296,7 @@ const DataUnit = () => {
                                     <FaGear size={18} color="white" />
                                 </th>
                                 {[
-                                    { label: 'ID', key: 'Id_interno', align: 'text-left', width: 'w-16' },
+                                    { label: 'ID', key: 'Id_interno', align: 'text-right', width: 'w-16' },
                                     { label: 'Type', key: 'TipoProduto', align: 'text-left', width: 'w-32' },
                                     { label: 'Description', key: 'Descricao', align: 'text-left' },
                                 ].map(({ label, key, align, width }) => (

@@ -248,7 +248,7 @@ const DataSubfamilia = () => {
                   <FaGear size={18} color="white" />
                 </th>
                 {[
-                  { label: 'Cod sub fam', key: 'VCodSubFam', align: 'text-left', width: 'w-16' },
+                  { label: 'Cod sub fam', key: 'VCodSubFam', align: 'text-right', width: 'w-16' },
                   { label: 'Description', key: 'VDesc', align: 'text-left', width: 'w-32' },
                   { label: 'Created in', key: 'dcriadoem', align: 'text-left' },
                   { label: 'Cod fam', key: 'VCodFam', align: 'text-left' },

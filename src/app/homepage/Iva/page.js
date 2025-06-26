@@ -308,7 +308,7 @@ const DataIva = () => {
                   <FaGear size={18} color="white" />
                 </th>
                 {[
-                  { label: 'Cod IVA', key: 'codIva', align: 'text-left', width: 'w-16' },
+                  { label: 'Cod IVA', key: 'codIva', align: 'text-right', width: 'w-16' },
                   { label: 'IVA Percentage', key: 'ivaPer', align: 'text-left', width: 'w-32' },
                   { label: 'Description', key: 'description', align: 'text-left' },
                 ].map(({ label, key, align, width }) => (

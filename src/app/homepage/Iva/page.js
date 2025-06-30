@@ -208,10 +208,10 @@ const DataIva = () => {
             onClick={toggleSidebar}
           />
         )}
-        <ModalContent>
+        <ModalContent className="rounded-2xl overflow-hidden">
           {(onClose) => (
             <>
-              <ModalHeader className="relative rounded bg-[#FC9D25] flex justify-between items-center px-6 py-3">
+              <ModalHeader className="relative bg-[#FC9D25] flex justify-between items-center px-6 py-3">
                 <div className="text-xl font-bold text-white">New IVA</div>
                 <button
                   type="button"
@@ -262,10 +262,10 @@ const DataIva = () => {
             onClick={toggleSidebar}
           />
         )}
-        <ModalContent>
+        <ModalContent className="rounded-2xl overflow-hidden">
           {(onEditClose) => (
             <>
-              <ModalHeader className="relative rounded bg-[#FC9D25] flex justify-between items-center px-6 py-3">
+              <ModalHeader className="relative bg-[#FC9D25] flex justify-between items-center px-6 py-3">
                 <div className="text-xl font-bold text-white">Edit IVA</div>
                 <button
                   type="button"

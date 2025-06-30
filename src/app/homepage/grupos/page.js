@@ -204,10 +204,10 @@ const DataGrupo = () => {
             onClick={toggleSidebar}
           />
         )}
-        <ModalContent>
+        <ModalContent className="rounded-2xl overflow-hidden">
           {(onClose) => (
             <>
-              <ModalHeader className="relative rounded bg-[#FC9D25] flex justify-between items-center px-6 py-3">
+              <ModalHeader className="relative bg-[#FC9D25] flex justify-between items-center px-6 py-3">
                 <div className="text-xl font-bold text-white">New Group</div>
                 <button
                   type="button"
@@ -236,9 +236,6 @@ const DataGrupo = () => {
                 </form>
               </ModalBody>
               <ModalFooter className="border-t border-[#EDEBEB] bg-[#FAFAFA] pt-2 px-8">
-                <Button onPress={handleCloseModal} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">
-                  Cancel
-                </Button>
                 <Button type="submit" form="addGroupForm" className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray-600 transition" disabled={loading}>
                   {loading ? "Saving..." : "Save"}
                 </Button>
@@ -256,7 +253,7 @@ const DataGrupo = () => {
             onClick={toggleSidebar}
           />
         )}
-        <ModalContent>
+        <ModalContent className="rounded-2xl overflow-hidden">
           {(onEditClose) => (
             <>
               <ModalHeader className="relative rounded bg-[#FC9D25] flex justify-between items-center px-6 py-3">

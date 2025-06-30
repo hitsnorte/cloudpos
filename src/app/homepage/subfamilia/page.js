@@ -218,7 +218,7 @@ const DataSubfamilia = () => {
     <div className="p-4">
       {/* Header with Search and Add */}
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">All Subfamilies</h2>
+        <h2 className="text-xl font-bold">All Sub Families</h2>
         <button
           onClick={() => setNewSubfamilia({ nome: '' })}
           className="bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded"
@@ -248,7 +248,7 @@ const DataSubfamilia = () => {
                   <FaGear size={18} color="white" />
                 </th>
                 {[
-                  { label: 'Cod sub fam', key: 'VCodSubFam', align: 'text-right', width: 'w-16' },
+                  { label: 'Cod SubFam', key: 'VCodSubFam', align: 'text-right', width: 'w-16' },
                   { label: 'Description', key: 'VDesc', align: 'text-left', width: 'w-32' },
                   { label: 'Created in', key: 'dcriadoem', align: 'text-left' },
                   { label: 'Cod fam', key: 'VCodFam', align: 'text-left' },

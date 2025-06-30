@@ -22,8 +22,8 @@ export default function AddProductModal({ selectedProduct, setSelectedProduct, a
         <>
             {/* Backdrop */}
             <div className="fixed inset-0 bg-black/30 z-40 h-full" />
-            <div className=" quantidades fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-115 bg-white shadow-xl rounded-lg z-50">
-                <div className=" bg-[#FAFAFA] w-full">
+            <div className="quantidades fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-115 shadow-xl rounded-lg z-50 bg-[#FAFAFA]">
+                <div className="bg-[#FAFAFA] w-full rounded-t-lg">
                     <div className="flex justify-between items-center mb-4 px-4 py-3 bg-[#FC9D25] rounded-t-lg">
                         <h2 className="text-l font-semibold text-white ml-1">Add product</h2>
                     </div>
@@ -39,8 +39,8 @@ export default function AddProductModal({ selectedProduct, setSelectedProduct, a
                     <div className="flex items-center justify-left px-6">
                         {/* Preço */}
                         <div className="flex flex-col">
-                            <div className="text-xl text-[#FC9D25] font-semibold whitespace-nowrap">
-                                €{selectedProduct?.price.toFixed(2)}/un
+                            <div className="text-xl text-[#FC9D25] font-semibold whitespace-nowrap ">
+                                €{selectedProduct?.price.toFixed(2)}/un 
                             </div>
                             <div className="text-sm text-black whitespace-nowrap">
                                 Iva {selectedProduct?.iva?.toFixed(2)}%
@@ -50,7 +50,7 @@ export default function AddProductModal({ selectedProduct, setSelectedProduct, a
                         {/* Seletor de quantidade */}
                         <div className="seletor flex items-center rounded overflow-hidden border border-gray-200 w-max fixed -mt-4">
                             <button
-                                onClick={() => setCount(prev => Math.max(1, prev - 1))}
+                                onClick={() => setCount((prev) => Math.max(1, prev - 1))}
                                 className="px-4 py-1 bg-white text-[#FC9D25] hover:bg-gray-300 transition"
                             >
                                 <span className="inline-block transform scale-150 font-thin">-</span>
@@ -59,7 +59,7 @@ export default function AddProductModal({ selectedProduct, setSelectedProduct, a
                                 {count}
                             </span>
                             <button
-                                onClick={() => setCount(prev => prev + 1)}
+                                onClick={() => setCount((prev) => prev + 1)}
                                 className="px-3.5 py-1 bg-white text-[#FC9D25] hover:bg-gray-300 transition"
                             >
                                 <span className="inline-block transform scale-150 font-thin">+</span>

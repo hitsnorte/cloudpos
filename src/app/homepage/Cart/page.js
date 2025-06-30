@@ -647,6 +647,7 @@ export default function ProductGroups() {
                         </Dropdown>
                     </div>
 
+
                     <Modal
                         isOpen={isAddModalOpen}
                         onOpenChange={onAddModalClose}
@@ -655,6 +656,12 @@ export default function ProductGroups() {
                         className="w-300 bg-white shadow-xl rounded-lg"
                         hideCloseButton={true}
                     >
+                        {isAddModalOpen && (
+                            <div
+                                className="fixed inset-0 z-30 bg-[#F0F0F0] md:bg-black/40 block md:block"
+                                onClick={toggleSidebar}
+                            />
+                        )}
                         <ModalContent>
                             {(onClose) => (
                                 <>
@@ -938,79 +945,84 @@ export default function ProductGroups() {
                     )}
 
                     {selectedProduct && (
-                        <div className=" quantidades fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-115 bg-white shadow-xl rounded-lg z-50">
-                            <div className="bg-[#FAFAFA] w-full ">
-                                <div className="flex justify-between items-center mb-4 px-4 py-3 bg-[#FC9D25] rounded-t-lg">
-                                    <h2 className=" text-l font-semibold text-white ml-1 ">
-                                        Add product
+                        <>
+                            {/* BACKDROP cinzento */}
+                            <div
+                                className="fixed inset-0 z-30 bg-[#F0F0F0] md:bg-black/40 block md:block"
+                                onClick={() => setSelectedProduct(null)} // fechar ao clicar fora
+                            />
+
+                            {/* MODAL */}
+                            <div className="quantidades fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-115 bg-white shadow-xl rounded-lg z-50">
+                                <div className="bg-[#FAFAFA] w-full rounded-t-lg">
+                                    <div className="flex justify-between items-center mb-4 px-4 py-3 bg-[#FC9D25] rounded-t-lg">
+                                        <h2 className="text-l font-semibold text-white ml-1">Add product</h2>
+                                    </div>
+
+                                    <h2 className="text-l font-semibold text-black ml-5 mb-5">
+                                        {selectedProduct.name
+                                            .toLowerCase()
+                                            .split(' ')
+                                            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                                            .join(' ')}
                                     </h2>
-                                </div>
-                                <h2 className="text-l font-semibold text-black ml-5 mb-5">
-                                    {selectedProduct.name
-                                        .toLowerCase()
-                                        .split(' ')
-                                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                                        .join(' ')}
-                                </h2>
 
-                                <div className="flex items-center justify-left px-6">
-                                    {/* Preço */}
-                                    <div className="flex flex-col ">
-                                        <div className="text-xl text-[#FC9D25] font-semibold whitespace-nowrap">
-                                            €{(selectedProduct?.price).toFixed(2)}/un
+                                    <div className="flex items-center justify-left px-6">
+                                        {/* Preço */}
+                                        <div className="flex flex-col">
+                                            <div className="text-xl text-[#FC9D25] font-semibold whitespace-nowrap">
+                                                €{(selectedProduct?.price).toFixed(2)}/un
+                                            </div>
+                                            <div className="text-sm text-black whitespace-nowrap">
+                                                Iva {selectedProduct?.iva?.toFixed(2)}%
+                                            </div>
                                         </div>
 
-                                        <div className="text-sm text-black whitespace-nowrap">
-                                            Iva {selectedProduct?.iva?.toFixed(2)}%
+                                        {/* Seletor de quantidade */}
+                                        <div className="seletor flex items-center rounded overflow-hidden border border-gray-200 w-max fixed -mt-4">
+                                            <button
+                                                onClick={() => setCount((prev) => Math.max(1, prev - 1))}
+                                                className="px-4 py-1 bg-white text-[#FC9D25] hover:bg-gray-300 transition"
+                                            >
+                                                <span className="inline-block transform scale-150 font-thin">-</span>
+                                            </button>
+                                            <span className="px-2 py-1 bg-white text-sm font-medium text-[#191919] border-gray-300">
+                                                {count}
+                                            </span>
+                                            <button
+                                                onClick={() => setCount((prev) => prev + 1)}
+                                                className="px-3.5 py-1 bg-white text-[#FC9D25] hover:bg-gray-300 transition"
+                                            >
+                                                <span className="inline-block transform scale-150 font-thin">+</span>
+                                            </button>
                                         </div>
                                     </div>
 
-                                    {/* Seletor de quantidade */}
-                                    <div className="seletor flex items-center rounded overflow-hidden border border-gray-200 w-max fixed -mt-4">
+                                    {/* Botões */}
+                                    <div className="flex justify-end space-x-3 ml-8 mb-5 m-5 mr-7">
                                         <button
-                                            onClick={() => setCount((prev) => Math.max(1, prev - 1))}
-                                            className="px-4 py-1 bg-white text-[#FC9D25] hover:bg-gray-300 transition"
+                                            onClick={() => setSelectedProduct(null)}
+                                            className="px-10.5 py-1 bg-[#D3D3D3] text-white rounded-md hover:bg-gray font-medium transition duration-200"
                                         >
-                                            <span className="inline-block transform scale-150 font-thin">-</span>
+                                            Close
                                         </button>
-                                        <span className="px-2 py-1 bg-white text-sm font-medium text-[#191919] border-gray-300">
-                                            {count}
-                                        </span>
                                         <button
-                                            onClick={() => setCount((prev) => prev + 1)}
-                                            className="px-3.5 py-1 bg-white text-[#FC9D25] hover:bg-gray-300 transition"
+                                            onClick={() => {
+                                                if (count > 0) {
+                                                    addToCart({ ...selectedProduct, quantity: count });
+                                                    setSelectedProduct(null);
+                                                }
+                                            }}
+                                            className="px-10.5 py-1 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
                                         >
-                                            <span className="inline-block transform scale-150 font-thin">+</span>
+                                            {isLoading ? <Spinner size="sm" color="white" /> : 'Save'}
                                         </button>
                                     </div>
-                                </div>
-
-                                {/* Modal de quantidades*/}
-                                <div className=" flex justify-end space-x-3 ml-8 mb-5 m-5 mr-7">
-                                    {/* Botão Close */}
-                                    <button
-                                        onClick={() => setSelectedProduct(null)}
-                                        className="px-10.5 py-1 bg-[#D3D3D3] text-white rounded-md hover:bg-gray font-medium transition duration-200"
-                                    >
-                                        Close
-                                    </button>
-
-                                    {/* Botão Save */}
-                                    <button
-                                        onClick={() => {
-                                            if (count > 0) {
-                                                addToCart({ ...selectedProduct, quantity: count });
-                                                setSelectedProduct(null);
-                                            }
-                                        }}
-                                        className="px-10.5 py-1 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
-                                    >
-                                        {isLoading ? <Spinner size="sm" color="white" /> : 'Save'}
-                                    </button>
                                 </div>
                             </div>
-                        </div>
+                        </>
                     )}
+
 
 
                     {cartOpen && (

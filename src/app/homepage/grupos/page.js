@@ -34,6 +34,7 @@ const DataGrupo = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchInput, setSearchInput] = useState('');
 
+  const toggleSidebar = () => setIsOpen(!isOpen);
 
   const [sortConfig, setSortConfig] = useState({ key: 'group_name', direction: 'asc' });
 
@@ -197,6 +198,12 @@ const DataGrupo = () => {
 
       {/* Add Group Modal */}
       <Modal isOpen={isOpen} onOpenChange={onClose} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
+        {isOpen && (
+          <div
+            className="fixed inset-0 z-30 bg-[#F0F0F0] md:bg-black/40 block md:block"
+            onClick={toggleSidebar}
+          />
+        )}
         <ModalContent>
           {(onClose) => (
             <>
@@ -243,6 +250,12 @@ const DataGrupo = () => {
 
       {/* Edit Group Modal */}
       <Modal isOpen={editIsOpen} onOpenChange={onEditClose} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
+        {editIsOpen && (
+          <div
+            className="fixed inset-0 z-30 bg-[#F0F0F0] md:bg-black/40 block md:block"
+            onClick={toggleSidebar}
+          />
+        )}
         <ModalContent>
           {(onEditClose) => (
             <>

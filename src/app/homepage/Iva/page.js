@@ -38,6 +38,8 @@ const DataIva = () => {
 
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
 
+  const toggleSidebar = () => setIsOpen(!isOpen);
+
   useEffect(() => {
     fetchIvas();
   }, []);
@@ -129,7 +131,7 @@ const DataIva = () => {
   const sortedIvas = useMemo(() => {
     if (!sortConfig.key) return filteredIvas;
 
-     const sorted = [...filteredIvas].sort((a, b) => {
+    const sorted = [...filteredIvas].sort((a, b) => {
       const aValue = a[sortConfig.key];
       const bValue = b[sortConfig.key];
 
@@ -200,6 +202,12 @@ const DataIva = () => {
 
       {/* Modal for adding new IVA */}
       <Modal isOpen={isOpen} onOpenChange={onClose} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
+        {isOpen && (
+          <div
+            className="fixed inset-0 z-30 bg-[#F0F0F0] md:bg-black/40 block md:block"
+            onClick={toggleSidebar}
+          />
+        )}
         <ModalContent>
           {(onClose) => (
             <>
@@ -248,6 +256,12 @@ const DataIva = () => {
 
       {/* Modal for editing IVA */}
       <Modal isOpen={editIsOpen} onOpenChange={onEditClose} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
+        {editIsOpen && (
+          <div
+            className="fixed inset-0 z-30 bg-[#F0F0F0] md:bg-black/40 block md:block"
+            onClick={toggleSidebar}
+          />
+        )}
         <ModalContent>
           {(onEditClose) => (
             <>

@@ -12,6 +12,7 @@ import { fetchIva } from '@/src/lib/apiiva';
 import { fetchSubfamily } from '@/src/lib/apisubfamily';
 import { fetchDashboard } from '@/src/lib/apidashboard';
 import { fetchClassepreco } from '@/src/lib/apiclassepreco';
+import { IoMdClose } from "react-icons/io";
 import { CiTrash } from "react-icons/ci";
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@heroui/react";
 import { FaArrowUp } from "react-icons/fa";
@@ -665,83 +666,82 @@ export default function ProductGroups() {
                         <ModalContent>
                             {(onClose) => (
                                 <>
-                                    <ModalHeader className="rounded bg-[#FC9D25] flex justify-between items-center">
-                                        <div className="text-xl font-bold text-white">Enter the PLU</div>
-                                        <Button
-                                            onClick={onClose}
-                                            className="text-white bg-transparent border-0 text-2xl p-0"
-                                            aria-label="Close"
-                                        >
-                                            &times; {/* Unicode for "×" sign */}
-                                        </Button>
-                                    </ModalHeader>
-                                    <ModalBody className="py-5 px-6">
-                                        {errorMessage && (
-                                            <div className="text-center text-red-600 font-semibold text-lg mb-4">
-                                                {errorMessage}
-                                            </div>
-                                        )}
-                                        <Input
-                                            placeholder="PLU"
-                                            value={inputValue}
-                                            onChange={(e) => {
-                                                const onlyNums = e.target.value.replace(/\D/g, ""); // Remove tudo que não for dígito
-                                                setInputValue(onlyNums);
-                                            }}
-                                            className="mb-4"
-                                            classNames={{
-                                                inputWrapper: "bg-gray-200 px-3 py-2 border border-gray-300",
-                                                input: "text-gray-800",
-                                            }}
-                                        />
+                                    <div className="fixed inset-0 z-50 flex items-center justify-center">
+                                        <div className="bg-white rounded-2xl shadow-xl w-92 max-w-md">
+                                            <ModalHeader className="bg-[#E6AC27] rounded-t-2xl p-4 flex justify-between">
+                                                <div className="text-xl font-semibold text-white">Enter the PLU</div>
+                                                <IoMdClose size={25} color='white' onClick={onClose} className='cursor-pointer' />
+                                            </ModalHeader>
+                                            <ModalBody className="p-4">
+                                                {errorMessage && (
+                                                    <div className="text-center text-red-600 font-semibold text-lg mb-4">
+                                                        {errorMessage}
+                                                    </div>
+                                                )}
+                                                <Input
+                                                    placeholder="PLU"
+                                                    value={inputValue}
+                                                    onChange={(e) => {
+                                                        const onlyNums = e.target.value.replace(/\D/g, ""); // Remove tudo que não for dígito
+                                                        setInputValue(onlyNums);
+                                                    }}
+                                                    className="mb-4"
+                                                    classNames={{
+                                                        inputWrapper: "bg-gray-200 px-3 py-2 border border-gray-300",
+                                                        input: "text-gray-800",
+                                                    }}
+                                                />
 
-                                        <div className="grid grid-cols-4 gap-2 ">
-                                            {[7, 8, 9].map((n) => (
-                                                <button
-                                                    key={n}
-                                                    onClick={() => handleKeyPress(n)}
-                                                    className="bg-gray-200 w-full aspect-square rounded text-lg font-medium btn"
-                                                >
-                                                    {n}
-                                                </button>
-                                            ))}
+                                                <div className="grid grid-cols-4 gap-2 ">
+                                                    {[7, 8, 9].map((n) => (
+                                                        <button
+                                                            key={n}
+                                                            onClick={() => handleKeyPress(n)}
+                                                            className="bg-gray-200 w-full aspect-square rounded text-lg font-medium btn"
+                                                        >
+                                                            {n}
+                                                        </button>
+                                                    ))}
 
-                                            <button onClick={handleClear} className="btn w-full bg-red-400 text-white font-bold rounded text-lg row-span-2">
-                                                C
-                                            </button>
+                                                    <button onClick={handleClear} className="btn w-full bg-red-400 text-white font-bold rounded text-lg row-span-2">
+                                                        C
+                                                    </button>
 
-                                            {[4, 5, 6].map((n) => (
-                                                <button key={n} onClick={() => handleKeyPress(n)} className="bg-gray-200 w-full aspect-square rounded text-lg font-medium btn">
-                                                    {n}
-                                                </button>
-                                            ))}
+                                                    {[4, 5, 6].map((n) => (
+                                                        <button key={n} onClick={() => handleKeyPress(n)} className="bg-gray-200 w-full aspect-square rounded text-lg font-medium btn">
+                                                            {n}
+                                                        </button>
+                                                    ))}
 
 
-                                            {[1, 2, 3].map((n) => (
-                                                <button key={n} onClick={() => handleKeyPress(n)} className="bg-gray-200 w-full aspect-square rounded text-lg font-medium btn">
-                                                    {n}
-                                                </button>
-                                            ))}
-                                            <button onClick={handleOk} className="btn w-full bg-[#94c465] rounded text-lg text-white row-span-2">
-                                                OK
-                                            </button>
+                                                    {[1, 2, 3].map((n) => (
+                                                        <button key={n} onClick={() => handleKeyPress(n)} className="bg-gray-200 w-full aspect-square rounded text-lg font-medium btn">
+                                                            {n}
+                                                        </button>
+                                                    ))}
+                                                    <button onClick={handleOk} className="btn w-full bg-[#94c465] rounded text-lg text-white row-span-2">
+                                                        OK
+                                                    </button>
 
-                                            {[0, "00"].map((n, idx) => (
-                                                <button
-                                                    key={n}
-                                                    onClick={() => handleKeyPress(n)}
-                                                    className={`bg-gray-200 w-full rounded text-lg font-medium btn ${idx === 0 ? "col-span-2 py-3" : "aspect-square"}`}
-                                                >
-                                                    {n}
-                                                </button>
+                                                    {[0, "00"].map((n, idx) => (
+                                                        <button
+                                                            key={n}
+                                                            onClick={() => handleKeyPress(n)}
+                                                            className={`bg-gray-200 w-full rounded text-lg font-medium btn ${idx === 0 ? "col-span-2 py-3" : "aspect-square"}`}
+                                                        >
+                                                            {n}
+                                                        </button>
 
-                                            ))}
+                                                    ))}
+                                                </div>
+
+                                            </ModalBody>
                                         </div>
-
-                                    </ModalBody>
-
+                                    </div>
                                 </>
+
                             )}
+
                         </ModalContent>
                     </Modal>
 

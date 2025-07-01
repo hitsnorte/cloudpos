@@ -34,6 +34,7 @@ const DataGrupo = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchInput, setSearchInput] = useState('');
 
+  const toggleSidebar = () => setIsOpen(!isOpen);
 
   const [sortConfig, setSortConfig] = useState({ key: 'group_name', direction: 'asc' });
 
@@ -197,10 +198,16 @@ const DataGrupo = () => {
 
       {/* Add Group Modal */}
       <Modal isOpen={isOpen} onOpenChange={onClose} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
-        <ModalContent>
+        {isOpen && (
+          <div
+            className="fixed inset-0 z-30 bg-[#F0F0F0] md:bg-black/40 block md:block"
+            onClick={toggleSidebar}
+          />
+        )}
+        <ModalContent className="rounded-2xl overflow-hidden">
           {(onClose) => (
             <>
-              <ModalHeader className="relative rounded bg-[#FC9D25] flex justify-between items-center px-6 py-3">
+              <ModalHeader className="relative bg-[#FC9D25] flex justify-between items-center px-6 py-3">
                 <div className="text-xl font-bold text-white">New Group</div>
                 <button
                   type="button"
@@ -229,9 +236,6 @@ const DataGrupo = () => {
                 </form>
               </ModalBody>
               <ModalFooter className="border-t border-[#EDEBEB] bg-[#FAFAFA] pt-2 px-8">
-                <Button onPress={handleCloseModal} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">
-                  Cancel
-                </Button>
                 <Button type="submit" form="addGroupForm" className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray-600 transition" disabled={loading}>
                   {loading ? "Saving..." : "Save"}
                 </Button>
@@ -243,7 +247,13 @@ const DataGrupo = () => {
 
       {/* Edit Group Modal */}
       <Modal isOpen={editIsOpen} onOpenChange={onEditClose} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
-        <ModalContent>
+        {editIsOpen && (
+          <div
+            className="fixed inset-0 z-30 bg-[#F0F0F0] md:bg-black/40 block md:block"
+            onClick={toggleSidebar}
+          />
+        )}
+        <ModalContent className="rounded-2xl overflow-hidden">
           {(onEditClose) => (
             <>
               <ModalHeader className="relative rounded bg-[#FC9D25] flex justify-between items-center px-6 py-3">

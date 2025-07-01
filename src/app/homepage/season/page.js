@@ -40,6 +40,9 @@ const DataSeason = () => {
 
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
 
+  const toggleSidebar = () => setIsOpen(!isOpen);
+
+
   useEffect(() => {
     fetchPeriods();
   }, []);
@@ -215,11 +218,17 @@ const DataSeason = () => {
       </div>
 
       {/* Modal for Adding Period */}
-      <Modal isOpen={isOpen} onOpenChange={onClose} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
-        <ModalContent>
+      <Modal isOpen={isOpen} onOpenChange={onClose} hideCloseButton={true} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
+        {isOpen && (
+          <div
+            className="fixed inset-0 z-30 bg-[#F0F0F0] md:bg-black/40 block md:block"
+            onClick={toggleSidebar}
+          />
+        )}
+        <ModalContent className="rounded-2xl overflow-hidden">
           {(onClose) => (
             <>
-              <ModalHeader className="rounded bg-[#FC9D25] flex justify-between items-center px-6 py-3">
+              <ModalHeader className="bg-[#FC9D25] flex justify-between items-center px-6 py-3">
                 <div className="text-xl font-bold text-white">New Period</div>
                 <button
                   type="button"
@@ -261,11 +270,17 @@ const DataSeason = () => {
       </Modal>
 
       {/* Modal for Editing Period */}
-      <Modal isOpen={editIsOpen} onOpenChange={onEditClose} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
-        <ModalContent>
+      <Modal isOpen={editIsOpen} onOpenChange={onEditClose} hideCloseButton={true} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
+        {editIsOpen && (
+          <div
+            className="fixed inset-0 z-30 bg-[#F0F0F0] md:bg-black/40 block md:block"
+            onClick={toggleSidebar}
+          />
+        )}
+        <ModalContent className="rounded-2xl overflow-hidden">
           {(onEditClose) => (
             <>
-              <ModalHeader className="rounded bg-[#FC9D25] flex justify-between items-center px-6 py-3">
+              <ModalHeader className="bg-[#FC9D25] flex justify-between items-center px-6 py-3">
                 <div className="text-xl font-bold text-white">Edit Period</div>
                 <button
                   type="button"
@@ -332,7 +347,6 @@ const DataSeason = () => {
                   onClick={() => handleSort('Vdesc')}
                 >
                   Description {sortConfig.key === 'Vdesc' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
-
                 </th>
                 <th
                   className="pl-2 pr-2 border-r border-[#e6e6e6] uppercase select-none"

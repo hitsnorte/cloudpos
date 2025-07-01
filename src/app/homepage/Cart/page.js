@@ -12,6 +12,7 @@ import { fetchIva } from '@/src/lib/apiiva';
 import { fetchSubfamily } from '@/src/lib/apisubfamily';
 import { fetchDashboard } from '@/src/lib/apidashboard';
 import { fetchClassepreco } from '@/src/lib/apiclassepreco';
+import { IoMdClose } from "react-icons/io";
 import { CiTrash } from "react-icons/ci";
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@heroui/react";
 import { FaArrowUp } from "react-icons/fa";
@@ -647,6 +648,7 @@ export default function ProductGroups() {
                         </Dropdown>
                     </div>
 
+
                     <Modal
                         isOpen={isAddModalOpen}
                         onOpenChange={onAddModalClose}
@@ -655,86 +657,91 @@ export default function ProductGroups() {
                         className="w-300 bg-white shadow-xl rounded-lg"
                         hideCloseButton={true}
                     >
+                        {isAddModalOpen && (
+                            <div
+                                className="fixed inset-0 z-30 bg-[#F0F0F0] md:bg-black/40 block md:block"
+                                onClick={toggleSidebar}
+                            />
+                        )}
                         <ModalContent>
                             {(onClose) => (
                                 <>
-                                    <ModalHeader className="rounded bg-[#FC9D25] flex justify-between items-center">
-                                        <div className="text-xl font-bold text-white">Enter the PLU</div>
-                                        <Button
-                                            onClick={onClose}
-                                            className="text-white bg-transparent border-0 text-2xl p-0"
-                                            aria-label="Close"
-                                        >
-                                            &times; {/* Unicode for "×" sign */}
-                                        </Button>
-                                    </ModalHeader>
-                                    <ModalBody className="py-5 px-6">
-                                        {errorMessage && (
-                                            <div className="text-center text-red-600 font-semibold text-lg mb-4">
-                                                {errorMessage}
-                                            </div>
-                                        )}
-                                        <Input
-                                            placeholder="PLU"
-                                            value={inputValue}
-                                            onChange={(e) => {
-                                                const onlyNums = e.target.value.replace(/\D/g, ""); // Remove tudo que não for dígito
-                                                setInputValue(onlyNums);
-                                            }}
-                                            className="mb-4"
-                                            classNames={{
-                                                inputWrapper: "bg-gray-200 px-3 py-2 border border-gray-300",
-                                                input: "text-gray-800",
-                                            }}
-                                        />
+                                    <div className="fixed inset-0 z-50 flex items-center justify-center">
+                                        <div className="bg-white rounded-2xl shadow-xl w-92 max-w-md">
+                                            <ModalHeader className="bg-[#E6AC27] rounded-t-2xl p-4 flex justify-between">
+                                                <div className="text-xl font-semibold text-white">Enter the PLU</div>
+                                                <IoMdClose size={25} color='white' onClick={onClose} className='cursor-pointer' />
+                                            </ModalHeader>
+                                            <ModalBody className="p-4">
+                                                {errorMessage && (
+                                                    <div className="text-center text-red-600 font-semibold text-lg mb-4">
+                                                        {errorMessage}
+                                                    </div>
+                                                )}
+                                                <Input
+                                                    placeholder="PLU"
+                                                    value={inputValue}
+                                                    onChange={(e) => {
+                                                        const onlyNums = e.target.value.replace(/\D/g, ""); // Remove tudo que não for dígito
+                                                        setInputValue(onlyNums);
+                                                    }}
+                                                    className="mb-4"
+                                                    classNames={{
+                                                        inputWrapper: "bg-gray-200 px-3 py-2 border border-gray-300",
+                                                        input: "text-gray-800",
+                                                    }}
+                                                />
 
-                                        <div className="grid grid-cols-4 gap-2 ">
-                                            {[7, 8, 9].map((n) => (
-                                                <button
-                                                    key={n}
-                                                    onClick={() => handleKeyPress(n)}
-                                                    className="bg-gray-200 w-full aspect-square rounded text-lg font-medium btn"
-                                                >
-                                                    {n}
-                                                </button>
-                                            ))}
+                                                <div className="grid grid-cols-4 gap-2 ">
+                                                    {[7, 8, 9].map((n) => (
+                                                        <button
+                                                            key={n}
+                                                            onClick={() => handleKeyPress(n)}
+                                                            className="bg-gray-200 w-full aspect-square rounded text-lg font-medium btn"
+                                                        >
+                                                            {n}
+                                                        </button>
+                                                    ))}
 
-                                            <button onClick={handleClear} className="btn w-full bg-red-400 text-white font-bold rounded text-lg row-span-2">
-                                                C
-                                            </button>
+                                                    <button onClick={handleClear} className="btn w-full bg-red-400 text-white font-bold rounded text-lg row-span-2">
+                                                        C
+                                                    </button>
 
-                                            {[4, 5, 6].map((n) => (
-                                                <button key={n} onClick={() => handleKeyPress(n)} className="bg-gray-200 w-full aspect-square rounded text-lg font-medium btn">
-                                                    {n}
-                                                </button>
-                                            ))}
+                                                    {[4, 5, 6].map((n) => (
+                                                        <button key={n} onClick={() => handleKeyPress(n)} className="bg-gray-200 w-full aspect-square rounded text-lg font-medium btn">
+                                                            {n}
+                                                        </button>
+                                                    ))}
 
 
-                                            {[1, 2, 3].map((n) => (
-                                                <button key={n} onClick={() => handleKeyPress(n)} className="bg-gray-200 w-full aspect-square rounded text-lg font-medium btn">
-                                                    {n}
-                                                </button>
-                                            ))}
-                                            <button onClick={handleOk} className="btn w-full bg-[#94c465] rounded text-lg text-white row-span-2">
-                                                OK
-                                            </button>
+                                                    {[1, 2, 3].map((n) => (
+                                                        <button key={n} onClick={() => handleKeyPress(n)} className="bg-gray-200 w-full aspect-square rounded text-lg font-medium btn">
+                                                            {n}
+                                                        </button>
+                                                    ))}
+                                                    <button onClick={handleOk} className="btn w-full bg-[#94c465] rounded text-lg text-white row-span-2">
+                                                        OK
+                                                    </button>
 
-                                            {[0, "00"].map((n, idx) => (
-                                                <button
-                                                    key={n}
-                                                    onClick={() => handleKeyPress(n)}
-                                                    className={`bg-gray-200 w-full rounded text-lg font-medium btn ${idx === 0 ? "col-span-2 py-3" : "aspect-square"}`}
-                                                >
-                                                    {n}
-                                                </button>
+                                                    {[0, "00"].map((n, idx) => (
+                                                        <button
+                                                            key={n}
+                                                            onClick={() => handleKeyPress(n)}
+                                                            className={`bg-gray-200 w-full rounded text-lg font-medium btn ${idx === 0 ? "col-span-2 py-3" : "aspect-square"}`}
+                                                        >
+                                                            {n}
+                                                        </button>
 
-                                            ))}
+                                                    ))}
+                                                </div>
+
+                                            </ModalBody>
                                         </div>
-
-                                    </ModalBody>
-
+                                    </div>
                                 </>
+
                             )}
+
                         </ModalContent>
                     </Modal>
 
@@ -938,79 +945,84 @@ export default function ProductGroups() {
                     )}
 
                     {selectedProduct && (
-                        <div className=" quantidades fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-115 bg-white shadow-xl rounded-lg z-50">
-                            <div className="bg-[#FAFAFA] w-full ">
-                                <div className="flex justify-between items-center mb-4 px-4 py-3 bg-[#FC9D25] rounded-t-lg">
-                                    <h2 className=" text-l font-semibold text-white ml-1 ">
-                                        Add product
+                        <>
+                            {/* BACKDROP cinzento */}
+                            <div
+                                className="fixed inset-0 z-30 bg-[#F0F0F0] md:bg-black/40 block md:block"
+                                onClick={() => setSelectedProduct(null)} // fechar ao clicar fora
+                            />
+
+                            {/* MODAL */}
+                            <div className="quantidades fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-115 bg-white shadow-xl rounded-lg z-50">
+                                <div className="bg-[#FAFAFA] w-full rounded-t-lg">
+                                    <div className="flex justify-between items-center mb-4 px-4 py-3 bg-[#FC9D25] rounded-t-lg">
+                                        <h2 className="text-l font-semibold text-white ml-1">Add product</h2>
+                                    </div>
+
+                                    <h2 className="text-l font-semibold text-black ml-5 mb-5">
+                                        {selectedProduct.name
+                                            .toLowerCase()
+                                            .split(' ')
+                                            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                                            .join(' ')}
                                     </h2>
-                                </div>
-                                <h2 className="text-l font-semibold text-black ml-5 mb-5">
-                                    {selectedProduct.name
-                                        .toLowerCase()
-                                        .split(' ')
-                                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                                        .join(' ')}
-                                </h2>
 
-                                <div className="flex items-center justify-left px-6">
-                                    {/* Preço */}
-                                    <div className="flex flex-col ">
-                                        <div className="text-xl text-[#FC9D25] font-semibold whitespace-nowrap">
-                                            €{(selectedProduct?.price).toFixed(2)}/un
+                                    <div className="flex items-center justify-left px-6">
+                                        {/* Preço */}
+                                        <div className="flex flex-col">
+                                            <div className="text-xl text-[#FC9D25] font-semibold whitespace-nowrap">
+                                                €{(selectedProduct?.price).toFixed(2)}/un
+                                            </div>
+                                            <div className="text-sm text-black whitespace-nowrap">
+                                                Iva {selectedProduct?.iva?.toFixed(2)}%
+                                            </div>
                                         </div>
 
-                                        <div className="text-sm text-black whitespace-nowrap">
-                                            Iva {selectedProduct?.iva?.toFixed(2)}%
+                                        {/* Seletor de quantidade */}
+                                        <div className="seletor flex items-center rounded overflow-hidden border border-gray-200 w-max fixed -mt-4">
+                                            <button
+                                                onClick={() => setCount((prev) => Math.max(1, prev - 1))}
+                                                className="px-4 py-1 bg-white text-[#FC9D25] hover:bg-gray-300 transition"
+                                            >
+                                                <span className="inline-block transform scale-150 font-thin">-</span>
+                                            </button>
+                                            <span className="px-2 py-1 bg-white text-sm font-medium text-[#191919] border-gray-300">
+                                                {count}
+                                            </span>
+                                            <button
+                                                onClick={() => setCount((prev) => prev + 1)}
+                                                className="px-3.5 py-1 bg-white text-[#FC9D25] hover:bg-gray-300 transition"
+                                            >
+                                                <span className="inline-block transform scale-150 font-thin">+</span>
+                                            </button>
                                         </div>
                                     </div>
 
-                                    {/* Seletor de quantidade */}
-                                    <div className="seletor flex items-center rounded overflow-hidden border border-gray-200 w-max fixed -mt-4">
+                                    {/* Botões */}
+                                    <div className="flex justify-end space-x-3 ml-8 mb-5 m-5 mr-7">
                                         <button
-                                            onClick={() => setCount((prev) => Math.max(1, prev - 1))}
-                                            className="px-4 py-1 bg-white text-[#FC9D25] hover:bg-gray-300 transition"
+                                            onClick={() => setSelectedProduct(null)}
+                                            className="px-10.5 py-1 bg-[#D3D3D3] text-white rounded-md hover:bg-gray font-medium transition duration-200"
                                         >
-                                            <span className="inline-block transform scale-150 font-thin">-</span>
+                                            Close
                                         </button>
-                                        <span className="px-2 py-1 bg-white text-sm font-medium text-[#191919] border-gray-300">
-                                            {count}
-                                        </span>
                                         <button
-                                            onClick={() => setCount((prev) => prev + 1)}
-                                            className="px-3.5 py-1 bg-white text-[#FC9D25] hover:bg-gray-300 transition"
+                                            onClick={() => {
+                                                if (count > 0) {
+                                                    addToCart({ ...selectedProduct, quantity: count });
+                                                    setSelectedProduct(null);
+                                                }
+                                            }}
+                                            className="px-10.5 py-1 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
                                         >
-                                            <span className="inline-block transform scale-150 font-thin">+</span>
+                                            {isLoading ? <Spinner size="sm" color="white" /> : 'Save'}
                                         </button>
                                     </div>
-                                </div>
-
-                                {/* Modal de quantidades*/}
-                                <div className=" flex justify-end space-x-3 ml-8 mb-5 m-5 mr-7">
-                                    {/* Botão Close */}
-                                    <button
-                                        onClick={() => setSelectedProduct(null)}
-                                        className="px-10.5 py-1 bg-[#D3D3D3] text-white rounded-md hover:bg-gray font-medium transition duration-200"
-                                    >
-                                        Close
-                                    </button>
-
-                                    {/* Botão Save */}
-                                    <button
-                                        onClick={() => {
-                                            if (count > 0) {
-                                                addToCart({ ...selectedProduct, quantity: count });
-                                                setSelectedProduct(null);
-                                            }
-                                        }}
-                                        className="px-10.5 py-1 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
-                                    >
-                                        {isLoading ? <Spinner size="sm" color="white" /> : 'Save'}
-                                    </button>
                                 </div>
                             </div>
-                        </div>
+                        </>
                     )}
+
 
 
                     {cartOpen && (

@@ -38,6 +38,9 @@ const DataUnit = () => {
 
     const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
 
+    const toggleSidebar = () => setIsOpen(!isOpen);
+
+
     useEffect(() => {
         fetchUnits();
     }, []);
@@ -188,7 +191,13 @@ const DataUnit = () => {
 
             {/* Modal for Adding Units */}
             <Modal isOpen={isOpen} onOpenChange={onClose} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
-                <ModalContent>
+                {isOpen && (
+                    <div
+                        className="fixed inset-0 z-30 bg-[#F0F0F0] md:bg-black/40 block md:block"
+                        onClick={toggleSidebar}
+                    />
+                )}
+                <ModalContent className="rounded-2xl overflow-hidden">
                     {(onClose) => (
                         <>
                             <ModalHeader className="relative rounded bg-[#FC9D25] flex justify-between items-center px-6 py-3">
@@ -236,10 +245,16 @@ const DataUnit = () => {
 
             {/* Modal for Editing Units */}
             <Modal isOpen={editIsOpen} onOpenChange={onEditClose} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
-                <ModalContent>
+                {editIsOpen && (
+                    <div
+                        className="fixed inset-0 z-30 bg-[#F0F0F0] md:bg-black/40 block md:block"
+                        onClick={toggleSidebar}
+                    />
+                )}
+                <ModalContent className="rounded-2xl overflow-hidden">
                     {(onEditClose) => (
                         <>
-                            <ModalHeader className="relative rounded bg-[#FC9D25] flex justify-between items-center px-6 py-3">
+                            <ModalHeader className="relative bg-[#FC9D25] flex justify-between items-center px-6 py-3">
                                 <div className="text-xl font-bold text-white">Edit Unit</div>
                                 <button
                                     type="button"

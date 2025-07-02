@@ -11,6 +11,7 @@ export default function CartPage({
     getCartItems,
     updateQuantity,
     removeItem,
+    clearCart
 }) {
     const [isOpen, setIsOpen] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);

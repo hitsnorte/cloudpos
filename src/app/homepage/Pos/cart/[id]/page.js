@@ -315,20 +315,25 @@ export default function Cart() {
         localStorage.setItem(cartKey, JSON.stringify(updatedCart));
     };
 
+    const clearCart = () => {
+        localStorage.removeItem(cartKey); // limpa o carrinho salvo
+        setCurrentCart([]);               // limpa o estado local
+    };
+
     return (
         <>
             <div className="flex items-center justify-center space-x-4 mt-4">
-                    <button
-                        className="fixed top-6 right-15 z-20 text-3xl text-[#191919] hover:text-[#FC9D25] transition"
-                        onClick={() => setIsCartOpen(true)}
-                    >
-                        <TiShoppingCart />
-                        {currentCart.length > 0 && (
-                            <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                                {currentCart.reduce((total, item) => total + item.quantity, 0)}
-                            </span>
-                        )}
-                    </button>
+                <button
+                    className="fixed top-6 right-15 z-20 text-3xl text-[#191919] hover:text-[#FC9D25] transition"
+                    onClick={() => setIsCartOpen(true)}
+                >
+                    <TiShoppingCart />
+                    {currentCart.length > 0 && (
+                        <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                            {currentCart.reduce((total, item) => total + item.quantity, 0)}
+                        </span>
+                    )}
+                </button>
 
                 {isCartOpen && (
                     <CartPage
@@ -337,6 +342,7 @@ export default function Cart() {
                         getCartItems={getCartItems}
                         updateQuantity={updateQuantity}
                         removeItem={removeItem}
+                        clearCart={clearCart}
                     />
                 )}
                 <button

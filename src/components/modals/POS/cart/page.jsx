@@ -10,6 +10,7 @@ export default function CartPage({
     getCartItems,
     updateQuantity,
     removeItem,
+    clearCart
 }) {
     const [isOpen, setIsOpen] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
@@ -149,7 +150,12 @@ export default function CartPage({
                         {showConfirm && <div className="fixed inset-0 bg-opacity-30 z-40" />}
                         <div className="relative z-50 inline-block">
                             <button
-                                onClick={() => setShowConfirm(true)}
+                                onClick={() => {
+                                    const confirmDelete = window.confirm("Tem certeza que deseja apagar todos os produtos do carrinho?");
+                                    if (confirmDelete) {
+                                        clearCart();
+                                    }
+                                }}
                                 className="w-12 ml-2 border border-[#ff0000] text-[#ff0000] rounded py-2 text-sm hover:bg-[#fff4e6] transition flex items-center justify-center gap-2"
                             >
                                 <CiTrash className="text-sm" size={20} />

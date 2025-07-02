@@ -12,6 +12,8 @@ export default function Tables() {
     const [selectedTable, setSelectedTable] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [clientNumber, setClienteNumber] = useState(null);
+    const [tempTable, setTempTable] = useState(null);
+
     const params = useParams();
     const router = useRouter();
 
@@ -24,6 +26,8 @@ export default function Tables() {
             console.warn("Nenhuma propriedade encontrada no localStorage!");
         }
     }, []);
+
+
 
     useEffect(() => {
         if (!propertyID || !params?.id) {
@@ -61,28 +65,53 @@ export default function Tables() {
     };
 
     const handleClientNumberSubmit = (clientNumber) => {
-        if (clientNumber.trim() !== '' && selectedTable) {
+        if (clientNumber.trim() !== '' && tempTable) {
             console.log("Número de clientes:", clientNumber);
             setClienteNumber(clientNumber);
             setShowModal(false);
 
+            // ⚠️ Limpa primeiro qualquer mesa anterior (opcional mas ajuda a debugar)
+            console.log("TempTable para guardar:", tempTable);
+            localStorage.removeItem("selectedMesa");
+            localStorage.setItem("selectedMesa", JSON.stringify(tempTable));
+            console.log("selectedMesa guardado:", localStorage.getItem("selectedMesa"));
+            localStorage.setItem("previousPage", window.location.pathname);
+
+            // ✅ Aguarda uma iteração do event loop para garantir que o localStorage está atualizado
             setTimeout(() => {
-                localStorage.setItem("selectedMesa", JSON.stringify(selectedTable));
-                router.push(`/homepage/Pos/cart/${selectedTable.ID_Mesa}`);
-            }, 300);
+                router.push(`/homepage/Pos/cart/${tempTable.ID_Mesa}`);
+            }, 0);
         }
     };
 
+    const handleBack = () => {
+        const postoId = localStorage.getItem("postoId");
+        if (postoId) {
+            router.push(`/homepage/Pos/rooms/${postoId}`);
+        } else {
+            router.back(); // fallback
+        }
+    };
+
+
     return (
         <>
-            <h1 className="text-3xl font-semibold">Tables</h1>
-
+            <div className="flex items-center px-6 mt-4 mb-2">
+                <button
+                    onClick={handleBack}
+                    className="px-3 -ml-2 py-1 bg-[#FC9D25] text-white rounded hover:bg-gray-300 transition"
+                >
+                    ← Rooms
+                </button>
+                <h1 className="text-3xl font-semibold ml-3">Tables</h1>
+            </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-6">
                 {tables.map((table, index) => (
                     <div
                         key={index}
                         onClick={() => {
                             setSelectedTable(table); // <- adiciona isso
+                            setTempTable(table); // ← armazena temporariamente
                             setShowModal(true);
                         }}
                         className="w-full h-40 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center cursor-pointer hover:bg-gray-100 transition"

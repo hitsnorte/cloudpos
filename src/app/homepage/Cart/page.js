@@ -12,6 +12,7 @@ import { fetchIva } from '@/src/lib/apiiva';
 import { fetchSubfamily } from '@/src/lib/apisubfamily';
 import { fetchDashboard } from '@/src/lib/apidashboard';
 import { fetchClassepreco } from '@/src/lib/apiclassepreco';
+import { IoMdClose } from "react-icons/io";
 import { CiTrash } from "react-icons/ci";
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@heroui/react";
 import { FaArrowUp } from "react-icons/fa";
@@ -20,6 +21,8 @@ import { FaMagnifyingGlass } from "react-icons/fa6";
 import { Card, CardBody } from "@heroui/react";
 import { useSession } from "next-auth/react"; // Import useSession
 import { Plus } from "lucide-react";
+import { IoIosArrowBack } from "react-icons/io";
+import "./style.css";
 import {
     Modal,
     ModalContent,
@@ -49,7 +52,6 @@ export default function ProductGroups() {
         const saved = localStorage.getItem('cart');
         return saved ? JSON.parse(saved) : [];
     });
-    const [produtos, setProdutos] = useState([]);
     const [dashboardData, setDashboardData] = useState(null);
     const router = useRouter();
     const { data: session, status } = useSession();
@@ -78,11 +80,6 @@ export default function ProductGroups() {
     };
 
     const toggleCart = () => setCartOpen(prev => !prev);
-
-    const closeModal = () => {
-        setSelectedProduct(null);
-        setCount(1);
-    };
 
     const {
         isOpen: isAddModalOpen,
@@ -589,41 +586,45 @@ export default function ProductGroups() {
             {/* Conteúdo restante só aparece após clicar em um card */}
             {selectedCardPath && (
                 <>
-                    <div className="flex items-center justify-center space-x-4 ">
+                    <div className="grid grid-cols-2 gap-4 sm:flex sm:items-center sm:justify-center sm:space-x-4">
+                        {/*Botão de retorno para a dashboard*/}
+                        {selectedCardPath && (
+                            <button
+                                onClick={() => setSelectedCardPath(null)}
+                                className="flex items-center gap-x-2 px-4 py-2 bg-[#FC9D25] text-white rounded"
+                            >
+                                <IoIosArrowBack size={16} />
+                                <span>Dashboard</span>
+                            </button>
+                        )}
 
-                        {/*  botão de selecao de groups, families e subfamilies */}
+                        {/* botão de selecao de groups, families e subfamilies */}
                         <button
                             onClick={() => setViewType('groups')}
                             className={`px-4 py-2 rounded ${viewType === 'groups' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
                         >
                             Groups
                         </button>
+
                         <button
                             onClick={() => setViewType('families')}
                             className={`px-4 py-2 rounded ${viewType === 'families' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
                         >
                             Families
                         </button>
+
                         <button
                             onClick={() => setViewType('subfamilies')}
                             className={`px-4 py-2 rounded ${viewType === 'subfamilies' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
                         >
                             Subfamilies
                         </button>
-                        {selectedCardPath && (
-                            <button
-                                onClick={() => setSelectedCardPath(null)}
-                                className="fixed top-6 left-74 bg-[#FC9D25] text-white px-4 py-2 rounded"
-                            >
-                                Dashboard
-                            </button>
-
-                        )}
                     </div>
 
-                    <div className="py-5 px-6 -mb-4" >
-                        {/* Campo de pesquisa */}
-                        <div className="mb-4 relative">
+
+                    <div className="flex items-center justify-between space-x-4 flex-wrap md:flex-nowrap mt-4">
+                        {/* Search input container */}
+                        <div className="relative flex-1 min-w-[200px] md:min-w-auto">
                             <FaMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
                             <input
                                 type="text"
@@ -633,19 +634,20 @@ export default function ProductGroups() {
                                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
                             />
                         </div>
-                    </div>
 
-                    <Dropdown>
-                        <DropdownTrigger>
-                            <div className="flex justify-end mr-6 -mb-2">
+                        {/* Plus button */}
+                        <Dropdown>
+                            <DropdownTrigger>
                                 <button
                                     onClick={onAddModalOpen}
-                                    className=" bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded">
-                                    < Plus size={25} />
+                                    className="bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded mt-2 md:mt-0"
+                                >
+                                    <Plus size={25} />
                                 </button>
-                            </div>
-                        </DropdownTrigger>
-                    </Dropdown>
+                            </DropdownTrigger>
+                        </Dropdown>
+                    </div>
+
 
                     <Modal
                         isOpen={isAddModalOpen}
@@ -655,89 +657,93 @@ export default function ProductGroups() {
                         className="w-300 bg-white shadow-xl rounded-lg"
                         hideCloseButton={true}
                     >
+                        {isAddModalOpen && (
+                            <div
+                                className="fixed inset-0 z-30 bg-[#F0F0F0] md:bg-black/40 block md:block"
+                                onClick={toggleSidebar}
+                            />
+                        )}
                         <ModalContent>
                             {(onClose) => (
                                 <>
-                                    <ModalHeader className="rounded bg-[#FC9D25] flex justify-between items-center">
-                                        <div className="text-xl font-bold text-white">Enter the PLU</div>
-                                        <Button
-                                            onClick={onClose}
-                                            className="text-white bg-transparent border-0 text-2xl p-0"
-                                            aria-label="Close"
-                                        >
-                                            &times; {/* Unicode for "×" sign */}
-                                        </Button>
-                                    </ModalHeader>
-                                    <ModalBody className="py-5 px-6">
-                                        {errorMessage && (
-                                            <div className="text-center text-red-600 font-semibold text-lg mb-4">
-                                                {errorMessage}
-                                            </div>
-                                        )}
-                                        <Input
-                                            placeholder="PLU"
-                                            value={inputValue}
-                                            onChange={(e) => {
-                                                const onlyNums = e.target.value.replace(/\D/g, ""); // Remove tudo que não for dígito
-                                                setInputValue(onlyNums);
-                                            }}
-                                            className="mb-4"
-                                            classNames={{
-                                                inputWrapper: "bg-gray-200 px-3 py-2 border border-gray-300",
-                                                input: "text-gray-800",
-                                            }}
-                                        />
+                                    <div className="fixed inset-0 z-50 flex items-center justify-center">
+                                        <div className="bg-white rounded-2xl shadow-xl w-92 max-w-md">
+                                            <ModalHeader className="bg-[#E6AC27] rounded-t-2xl p-4 flex justify-between">
+                                                <div className="text-xl font-semibold text-white">Enter the PLU</div>
+                                                <IoMdClose size={25} color='white' onClick={onClose} className='cursor-pointer' />
+                                            </ModalHeader>
+                                            <ModalBody className="p-4">
+                                                {errorMessage && (
+                                                    <div className="text-center text-red-600 font-semibold text-lg mb-4">
+                                                        {errorMessage}
+                                                    </div>
+                                                )}
+                                                <Input
+                                                    placeholder="PLU"
+                                                    value={inputValue}
+                                                    onChange={(e) => {
+                                                        const onlyNums = e.target.value.replace(/\D/g, ""); // Remove tudo que não for dígito
+                                                        setInputValue(onlyNums);
+                                                    }}
+                                                    className="mb-4"
+                                                    classNames={{
+                                                        inputWrapper: "bg-gray-200 px-3 py-2 border border-gray-300",
+                                                        input: "text-gray-800",
+                                                    }}
+                                                />
 
-                                        <div className="grid grid-cols-4 gap-2 ">
-                                            {[7, 8, 9].map((n) => (
-                                                <button
-                                                    key={n}
-                                                    onClick={() => handleKeyPress(n)}
-                                                    className="bg-gray-200 w-full aspect-square rounded text-lg font-medium btn"
-                                                >
-                                                    {n}
-                                                </button>
-                                            ))}
+                                                <div className="grid grid-cols-4 gap-2 ">
+                                                    {[7, 8, 9].map((n) => (
+                                                        <button
+                                                            key={n}
+                                                            onClick={() => handleKeyPress(n)}
+                                                            className="bg-gray-200 w-full aspect-square rounded text-lg font-medium btn"
+                                                        >
+                                                            {n}
+                                                        </button>
+                                                    ))}
 
-                                            <button onClick={handleClear} className="btn w-full bg-red-400 text-white font-bold rounded text-lg row-span-2">
-                                                C
-                                            </button>
+                                                    <button onClick={handleClear} className="btn w-full bg-red-400 text-white font-bold rounded text-lg row-span-2">
+                                                        C
+                                                    </button>
 
-                                            {[4, 5, 6].map((n) => (
-                                                <button key={n} onClick={() => handleKeyPress(n)} className="bg-gray-200 w-full aspect-square rounded text-lg font-medium btn">
-                                                    {n}
-                                                </button>
-                                            ))}
+                                                    {[4, 5, 6].map((n) => (
+                                                        <button key={n} onClick={() => handleKeyPress(n)} className="bg-gray-200 w-full aspect-square rounded text-lg font-medium btn">
+                                                            {n}
+                                                        </button>
+                                                    ))}
 
 
-                                            {[1, 2, 3].map((n) => (
-                                                <button key={n} onClick={() => handleKeyPress(n)} className="bg-gray-200 w-full aspect-square rounded text-lg font-medium btn">
-                                                    {n}
-                                                </button>
-                                            ))}
-                                            <button onClick={handleOk} className="btn w-full bg-[#94c465] rounded text-lg text-white row-span-2">
-                                                OK
-                                            </button>
+                                                    {[1, 2, 3].map((n) => (
+                                                        <button key={n} onClick={() => handleKeyPress(n)} className="bg-gray-200 w-full aspect-square rounded text-lg font-medium btn">
+                                                            {n}
+                                                        </button>
+                                                    ))}
+                                                    <button onClick={handleOk} className="btn w-full bg-[#94c465] rounded text-lg text-white row-span-2">
+                                                        OK
+                                                    </button>
 
-                                            {[0, "00"].map((n, idx) => (
-                                                <button
-                                                    key={n}
-                                                    onClick={() => handleKeyPress(n)}
-                                                    className={`bg-gray-200 w-full rounded text-lg font-medium btn ${idx === 0 ? "col-span-2 py-3" : "aspect-square"}`}
-                                                >
-                                                    {n}
-                                                </button>
+                                                    {[0, "00"].map((n, idx) => (
+                                                        <button
+                                                            key={n}
+                                                            onClick={() => handleKeyPress(n)}
+                                                            className={`bg-gray-200 w-full rounded text-lg font-medium btn ${idx === 0 ? "col-span-2 py-3" : "aspect-square"}`}
+                                                        >
+                                                            {n}
+                                                        </button>
 
-                                            ))}
+                                                    ))}
+                                                </div>
+
+                                            </ModalBody>
                                         </div>
-
-                                    </ModalBody>
-
+                                    </div>
                                 </>
+
                             )}
+
                         </ModalContent>
                     </Modal>
-
 
 
                     {/*  botão do carrinho */}
@@ -745,7 +751,7 @@ export default function ProductGroups() {
                         {/* Botão Carrinho */}
                         {!isOpen && (
                             <button
-                                className="fixed top-6 right-15 z-50 text-3xl text-[#191919] hover:text-[#FC9D25] transition"
+                                className="fixed bottom-6 right-6 md:top-6 md:right-15 md:bottom-auto text-3xl text-[#191919] hover:text-[#FC9D25] transition z-50"
                                 onClick={toggleSidebar}
                             >
                                 <TiShoppingCart />
@@ -756,30 +762,32 @@ export default function ProductGroups() {
                                 )}
                             </button>
                         )}
+
                         {/* Overlay escuro */}
                         {isOpen && (
                             <div
-                                className="fixed inset-0 bg-black/40 z-30"
+                                className="fixed inset-0 z-30 bg-[#F0F0F0] md:bg-black/40 block md:block"
                                 onClick={toggleSidebar}
-                            ></div>
+                            />
                         )}
+
                         {/* Sidebar Carrinho */}
                         <div
-                            className={`fixed top-0 right-0 h-full w-[400px] max-w-full bg-[#F0F0F0] shadow-lg transition-transform duration-300 z-40 ${isOpen ? 'translate-x-0' : 'translate-x-full'
+                            className={`cart fixed top-0 right-0 h-full w-[400px] max-w-full bg-[#F0F0F0] z-[9999] shadow-lg transition-transform duration-300 ${isOpen ? 'translate-x-0' : 'translate-x-full'
                                 }`}
                         >
                             {/* Cabeçalho */}
-                            <div className="sticky top-0 z-10 bg-[#F0F0F0] flex items-center justify-between p-5 ml-1">
-                                <h2 className="text-l font-semibold ml-1">Your Shopping Cart</h2>
+                            <div className="sticky top-0 z-10 bg-[#F0F0F0] flex items-center justify-between p-5 ml-1 mb-4">
+                                <h2 className="text-l font-semibold ml-1 mt-5">Your Shopping Cart</h2>
                                 <button onClick={toggleSidebar} className="text-l text-[#FC9D25]">
                                     <span className="inline-block transform scale-150 font-thin mr-5">x</span>
                                 </button>
                             </div>
 
                             {/* Conteúdo do Carrinho */}
-                            <div className="p-7 flex flex-col h-[calc(100%-150px)] overflow-y-auto  -mt-5">
+                            <div className="flex-1 overflow-y-auto h-[calc(100%-150px)] px-4 py-2" style={{ maxHeight: 'calc(100vh - 200px)' }}>
                                 {cartItems.length === 0 ? (
-                                    <p className="text-sm">Your Shopping Card Is Empty.</p>
+                                    <p className="text-sm">Your Shopping Cart is Empty.</p>
                                 ) : (
                                     <div className="bg-white rounded-l border border-white pt-2 px-4 flex flex-col">
                                         {cartItems.map((item, idx) => (
@@ -937,148 +945,160 @@ export default function ProductGroups() {
                     )}
 
                     {selectedProduct && (
-                        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-115 bg-white shadow-xl rounded-lg z-50">
-                            <div className="bg-[#FAFAFA] w-full ">
-                                <div className="flex justify-between items-center mb-4 px-4 py-3 bg-[#FC9D25] rounded-t-lg">
-                                    <h2 className=" text-l font-semibold text-white ml-1 ">
-                                        Add product
+                        <>
+                            {/* BACKDROP cinzento */}
+                            <div
+                                className="fixed inset-0 z-30 bg-[#F0F0F0] md:bg-black/40 block md:block"
+                                onClick={() => setSelectedProduct(null)} // fechar ao clicar fora
+                            />
+
+                            {/* MODAL */}
+                            <div className="quantidades fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-115 bg-white shadow-xl rounded-lg z-50">
+                                <div className="bg-[#FAFAFA] w-full rounded-t-lg">
+                                    <div className="flex justify-between items-center mb-4 px-4 py-3 bg-[#FC9D25] rounded-t-lg">
+                                        <h2 className="text-l font-semibold text-white ml-1">Add product</h2>
+                                    </div>
+
+                                    <h2 className="text-l font-semibold text-black ml-5 mb-5">
+                                        {selectedProduct.name
+                                            .toLowerCase()
+                                            .split(' ')
+                                            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                                            .join(' ')}
                                     </h2>
-                                </div>
-                                <h2 className="text-l font-semibold text-black ml-5 mb-5">
-                                    {selectedProduct.name
-                                        .toLowerCase()
-                                        .split(' ')
-                                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                                        .join(' ')}
-                                </h2>
 
-                                <div className="flex items-center justify-left px-6">
-                                    {/* Preço */}
-                                    <div className="flex flex-col ">
-                                        <div className="text-xl text-[#FC9D25] font-semibold whitespace-nowrap">
-                                            €{(selectedProduct?.price).toFixed(2)}/un
+                                    <div className="flex items-center justify-left px-6">
+                                        {/* Preço */}
+                                        <div className="flex flex-col">
+                                            <div className="text-xl text-[#FC9D25] font-semibold whitespace-nowrap">
+                                                €{(selectedProduct?.price).toFixed(2)}/un
+                                            </div>
+                                            <div className="text-sm text-black whitespace-nowrap">
+                                                Iva {selectedProduct?.iva?.toFixed(2)}%
+                                            </div>
                                         </div>
 
-                                        <div className="text-sm text-black whitespace-nowrap">
-                                            Iva {selectedProduct?.iva?.toFixed(2)}%
-                                        </div>
-                                    </div>
-
-                                    {/* Seletor de quantidade */}
-                                    <div className="flex items-center rounded overflow-hidden border border-gray-200 w-max fixed ml-72 -mt-4">
-                                        <button
-                                            onClick={() => setCount((prev) => Math.max(1, prev - 1))}
-                                            className="px-4 py-1 bg-white text-[#FC9D25] hover:bg-gray-300 transition"
-                                        >
-                                            <span className="inline-block transform scale-150 font-thin">-</span>
-                                        </button>
-                                        <span className="px-2 py-1 bg-white text-sm font-medium text-[#191919] border-gray-300">
-                                            {count} un
-                                        </span>
-                                        <button
-                                            onClick={() => setCount((prev) => prev + 1)}
-                                            className="px-3.5 py-1 bg-white text-[#FC9D25] hover:bg-gray-300 transition"
-                                        >
-                                            <span className="inline-block transform scale-150 font-thin">+</span>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* Modal de quantidades*/}
-                                <div className="flex justify-end space-x-3 ml-8 mb-5 m-5 mr-7">
-                                    {/* Botão Close */}
-                                    <button
-                                        onClick={() => setSelectedProduct(null)}
-                                        className="px-10.5 py-1 bg-[#D3D3D3] text-white rounded-md hover:bg-gray font-medium transition duration-200"
-                                    >
-                                        Close
-                                    </button>
-
-                                    {/* Botão Save */}
-                                    <button
-                                        onClick={() => {
-                                            if (count > 0) {
-                                                addToCart({ ...selectedProduct, quantity: count });
-                                                setSelectedProduct(null);
-                                            }
-                                        }}
-                                        className="px-10.5 py-1 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
-                                    >
-                                        {isLoading ? <Spinner size="sm" color="white" /> : 'Save'}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Modal do carrinho */}
-                    {cartOpen && (
-                        <div className="fixed top-16 right-16">
-                            <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-4 relative">
-                                <button
-                                    onClick={toggleCart}
-                                    className="absolute top-4 right-4 text-[#191919] text-lg"
-                                >
-                                    X
-                                </button>
-
-                                <h2 className="text-xl font-semibold text-[#191919] mb-7">Your Cart</h2>
-                                {cartItems.length === 0 ? (
-                                    <p className="text-[#191919] text-left">No products added.</p>
-                                ) : (
-                                    <ul className="space-y-2">
-                                        {cartItems.map((item, index) => (
-                                            <li
-                                                key={item.id || `item-${index}`}
-                                                className="flex justify-between items-center border-b pb-2"
+                                        {/* Seletor de quantidade */}
+                                        <div className="seletor flex items-center rounded overflow-hidden border border-gray-200 w-max fixed -mt-4">
+                                            <button
+                                                onClick={() => setCount((prev) => Math.max(1, prev - 1))}
+                                                className="px-4 py-1 bg-white text-[#FC9D25] hover:bg-gray-300 transition"
                                             >
-                                                <div>
-                                                    <p className="font-medium text-[#191919] px-5">
-                                                        {item.name} - <span className="text-[#FC9D25] font-semibold">{item.price.toFixed(2)}€</span>
-                                                    </p>
+                                                <span className="inline-block transform scale-150 font-thin">-</span>
+                                            </button>
+                                            <span className="px-2 py-1 bg-white text-sm font-medium text-[#191919] border-gray-300">
+                                                {count}
+                                            </span>
+                                            <button
+                                                onClick={() => setCount((prev) => prev + 1)}
+                                                className="px-3.5 py-1 bg-white text-[#FC9D25] hover:bg-gray-300 transition"
+                                            >
+                                                <span className="inline-block transform scale-150 font-thin">+</span>
+                                            </button>
+                                        </div>
+                                    </div>
 
-                                                    <div className="px-5 text-sm text-gray-500 flex items-center gap-2">
-                                                        Qty:
-                                                        <input
-                                                            type="number"
-                                                            min="1"
-                                                            value={item.count}
-                                                            onChange={(e) => {
-                                                                const newCount = parseInt(e.target.value);
-                                                                if (newCount >= 1) {
-                                                                    setCartItems((prev) =>
-                                                                        prev.map((ci) =>
-                                                                            ci.id === item.id ? { ...ci, count: newCount } : ci
-                                                                        )
-                                                                    );
-                                                                }
-                                                            }}
-                                                            className="w-16 border rounded px-2 py-1 text-center"
-                                                        />
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-[#FC9D25] font-bold">...€</span>
-                                                    <button
-                                                        onClick={() => {
-                                                            setCartItems((prev) =>
-                                                                prev.filter((ci) => ci.id !== item.id)
-                                                            );
-                                                        }}
-                                                        className="text-red-500 hover:text-red-700 transition"
-                                                    >
-                                                        <IoTrashBinOutline size={20} />
-                                                    </button>
-                                                </div>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                )}
+                                    {/* Botões */}
+                                    <div className="flex justify-end space-x-3 ml-8 mb-5 m-5 mr-7">
+                                        <button
+                                            onClick={() => setSelectedProduct(null)}
+                                            className="px-10.5 py-1 bg-[#D3D3D3] text-white rounded-md hover:bg-gray font-medium transition duration-200"
+                                        >
+                                            Close
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                if (count > 0) {
+                                                    addToCart({ ...selectedProduct, quantity: count });
+                                                    setSelectedProduct(null);
+                                                }
+                                            }}
+                                            className="px-10.5 py-1 bg-[#FC9D25] text-white rounded-md hover:bg-gray font-medium transition duration-200"
+                                        >
+                                            {isLoading ? <Spinner size="sm" color="white" /> : 'Save'}
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
+                        </>
                     )}
 
+
+
+                    {cartOpen && (
+                        <>
+                            {/* Fundo mobile */}
+                            <div className="fixed inset-0 bg-white opacity-80 z-40 ">
+                                <span className="text-white text-2xl">Overlay Visible</span>
+                            </div>
+
+                            {/* Modal do carrinho */}
+                            <div className="fixed top-16 right-16 z-50 sm:right-4 sm:left-4 sm:top-10">
+                                <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-4 relative">
+                                    <button
+                                        onClick={toggleCart}
+                                        className="absolute top-4 right-4 text-[#191919] text-lg"
+                                    >
+                                        X
+                                    </button>
+
+                                    <h2 className="text-xl font-semibold text-[#191919] mb-7">Your Cart</h2>
+                                    {cartItems.length === 0 ? (
+                                        <p className="text-[#191919] text-left">No products added.</p>
+                                    ) : (
+                                        <ul className="space-y-2">
+                                            {cartItems.map((item, index) => (
+                                                <li
+                                                    key={item.id || `item-${index}`}
+                                                    className="flex justify-between items-center border-b pb-2"
+                                                >
+                                                    <div>
+                                                        <p className="font-medium text-[#191919] px-5">
+                                                            {item.name} - <span className="text-[#FC9D25] font-semibold">{item.price.toFixed(2)}€</span>
+                                                        </p>
+
+                                                        <div className="px-5 text-sm text-gray-500 flex items-center gap-2">
+                                                            Qty:
+                                                            <input
+                                                                type="number"
+                                                                min="1"
+                                                                value={item.count}
+                                                                onChange={(e) => {
+                                                                    const newCount = parseInt(e.target.value);
+                                                                    if (newCount >= 1) {
+                                                                        setCartItems((prev) =>
+                                                                            prev.map((ci) =>
+                                                                                ci.id === item.id ? { ...ci, count: newCount } : ci
+                                                                            )
+                                                                        );
+                                                                    }
+                                                                }}
+                                                                className="w-16 border rounded px-2 py-1 text-center"
+                                                            />
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-[#FC9D25] font-bold">...€</span>
+                                                        <button
+                                                            onClick={() => {
+                                                                setCartItems((prev) =>
+                                                                    prev.filter((ci) => ci.id !== item.id)
+                                                                );
+                                                            }}
+                                                            className="text-red-500 hover:text-red-700 transition"
+                                                        >
+                                                            <IoTrashBinOutline size={20} />
+                                                        </button>
+                                                    </div>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                </div>
+                            </div>
+                        </>
+                    )}
 
                     <div className="p-6 space-y-4">
                         {viewType === 'groups' && filterByName(groupsWithProducts).map((group) => {

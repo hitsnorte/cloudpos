@@ -100,6 +100,24 @@ export default function ProductGroups() {
     };
 
     useEffect(() => {
+        const mesa = localStorage.getItem('selectedMesa');
+        if (mesa) {
+            try {
+                setSelectedTable(JSON.parse(mesa));
+            } catch (err) {
+                console.error('Erro ao ler mesa do localStorage:', err);
+            }
+        }
+    }, []);
+
+    useEffect(() => {
+        const mesa = localStorage.getItem('selectedMesa');
+        if (mesa) {
+            setSelectedTable(JSON.parse(mesa));
+        }
+    }, []);
+
+    useEffect(() => {
         const fetchMesas = async () => {
             try {
                 const res = await fetch('/api/mesas', {
@@ -132,52 +150,52 @@ export default function ProductGroups() {
         fetchMesas();
     }, []);
 
-   const selectedPostoVPosto = useMemo(() => {
-    if (!selectedCardPath) return null;
-    const parts = selectedCardPath.split("/");
-    return parts[parts.length - 1]; // extrai o VPosto (ex: "posto1")
-}, [selectedCardPath]);
+    const selectedPostoVPosto = useMemo(() => {
+        if (!selectedCardPath) return null;
+        const parts = selectedCardPath.split("/");
+        return parts[parts.length - 1]; // extrai o VPosto (ex: "posto1")
+    }, [selectedCardPath]);
 
-const cardPaths = useMemo(() => {
-    if (!postosComSalas || !selectedPostoVPosto) return [];
+    const cardPaths = useMemo(() => {
+        if (!postosComSalas || !selectedPostoVPosto) return [];
 
-    const posto = postosComSalas.find(p => p.VPosto === selectedPostoVPosto);
-    if (!posto || !posto.salas) return [];
+        const posto = postosComSalas.find(p => p.VPosto === selectedPostoVPosto);
+        if (!posto || !posto.salas) return [];
 
-    return posto.salas.map(sala => ({
-        label: sala.Descricao,
-        value: sala.ID_SALA,
-        path: `/homepage/${posto.VPosto}/sala/${sala.ID_SALA}`,
-    }));
-}, [postosComSalas, selectedPostoVPosto]);
+        return posto.salas.map(sala => ({
+            label: sala.Descricao,
+            value: sala.ID_SALA,
+            path: `/homepage/${posto.VPosto}/sala/${sala.ID_SALA}`,
+        }));
+    }, [postosComSalas, selectedPostoVPosto]);
 
 
-const cardPaths3 = useMemo(() => {
-    if (!selectedRow || !salasComMesas.length || !postosComSalas.length) return [];
+    const cardPaths3 = useMemo(() => {
+        if (!selectedRow || !salasComMesas.length || !postosComSalas.length) return [];
 
-    const salaId = parseInt(selectedRow.split("/").pop());
+        const salaId = parseInt(selectedRow.split("/").pop());
 
-    // Encontrar a sala selecionada
-    const salaSelecionada = salasComMesas.find(s => s.ID_SALA === salaId);
-    if (!salaSelecionada || !salaSelecionada.mesas) return [];
+        // Encontrar a sala selecionada
+        const salaSelecionada = salasComMesas.find(s => s.ID_SALA === salaId);
+        if (!salaSelecionada || !salaSelecionada.mesas) return [];
 
-    // Encontrar o posto que contém essa sala
-    const postoQueContemSala = postosComSalas.find(posto =>
-        posto.salas?.some(sala => sala.ID_SALA === salaId)
-    );
+        // Encontrar o posto que contém essa sala
+        const postoQueContemSala = postosComSalas.find(posto =>
+            posto.salas?.some(sala => sala.ID_SALA === salaId)
+        );
 
-    const postoId = postoQueContemSala?.Icodi ?? null;
-    if (!postoId) return [];
+        const postoId = postoQueContemSala?.Icodi ?? null;
+        if (!postoId) return [];
 
-    return salaSelecionada.mesas.map(mesa => ({
-        label: mesa.Descricao,
-        value: mesa.ID_Mesa,
-        path: `/mesas/${mesa.ID_Mesa}`,
-        Posto: String(postoId),      // compatível com mesasEmUso
-        ID_sala: salaId,
-        ID_Mesa: mesa.ID_Mesa,
-    }));
-}, [selectedRow, salasComMesas, postosComSalas]);
+        return salaSelecionada.mesas.map(mesa => ({
+            label: mesa.Descricao,
+            value: mesa.ID_Mesa,
+            path: `/mesas/${mesa.ID_Mesa}`,
+            Posto: String(postoId),      // compatível com mesasEmUso
+            ID_sala: salaId,
+            ID_Mesa: mesa.ID_Mesa,
+        }));
+    }, [selectedRow, salasComMesas, postosComSalas]);
 
 
 
@@ -246,6 +264,7 @@ const cardPaths3 = useMemo(() => {
             setError(err.message);
         }
     };
+
 
     useEffect(() => {
         const loadPostosWithSalas = async () => {
@@ -609,7 +628,7 @@ const cardPaths3 = useMemo(() => {
         }
     };
 
-    
+
 
     if (status === "loading" || loading) {
         return <LoadingBackdrop open={true} />;
@@ -724,6 +743,9 @@ const cardPaths3 = useMemo(() => {
     const handleCloseModal = () => {
         setShowModal(false);
     };
+
+
+
     return (
         <>
             {!selectedCardPath && !selectedRow && !selectedTable && (
@@ -876,43 +898,34 @@ const cardPaths3 = useMemo(() => {
                 )
             }
 
-            <div className="relative">
+            <div className="w-full overflow-x-visible">
                 {selectedTable && (
                     <>
-                        <button
-                            onClick={() => {
-                                setSelectedCardPath(null);
-                                setSelectedTable(null);
-                            }}
-                            className="ml-4 px-4 py-2 rounded bg-[#FC9D25] text-white hover:bg-[#e38d20] flex items-center gap-2"
-                        >
-                            <IoIosArrowBack size={16} />
-                            <span>Mesas</span>
-                        </button>
-
-                        <div className="flex items-center justify-center space-x-4 mt-4">
-                            <button
-                                onClick={() => setViewType('groups')}
-                                className={`px-4 py-2 rounded ${viewType === 'groups' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
-                            >
-                                Groups
-                            </button>
-                            <button
-                                onClick={() => setViewType('families')}
-                                className={`px-4 py-2 rounded ${viewType === 'families' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
-                            >
-                                Families
-                            </button>
-                            <button
-                                onClick={() => setViewType('subfamilies')}
-                                className={`px-4 py-2 rounded ${viewType === 'subfamilies' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
-                            >
-                                Subfamilies
-                            </button>
+                        <div className="grid grid-cols-2 gap-4 sm:flex sm:items-center sm:justify-center sm:space-x-4">
+                            <div className="flex space-x-4">
+                                <button
+                                    onClick={() => setViewType('groups')}
+                                    className={`px-4 py-2 rounded ${viewType === 'groups' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
+                                >
+                                    Groups
+                                </button>
+                                <button
+                                    onClick={() => setViewType('families')}
+                                    className={`px-4 py-2 rounded ${viewType === 'families' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
+                                >
+                                    Families
+                                </button>
+                                <button
+                                    onClick={() => setViewType('subfamilies')}
+                                    className={`px-4 py-2 rounded ${viewType === 'subfamilies' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
+                                >
+                                    Subfamilies
+                                </button>
+                            </div>
                         </div>
 
-                        <div className="py-5 px-6">
-                            <div className="mb-4 relative">
+                        <div className="flex items-center justify-between space-x-4 flex-wrap md:flex-nowrap mt-4">
+                            <div className="relative flex-1 min-w-[200px] md:min-w-auto">
                                 <FaMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
                                 <input
                                     type="text"
@@ -925,7 +938,6 @@ const cardPaths3 = useMemo(() => {
                         </div>
 
                         <div className="p-6 space-y-4">
-
                             {viewType === 'groups' && (() => {
                                 const filtered = filterByName(groupsWithProducts)
                                     .filter(group => group.products && group.products.length > 0);
@@ -953,8 +965,8 @@ const cardPaths3 = useMemo(() => {
                                             </div>
 
                                             {isOpen && (
-                                                <div className="overflow-x-auto bg-muted/40 transition-all duration-300 ease-in-out">
-                                                    <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB]">
+                                                <div className=" w-fulloverflow-x-auto bg-muted/40 transition-all duration-300 ease-in-out">
+                                                    <table className="w-full table-auto border-collapse border border-[#EDEBEB]">
                                                         <thead>
                                                             <tr className="bg-[#FC9D25] text-white">
                                                                 <th className="border border-[#EDEBEB] px-4 py-2 text-left">
@@ -1023,8 +1035,8 @@ const cardPaths3 = useMemo(() => {
                                             </div>
 
                                             {isOpen && (
-                                                <div className="overflow-x-auto bg-muted/40 transition-all duration-300 ease-in-out">
-                                                    <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB]">
+                                                <div className="w-full overflow-x-auto bg-muted/40 transition-all duration-300 ease-in-out">
+                                                    <table className="w-full table-auto bg-[#FAFAFA] border-collapse border border-[#EDEBEB]">
                                                         <thead>
                                                             <tr className="bg-[#FC9D25] text-white">
                                                                 <th className="border border-[#EDEBEB] px-4 py-2 text-left">Product</th>
@@ -1086,8 +1098,8 @@ const cardPaths3 = useMemo(() => {
                                             </div>
 
                                             {isOpen && (
-                                                <div className="overflow-x-auto bg-muted/40 transition-all duration-300 ease-in-out">
-                                                    <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB]">
+                                                <div className="w-full overflow-x-auto bg-muted/40 transition-all duration-300 ease-in-out">
+                                                    <table className="w-full table-auto bg-[#FAFAFA] border-collapse border border-[#EDEBEB]">
                                                         <thead>
                                                             <tr className="bg-[#FC9D25] text-white">
                                                                 <th className="border border-[#EDEBEB] px-4 py-2 text-left">Product</th>
@@ -1168,7 +1180,7 @@ const cardPaths3 = useMemo(() => {
                                                 <span className="inline-block transform scale-150 font-thin">-</span>
                                             </button>
                                             <span className="px-2 py-1 bg-white text-sm font-medium text-[#191919] border-gray-300">
-                                                {count} un
+                                                {count}
                                             </span>
                                             <button
                                                 onClick={() => setCount((prev) => prev + 1)}
@@ -1212,7 +1224,7 @@ const cardPaths3 = useMemo(() => {
                 {/* Carrinho*/}
                 {!isOpen && selectedTable && (
                     <button
-                        className="fixed top-6 right-15 z-50 text-3xl text-[#191919] hover:text-[#FC9D25] transition"
+                        className="fixed bottom-6 right-6 md:top-6 md:right-15 md:bottom-auto text-3xl text-[#191919] hover:text-[#FC9D25] transition z-50"
                         onClick={toggleSidebar}
                     >
                         <TiShoppingCart />
@@ -1225,11 +1237,14 @@ const cardPaths3 = useMemo(() => {
                 )}
 
                 {isOpen && (
-                    <div className="fixed inset-0 bg-black/40 z-30" onClick={toggleSidebar}></div>
+                    <div
+                        className="fixed inset-0 z-30 bg-[#F0F0F0] md:bg-black/40 block md:block"
+                        onClick={toggleSidebar}
+                    />
                 )}
 
                 <div
-                    className={`fixed top-0 right-0 h-full w-[400px] max-w-full bg-[#F0F0F0] shadow-lg transition-transform duration-300 z-40 ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
+                    className={`fixed top-0 right-0 h-full w-[400px] max-w-full bg-[#F0F0F0] shadow-lg transition-transform duration-300 z-40 ${isOpen ? 'translate-x-0' : 'translate-x-full'}` }
                 >
                     {/* Header */}
                     <div className="sticky top-0 z-10 bg-[#F0F0F0] flex items-center justify-between p-5 ml-1">
@@ -1240,7 +1255,7 @@ const cardPaths3 = useMemo(() => {
                     </div>
 
                     {/* Cart Items */}
-                    <div className="p-7 flex flex-col h-[calc(100%-150px)] overflow-y-auto -mt-5">
+                    <div className="items p-7 flex flex-col h-[calc(100%-150px)] overflow-y-auto ">
                         {getCartItems().length === 0 ? (
                             <p className="text-sm">Your order is empty.</p>
                         ) : (

@@ -17,6 +17,7 @@ import {
     DropdownMenu,
     DropdownItem
 } from "@nextui-org/react";
+import CustomPagination from "@/src/components/table/page";
 
 const ChainsTable = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -124,9 +125,15 @@ const ChainsTable = () => {
         onClose();
     };
 
-    const filteredChains = chains.filter((chain) =>
-        chain.chainName.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // Update your filter logic to search all columns:
+    const filteredChains = chains.filter((chain) => {
+        const search = searchTerm.toLowerCase();
+        return (
+            (chain.chainID && String(chain.chainID).toLowerCase().includes(search)) ||
+            (chain.chainTag && chain.chainTag.toLowerCase().includes(search)) ||
+            (chain.chainName && chain.chainName.toLowerCase().includes(search))
+        );
+    });
 
     const paginatedChains = filteredChains.slice(
         (currentPage - 1) * itemsPerPage,
@@ -141,30 +148,13 @@ const ChainsTable = () => {
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold">All Chains</h2>
                 <div className="flex items-center gap-2">
+                    {/* Removed search button */}
                     <button
-                        onClick={() => {
-                            setSearchTerm(searchInput);
-                            setCurrentPage(1);
-                        }}
-                        className="p-2 rounded hover:bg-gray-200 transition"
-                        aria-label="Search"
+                        onClick={onOpen}
+                        className="bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded"
                     >
-                        <FaSearch size={18} />
+                        <Plus size={25} />
                     </button>
-
-                    <Dropdown>
-                        <DropdownTrigger>
-                            <button
-                                onClick={onOpen}
-                                className="bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded"
-                            >
-                                <Plus size={25} />
-                            </button>
-                        </DropdownTrigger>
-                        <DropdownMenu aria-label="Actions" className="bg-white shadow-lg rounded-md p-1">
-                            <DropdownItem key="add" onPress={onOpen}>Add Chain</DropdownItem>
-                        </DropdownMenu>
-                    </Dropdown>
                 </div>
             </div>
 
@@ -172,53 +162,15 @@ const ChainsTable = () => {
             <div className="flex mb-4 items-center gap-2">
                 <input
                     type="text"
-                    placeholder="Search by chain name..."
+                    placeholder="Search by ID, Chain Tag and Chain Name..."
                     value={searchInput}
-                    onChange={(e) => setSearchInput(e.target.value)}
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                            setSearchTerm(searchInput);
-                            setCurrentPage(1);
-                        }
+                    onChange={(e) => {
+                        setSearchInput(e.target.value);
+                        setSearchTerm(e.target.value);
+                        setCurrentPage(1);
                     }}
                     className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-[#FC9D25]"
                 />
-            </div>
-
-            {/* Tabela */}
-            <div className="overflow-x-auto bg-muted/40">
-                <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB] mx-auto">
-                    <thead>
-                    <tr className="bg-[#FC9D25] text-white">
-                        <th className="border border-[#EDEBEB] w-[50px] px-2 py-2 text-center">
-                            <FaGear size={20} />
-                        </th>
-                        <th className="border border-[#EDEBEB] px-4 py-2 text-left">ID</th>
-                        <th className="border border-[#EDEBEB] px-4 py-2 text-left">Chain Tag</th>
-                        <th className="border border-[#EDEBEB] px-4 py-2 text-left">Chain Name</th>
-                    </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-300">
-                    {paginatedChains.length > 0 ? (
-                        paginatedChains.map((chain) => (
-                            <tr key={chain.id || chain.chainTag} className="hover:bg-gray-100">
-                                <td className="border border-[#EDEBEB] w-[50px] px-2 py-2 text-center">
-                                    <HiDotsVertical size={18} onClick={() => onEditOpen(chain)} />
-                                </td>
-                                <td className="border border-[#EDEBEB] px-4 py-2">{chain.chainID}</td>
-                                <td className="border border-[#EDEBEB] px-4 py-2">{chain.chainTag}</td>
-                                <td className="border border-[#EDEBEB] px-4 py-2">{chain.chainName}</td>
-                            </tr>
-                        ))
-                    ) : (
-                        <tr>
-                            <td colSpan="4" className="border border-[#EDEBEB] px-4 py-4 text-center text-gray-500">
-                                No chains available
-                            </td>
-                        </tr>
-                    )}
-                    </tbody>
-                </table>
             </div>
 
             {/* Modal de adição de cadeias novas */}
@@ -329,45 +281,85 @@ const ChainsTable = () => {
                 </ModalContent>
             </Modal>
 
+            <div className="mt-5">
+                {loading ? (
+                    <div className="text-center py-8">Loading...</div>
+                ) : paginatedChains.length > 0 ? (
+                    <table className="w-full text-left mb-5 min-w-full md:min-w-0 border-collapse">
+                        <thead>
+        <tr className="bg-[#FC9D25] text-white h-12">
+            <td className="pl-2 pr-2 w-8 border-r border-[#e6e6e6]">
+                <FaGear size={18} color="white" />
+            </td>
+            <td className="pl-2 pr-2 w-16 text-right border-r border-[#e6e6e6] uppercase">ID</td>
+            <td className="pl-2 pr-2 w-32 border-r border-[#e6e6e6] uppercase">Chain Tag</td>
+            <td className="pl-2 pr-2 border-r border-[#e6e6e6] uppercase">Chain Name</td>
+            {/* Add more columns here if needed */}
+        </tr>
+    </thead>
+    <tbody>
+        {paginatedChains.map((chain, index) => (
+            <tr
+                key={chain.chainID || chain.chainTag || index}
+                className="h-10 border-b border-[#e8e6e6] text-textPrimaryColor text-left transition-colors duration-150 hover:bg-[#FC9D25]/20"
+            >
+                <td className="pl-1 flex items-start border-r border-[#e6e6e6] relative z-10">
+                    <Dropdown>
+                        <DropdownTrigger>
+                            <Button
+                                variant="light"
+                                className="flex justify-center items-center w-auto min-w-0 p-0 m-0 relative"
+                            >
+                                <HiDotsVertical size={20} className="text-textPrimaryColor" />
+                            </Button>
+                        </DropdownTrigger>
+                        <DropdownMenu
+                            aria-label="Actions"
+                            closeOnSelect={true}
+                            className="min-w-[150px] bg-white rounded-lg shadow-xl py-2 px-1 border border-gray-100"
+                        >
+                            <DropdownItem
+                                key="edit"
+                                className="px-4 py-2 text-base text-gray-700 hover:bg-gray-200 hover:text-gray-900 rounded transition-colors cursor-pointer"
+                                onPress={() => onEditOpen(chain)}
+                            >
+                                Edit
+                            </DropdownItem>
+                            {/* Add more dropdown actions here */}
+                        </DropdownMenu>
+                    </Dropdown>
+                </td>
+                <td className="pl-2 pr-2 w-16 text-right border-r border-[#e6e6e6]">{chain.chainID}</td>
+                <td className="pl-2 pr-2 w-32 border-r border-[#e6e6e6]">{chain.chainTag}</td>
+                <td className="pl-2 pr-2">{chain.chainName}</td>
+                {/* Add more cells here if needed */}
+            </tr>
+        ))}
+    </tbody>
+</table>
+                ) : (
+                    <p className="text-textLabelColor">No chains available</p>
+                )}
+            </div>
 
-            {/* Paginação*/}
-            <div className="flex fixed bottom-0 left-0 items-center gap-2 w-full px-4 py-3 bg-[#EDEBEB] justify-end">
-                <span className="px-2 py-1">Items per page</span>
-
-                <select
-                    value={itemsPerPage}
-                    onChange={(e) => {
-                        setItemsPerPage(Number(e.target.value));
+            {/* Fixed Pagination Section */}
+            <div className="bottom-0 w-full bg-white p-0 m-0 pagination-container">
+                <CustomPagination
+                    page={currentPage}
+                    pages={totalPages}
+                    rowsPerPage={itemsPerPage}
+                    handleChangeRowsPerPage={(newSize) => {
+                        setItemsPerPage(newSize);
                         setCurrentPage(1);
                     }}
-                    className="border p-2 rounded px-2 py-1 w-16"
-                >
-                    {[5, 10, 20, 50].map((size) => (
-                        <option key={size} value={size}>{size}</option>
-                    ))}
-                </select>
-
-                <div className="flex items-center border rounded-lg overflow-hidden ml-4">
-                    <button
-                        onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                        disabled={currentPage === 1}
-                        className={`px-3 py-0.5 ${currentPage === 1 ? 'bg-white text-black cursor-not-allowed' : 'bg-white hover:bg-gray-100'}`}
-                    >
-                        &lt;
-                    </button>
-
-                    <span className="px-3 py-0.5 bg-white">
-            {currentPage}
-        </span>
-
-                    <button
-                        onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                        disabled={currentPage === totalPages}
-                        className={`px-3 py-0.5 ${currentPage === totalPages ? 'bg-white text-black cursor-not-allowed' : 'bg-white hover:bg-gray-100'}`}
-                    >
-                        &gt;
-                    </button>
-                </div>
+                    items={paginatedChains}
+                    setPage={setCurrentPage}
+                    dataCSVButton={paginatedChains.map((item) => ({
+                        ID: item.chainID,
+                        Tag: item.chainTag,
+                        Name: item.chainName,
+                    }))}
+                />
             </div>
         </div>
     );

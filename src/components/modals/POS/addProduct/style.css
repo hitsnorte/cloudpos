@@ -1,0 +1,22 @@
+.seletor{
+    margin-left: 100px;
+}
+
+@media (max-width:693px) {
+    .cart {
+        width: 100%;
+    }
+
+    .items{
+        margin-top: 60px;
+    }
+
+    .quantidades {
+        max-width:400px;
+        max-height:50px;
+    }
+
+    .seletor{
+        margin-left: 245px;
+    }
+}

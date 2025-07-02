@@ -1,8 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { FaMagnifyingGlass } from 'react-icons/fa6'; // Certifique-se de importar isso
-
 import { fetchGrup } from '@/src/lib/apigroup'
 import { fetchProduct } from '@/src/lib/apiproduct'
 import { fetchFamily } from '@/src/lib/apifamily'
@@ -10,10 +9,9 @@ import { fetchIva } from '@/src/lib/apiiva';
 import { fetchSubfamily } from '@/src/lib/apisubfamily';
 import { fetchClassepreco } from '@/src/lib/apiclassepreco';
 import { fetchPreco } from "@/src/lib/apipreco";
-
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { TiShoppingCart } from 'react-icons/ti';
-
+import { IoIosArrowBack } from "react-icons/io"
 import AddProductModal from '@/src/components/modals/POS/addProduct/page';
 import CartPage from '@/src/components/modals/POS/cart/page';
 
@@ -34,11 +32,19 @@ export default function Cart() {
     const [count, setCount] = useState(0);
 
     const params = useParams();
-    const selectedTable = params?.id;
+    const [selectedTable, setSelectedTable] = useState(null);
+
 
     const [posto, setPosto] = useState(null);
     const [sala, setSala] = useState(null);
     const [mesa, setMesa] = useState(null);
+
+    const router = useRouter();
+
+    useEffect(() => {
+        if (!params?.id) return;
+        setSelectedTable({ ID_Mesa: params.id }); // ou buscar mais info da mesa aqui
+    }, [params?.id]);
 
     useEffect(() => {
         const storedPosto = JSON.parse(localStorage.getItem("selectedPosto"));
@@ -278,8 +284,20 @@ export default function Cart() {
         setCurrentCart(existingCart);
     };
 
+
     const [currentCart, setCurrentCart] = useState([]);
 
+    const handleBackToTables = () => {
+        const previousPage = localStorage.getItem("previousPage");
+        console.log("Previous Page:", previousPage);
+
+        if (previousPage) {
+            localStorage.removeItem("previousPage");
+            router.push(previousPage);
+        } else {
+            router.back();
+        }
+    };
 
     // Carregar produtos do localStorage ao abrir o carrinho
     useEffect(() => {
@@ -322,9 +340,9 @@ export default function Cart() {
 
     return (
         <>
-            <div className="flex items-center justify-center space-x-4 mt-4">
+            <div className="relative">
                 <button
-                    className="fixed top-6 right-15 z-20 text-3xl text-[#191919] hover:text-[#FC9D25] transition"
+                    className="fixed bottom-6 right-6 md:top-6 md:right-15 md:bottom-auto text-3xl text-[#191919] hover:text-[#FC9D25] transition z-50"
                     onClick={() => setIsCartOpen(true)}
                 >
                     <TiShoppingCart />
@@ -345,41 +363,72 @@ export default function Cart() {
                         clearCart={clearCart}
                     />
                 )}
-                <button
-                    onClick={() => setViewType('groups')}
-                    className={`px-4 py-2 rounded ${viewType === 'groups' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
-                >
-                    Groups
-                </button>
-                <button
-                    onClick={() => setViewType('families')}
-                    className={`px-4 py-2 rounded ${viewType === 'families' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
-                >
-                    Families
-                </button>
-                <button
-                    onClick={() => setViewType('subfamilies')}
-                    className={`px-4 py-2 rounded ${viewType === 'subfamilies' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
-                >
-                    Subfamilies
-                </button>
+
+                <div className="w-full px-4 py-2">
+                    {/* Título com o Posto */}
+                    {mesa ? (
+                        <h2 className="text-lg text-center mb-4">
+                            Posto: {posto?.VDescricao || posto?.Nome || 'Posto não definido'}
+                        </h2>
+                    ) : (
+                        <h2 className="text-lg font-semibold text-center mb-4">
+                            Nenhuma mesa selecionada
+                        </h2>
+                    )}
+
+                    {/* Botões */}
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4 max-w-md mx-auto">
+                        {/* Mesas button */}
+                        <button
+                            onClick={handleBackToTables}
+                            className="flex items-left justify-center gap-x-2 px-4 py-2 bg-[#FC9D25] text-white rounded"
+                        >
+                            <IoIosArrowBack size={21} />
+                            <span>Mesas</span>
+                        </button>
+
+                        {/* Groups */}
+                        <button
+                            onClick={() => setViewType('groups')}
+                            className={`px-4 py-2 rounded ${viewType === 'groups' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
+                        >
+                            Groups
+                        </button>
+
+                        {/* Families */}
+                        <button
+                            onClick={() => setViewType('families')}
+                            className={`px-4 py-2 rounded ${viewType === 'families' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
+                        >
+                            Families
+                        </button>
+
+                        {/* Subfamilies */}
+                        <button
+                            onClick={() => setViewType('subfamilies')}
+                            className={` px-4 py-2 min-w-[120px] rounded ${viewType === 'subfamilies' ? 'bg-[#FC9D25] text-white' : 'bg-gray-200 text-[#191919]'}`}
+                        >
+                            Subfamilies
+                        </button>
+                    </div>
+                </div>
+
             </div>
 
-            <div className="py-5 px-6">
-                <div className="mb-4 relative">
+            <div className="flex items-center justify-between space-x-4 flex-wrap md:flex-nowrap mt-4">
+                <div className="relative flex-1 min-w-[200px] md:min-w-auto">
                     <FaMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
                     <input
                         type="text"
                         placeholder="Pesquisar..."
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2"
                     />
                 </div>
             </div>
 
             <div className="p-6 space-y-4">
-
                 {viewType === 'groups' && (() => {
                     const filtered = filterByName(groupsWithProducts)
                         .filter(group => group.products && group.products.length > 0);

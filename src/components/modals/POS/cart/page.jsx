@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { TiShoppingCart } from "react-icons/ti";
 import { CiTrash } from "react-icons/ci";

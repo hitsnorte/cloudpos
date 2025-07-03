@@ -19,6 +19,7 @@ import {
 } from "@nextui-org/react";
 import CustomPagination from "@/src/components/table/page";
 import { fetchIva } from "@/src/lib/apiiva";
+import { IoMdClose } from "react-icons/io";
 
 const DataIva = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -213,13 +214,7 @@ const DataIva = () => {
             <>
               <ModalHeader className="relative bg-[#FC9D25] flex justify-between items-center px-6 py-3">
                 <div className="text-xl font-bold text-white">New IVA</div>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="absolute right-4 top-3 text-white text-2xl font-bold hover:text-gray-200"
-                >
-                  &times;
-                </button>
+                <IoMdClose size={25} color='white' onClick={onClose} className='cursor-pointer' />
               </ModalHeader>
               <ModalBody className="py-5 px-6 bg-[#FAFAFA]">
                 <form id="addIvaForm" onSubmit={handleAddIva} className="space-y-6">
@@ -267,141 +262,135 @@ const DataIva = () => {
             <>
               <ModalHeader className="relative bg-[#FC9D25] flex justify-between items-center px-6 py-3">
                 <div className="text-xl font-bold text-white">Edit IVA</div>
-                <button
-                  type="button"
-                  onClick={onEditClose}
-                  className="absolute right-4 top-3 text-white text-2xl font-bold hover:text-gray-200"
-                >
-                  &times;
-                </button>
-              </ModalHeader>
-              <ModalBody className="py-5 px-6 bg-[#FAFAFA]">
-                {selectedIva && (
-                  <form id="editIvaForm" onSubmit={handleEditIva} className="space-y-6">
-                    {['description'].map((field, index) => (
-                      <div key={index}>
-                        <label htmlFor={field} className="block text-sm font-medium text-[#191919] mb-1">
-                          {field === "description" ? "Description" : null}
-                        </label>
-                        <input
-                          id={field}
-                          type="text"
-                          name={field}
-                          value={selectedIva[field]}
-                          onChange={handleEditInputChange}
-                          className="w-full p-2 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
-                          required
-                        />
-                      </div>
-                    ))}
-                  </form>
-                )}
-              </ModalBody>
-              <ModalFooter className="border-t border-[#EDEBEB] bg-[#FAFAFA] pt-2 px-8">
-                <Button onPress={onEditClose} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">
-                  Cancel
-                </Button>
-                <Button type="submit" form="editIvaForm" className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray-600 transition" disabled={loading}>
-                  {loading ? "Saving..." : "Save"}
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
-
-      {/* Table */}
-      <div className="mt-5">
-        {loading ? (
-          <div className="text-center py-8">Loading...</div>
-        ) : paginatedIvas.length > 0 ? (
-          <table className="w-full text-left mb-5 min-w-full md:min-w-0 border-collapse">
-            <thead>
-              <tr className="bg-[#FC9D25] text-white h-12">
-                <th className="pl-2 pr-2 w-8 border-r border-[#e6e6e6]">
-                  <FaGear size={18} color="white" />
-                </th>
-                {[
-                  { label: 'Cod IVA', key: 'codIva', align: 'text-right', width: 'w-16' },
-                  { label: 'IVA Percentage', key: 'ivaPer', align: 'text-left', width: 'w-32' },
-                  { label: 'Description', key: 'description', align: 'text-left' },
-                ].map(({ label, key, align, width }) => (
-                  <th
-                    key={key}
-                    onClick={() => handleSort(key)}
-                    className={`pl-2 pr-2 ${width || ''} border-r border-[#e6e6e6] uppercase cursor-pointer select-none font-light uppercase ${align}`}
-                  >
-                    {label}
-                    {sortConfig.key === key && (
-                      <span className="ml-1">{sortConfig.direction === 'asc' ? '▲' : '▼'}</span>
-                    )}
-                  </th>
+                <IoMdClose size={25} color='white' onClick={onEditClose} className='cursor-pointer' />
+            </ModalHeader>
+          <ModalBody className="py-5 px-6 bg-[#FAFAFA]">
+            {selectedIva && (
+              <form id="editIvaForm" onSubmit={handleEditIva} className="space-y-6">
+                {['description'].map((field, index) => (
+                  <div key={index}>
+                    <label htmlFor={field} className="block text-sm font-medium text-[#191919] mb-1">
+                      {field === "description" ? "Description" : null}
+                    </label>
+                    <input
+                      id={field}
+                      type="text"
+                      name={field}
+                      value={selectedIva[field]}
+                      onChange={handleEditInputChange}
+                      className="w-full p-2 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                      required
+                    />
+                  </div>
                 ))}
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedIvas.map((iva, index) => (
-                <tr
-                  key={iva.codIva || index}
-                  className="h-10 border-b border-[#e8e6e6] text-textPrimaryColor text-left transition-colors duration-150 hover:bg-[#FC9D25]/20"
-                >
-                  <td className="pl-1 flex items-start border-r border-[#e6e6e6] relative z-10">
-                    <Dropdown>
-                      <DropdownTrigger>
-                        <Button
-                          variant="light"
-                          className="flex justify-center items-center w-auto min-w-0 p-0 m-0 relative"
-                        >
-                          <HiDotsVertical size={20} className="text-textPrimaryColor" />
-                        </Button>
-                      </DropdownTrigger>
-                      <DropdownMenu
-                        aria-label="Actions"
-                        closeOnSelect={true}
-                        className="min-w-[150px] bg-white rounded-lg shadow-xl py-2 px-1 border border-gray-100"
-                      >
-                        <DropdownItem
-                          key="edit"
-                          className="px-4 py-2 text-base text-gray-700 hover:bg-gray-200 hover:text-gray-900 rounded transition-colors cursor-pointer"
-                          onPress={() => onEditOpen(iva)}
-                        >
-                          Edit
-                        </DropdownItem>
-                      </DropdownMenu>
-                    </Dropdown>
-                  </td>
-                  <td className="pl-2 pr-2 w-16 text-right border-r border-[#e6e6e6]">{iva.codIva}</td>
-                  <td className="pl-2 pr-2 w-32 border-r border-[#e6e6e6]">{iva.ivaPer}</td>
-                  <td className="pl-2 pr-2">{iva.description}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <p className="text-textLabelColor">No IVAs available</p>
-        )}
-      </div>
+              </form>
+            )}
+          </ModalBody>
+          <ModalFooter className="border-t border-[#EDEBEB] bg-[#FAFAFA] pt-2 px-8">
+            <Button onPress={onEditClose} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">
+              Cancel
+            </Button>
+            <Button type="submit" form="editIvaForm" className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray-600 transition" disabled={loading}>
+              {loading ? "Saving..." : "Save"}
+            </Button>
+          </ModalFooter>
+        </>
+      )}
+      </ModalContent>
+    </Modal>
 
-      {/* Pagination */}
-      <div className="bottom-0 w-full bg-white p-0 m-0 pagination-container">
-        <CustomPagination
-          page={currentPage}
-          pages={totalPages}
-          rowsPerPage={itemsPerPage}
-          handleChangeRowsPerPage={(newSize) => {
-            setItemsPerPage(newSize);
-            setCurrentPage(1);
-          }}
-          items={paginatedIvas}
-          setPage={setCurrentPage}
-          dataCSVButton={paginatedIvas.map((item) => ({
-            CodIVA: item.codIva,
-            Percentage: item.ivaPer,
-            Description: item.description,
-          }))}
-        />
-      </div>
-    </div>
+  {/* Table */ }
+  <div className="mt-5">
+    {loading ? (
+      <div className="text-center py-8">Loading...</div>
+    ) : paginatedIvas.length > 0 ? (
+      <table className="w-full text-left mb-5 min-w-full md:min-w-0 border-collapse">
+        <thead>
+          <tr className="bg-[#FC9D25] text-white h-12">
+            <th className="pl-2 pr-2 w-8 border-r border-[#e6e6e6]">
+              <FaGear size={18} color="white" />
+            </th>
+            {[
+              { label: 'Cod IVA', key: 'codIva', align: 'text-right', width: 'w-16' },
+              { label: 'IVA Percentage', key: 'ivaPer', align: 'text-left', width: 'w-32' },
+              { label: 'Description', key: 'description', align: 'text-left' },
+            ].map(({ label, key, align, width }) => (
+              <th
+                key={key}
+                onClick={() => handleSort(key)}
+                className={`pl-2 pr-2 ${width || ''} border-r border-[#e6e6e6] uppercase cursor-pointer select-none font-light uppercase ${align}`}
+              >
+                {label}
+                {sortConfig.key === key && (
+                  <span className="ml-1">{sortConfig.direction === 'asc' ? '▲' : '▼'}</span>
+                )}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {paginatedIvas.map((iva, index) => (
+            <tr
+              key={iva.codIva || index}
+              className="h-10 border-b border-[#e8e6e6] text-textPrimaryColor text-left transition-colors duration-150 hover:bg-[#FC9D25]/20"
+            >
+              <td className="pl-1 flex items-start border-r border-[#e6e6e6] relative z-10">
+                <Dropdown>
+                  <DropdownTrigger>
+                    <Button
+                      variant="light"
+                      className="flex justify-center items-center w-auto min-w-0 p-0 m-0 relative"
+                    >
+                      <HiDotsVertical size={20} className="text-textPrimaryColor" />
+                    </Button>
+                  </DropdownTrigger>
+                  <DropdownMenu
+                    aria-label="Actions"
+                    closeOnSelect={true}
+                    className="min-w-[150px] bg-white rounded-lg shadow-xl py-2 px-1 border border-gray-100"
+                  >
+                    <DropdownItem
+                      key="edit"
+                      className="px-4 py-2 text-base text-gray-700 hover:bg-gray-200 hover:text-gray-900 rounded transition-colors cursor-pointer"
+                      onPress={() => onEditOpen(iva)}
+                    >
+                      Edit
+                    </DropdownItem>
+                  </DropdownMenu>
+                </Dropdown>
+              </td>
+              <td className="pl-2 pr-2 w-16 text-right border-r border-[#e6e6e6]">{iva.codIva}</td>
+              <td className="pl-2 pr-2 w-32 border-r border-[#e6e6e6]">{iva.ivaPer}</td>
+              <td className="pl-2 pr-2">{iva.description}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    ) : (
+      <p className="text-textLabelColor">No IVAs available</p>
+    )}
+  </div>
+
+  {/* Pagination */ }
+  <div className="bottom-0 w-full bg-white p-0 m-0 pagination-container">
+    <CustomPagination
+      page={currentPage}
+      pages={totalPages}
+      rowsPerPage={itemsPerPage}
+      handleChangeRowsPerPage={(newSize) => {
+        setItemsPerPage(newSize);
+        setCurrentPage(1);
+      }}
+      items={paginatedIvas}
+      setPage={setCurrentPage}
+      dataCSVButton={paginatedIvas.map((item) => ({
+        CodIVA: item.codIva,
+        Percentage: item.ivaPer,
+        Description: item.description,
+      }))}
+    />
+  </div>
+    </div >
   );
 };
 

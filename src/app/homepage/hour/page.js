@@ -19,6 +19,7 @@ import {
 } from "@nextui-org/react";
 import CustomPagination from "@/src/components/table/page";
 import { fetchHour, createHour } from '@/src/lib/apihour';
+import { IoMdClose } from "react-icons/io";
 
 const DataHour = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -211,19 +212,13 @@ const DataHour = () => {
                         <>
                             <ModalHeader className="relative bg-[#FC9D25] flex justify-between items-center px-6 py-3">
                                 <div className="text-xl font-bold text-white">New Hour</div>
-                                <button
-                                    type="button"
-                                    onClick={onClose}
-                                    className="absolute right-4 top-3 text-white text-2xl font-bold hover:text-gray-200"
-                                >
-                                    &times;
-                                </button>
+                                <IoMdClose size={25} color='white' onClick={onClose} className='cursor-pointer' />
                             </ModalHeader>
                             <ModalBody className="py-5 px-6 bg-[#FAFAFA]">
                                 <form id="addHourForm" onSubmit={handleAddHour} className="space-y-6">
                                     <div>
-                                        <label htmlFor="hour_name" className="block text-sm font-medium text-[#191919] mb-1">
-                                            Hour Name
+                                        <label htmlFor="hour_description" className="block text-sm font-medium text-[#191919] mb-1">
+                                            Hour Description
                                         </label>
                                         <input
                                             id="hour_name"
@@ -263,13 +258,8 @@ const DataHour = () => {
                         <>
                             <ModalHeader className="relative bg-[#FC9D25] flex justify-between items-center px-6 py-3">
                                 <div className="text-xl font-bold text-white">Edit Hour</div>
-                                <button
-                                    type="button"
-                                    onClick={onEditClose}
-                                    className="absolute right-4 top-3 text-white text-2xl font-bold hover:text-gray-200"
-                                >
-                                    &times;
-                                </button>
+                                <IoMdClose size={25} color='white' onClick={onEditClose} className='cursor-pointer' />
+
                             </ModalHeader>
                             <ModalBody className="py-5 px-6 bg-[#FAFAFA]">
                                 {selectedHour && (

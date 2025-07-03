@@ -687,7 +687,7 @@ export default function ProductGroups() {
                                                     }}
                                                     className="mb-4"
                                                     classNames={{
-                                                        inputWrapper: "bg-gray-200 px-3 py-2 border border-gray-300",
+                                                        inputWrapper: "px-3 py-2 rounded-lg border border-gray-300",
                                                         input: "text-gray-800",
                                                     }}
                                                 />
@@ -697,29 +697,29 @@ export default function ProductGroups() {
                                                         <button
                                                             key={n}
                                                             onClick={() => handleKeyPress(n)}
-                                                            className="bg-gray-200 w-full aspect-square rounded text-lg font-medium btn"
+                                                            className="bg-gray-200 w-full aspect-square rounded-lg text-lg font-medium btn"
                                                         >
                                                             {n}
                                                         </button>
                                                     ))}
 
-                                                    <button onClick={handleClear} className="btn w-full bg-red-400 text-white font-bold rounded text-lg row-span-2">
+                                                    <button onClick={handleClear} className="btn w-full bg-red-400 text-white font-bold rounded-lg text-lg row-span-2">
                                                         C
                                                     </button>
 
                                                     {[4, 5, 6].map((n) => (
-                                                        <button key={n} onClick={() => handleKeyPress(n)} className="bg-gray-200 w-full aspect-square rounded text-lg font-medium btn">
+                                                        <button key={n} onClick={() => handleKeyPress(n)} className="bg-gray-200 w-full aspect-square rounded-lg text-lg font-medium btn">
                                                             {n}
                                                         </button>
                                                     ))}
 
 
                                                     {[1, 2, 3].map((n) => (
-                                                        <button key={n} onClick={() => handleKeyPress(n)} className="bg-gray-200 w-full aspect-square rounded text-lg font-medium btn">
+                                                        <button key={n} onClick={() => handleKeyPress(n)} className="bg-gray-200 w-full aspect-square rounded-lg text-lg font-medium btn">
                                                             {n}
                                                         </button>
                                                     ))}
-                                                    <button onClick={handleOk} className="btn w-full bg-[#94c465] rounded text-lg text-white row-span-2">
+                                                    <button onClick={handleOk} className="btn w-full bg-[#94c465] rounded-lg text-lg text-white row-span-2">
                                                         OK
                                                     </button>
 
@@ -727,7 +727,7 @@ export default function ProductGroups() {
                                                         <button
                                                             key={n}
                                                             onClick={() => handleKeyPress(n)}
-                                                            className={`bg-gray-200 w-full rounded text-lg font-medium btn ${idx === 0 ? "col-span-2 py-3" : "aspect-square"}`}
+                                                            className={`bg-gray-200 w-full rounded-lg text-lg font-medium btn ${idx === 0 ? "col-span-2 py-3" : "aspect-square"}`}
                                                         >
                                                             {n}
                                                         </button>
@@ -779,9 +779,14 @@ export default function ProductGroups() {
                             {/* Cabeçalho */}
                             <div className="sticky top-0 z-10 bg-[#F0F0F0] flex items-center justify-between p-5 ml-1 mb-4">
                                 <h2 className="text-l font-semibold ml-1 mt-5">Your Shopping Cart</h2>
-                                <button onClick={toggleSidebar} className="text-l text-[#FC9D25]">
-                                    <span className="inline-block transform scale-150 font-thin mr-5">x</span>
+                                <button
+                                    onClick={toggleSidebar}
+                                    className="p-2 rounded cursor-pointer"
+                                    aria-label="Close sidebar"
+                                >
+                                    <IoMdClose size={25} color="#FC9D25" />
                                 </button>
+
                             </div>
 
                             {/* Conteúdo do Carrinho */}
@@ -953,7 +958,7 @@ export default function ProductGroups() {
                             />
 
                             {/* MODAL */}
-                            <div className="quantidades fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-115 bg-white shadow-xl rounded-lg z-50">
+                            <div className="quantidades fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-115 shadow-xl rounded-lg z-50 bg-[#FAFAFA]">
                                 <div className="bg-[#FAFAFA] w-full rounded-t-lg">
                                     <div className="flex justify-between items-center mb-4 px-4 py-3 bg-[#FC9D25] rounded-t-lg">
                                         <h2 className="text-l font-semibold text-white ml-1">Add product</h2>

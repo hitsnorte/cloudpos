@@ -49,7 +49,7 @@ export default function ProductGroups() {
                             localStorage.setItem("selectedPosto", JSON.stringify(posto));
                             router.push(`/homepage/Pos/rooms/${posto.Icodi}`);
                         }}
-                        className="w-72 h-48 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition"
+                        className="w-64 h-48 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition"
                     >
                         <MdPointOfSale size={50} color="#FC9D25" />
                         <p className="text-center text-sm text-gray-600 mt-4">

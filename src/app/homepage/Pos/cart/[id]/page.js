@@ -566,6 +566,7 @@ export default function Cart() {
                     });
                 })()}
 
+
                 {viewType === 'subfamilies' && (() => {
                     const filtered = filterByName(subfamiliesWithProducts)
                         .filter(sub => sub.products && sub.products.length > 0);

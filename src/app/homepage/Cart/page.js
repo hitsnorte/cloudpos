@@ -16,7 +16,7 @@ import { IoMdClose } from "react-icons/io";
 import { CiTrash } from "react-icons/ci";
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@heroui/react";
 import { FaArrowUp } from "react-icons/fa";
-import { fetchPreco } from "@/src/lib/apipreco";
+import { fetchOnlinePrices } from "../../../lib/apicartprices";
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import { Card, CardBody } from "@heroui/react";
 import { useSession } from "next-auth/react"; // Import useSession
@@ -341,7 +341,7 @@ export default function ProductGroups() {
                     fetchSubfamily(),
                     fetchProduct(),
                     fetchClassepreco(),
-                    fetchPreco(),
+                    fetchOnlinePrices(),
                     fetchIva(),
                 ]);
 

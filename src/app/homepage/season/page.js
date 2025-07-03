@@ -21,6 +21,7 @@ import CustomPagination from "@/src/components/table/page";
 import { fetchPeriod, createPeriod } from "@/src/lib/apiseason";
 import { fetchClassepreco } from "@/src/lib/apiclassepreco";
 import { fetchClacexp } from "@/src/lib/apiclacexp";
+import { IoMdClose } from "react-icons/io";
 
 const DataSeason = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -229,20 +230,14 @@ const DataSeason = () => {
           {(onClose) => (
             <>
               <ModalHeader className="bg-[#FC9D25] flex justify-between items-center px-6 py-3">
-                <div className="text-xl font-bold text-white">New Period</div>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="text-white text-2xl font-bold hover:text-gray-200"
-                >
-                  &times;
-                </button>
+                <div className="text-xl font-bold text-white">New Season</div>
+                <IoMdClose size={25} color='white' onClick={onClose} className='cursor-pointer' />
               </ModalHeader>
               <ModalBody className="py-5 px-6 bg-[#FAFAFA]">
                 <form id="addPeriodForm" onSubmit={handleAddPeriod} className="space-y-6">
                   <div>
                     <label htmlFor="period_name" className="block text-sm font-medium text-[#191919] mb-1">
-                      Period Name
+                      Season Name
                     </label>
                     <input
                       id="period_name"
@@ -281,14 +276,8 @@ const DataSeason = () => {
           {(onEditClose) => (
             <>
               <ModalHeader className="bg-[#FC9D25] flex justify-between items-center px-6 py-3">
-                <div className="text-xl font-bold text-white">Edit Period</div>
-                <button
-                  type="button"
-                  onClick={onEditClose}
-                  className="text-white text-2xl font-bold hover:text-gray-200"
-                >
-                  &times;
-                </button>
+                <div className="text-xl font-bold text-white">Edit Season</div>
+                <IoMdClose size={25} color='white' onClick={onEditClose} className='cursor-pointer' />
               </ModalHeader>
               <ModalBody className="py-5 px-6 bg-[#FAFAFA]">
                 {selectedPeriod && (

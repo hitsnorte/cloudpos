@@ -19,6 +19,7 @@ import {
 } from "@nextui-org/react";
 import CustomPagination from "@/src/components/table/page";
 import { fetchClassepreco, createClassepreco } from "@/src/lib/apiclassepreco";
+import { IoMdClose } from "react-icons/io";
 
 const DataClassepreco = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -203,13 +204,7 @@ const DataClassepreco = () => {
             <>
               <ModalHeader className="relative bg-[#FC9D25] flex justify-between items-center px-6 py-3">
                 <div className="text-xl font-bold text-white">New Price Class</div>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="absolute right-4 top-3 text-white text-2xl font-bold hover:text-gray-200"
-                >
-                  &times;
-                </button>
+                <IoMdClose size={25} color='white' onClick={onClose} className='cursor-pointer' />
               </ModalHeader>
               <ModalBody className="py-5 px-6 bg-[#FAFAFA]">
                 <form id="addClasseprecoForm" onSubmit={handleAddClassepreco} className="space-y-6">
@@ -255,13 +250,7 @@ const DataClassepreco = () => {
             <>
               <ModalHeader className="relative bg-[#FC9D25] flex justify-between items-center px-6 py-3">
                 <div className="text-xl font-bold text-white">Edit Price Class</div>
-                <button
-                  type="button"
-                  onClick={onEditClose}
-                  className="absolute right-4 top-3 text-white text-2xl font-bold hover:text-gray-200"
-                >
-                  &times;
-                </button>
+                <IoMdClose size={25} color='white' onClick={onEditClose} className='cursor-pointer' />
               </ModalHeader>
               <ModalBody className="py-5 px-6 bg-[#FAFAFA]">
                 {selectedClassepreco && (

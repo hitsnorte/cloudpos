@@ -17,6 +17,7 @@ import {
   DropdownItem
 } from "@nextui-org/react";
 import CustomPagination from "@/src/components/table/page";
+import { IoMdClose } from "react-icons/io";
 
 const DataGrupo = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -196,54 +197,63 @@ const DataGrupo = () => {
         />
       </div>
 
-      {/* Add Group Modal */}
-      <Modal isOpen={isOpen} onOpenChange={onClose} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
-        {isOpen && (
+      {isOpen && (
+        <>
           <div
-            className="fixed inset-0 z-30 bg-[#F0F0F0] md:bg-black/40 block md:block"
-            onClick={toggleSidebar}
+            className="fixed inset-0 bg-black/40 z-40"
+            onClick={handleCloseModal}
           />
-        )}
-        <ModalContent className="rounded-2xl overflow-hidden">
-          {(onClose) => (
-            <>
-              <ModalHeader className="relative bg-[#FC9D25] flex justify-between items-center px-6 py-3">
-                <div className="text-xl font-bold text-white">New Group</div>
-                <button
-                  type="button"
-                  onClick={handleCloseModal}
-                  className="absolute right-4 top-3 text-white text-2xl font-bold hover:text-gray-200"
-                >
-                  &times;
-                </button>
-              </ModalHeader>
-              <ModalBody className="py-5 px-6 bg-[#FAFAFA]">
-                <form id="addGroupForm" onSubmit={handleAddGroup} className="space-y-6">
-                  <div>
-                    <label htmlFor="group_name" className="block text-sm font-medium text-[#191919] mb-1">
-                      Group Name
-                    </label>
-                    <input
-                      id="group_name"
-                      type="text"
-                      name="group_name"
-                      value={newGroup.group_name}
-                      onChange={handleInputChange}
-                      className="w-full p-2 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
-                      required
-                    />
-                  </div>
-                </form>
-              </ModalBody>
-              <ModalFooter className="border-t border-[#EDEBEB] bg-[#FAFAFA] pt-2 px-8">
-                <Button type="submit" form="addGroupForm" className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray-600 transition" disabled={loading}>
-                  {loading ? "Saving..." : "Save"}
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
+          {/* Add Group Modal */}
+          <Modal
+            isOpen={isOpen}
+            onOpenChange={onClose}
+            size="md"
+            placement="center"
+            className="z-50 w-[400px] max-w-full shadow-xl rounded-2xl"
+          >
+            {/* Overlay */}
+
+
+            <ModalContent className="rounded-2xl overflow-hidden bg-white">
+              <>
+                <ModalHeader className="relative bg-[#FC9D25] flex justify-between items-center px-6 py-3 rounded-t-2xl">
+                  <div className="text-xl font-bold text-white">New Group</div>
+                  <IoMdClose size={25} color='white' onClick={onClose} className='cursor-pointer' />
+                </ModalHeader>
+                <ModalBody className="py-5 px-6 bg-white">
+                  <form id="addGroupForm" onSubmit={handleAddGroup} className="space-y-6">
+                    <div>
+                      <label htmlFor="group_name" className="block text-sm font-medium text-[#191919] mb-1">
+                        Group Name
+                      </label>
+                      <input
+                        id="group_name"
+                        type="text"
+                        name="group_name"
+                        value={newGroup.group_name}
+                        onChange={handleInputChange}
+                        className="w-full p-2 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                        required
+                      />
+                    </div>
+                  </form>
+                </ModalBody>
+                <ModalFooter className="border-t border-[#EDEBEB] bg-white pt-2 px-8 rounded-b-2xl">
+                  <Button
+                    type="submit"
+                    form="addGroupForm"
+                    className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray-600 transition"
+                    disabled={loading}
+                  >
+                    {loading ? "Saving..." : "Save"}
+                  </Button>
+                </ModalFooter>
+              </>
+            </ModalContent>
+          </Modal>
+        </>
+      )}
+
 
       {/* Edit Group Modal */}
       <Modal isOpen={editIsOpen} onOpenChange={onEditClose} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
@@ -258,13 +268,7 @@ const DataGrupo = () => {
             <>
               <ModalHeader className="relative rounded bg-[#FC9D25] flex justify-between items-center px-6 py-3">
                 <div className="text-xl font-bold text-white">Edit Group</div>
-                <button
-                  type="button"
-                  onClick={onEditClose}
-                  className="absolute right-4 top-3 text-white text-2xl font-bold hover:text-gray-200"
-                >
-                  &times;
-                </button>
+                <IoMdClose size={25} color='white' onClick={onEditClose} className='cursor-pointer' />
               </ModalHeader>
               <ModalBody className="py-5 px-6 bg-[#FAFAFA]">
                 {selectedGroup && (
@@ -298,6 +302,7 @@ const DataGrupo = () => {
           )}
         </ModalContent>
       </Modal>
+
 
       {/* Groups Table */}
       <div className="mt-5">

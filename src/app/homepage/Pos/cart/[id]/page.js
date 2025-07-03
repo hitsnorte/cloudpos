@@ -333,6 +333,11 @@ export default function Cart() {
         localStorage.setItem(cartKey, JSON.stringify(updatedCart));
     };
 
+    const clearCart = () => {
+        localStorage.removeItem(cartKey); // limpa o carrinho salvo
+        setCurrentCart([]);               // limpa o estado local
+    };
+
     return (
         <>
             <div className="relative">
@@ -355,6 +360,7 @@ export default function Cart() {
                         getCartItems={getCartItems}
                         updateQuantity={updateQuantity}
                         removeItem={removeItem}
+                        clearCart={clearCart}
                     />
                 )}
 

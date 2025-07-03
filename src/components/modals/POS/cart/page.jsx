@@ -4,6 +4,7 @@ import { useState } from "react";
 import { TiShoppingCart } from "react-icons/ti";
 import { CiTrash } from "react-icons/ci";
 import "./style.css";
+import { IoMdClose } from "react-icons/io";
 
 export default function CartPage({
     currentCart,
@@ -11,6 +12,7 @@ export default function CartPage({
     getCartItems,
     updateQuantity,
     removeItem,
+    clearCart
 }) {
     const [isOpen, setIsOpen] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
@@ -54,8 +56,12 @@ export default function CartPage({
                     {/* Header */}
                     <div className="sticky top-0 z-10 bg-[#F0F0F0] flex items-center justify-between p-5 ml-1 mb-4">
                         <h2 className="text-l font-semibold ml-1 mt-5">Your order</h2>
-                        <button onClick={toggleSidebar} className="text-l text-[#FC9D25]">
-                            <span className="inline-block transform scale-150 font-thin mr-5">x</span>
+                        <button
+                            onClick={toggleSidebar}
+                            className="p-2 rounded cursor-pointer"
+                            aria-label="Close sidebar"
+                        >
+                            <IoMdClose size={25} color="#FC9D25" />
                         </button>
                     </div>
 

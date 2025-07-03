@@ -5,7 +5,7 @@ export async function GET(request) {
 
         const authHeader = 'Basic ' + Buffer.from(`${BASIC_AUTH_USERNAME}:${BASIC_AUTH_PASSWORD}`).toString('base64');
 
-        const response = await fetch('http://192.168.145.23:5101/datasnap/rest/TSysModuleComprasOnline/PrecosOnline', {
+        const response = await fetch('http://213.146.218.25:5101/datasnap/rest/TSysModuleComprasOnline/PrecosOnline', {
             method: 'GET',
             headers: {
                 'Authorization': authHeader,
@@ -15,7 +15,7 @@ export async function GET(request) {
 
         if (!response.ok) {
             return new Response(
-                JSON.stringify({ error: "Erro ao buscar dados da API externa." }),
+                JSON.stringify({ error: "Erro ao buscar dados da API externa."+response.status }),
                 { status: 500, headers: { "Content-Type": "application/json; charset=UTF-8" } }
             );
         }

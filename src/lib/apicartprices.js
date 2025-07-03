@@ -4,7 +4,6 @@ export const fetchOnlinePrices = async () => {
         const response = await fetch('/api/priceCART', {
             method: 'GET',
             headers: {
-                'Content-Type': 'application/json',
                 'X-Property-ID': selectedPropertyID,
             },
         });

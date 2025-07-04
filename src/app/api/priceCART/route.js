@@ -5,6 +5,10 @@ export async function GET(request) {
 
         const authHeader = 'Basic ' + Buffer.from(`${BASIC_AUTH_USERNAME}:${BASIC_AUTH_PASSWORD}`).toString('base64');
 
+        console.log('Username:', BASIC_AUTH_USERNAME);
+        console.log('Password:', BASIC_AUTH_PASSWORD);
+        console.log('Auth header:', authHeader);
+
         const response = await fetch('http://213.146.218.25:5101/datasnap/rest/TSysModuleComprasOnline/PrecosOnline', {
             method: 'GET',
             headers: {

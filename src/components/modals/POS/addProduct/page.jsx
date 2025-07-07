@@ -48,7 +48,7 @@ export default function AddProductModal({ selectedProduct, setSelectedProduct, a
                         </div>
 
                         {/* Seletor de quantidade */}
-                        <div className="seletor flex items-center rounded overflow-hidden border border-gray-200 w-max fixed -mt-4">
+                        <div  className="seletor flex items-center rounded overflow-hidden border border-gray-200 w-max fixed -mt-4">
                             <button
                                 onClick={() => setCount((prev) => Math.max(1, prev - 1))}
                                 className="px-4 py-1 bg-white text-[#FC9D25] hover:bg-gray-300 transition"

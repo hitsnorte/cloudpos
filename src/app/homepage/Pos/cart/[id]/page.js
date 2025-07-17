@@ -416,8 +416,8 @@ export default function Cart() {
             </div>
 
             <div className="flex items-center justify-between space-x-4 flex-wrap md:flex-nowrap mt-4">
-                <div className="relative flex-1 min-w-[200px] md:min-w-auto">
-                    <FaMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+                <div className="w-full flex justify-center px-6 relative">
+                    <FaMagnifyingGlass className="ml-6.5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
                     <input
                         type="text"
                         placeholder="Pesquisar..."

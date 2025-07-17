@@ -266,13 +266,13 @@ const DataProduct = () => {
                 </th>
                 {[
                   { label: 'Cod prod', key: 'VPRODUTO', align: 'text-right', width: 'w-16' },
-                  { label: 'Description', key: 'VDESC1', align: 'text-left', width: 'w-32' },
-                  { label: 'Cod subfam', key: 'VSUBFAM', align: 'text-left' },
-                  { label: 'Desc subfam', key: 'VDescSubfamily', align: 'text-left' },
-                  { label: 'Cod fam', key: 'VCodFam', align: 'text-left' },
-                  { label: 'Desc fam', key: 'VDescFamily', align: 'text-left' },
-                  { label: 'Cod grp', key: 'VCodGrfam', align: 'text-left' },
-                  { label: 'Desc grp', key: 'VDescGroup', align: 'text-left' },
+                  { label: 'Description', key: 'VDESC1', align: 'text-left', width: 'w-50' },
+                  { label: 'Cod subfam', key: 'VSUBFAM', align: 'text-left', width: 'w-16' },
+                  { label: 'Desc subfam', key: 'VDescSubfamily', align: 'text-left', width: 'w-50' },
+                  { label: 'Cod fam', key: 'VCodFam', align: 'text-left', width: 'w-16' },
+                  { label: 'Desc fam', key: 'VDescFamily', align: 'text-left', width: 'w-50' },
+                  { label: 'Cod grp', key: 'VCodGrfam', align: 'text-left', width: 'w-16' },
+                  { label: 'Desc grp', key: 'VDescGroup', align: 'text-left', width: 'w-50' },
                 ].map(({ label, key, align, width }) => (
                   <th
                     key={key}
@@ -309,13 +309,33 @@ const DataProduct = () => {
                     </Dropdown>
                   </td>
                   <td className="pl-2 pr-2 w-16 text-right border-r border-[#e6e6e6]">{product.VPRODUTO}</td>
-                  <td className="pl-2 pr-2 w-32 border-r border-[#e6e6e6]">{product.VDESC1}</td>
+                  <td className="pl-2 pr-2 w-32 border-r border-[#e6e6e6]">{product.VDESC1
+                    .toLowerCase()
+                    .split(" ")
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(" ")}
+                  </td>
                   <td className="pl-2 pr-2 border-r border-[#e6e6e6]">{product.VSUBFAM}</td>
-                  <td className="pl-2 pr-2 border-r border-[#e6e6e6]">{product.VDescSubfamily}</td>
+                  <td className="pl-2 pr-2 border-r border-[#e6e6e6]">{product.VDescSubfamily
+                    .toLowerCase()
+                    .split(" ")
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(" ")}
+                  </td>
                   <td className="pl-2 pr-2 border-r border-[#e6e6e6]">{product.VCodFam}</td>
-                  <td className="pl-2 pr-2 border-r border-[#e6e6e6]">{product.VDescFamily}</td>
+                  <td className="pl-2 pr-2 border-r border-[#e6e6e6]">{product.VDescFamily
+                    .toLowerCase()
+                    .split(" ")
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(" ")}
+                  </td>
                   <td className="pl-2 pr-2 border-r border-[#e6e6e6]">{product.VCodGrfam}</td>
-                  <td className="pl-2 pr-2">{product.VDescGroup}</td>
+                  <td className="pl-2 pr-2">{product.VDescGroup
+                    .toLowerCase()
+                    .split(" ")
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(" ")}
+                  </td>
                 </tr>
               ))}
             </tbody>

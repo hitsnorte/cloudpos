@@ -175,7 +175,7 @@ const DataSubfamilia = () => {
   const sortedSubfamilias = useMemo(() => {
     if (!sortConfig.key) return filteredSubfamilias;
 
-   const sorted = [...filteredSubfamilias].sort((a, b) => {
+    const sorted = [...filteredSubfamilias].sort((a, b) => {
       const aValue = a[sortConfig.key];
       const bValue = b[sortConfig.key];
 
@@ -249,12 +249,12 @@ const DataSubfamilia = () => {
                 </th>
                 {[
                   { label: 'Cod SubFam', key: 'VCodSubFam', align: 'text-right', width: 'w-16' },
-                  { label: 'Description', key: 'VDesc', align: 'text-left', width: 'w-32' },
-                  { label: 'Created in', key: 'dcriadoem', align: 'text-left' },
-                  { label: 'Cod fam', key: 'VCodFam', align: 'text-left' },
-                  { label: 'Desc fam', key: 'VDescFamily', align: 'text-left' },
-                  { label: 'Cod grp fam', key: 'VCodGrfam', align: 'text-left' },
-                  { label: 'Desc grp', key: 'VDescGroup', align: 'text-left' },
+                  { label: 'Description', key: 'VDesc', align: 'text-left', width: 'w-50' },
+                  { label: 'Created in', key: 'dcriadoem', align: 'text-left', width: 'w-35' },
+                  { label: 'Cod fam', key: 'VCodFam', align: 'text-left', width: 'w-16' },
+                  { label: 'Desc fam', key: 'VDescFamily', align: 'text-left', width: 'w-50' },
+                  { label: 'Cod grp', key: 'VCodGrfam', align: 'text-left', width: 'w-16' },
+                  { label: 'Desc grp', key: 'VDescGroup', align: 'text-left', width: 'w-50' },
                 ].map(({ label, key, align, width }) => (
                   <th
                     key={key}
@@ -291,14 +291,29 @@ const DataSubfamilia = () => {
                     </Dropdown>
                   </td>
                   <td className="pl-2 pr-2 w-16 text-right border-r border-[#e6e6e6]">{subfamilia.VCodSubFam}</td>
-                  <td className="pl-2 pr-2 w-32 border-r border-[#e6e6e6]">{subfamilia.VDesc}</td>
+                  <td className="pl-2 pr-2 w-32 border-r border-[#e6e6e6]">{subfamilia.VDesc
+                    .toLowerCase()
+                    .split(" ")
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(" ")}
+                  </td>
                   <td className="pl-2 pr-2 border-r border-[#e6e6e6]">
                     {new Date(subfamilia.dcriadoem).toLocaleDateString('pt-BR')}
                   </td>
                   <td className="pl-2 pr-2 border-r border-[#e6e6e6]">{subfamilia.VCodFam}</td>
-                  <td className="pl-2 pr-2 border-r border-[#e6e6e6]">{subfamilia.VDescFamily}</td>
+                  <td className="pl-2 pr-2 border-r border-[#e6e6e6]">{subfamilia.VDescFamily
+                    .toLowerCase()
+                    .split(" ")
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(" ")}
+                  </td>
                   <td className="pl-2 pr-2 border-r border-[#e6e6e6]">{subfamilia.VCodGrfam}</td>
-                  <td className="pl-2 pr-2">{subfamilia.VDescGroup}</td>
+                  <td className="pl-2 pr-2">{subfamilia.VDescGroup
+                    .toLowerCase()
+                    .split(" ")
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(" ")}
+                  </td>
                 </tr>
               ))}
             </tbody>

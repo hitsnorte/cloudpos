@@ -312,7 +312,7 @@ const DataIva = () => {
             </th>
             {[
               { label: 'Cod IVA', key: 'codIva', align: 'text-right', width: 'w-16' },
-              { label: 'IVA Percentage', key: 'ivaPer', align: 'text-left', width: 'w-32' },
+              { label: 'IVA Percentage', key: 'ivaPer', align: 'text-left' },
               { label: 'Description', key: 'description', align: 'text-left' },
             ].map(({ label, key, align, width }) => (
               <th

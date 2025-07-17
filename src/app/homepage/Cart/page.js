@@ -625,7 +625,7 @@ export default function ProductGroups() {
                     <div className="flex items-center justify-between space-x-10 flex-wrap md:flex-nowrap mt-4">
                         {/* Search input container */}
                         <div className="relative flex-1 min-w-[200px] md:min-w-auto">
-                            <FaMagnifyingGlass className="ml-6 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+                            <FaMagnifyingGlass className=" absolute left-10 top-1/2 transform -translate-y-1/2 text-gray-500" />
                             <input
                                 type="text"
                                 placeholder="Pesquisar..."

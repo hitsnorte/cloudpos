@@ -291,9 +291,6 @@ const DataGrupo = () => {
                 )}
               </ModalBody>
               <ModalFooter className="border-t border-[#EDEBEB] bg-[#FAFAFA] pt-2 px-8">
-                <Button onPress={onEditClose} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">
-                  Cancel
-                </Button>
                 <Button type="submit" form="editGroupForm" className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray-600 transition" disabled={loading}>
                   {loading ? "Saving..." : "Save"}
                 </Button>
@@ -371,7 +368,13 @@ const DataGrupo = () => {
                     </Dropdown>
                   </td>
                   <td className="pl-2 pr-2 w-16 text-right border-r border-[#e6e6e6]">{group.id}</td>
-                  <td className="pl-2 pr-2">{group.group_name}</td>
+                  <td className="pl-2 pr-2">
+                    {group.group_name
+                      .toLowerCase()
+                      .split(" ")
+                      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                      .join(" ")}
+                  </td>
                 </tr>
               ))}
             </tbody>

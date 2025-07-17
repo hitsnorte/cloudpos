@@ -331,7 +331,7 @@ const DataSeason = () => {
                   ID {sortConfig.key === 'vcodi' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
                 </th>
                 <th
-                  className="pl-2 pr-2 w-32 border-r border-[#e6e6e6] uppercase select-none"
+                  className="pl-2 pr-2 w-40 border-r border-[#e6e6e6] uppercase select-none"
                   style={{ fontWeight: 300 }}
                   onClick={() => handleSort('Vdesc')}
                 >

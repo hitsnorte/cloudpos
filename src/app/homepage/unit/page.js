@@ -349,8 +349,18 @@ const DataUnit = () => {
                                         </Dropdown>
                                     </td>
                                     <td className="pl-2 pr-2 w-16 text-right border-r border-[#e6e6e6]">{unit.Id_interno}</td>
-                                    <td className="pl-2 pr-2 w-32 border-r border-[#e6e6e6]">{unit.TipoProduto}</td>
-                                    <td className="pl-2 pr-2">{unit.Descricao}</td>
+                                    <td className="pl-2 pr-2 w-32 border-r border-[#e6e6e6]">{unit.TipoProduto
+                                        .toLowerCase()
+                                        .split(" ")
+                                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                                        .join(" ")}
+                                    </td>
+                                    <td className="pl-2 pr-2">{unit.Descricao
+                                        .toLowerCase()
+                                        .split(" ")
+                                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                                        .join(" ")}
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>

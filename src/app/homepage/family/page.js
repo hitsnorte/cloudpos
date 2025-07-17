@@ -223,10 +223,10 @@ const DataFamily = () => {
                 </th>
                 {[
                   { label: 'Cod Fam', key: 'VCodFam', align: 'text-right ', width: 'w-16' },
-                  { label: 'Description', key: 'VDesc', align: 'text-left', width: 'w-32' },
-                  { label: 'Created In', key: 'DCriadoEm', align: 'text-left' },
-                  { label: 'Cod Grp Fam', key: 'VCodGrFam', align: 'text-left' },
-                  { label: 'Desc Grp', key: 'VDescGroup', align: 'text-left' },
+                  { label: 'Description', key: 'VDesc', align: 'text-left', width: 'w-50' },
+                  { label: 'Created In', key: 'DCriadoEm', align: 'text-left', width: 'w-35' },
+                  { label: 'Cod Grp', key: 'VCodGrFam', align: 'text-left', width: 'w-16' },
+                  { label: 'Desc Grp', key: 'VDescGroup', align: 'text-left', width: 'w-50' },
                 ].map(({ label, key, align, width }) => (
                   <th
                     key={key}
@@ -264,12 +264,23 @@ const DataFamily = () => {
                     </Dropdown>
                   </td>
                   <td className="pl-2 pr-2 w-16 text-right border-r border-[#e6e6e6]">{family.VCodFam}</td>
-                  <td className="pl-2 pr-2 w-32 border-r border-[#e6e6e6]">{family.VDesc}</td>
+                  <td className="pl-2 pr-2 w-32 border-r border-[#e6e6e6]">
+                    {family.VDesc
+                      .toLowerCase()
+                      .split(" ")
+                      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                      .join(" ")}
+                  </td>
                   <td className="pl-2 pr-2 border-r border-[#e6e6e6]">
                     {new Date(family.DCriadoEm).toLocaleDateString('pt-BR')}
                   </td>
                   <td className="pl-2 pr-2 border-r border-[#e6e6e6]">{family.VCodGrFam}</td>
-                  <td className="pl-2 pr-2">{family.VDescGroup}</td>
+                  <td className="pl-2 pr-2">{family.VDescGroup
+                    .toLowerCase()
+                      .split(" ")
+                      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                      .join(" ")}
+                  </td>
                 </tr>
               ))}
             </tbody>

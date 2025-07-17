@@ -126,7 +126,13 @@ export default function Tables() {
                                 />
                             </div>
                             <p className="text-center text-sm text-[#191919]">
-                                {table.Descricao || 'Sem nome'}
+                                {table.Descricao
+                                    ? table.Descricao
+                                        .toLowerCase()
+                                        .split(" ")
+                                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                                        .join(" ")
+                                    : "Sem nome"}
                             </p>
                         </div>
                     </div>

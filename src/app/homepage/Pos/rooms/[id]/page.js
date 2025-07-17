@@ -3,12 +3,15 @@ import React, { useState, useEffect } from 'react';
 import { FaDoorOpen } from "react-icons/fa";
 import { useRouter, useParams } from 'next/navigation';
 import axios from 'axios';
+import { IoIosSwap } from "react-icons/io";
 
 export default function Rooms() {
     const [rooms, setRooms] = useState([]);
     const [propertyID, setPropertyID] = useState(null);
     const router = useRouter();
     const params = useParams();
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
 
     useEffect(() => {
         const storedID = localStorage.getItem('selectedProperty');
@@ -74,6 +77,34 @@ export default function Rooms() {
                     ← Outlets
                 </button>
                 <h1 className="text-3xl font-semibold ml-4">Rooms</h1>
+
+                {/* butao e modal para selecionar price class */}
+                <button
+                    onClick={() => setIsModalOpen(true)}
+                    className="px-3 ml-164 py-3 bg-[#FC9D25] text-white rounded hover:bg-gray-300 transition"
+                >
+                    <IoIosSwap />
+                </button>
+
+                {isModalOpen && (
+                    <div className="fixed inset-0 z-30 bg-black/40 flex items-center justify-center">
+                        <div className="bg-[#FAFAFA] w-100 rounded-lg shadow-lg">
+                            <div className="flex justify-between items-center mb-4 px-4 py-3 bg-[#FC9D25] rounded-t-lg">
+                                <h2 className="text-l font-semibold text-white ml-1">Select Price Class</h2>
+                            </div>
+                            <div className="flex justify-end space-x-3 ml-8 mb-5 m-5 mr-7">
+                                <button
+                                    onClick={() => setIsModalOpen(false)}
+                                    className="px-10.5 py-1 bg-[#D3D3D3] text-white rounded-md hover:bg-gray font-medium transition duration-200"
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+
             </div>
             <div className="px-4 flex flex-wrap gap-6 p-6">
                 {rooms.map((room, index) => (

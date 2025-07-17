@@ -94,7 +94,7 @@ export default function Rooms() {
                             <div className="flex justify-between items-center mb-4 px-4 py-3 bg-[#FC9D25] rounded-t-lg">
                                 <h2 className="text-l font-semibold text-white ml-1">Select Price Class</h2>
                             </div>
-                            
+
                             <div className="flex justify-center gap-4 px-6 mb-4">
                                 <button className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition">BLIND</button>
                                 <button className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition">SPA</button>

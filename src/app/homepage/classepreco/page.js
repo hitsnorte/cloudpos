@@ -303,7 +303,7 @@ const DataClassepreco = () => {
                   ID {sortConfig.key === 'Vcodi' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
                 </th>
                 <th
-                  className="pl-2 pr-2 w-32 border-r border-[#e6e6e6] uppercase cursor-pointer select-none" style={{ fontWeight: 300 }}
+                  className="pl-2 pr-2 w-40 border-r border-[#e6e6e6] uppercase cursor-pointer select-none" style={{ fontWeight: 300 }}
                   onClick={() => handleSort('abreviatura')}
                 >
                   Abbreviation {sortConfig.key === 'abreviatura' && (sortConfig.direction === 'asc' ? '▲' : '▼')}

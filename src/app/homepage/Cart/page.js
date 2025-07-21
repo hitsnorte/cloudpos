@@ -772,10 +772,14 @@ export default function ProductGroups() {
                         )}
 
                         {/* Sidebar Carrinho */}
+                       
                         <div
                             className={`cart fixed top-0 right-0 h-full w-[400px] max-w-full bg-[#F0F0F0] z-[9999] shadow-lg transition-transform duration-300 ${isOpen ? 'translate-x-0' : 'translate-x-full'
                             }`}
                         >
+                            {showConfirm && (
+                                <div className="absolute inset-0 bg-[#F0F0F0]/80 z-50 pointer-events-none" />
+                            )}
                             {/* Cabeçalho */}
                             <div className="sticky top-0 z-10 bg-[#F0F0F0] flex items-center justify-between p-5 ml-1 mb-4">
                                 <h2 className="text-l font-semibold ml-1 mt-2">Your Shopping Cart</h2>
@@ -912,10 +916,7 @@ export default function ProductGroups() {
 
                     {showConfirm && (
                         <>
-                            <div
-                                className="fixed inset-0 bg-black/40 z-40"
-                                onClick={() => setShowConfirm(false)}
-                            />
+
                             <div
                                 ref={popoverRef}
 

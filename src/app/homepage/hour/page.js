@@ -388,7 +388,7 @@ const DataHour = () => {
                                     style={{ fontWeight: 300 }}
                                     onClick={() => handleSort('classePrecoDesc')}
                                 >
-                                    Classe Preço {sortConfig.key === 'classePrecoDesc' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
+                                    Price Class {sortConfig.key === 'classePrecoDesc' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
                                 </th>
                             </tr>
                         </thead>

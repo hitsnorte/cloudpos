@@ -215,7 +215,7 @@ const DataFamily = () => {
       {/* Table */}
       <div className="mt-5">
         {paginatedFamilies.length > 0 ? (
-          <table className="w-full text-left mb-5 border-collapse mb-13">
+          <table className="w-full text-left mb-5 border-collapse">
             <thead>
               <tr className="bg-[#FC9D25] text-white h-12">
                 <th className="pl-2 pr-2 w-8 border-r border-[#e6e6e6] ">

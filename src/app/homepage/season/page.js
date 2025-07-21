@@ -342,7 +342,7 @@ const DataSeason = () => {
                   style={{ fontWeight: 300 }}
                   onClick={() => handleSort('classePrecoDesc')}
                 >
-                  Classe Preco {sortConfig.key === 'classePrecoDesc' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
+                  Price Class {sortConfig.key === 'classePrecoDesc' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
                 </th>
               </tr>
             </thead>

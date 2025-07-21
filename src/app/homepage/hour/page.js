@@ -156,37 +156,37 @@ const DataHour = () => {
         }
     };
 
-    const filteredHours = hours.filter((hour) => {
-        const search = searchTerm.toLowerCase();
-        return (
-            (hour.Vcodi && String(hour.Vcodi).toLowerCase().includes(search)) ||
-            (hour.Vdesc && hour.Vdesc.toLowerCase().includes(search))
-        );
-    });
-
-    const horasComPeriodo = useMemo(() => {
+    const filteredHorasComPeriodo = useMemo(() => {
         if (!hours || !periodo) return [];
 
-        return hours.map(hour => {
-            // Certifique-se de que o nome do campo é o correto para comparar:
-            const periodoEncontrado = periodo.find(p => String(p.vcodi) === String(hour.VCodiPeri));
+        const search = searchTerm.toLowerCase();
 
-            return {
-                ...hour,
-                PeriodoDescricao: periodoEncontrado ? periodoEncontrado.Vdesc : 'Desconhecido',
-                classePrecoDesc: periodoEncontrado ? periodoEncontrado.classePrecoDesc : '-',
-            };
-        });
-    }, [hours, periodo]);
+        return hours
+            .map((hour) => {
+                const periodoEncontrado = periodo.find(p => p.vcodi.toString() === hour.VCodiPeri);
+                return {
+                    ...hour,
+                    PeriodoDescricao: periodoEncontrado?.Vdesc || 'Desconhecido',
+                    classePrecoDesc: periodoEncontrado?.classePrecoDesc || 'Desconhecido',
+                };
+            })
+            .filter((hour) => {
+                return (
+                    (hour.Vcodi && String(hour.Vcodi).toLowerCase().includes(search)) ||
+                    (hour.Vdesc && hour.Vdesc.toLowerCase().includes(search)) ||
+                    (hour.PeriodoDescricao && hour.PeriodoDescricao.toLowerCase().includes(search)) ||
+                    (hour.classePrecoDesc && hour.classePrecoDesc.toLowerCase().includes(search))
+                );
+            });
+    }, [hours, periodo, searchTerm]);
 
     // 2. Ordena com base nos dados combinados
     const sortedHours = useMemo(() => {
-        if (!sortConfig.key) return horasComPeriodo;
+        if (!sortConfig.key) return filteredHorasComPeriodo;
 
-        const sorted = [...horasComPeriodo].sort((a, b) => {
+        return [...filteredHorasComPeriodo].sort((a, b) => {
             const aValue = a[sortConfig.key];
             const bValue = b[sortConfig.key];
-
             const isNumeric = typeof aValue === 'number' || !isNaN(Number(aValue));
 
             if (isNumeric) {
@@ -199,14 +199,14 @@ const DataHour = () => {
                     : String(bValue).localeCompare(String(aValue));
             }
         });
+    }, [filteredHorasComPeriodo, sortConfig]);
 
-        return sorted;
-    }, [horasComPeriodo, sortConfig]);
-
-    const paginatedHours = sortedHours.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
-    );
+    const paginatedHours = useMemo(() => {
+        return sortedHours.slice(
+            (currentPage - 1) * itemsPerPage,
+            currentPage * itemsPerPage
+        );
+    }, [sortedHours, currentPage, itemsPerPage]);
 
     const handleSort = (key) => {
         setSortConfig((prev) => {
@@ -220,7 +220,7 @@ const DataHour = () => {
         });
     };
 
-    const totalPages = Math.ceil(filteredHours.length / itemsPerPage);
+    const totalPages = Math.ceil(filteredHorasComPeriodo.length / itemsPerPage);
 
     return (
         <div className="p-4">

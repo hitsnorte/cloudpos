@@ -454,13 +454,6 @@ const DataProduct = () => {
   }
 
   // Simulação do carregamento da subfamília ao renderizar
-  useEffect(() => {
-    const loadSubfam = async () => {
-      await fetchSubFamilia(editProduct.VSUBFAM);
-    };
-
-    loadSubfam();
-  }, []);
 
   const [selectedProduct, setSelectedProduct] = useState('');
 
@@ -899,7 +892,17 @@ const DataProduct = () => {
                                   </select>
                                 </td>
                                 <td className="px-4 py-2 text-center">
-                                  <input type="checkbox" checked={!price.Indisponivel} />
+                                  <input
+                                    type="checkbox"
+                                    checked={!price.Indisponivel}
+                                    onChange={(e) =>
+                                      setPrices((prev) =>
+                                        prev.map((p) =>
+                                          p.id === price.id ? { ...p, Indisponivel: !e.target.checked } : p
+                                        )
+                                      )
+                                    }
+                                  />
                                 </td>
                                 <td className="px-4 py-2">
                                   <HiDotsVertical size={18} />
@@ -1080,24 +1083,24 @@ const DataProduct = () => {
         )}
       </div>
 
-        {/* Pagination */}
-        <div className="bottom-0 w-full bg-white p-0 m-0 pagination-container">
-          <CustomPagination
-            page={currentPage}
-            pages={totalPages}
-            rowsPerPage={itemsPerPage}
-            handleChangeRowsPerPage={(newSize) => {
-              setItemsPerPage(newSize);
-              setCurrentPage(1);
-            }}
-            items={paginatedProducts}
-            setPage={setCurrentPage}
-            dataCSVButton={paginatedProducts.map((item) => ({
-              Codprod: item.Codprod,
-              Description: item.descricao,
-            }))}
-          />
-        </div>
+      {/* Pagination */}
+      <div className="bottom-0 w-full bg-white p-0 m-0 pagination-container">
+        <CustomPagination
+          page={currentPage}
+          pages={totalPages}
+          rowsPerPage={itemsPerPage}
+          handleChangeRowsPerPage={(newSize) => {
+            setItemsPerPage(newSize);
+            setCurrentPage(1);
+          }}
+          items={paginatedProducts}
+          setPage={setCurrentPage}
+          dataCSVButton={paginatedProducts.map((item) => ({
+            Codprod: item.Codprod,
+            Description: item.descricao,
+          }))}
+        />
+      </div>
     </div>
   );
 };

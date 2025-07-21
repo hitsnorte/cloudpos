@@ -19,6 +19,9 @@ import {
 } from "@nextui-org/react";
 import CustomPagination from "@/src/components/table/page";
 import { fetchHour, createHour } from '@/src/lib/apihour';
+import { fetchPeriod } from '@/src/lib/apiseason';
+import { fetchClassepreco } from '@/src/lib/apiclassepreco';
+import { fetchClacexp } from '@/src/lib/apiclacexp';
 import { IoMdClose } from "react-icons/io";
 
 const DataHour = () => {
@@ -29,6 +32,7 @@ const DataHour = () => {
     const [selectedHour, setSelectedHour] = useState(null);
 
     const [newHour, setNewHour] = useState({ hour_name: "" });
+    const [periodo, setPeriodo] = useState([]);
 
     const [loading, setLoading] = useState(false);
 
@@ -44,6 +48,7 @@ const DataHour = () => {
 
     useEffect(() => {
         loadHour();
+        fetchPeriods();
     }, []);
 
     const loadHour = async () => {
@@ -54,6 +59,38 @@ const DataHour = () => {
         } catch (error) {
             console.error("Error fetching hours:", error);
         }
+    };
+
+    const fetchPeriods = async () => {
+        try {
+            const [periodosData, classeprecosData, clacexpData] = await Promise.all([
+                fetchPeriod(),
+                fetchClassepreco(),
+                fetchClacexp(),
+            ]);
+
+            const dadosComRelacionamento = relacionarDados({
+                periodos: periodosData,
+                clacexp: clacexpData,
+                classes: classeprecosData,
+            });
+
+            setPeriodo(dadosComRelacionamento);
+        } catch (error) {
+            console.error("Error fetching periods:", error);
+        }
+    };
+
+    const relacionarDados = ({ periodos, clacexp, classes }) => {
+        return periodos.map((periodo) => {
+            const relacao = clacexp.find((c) => c.icodi === periodo.icodClasCexp);
+            const classePreco = classes.find((cls) => cls.Vcodi === relacao?.icodiClasse);
+
+            return {
+                ...periodo,
+                classePrecoDesc: classePreco?.Vdesc || "Sem descrição",
+            };
+        });
     };
 
     const onOpen = () => setIsOpen(true);
@@ -127,10 +164,26 @@ const DataHour = () => {
         );
     });
 
-    const sortedHours = useMemo(() => {
-        if (!sortConfig.key) return filteredHours;
+    const horasComPeriodo = useMemo(() => {
+        if (!hours || !periodo) return [];
 
-        const sorted = [...filteredHours].sort((a, b) => {
+        return hours.map(hour => {
+            // Certifique-se de que o nome do campo é o correto para comparar:
+            const periodoEncontrado = periodo.find(p => String(p.vcodi) === String(hour.VCodiPeri));
+
+            return {
+                ...hour,
+                PeriodoDescricao: periodoEncontrado ? periodoEncontrado.Vdesc : 'Desconhecido',
+                classePrecoDesc: periodoEncontrado ? periodoEncontrado.classePrecoDesc : '-',
+            };
+        });
+    }, [hours, periodo]);
+
+    // 2. Ordena com base nos dados combinados
+    const sortedHours = useMemo(() => {
+        if (!sortConfig.key) return horasComPeriodo;
+
+        const sorted = [...horasComPeriodo].sort((a, b) => {
             const aValue = a[sortConfig.key];
             const bValue = b[sortConfig.key];
 
@@ -148,7 +201,7 @@ const DataHour = () => {
         });
 
         return sorted;
-    }, [filteredHours, sortConfig]);
+    }, [horasComPeriodo, sortConfig]);
 
     const paginatedHours = sortedHours.slice(
         (currentPage - 1) * itemsPerPage,
@@ -298,7 +351,7 @@ const DataHour = () => {
             <div className="mt-5">
                 {loading ? (
                     <div className="text-center py-8">Loading...</div>
-                ) : paginatedHours.length > 0 ? (
+                ) : sortedHours.length > 0 ? (
                     <table className="w-full text-left mb-5 min-w-full md:min-w-0 border-collapse">
                         <thead>
                             <tr className="bg-[#FC9D25] text-white h-12">
@@ -315,13 +368,27 @@ const DataHour = () => {
 
                                 </th>
                                 <th
-                                    className="pl-2 pr-2 border-r border-[#e6e6e6] uppercase select-none"
+                                    className="pl-2 pr-2 w-50 border-r border-[#e6e6e6] uppercase select-none"
                                     style={{ fontWeight: 300 }}
                                     onClick={() => handleSort('Vdesc')}
 
                                 >
                                     Description {sortConfig.key === 'Vdesc' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
 
+                                </th>
+                                <th
+                                    className="pl-2 pr-2 w-50 border-r border-[#e6e6e6] uppercase select-none"
+                                    style={{ fontWeight: 300 }}
+                                    onClick={() => handleSort('PeriodoDescricao')}
+                                >
+                                    Seasons {sortConfig.key === 'PeriodoDescricao' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
+                                </th>
+                                <th
+                                    className="pl-2 pr-2 border-r border-[#e6e6e6] uppercase select-none"
+                                    style={{ fontWeight: 300 }}
+                                    onClick={() => handleSort('classePrecoDesc')}
+                                >
+                                    Classe Preço {sortConfig.key === 'classePrecoDesc' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
                                 </th>
                             </tr>
                         </thead>
@@ -358,6 +425,8 @@ const DataHour = () => {
                                     </td>
                                     <td className="pl-2 pr-2 w-16 text-right border-r border-[#e6e6e6]">{hour.Vcodi}</td>
                                     <td className="pl-2 pr-2">{hour.Vdesc}</td>
+                                    <td className="pl-2 pr-2">{hour.PeriodoDescricao}</td>
+                                    <td className="pl-2 pr-2">{hour.classePrecoDesc || '-'}</td>
                                 </tr>
                             ))}
                         </tbody>

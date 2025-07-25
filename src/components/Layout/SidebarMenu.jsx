@@ -126,7 +126,7 @@ export default function SidebarMenu() {
         window.addEventListener("resize", checkMobile);
         return () => window.removeEventListener("resize", checkMobile);
     }, []);
-
+    
     return (
         <div className="p-3">
             <select

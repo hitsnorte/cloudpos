@@ -3,11 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { HiDotsVertical } from "react-icons/hi";
 import { FaGear } from "react-icons/fa6";
-import { FaCheckCircle } from "react-icons/fa";
 import { Plus } from "lucide-react";
-import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
-import { FaMagnifyingGlass } from "react-icons/fa6";
-import { HiAdjustmentsHorizontal } from "react-icons/hi2";
 import { fetchProduct, createProduct, deleteProduct, updateProduct } from '@/src/lib/apiproduct';
 import { fetchSubfamily } from '@/src/lib/apisubfamily';
 import { fetchFamily } from '@/src/lib/apifamily';
@@ -16,7 +12,6 @@ import { fetchIva } from '@/src/lib/apiiva';
 import { fetchUnit } from '@/src/lib/apiunit';
 import { fetchClassepreco } from "@/src/lib/apiclassepreco";
 import { fetchPreco } from "@/src/lib/apipreco";
-import { IoInformationSharp } from "react-icons/io5";
 import { fetchPeriod } from "@/src/lib/apiseason";
 import { fetchHour } from "@/src/lib/apihour";
 import Select from "react-select";
@@ -40,13 +35,10 @@ const DataProduct = () => {
   const [newProduct, setNewProduct] = useState({ product_name: '', quantity: '' });
   const [editProduct, setEditProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [productToDelete, setProductToDelete] = useState(null);
-  const [quantityError, setQuantityError] = useState('');
+
   const [selectedSubfamily, setSelectedSubfamily] = useState("");
   const [selectedIva, setSelectedIva] = useState("");
-  const [selectedTipo, setSelectedTipo] = useState("");
-  const [isActive, setIsActive] = useState(false);
-  const [dashboardData, setDashboardData] = useState(null);
+
 
   const [itemsPerPage, setItemsPerPage] = useState(50);
   const [currentPage, setCurrentPage] = useState(1);
@@ -54,8 +46,6 @@ const DataProduct = () => {
   const [isChecked, setIsChecked] = useState(false);
 
   const [sortConfig, setSortConfig] = useState({ key: 'VDesc', direction: 'asc' });
-
-  const PAGE_SIZES = [25, 50, 150, 250];
 
   const {
     isOpen: isAddModalOpen,
@@ -649,6 +639,9 @@ const DataProduct = () => {
         />
       </div>
 
+      {isEditModalOpen && (
+        <div className="fixed inset-0 z-30 bg-[#F0F0F0] md:bg-black/40 block md:block" />
+      )}
       <Modal
         isOpen={isEditModalOpen}
         onOpenChange={handleEditModalClose}
@@ -659,28 +652,28 @@ const DataProduct = () => {
         product={selectedProduct}
         prices={prices}
       >
-        <ModalContent>
+        <ModalContent className="rounded-2xl overflow-hidden">
           {(onClose) => (
             <>
-              <ModalHeader className="rounded bg-[#FC9D25] flex justify-between items-center">
+              <ModalHeader className="bg-[#FC9D25] h-12 flex items-center justify-between px-4">
                 <div className="text-xl font-bold text-white">Edit product</div>
                 <Button
                   onClick={onEditModalClose}
-                  className="text-white bg-transparent border-0 text-2xl p-0"
+                  className="text-white bg-transparent border-0 text-2xl p-0 ml-auto"
                   aria-label="Close"
                 >
-                  &times; {/* Unicode for "×" sign */}
+                  &times;
                 </Button>
               </ModalHeader>
 
-              <ModalBody className="py-5 px-6">
+              <ModalBody className="py-5 px-6 ">
                 {editProduct && (
                   <form id="updateProductForm" onSubmit={handleUpdateProduct} className="space-y-6">
                     {/* Abreviatura e tipo de produto */}
-                    <div className="flex gap-4">
-                      {/* Abreviatura*/}
-                      <div className="w-1/2">
-                        <label htmlFor="productAbbreviation" className="block text-sm font-medium text-[#191919] mb-1">
+                    <div className="flex gap-4 items-end">
+                      {/* Abbreviation - half width */}
+                      <div className="flex flex-col w-1/2">
+                        <label htmlFor="productAbbreviation" className="text-sm font-medium text-[#191919] mb-1">
                           Abbreviation
                         </label>
                         <input
@@ -689,41 +682,38 @@ const DataProduct = () => {
                           value={editProduct?.Abreviatura || ''}
                           onChange={(e) => setEditProduct({ ...editProduct, Abreviatura: e.target.value })}
                           placeholder="Digite a Abbreviation do produto"
-                          className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                          className="w-full p-2 h-8 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
                           required
                         />
                       </div>
 
-                      {/* Detalhes do tipo de produto */}
-                      <div className="w-1/2 flex gap-2 items-end">
-                        {/* Tipo de produto */}
-                        <div className="flex flex-col w-1/3">
-                          <label className="text-sm font-medium text-[#191919] mb-1">Prod. Type</label>
-                          <div className="bg-gray-200 p-1 rounded text-sm text-gray-700">
-                            {editProduct?.vtipprod || '—'}
-                          </div>
+                      {/* Prod. Type */}
+                      <div className="flex flex-col w-1/6">
+                        <label className="text-sm font-medium text-[#191919] mb-1">Prod. Type</label>
+                        <div className="bg-gray-200 p-2 h-8 rounded text-sm text-gray-700 flex items-center">
+                          {editProduct?.vtipprod || '—'}
                         </div>
+                      </div>
 
-                        {/* Tipo de produto */}
-                        <div className="flex flex-col w-1/3">
-                          <label className="text-sm font-medium text-[#191919] mb-1">Type</label>
-                          <div className="bg-gray-200 p-1 rounded text-sm text-gray-700">
-                            {editProduct?.ProductType || '—'}
-                          </div>
+                      {/* Type */}
+                      <div className="flex flex-col w-1/6">
+                        <label className="text-sm font-medium text-[#191919] mb-1">Type</label>
+                        <div className="bg-gray-200 p-2 h-8 rounded text-sm text-gray-700 flex items-center">
+                          {editProduct?.ProductType || '—'}
                         </div>
+                      </div>
 
-                        {/* Status*/}
-                        <div className="flex flex-col w-1/3 items-center">
-                          <label className="text-sm font-medium text-[#191919] mb-1">Status</label>
-                          <label className="flex items-center gap-1 text-sm text-gray-700">
-                            <input
-                              type="checkbox"
-                              checked={editProduct?.activo || false}
-                              onChange={(e) => setEditProduct({ ...editProduct, activo: e.target.checked })}
-                            />
-                            {editProduct?.activo ? 'Active' : 'Inactive'}
-                          </label>
-                        </div>
+                      {/* Status */}
+                      <div className="flex flex-col w-1/6 items-center">
+                        <label className="text-sm font-medium text-[#191919] mb-1">Status</label>
+                        <label className="rounded flex items-center gap-2 mb-1.5 text-sm text-gray-700">
+                          <input
+                            type="checkbox"
+                            checked={editProduct?.activo || false}
+                            onChange={(e) => setEditProduct({ ...editProduct, activo: e.target.checked })}
+                          />
+                          {editProduct?.activo ? 'Active' : 'Inactive'}
+                        </label>
                       </div>
                     </div>
 
@@ -750,7 +740,7 @@ const DataProduct = () => {
                         </label>
                         <div
                           id="subFamilia"
-                          className="w-full p-1 bg-gray-200 rounded text-sm text-gray-700"
+                          className="w-full p-1 h-8 bg-gray-200 rounded text-sm text-gray-700"
                         >
                           {loadingsubfam ? 'Loading...' : subfam || 'Not associated'}
                         </div>
@@ -763,7 +753,7 @@ const DataProduct = () => {
                         </label>
                         <div
                           id="family"
-                          className="w-full p-1 bg-gray-200 rounded text-sm text-gray-700"
+                          className="w-full p-1 h-8 bg-gray-200 rounded text-sm text-gray-700"
                         >
                           {loadingFamily ? 'Loading...' : FamilyName || 'Unknown'}
                         </div>
@@ -776,7 +766,7 @@ const DataProduct = () => {
                         </label>
                         <div
                           id="group"
-                          className="w-full p-1 bg-gray-200 rounded text-sm text-gray-700"
+                          className="w-full p-1 h-8 bg-gray-200 rounded text-sm text-gray-700"
                         >
                           {loadingGroup ? 'Loading...' : group || 'Group is not associated'}
                         </div>
@@ -796,7 +786,7 @@ const DataProduct = () => {
                           value={editProduct?.VREFERENCIA || ''}
                           onChange={(e) => setEditProduct({ ...editProduct, VREFERENCIA: e.target.value })}
                           placeholder="Insert reference"
-                          className="w-full h-[40px] px-3 relative -top-[2px] bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                          className="w-full px-3 h-8 relative -top-[2px] bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
                         />
                       </div>
 
@@ -821,15 +811,42 @@ const DataProduct = () => {
                             setSelectedIva(selectedOption ? selectedOption.value : "");
                           }}
                           isSearchable
-                          className="w-full p-1"
+                          className="w-full h-8.5"
                           classNamePrefix="select"
                           placeholder="Select VAT"
+                          styles={{
+                            control: (provided) => ({
+                              ...provided,
+                              minHeight: '32px',       // Smaller height
+                              height: '32px',
+                              padding: '0',
+                            }),
+                            valueContainer: (provided) => ({
+                              ...provided,
+                              padding: '0 8px',
+                              height: '31px',
+                            }),
+                            indicatorsContainer: (provided) => ({
+                              ...provided,
+                              height: '32px',
+                            }),
+                            input: (provided) => ({
+                              ...provided,
+                              margin: '0',
+                              padding: '0',
+                            }),
+                            singleValue: (provided) => ({
+                              ...provided,
+                              lineHeight: '1.5',
+                            }),
+                          }}
                         />
                       </div>
                     </div>
 
 
                     {/* Tabela */}
+
                     <div className="overflow-x-auto border border-gray-300 rounded">
                       <table className="min-w-full text-sm text-left text-gray-700">
                         <thead className="bg-[#FC9D25] text-white">
@@ -862,26 +879,33 @@ const DataProduct = () => {
                             };
 
                             return (
-                              <tr key={index} className="bg-gray-100">
+                              <tr
+                                key={index}
+                                className={`${price.Indisponivel
+                                  ? 'bg-gray-300 text-gray-400 opacity-60'
+                                  : 'bg-gray-100'
+                                  }`}
+                              >
                                 <td className="px-4 py-2">{getClassName(price.VCodClas)}</td>
                                 <td className="px-4 py-2">{price.cexpName || '-'}</td>
-                                <td className="px-4 py-2 min-w-[8rem]">{getPeriodDescription(price.VCodPeri)}</td>
+                                <td className="px-4 py-2 min-w-[8rem]">
+                                  {getPeriodDescription(price.VCodPeri)}
+                                </td>
                                 <td className="px-4 py-2">{getHourDescription(price.VCodInthoras)}</td>
                                 <td className="px-4 py-2">
                                   <input
                                     type="text"
                                     value={price.nValUnit?.toFixed(2) || ''}
                                     onChange={handlePvpChange}
-                                    className="border rounded px-2 py-1 block w-full"
+                                    className="border rounded px-2 h-8 py-1 block w-25"
                                   />
-
                                 </td>
                                 <td className="px-4 py-2">0.00€</td>
                                 <td className="px-4 py-2">
                                   <select
                                     value={price.VCodIva ?? ''}
                                     onChange={(e) => handleVatChange(index, Number(e.target.value))}
-                                    className="border rounded px-2 py-1 w-1/2"
+                                    className="border rounded px-2 h-8 py-1 w-30"
                                   >
                                     <option value="">—</option>
                                     {ivaOptions.map((vat) => (
@@ -892,17 +916,23 @@ const DataProduct = () => {
                                   </select>
                                 </td>
                                 <td className="px-4 py-2 text-center">
-                                  <input
-                                    type="checkbox"
-                                    checked={!price.Indisponivel}
-                                    onChange={(e) =>
-                                      setPrices((prev) =>
-                                        prev.map((p) =>
-                                          p.id === price.id ? { ...p, Indisponivel: !e.target.checked } : p
-                                        )
-                                      )
-                                    }
-                                  />
+                                  <label className="inline-flex items-center gap-2">
+                                    <input
+                                      type="checkbox"
+                                      checked={!price.Indisponivel}
+                                      onChange={(e) => {
+                                        const updated = [...filteredPrices];
+                                        updated[index] = {
+                                          ...updated[index],
+                                          Indisponivel: !e.target.checked,
+                                        };
+                                        setFilteredPrices(updated);
+                                      }}
+                                    />
+                                    <span className="text-sm">
+                                      {price.Indisponivel ? 'Inactive' : 'Active'}
+                                    </span>
+                                  </label>
                                 </td>
                                 <td className="px-4 py-2">
                                   <HiDotsVertical size={18} />
@@ -913,6 +943,7 @@ const DataProduct = () => {
                         </tbody>
                       </table>
                     </div>
+
 
                     {/*Criado por , em: , Ultima vez alterado por: , Em:*/}
                     <div className="flex justify-end gap-4">

@@ -3,6 +3,7 @@ import prisma from '@/src/lib/prisma';
 export async function GET(request) {
   try {
     const propertyID = request.headers.get('X-Property-ID'); // Obter o propertyID dos cabeçalhos
+    console.log("propertyID: ", propertyID);
 
     if (!propertyID) {
       return new Response(
@@ -12,7 +13,7 @@ export async function GET(request) {
     }
 
     const API_BASE_URL = process.env.API_BASE_URL;
-
+    console.log("API URL: ", API_BASE_URL);
     // Faz a requisição para a API de propriedades para obter server e port
     const propertyResponse = await fetch(`${API_BASE_URL}/api/properties/get_properties/${propertyID}`);
     if (!propertyResponse.ok) {
@@ -21,12 +22,14 @@ export async function GET(request) {
         { status: 500, headers: { "content-type": "application/json; charset=UTF-8" } }
       );
     }
+    console.log("resposta properties: ", propertyResponse);
 
     const propertyData = await propertyResponse.json();
     const { propertyServer, propertyPort } = propertyData;
 
     // Agora faz a requisição para o servidor de produtos usando a URL da propriedade
     const tipoprodutoUrl = `http://${propertyServer}:${propertyPort}/getclasseprecos`;
+    console.log("url de envio precos: ", tipoprodutoUrl);
     const tipoprodutoResponse = await fetch(tipoprodutoUrl);
     if (!tipoprodutoResponse.ok) {
       return new Response(

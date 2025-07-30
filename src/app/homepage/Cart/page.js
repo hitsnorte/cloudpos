@@ -772,10 +772,10 @@ export default function ProductGroups() {
                         )}
 
                         {/* Sidebar Carrinho */}
-                       
+
                         <div
                             className={`cart fixed top-0 right-0 h-full w-[400px] max-w-full bg-[#F0F0F0] z-[9999] shadow-lg transition-transform duration-300 ${isOpen ? 'translate-x-0' : 'translate-x-full'
-                                }`}
+                            }`}
                         >
                             {showConfirm && (
                                 <div className="absolute inset-0 bg-[#F0F0F0]/80 z-50 pointer-events-none" />
@@ -1127,22 +1127,22 @@ export default function ProductGroups() {
                                         <div className="overflow-x-auto bg-muted/40 transition-all duration-300 ease-in-out">
                                             <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB]">
                                                 <thead>
-                                                    <tr className="bg-[#FC9D25] text-white">
-                                                        <th className="border border-[#EDEBEB] px-4 py-2 text-left">
-                                                            Product
-                                                        </th>
-                                                        <th className="border border-[#EDEBEB] px-4 py-2 text-left">
-                                                            Price
-                                                        </th>
-                                                    </tr>
+                                                <tr className="bg-[#FC9D25] text-white">
+                                                    <th className="border border-[#EDEBEB] px-4 py-2 text-left">
+                                                        Product
+                                                    </th>
+                                                    <th className="border border-[#EDEBEB] px-4 py-2 text-left">
+                                                        Price
+                                                    </th>
+                                                </tr>
                                                 </thead>
                                                 <tbody className="divide-y divide-gray-300">
-                                                    {group.products.map((product, index) => (
-                                                        <tr
-                                                            key={product.id || `product-${index}`}
-                                                            className="hover:bg-indigo-50 transition-colors"
-                                                        >
-                                                            <td className="border border-[#EDEBEB] px-4 py-2 text-gray-700">
+                                                {group.products.map((product, index) => (
+                                                    <tr
+                                                        key={product.id || `product-${index}`}
+                                                        className="hover:bg-indigo-50 transition-colors"
+                                                    >
+                                                        <td className="border border-[#EDEBEB] px-4 py-2 text-gray-700">
                                                                 <span
                                                                     className="cursor-pointer hover:underline text-[#191919]"
                                                                     onClick={() => {
@@ -1153,11 +1153,11 @@ export default function ProductGroups() {
                                                                 >
                                                                     {product.name}
                                                                 </span>
-                                                            </td>
+                                                        </td>
 
-                                                            <td className="border border-[#EDEBEB] px-3 py-2 text-right">{product.price.toFixed(2)} €</td>
-                                                        </tr>
-                                                    ))}
+                                                        <td className="border border-[#EDEBEB] px-3 py-2 text-right">{product.price.toFixed(2)} €</td>
+                                                    </tr>
+                                                ))}
                                                 </tbody>
                                             </table>
                                         </div>
@@ -1187,32 +1187,32 @@ export default function ProductGroups() {
                                         <div className="overflow-x-auto bg-muted/40 transition-all duration-300 ease-in-out">
                                             <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB]">
                                                 <thead>
-                                                    <tr className="bg-[#FC9D25] text-white">
-                                                        <th className="border border-[#EDEBEB] px-4 py-2 text-left">Product</th>
-                                                        <th className="border border-[#EDEBEB] px-4 py-2 text-right">Price</th>
-                                                    </tr>
+                                                <tr className="bg-[#FC9D25] text-white">
+                                                    <th className="border border-[#EDEBEB] px-4 py-2 text-left">Product</th>
+                                                    <th className="border border-[#EDEBEB] px-4 py-2 text-right">Price</th>
+                                                </tr>
                                                 </thead>
                                                 <tbody className="divide-y divide-gray-300">
-                                                    {family.products.map((product, index) => (
-                                                        <tr
-                                                            key={product.id || `product-${index}`}
-                                                            className="hover:bg-indigo-50 transition-colors"
-                                                        >
-                                                            <td className="border border-[#EDEBEB] px-4 py-2 text-gray-700">
+                                                {family.products.map((product, index) => (
+                                                    <tr
+                                                        key={product.id || `product-${index}`}
+                                                        className="hover:bg-indigo-50 transition-colors"
+                                                    >
+                                                        <td className="border border-[#EDEBEB] px-4 py-2 text-gray-700">
                                                                 <span
                                                                     className="cursor-pointer hover:underline text-[#191919]"
                                                                     onClick={() => setSelectedProduct(product)}
                                                                 >
                                                                     {product.name}
                                                                 </span>
-                                                            </td>
-                                                            <td className="...">
-                                                                {product?.price != null && !isNaN(product.price)
-                                                                    ? `${Number(product.price).toFixed(2)} €`
-                                                                    : '—'}
-                                                            </td>
-                                                        </tr>
-                                                    ))}
+                                                        </td>
+                                                        <td className="...">
+                                                            {product?.price != null && !isNaN(product.price)
+                                                                ? `${Number(product.price).toFixed(2)} €`
+                                                                : '—'}
+                                                        </td>
+                                                    </tr>
+                                                ))}
                                                 </tbody>
                                             </table>
                                         </div>
@@ -1241,29 +1241,29 @@ export default function ProductGroups() {
                                         <div className="overflow-x-auto bg-muted/40 transition-all duration-300 ease-in-out">
                                             <table className="min-w-full bg-[#FAFAFA] border-collapse border border-[#EDEBEB]">
                                                 <thead>
-                                                    <tr className="bg-[#FC9D25] text-white">
-                                                        <th className="border border-[#EDEBEB] px-4 py-2 text-left">Product</th>
-                                                        <th className="border border-[#EDEBEB] px-4 py-2 text-right">Price</th>
-                                                    </tr>
+                                                <tr className="bg-[#FC9D25] text-white">
+                                                    <th className="border border-[#EDEBEB] px-4 py-2 text-left">Product</th>
+                                                    <th className="border border-[#EDEBEB] px-4 py-2 text-right">Price</th>
+                                                </tr>
                                                 </thead>
                                                 <tbody className="divide-y divide-gray-300">
-                                                    {sub.products.map((product, index) => (
-                                                        <tr key={product.id || `product-${index}`} className="hover:bg-indigo-50 transition-colors">
-                                                            <td className="border border-[#EDEBEB] px-4 py-2 text-gray-700">
+                                                {sub.products.map((product, index) => (
+                                                    <tr key={product.id || `product-${index}`} className="hover:bg-indigo-50 transition-colors">
+                                                        <td className="border border-[#EDEBEB] px-4 py-2 text-gray-700">
                                                                 <span
                                                                     className="cursor-pointer hover:underline text-[#191919]"
                                                                     onClick={() => setSelectedProduct(product)}
                                                                 >
                                                                     {product.name}
                                                                 </span>
-                                                            </td>
-                                                            <td className="...">
-                                                                {product?.price != null && !isNaN(product.price)
-                                                                    ? `${Number(product.price).toFixed(2)} €`
-                                                                    : '—'}
-                                                            </td>
-                                                        </tr>
-                                                    ))}
+                                                        </td>
+                                                        <td className="...">
+                                                            {product?.price != null && !isNaN(product.price)
+                                                                ? `${Number(product.price).toFixed(2)} €`
+                                                                : '—'}
+                                                        </td>
+                                                    </tr>
+                                                ))}
                                                 </tbody>
                                             </table>
                                         </div>
@@ -1279,4 +1279,3 @@ export default function ProductGroups() {
         </>
     )
 }
-

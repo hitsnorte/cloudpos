@@ -287,56 +287,56 @@ const ChainsTable = () => {
                 ) : paginatedChains.length > 0 ? (
                     <table className="w-full text-left mb-5 min-w-full md:min-w-0 border-collapse">
                         <thead>
-        <tr className="bg-[#FC9D25] text-white h-12">
-            <td className="pl-2 pr-2 w-8 border-r border-[#e6e6e6]">
-                <FaGear size={18} color="white" />
-            </td>
-            <td className="pl-2 pr-2 w-16 text-right border-r border-[#e6e6e6] uppercase">ID</td>
-            <td className="pl-2 pr-2 w-32 border-r border-[#e6e6e6] uppercase">Chain Tag</td>
-            <td className="pl-2 pr-2 border-r border-[#e6e6e6] uppercase">Chain Name</td>
-            {/* Add more columns here if needed */}
-        </tr>
-    </thead>
-    <tbody>
-        {paginatedChains.map((chain, index) => (
-            <tr
-                key={chain.chainID || chain.chainTag || index}
-                className="h-10 border-b border-[#e8e6e6] text-textPrimaryColor text-left transition-colors duration-150 hover:bg-[#FC9D25]/20"
-            >
-                <td className="pl-1 flex items-start border-r border-[#e6e6e6] relative z-10">
-                    <Dropdown>
-                        <DropdownTrigger>
-                            <Button
-                                variant="light"
-                                className="flex justify-center items-center w-auto min-w-0 p-0 m-0 relative"
+                        <tr className="bg-[#FC9D25] text-white h-12">
+                            <td className="pl-2 pr-2 w-8 border-r border-[#e6e6e6]">
+                                <FaGear size={18} color="white" />
+                            </td>
+                            <td className="pl-2 pr-2 w-16 text-right border-r border-[#e6e6e6] uppercase">ID</td>
+                            <td className="pl-2 pr-2 w-32 border-r border-[#e6e6e6] uppercase">Chain Tag</td>
+                            <td className="pl-2 pr-2 border-r border-[#e6e6e6] uppercase">Chain Name</td>
+                            {/* Add more columns here if needed */}
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {paginatedChains.map((chain, index) => (
+                            <tr
+                                key={chain.chainID || chain.chainTag || index}
+                                className="h-10 border-b border-[#e8e6e6] text-textPrimaryColor text-left transition-colors duration-150 hover:bg-[#FC9D25]/20"
                             >
-                                <HiDotsVertical size={20} className="text-textPrimaryColor" />
-                            </Button>
-                        </DropdownTrigger>
-                        <DropdownMenu
-                            aria-label="Actions"
-                            closeOnSelect={true}
-                            className="min-w-[150px] bg-white rounded-lg shadow-xl py-2 px-1 border border-gray-100"
-                        >
-                            <DropdownItem
-                                key="edit"
-                                className="px-4 py-2 text-base text-gray-700 hover:bg-gray-200 hover:text-gray-900 rounded transition-colors cursor-pointer"
-                                onPress={() => onEditOpen(chain)}
-                            >
-                                Edit
-                            </DropdownItem>
-                            {/* Add more dropdown actions here */}
-                        </DropdownMenu>
-                    </Dropdown>
-                </td>
-                <td className="pl-2 pr-2 w-16 text-right border-r border-[#e6e6e6]">{chain.chainID}</td>
-                <td className="pl-2 pr-2 w-32 border-r border-[#e6e6e6]">{chain.chainTag}</td>
-                <td className="pl-2 pr-2">{chain.chainName}</td>
-                {/* Add more cells here if needed */}
-            </tr>
-        ))}
-    </tbody>
-</table>
+                                <td className="pl-1 flex items-start border-r border-[#e6e6e6] relative z-10">
+                                    <Dropdown>
+                                        <DropdownTrigger>
+                                            <Button
+                                                variant="light"
+                                                className="flex justify-center items-center w-auto min-w-0 p-0 m-0 relative"
+                                            >
+                                                <HiDotsVertical size={20} className="text-textPrimaryColor" />
+                                            </Button>
+                                        </DropdownTrigger>
+                                        <DropdownMenu
+                                            aria-label="Actions"
+                                            closeOnSelect={true}
+                                            className="min-w-[150px] bg-white rounded-lg shadow-xl py-2 px-1 border border-gray-100"
+                                        >
+                                            <DropdownItem
+                                                key="edit"
+                                                className="px-4 py-2 text-base text-gray-700 hover:bg-gray-200 hover:text-gray-900 rounded transition-colors cursor-pointer"
+                                                onPress={() => onEditOpen(chain)}
+                                            >
+                                                Edit
+                                            </DropdownItem>
+                                            {/* Add more dropdown actions here */}
+                                        </DropdownMenu>
+                                    </Dropdown>
+                                </td>
+                                <td className="pl-2 pr-2 w-16 text-right border-r border-[#e6e6e6]">{chain.chainID}</td>
+                                <td className="pl-2 pr-2 w-32 border-r border-[#e6e6e6]">{chain.chainTag}</td>
+                                <td className="pl-2 pr-2">{chain.chainName}</td>
+                                {/* Add more cells here if needed */}
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
                 ) : (
                     <p className="text-textLabelColor">No chains available</p>
                 )}

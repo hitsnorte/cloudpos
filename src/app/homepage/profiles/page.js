@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { HiDotsVertical } from "react-icons/hi";
 import { FaGear } from "react-icons/fa6";
 import { Plus } from "lucide-react";
+import Select from "react-select";
 import {
     Button,
     Modal,
@@ -14,33 +15,44 @@ import {
     Dropdown,
     DropdownTrigger,
     DropdownMenu,
-    DropdownItem
+    DropdownItem,
+    useDisclosure
 } from "@nextui-org/react";
 import CustomPagination from "@/src/components/table/page";
 
 const ProfilesTable = () => {
-    const [isOpen, setIsOpen] = useState(false);
-    const [editIsOpen, setEditIsOpen] = useState(false);
+    const { isOpen: isAddProfileModalOpen, onOpen: onOpenAddProfileModal, onClose: onCloseAddProfileModal } = useDisclosure();
+    const { isOpen: isEditProfileModalOpen, onOpen: onOpenEditProfileModal, onClose: onCloseEditProfileModal } = useDisclosure();
+    const { isOpen: isDeleteUserModalOpen, onOpen: onOpenDeleteUserModal, onClose: onCloseDeleteUserModal } = useDisclosure();
 
     const [profiles, setProfiles] = useState([]);
     const [selectedProfile, setSelectedProfile] = useState(null);
-
+    const [currentProfile, setCurrentProfile] = useState(null); // Added for edit modal
     const [newProfile, setNewProfile] = useState({
         firstName: "",
         secondName: "",
         email: "",
         password: "",
+        propertyIDs: [],
+        propertyTags: [],
     });
-
     const [loading, setLoading] = useState(false);
-
+    const [properties, setProperties] = useState([]);
     const [itemsPerPage, setItemsPerPage] = useState(15);
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
     const [searchInput, setSearchInput] = useState('');
+    const [showPasswordFields, setShowPasswordFields] = useState(false);
+    const [deleteConfirmationEmail, setDeleteConfirmationEmail] = useState('');
+    const [currentPassword, setCurrentPassword] = useState(''); // Added for password fields
+    const [newPassword, setNewPassword] = useState(''); // Added for password fields
+    const [confirmPassword, setConfirmPassword] = useState(''); // Added for password fields
+    const [passwordError, setPasswordError] = useState(''); // Added for password error
+    const [userToDelete, setUserToDelete] = useState(null); // Added for delete modal
 
     useEffect(() => {
         fetchProfiles();
+        fetchProperties();
     }, []);
 
     const fetchProfiles = async () => {
@@ -54,27 +66,48 @@ const ProfilesTable = () => {
         }
     };
 
-    const onOpen = () => setIsOpen(true);
-    const onClose = () => setIsOpen(false);
-
-    const onEditOpen = (profile) => {
-        setSelectedProfile(profile);
-        setEditIsOpen(true);
+    const fetchProperties = async () => {
+        try {
+            const response = await fetch('/api/properties');
+            const data = await response.json();
+            setProperties(data || []);
+        } catch (error) {
+            console.error("Error fetching properties:", error);
+        }
     };
 
-    const onEditClose = () => {
-        setSelectedProfile(null);
-        setEditIsOpen(false);
+    const openEditModal = (profile) => {
+        setCurrentProfile(profile);
+        setNewProfile({
+            firstName: profile.firstName,
+            secondName: profile.secondName,
+            email: profile.email,
+            password: '',
+            propertyIDs: profile.propertyIDs || [],
+            propertyTags: profile.propertyTags || [],
+        });
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+        setPasswordError('');
+        onOpenEditProfileModal();
     };
+
+    const openDeleteModal = (profile) => {
+        setUserToDelete(profile);
+        setDeleteConfirmationEmail('');
+        onOpenDeleteUserModal();
+    };
+
+    const propertyOptions = properties.map(property => ({
+        value: property.propertyID,
+        label: `${property.propertyName} (${property.propertyTag})`,
+        tag: property.propertyTag
+    }));
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setNewProfile((prev) => ({ ...prev, [name]: value }));
-    };
-
-    const handleEditInputChange = (e) => {
-        const { name, value } = e.target;
-        setSelectedProfile((prev) => ({ ...prev, [name]: value }));
     };
 
     const handleAddProfile = async (e) => {
@@ -86,12 +119,10 @@ const ProfilesTable = () => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(newProfile),
             });
-
             if (!res.ok) throw new Error("Failed to add profile");
-
             await fetchProfiles();
-            setNewProfile({ firstName: "", secondName: "", email: "", password: "" });
-            onClose();
+            setNewProfile({ firstName: "", secondName: "", email: "", password: "", propertyIDs: [], propertyTags: [] });
+            onCloseAddProfileModal();
         } catch (error) {
             console.error("Error adding profile:", error);
         } finally {
@@ -99,25 +130,71 @@ const ProfilesTable = () => {
         }
     };
 
-    const handleEditProfile = async (e) => {
+    const handleSubmitProfile = async (e) => {
         e.preventDefault();
-        setLoading(true);
-
+        if (showPasswordFields && newPassword !== confirmPassword) {
+            setPasswordError('Passwords do not match');
+            return;
+        }
+        const updatedProfile = {
+            firstName: newProfile.firstName,
+            secondName: newProfile.secondName,
+            email: newProfile.email,
+            password: showPasswordFields ? newPassword : undefined,
+            currentPassword: showPasswordFields ? currentPassword : undefined,
+            propertyIDs: newProfile.propertyIDs,
+            propertyTags: newProfile.propertyTags,
+        };
         try {
-            const res = await fetch(`/api/user/${selectedProfile.userID}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(selectedProfile),
-            });
-
-            if (!res.ok) throw new Error("Failed to update profile");
-
-            await fetchProfiles();
-            onEditClose();
+            if (currentProfile) {
+                const response = await fetch(`/api/user/${currentProfile.userID}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatedProfile),
+                });
+                if (!response.ok) throw new Error("Failed to edit profile");
+                onCloseEditProfileModal();
+            } else {
+                const response = await fetch('/api/user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatedProfile),
+                });
+                if (!response.ok) throw new Error("Failed to add profile");
+                onCloseAddProfileModal();
+            }
+            fetchProfiles();
         } catch (error) {
-            console.error("Error updating profile:", error);
-        } finally {
-            setLoading(false);
+            console.error("Error with profile:", error);
+            alert(error.message);
+        }
+    };
+
+    const handlePropertyChange = (selectedOptions) => {
+        const selectedIDs = selectedOptions.map(option => option.value);
+        const selectedTags = selectedOptions.map(option => option.tag);
+        setNewProfile(prevProfile => ({
+            ...prevProfile,
+            propertyIDs: selectedIDs,
+            propertyTags: selectedTags,
+        }));
+    };
+
+    const handleDeleteConfirmation = async () => {
+        if (deleteConfirmationEmail !== userToDelete.email) {
+            alert("The email does not match. Please enter the correct email.");
+            return;
+        }
+        try {
+            const response = await fetch(`/api/user/${userToDelete.userID}`, {
+                method: 'DELETE',
+            });
+            if (!response.ok) throw new Error('Failed to delete user');
+            alert('User deleted successfully');
+            onCloseDeleteUserModal();
+            fetchProfiles();
+        } catch (error) {
+            console.error('Error deleting user:', error);
         }
     };
 
@@ -145,7 +222,7 @@ const ProfilesTable = () => {
                 <h2 className="text-xl font-bold">All Profiles</h2>
                 <div className="flex items-center gap-2">
                     <button
-                        onClick={onOpen}
+                        onClick={onOpenAddProfileModal} // Fixed to use useDisclosure
                         className="bg-[#FC9D25] w-14 text-white p-2 shadow-lg flex items-center justify-center rounded"
                     >
                         <Plus size={25} />
@@ -175,53 +252,60 @@ const ProfilesTable = () => {
                 ) : paginatedProfiles.length > 0 ? (
                     <table className="w-full text-left mb-5 min-w-full md:min-w-0 border-collapse">
                         <thead>
-                            <tr className="bg-[#FC9D25] text-white h-12">
-                                <td className="pl-2 pr-2 w-8 border-r border-[#e6e6e6]">
-                                    <FaGear size={18} color="white" />
-                                </td>
-                                <td className="pl-2 pr-2 w-16 text-right border-r border-[#e6e6e6] uppercase">ID</td>
-                                <td className="pl-2 pr-2 w-32 border-r border-[#e6e6e6] uppercase">First Name</td>
-                                <td className="pl-2 pr-2 w-32 border-r border-[#e6e6e6] uppercase">Last Name</td>
-                                <td className="pl-2 pr-2 border-r border-[#e6e6e6] uppercase">Email</td>
-                            </tr>
+                        <tr className="bg-[#FC9D25] text-white h-12">
+                            <td className="pl-2 pr-2 w-8 border-r border-[#e6e6e6]">
+                                <FaGear size={18} color="white" />
+                            </td>
+                            <td className="pl-2 pr-2 w-16 text-right border-r border-[#e6e6e6] uppercase">ID</td>
+                            <td className="pl-2 pr-2 w-32 border-r border-[#e6e6e6] uppercase">First Name</td>
+                            <td className="pl-2 pr-2 w-32 border-r border-[#e6e6e6] uppercase">Last Name</td>
+                            <td className="pl-2 pr-2 border-r border-[#e6e6e6] uppercase">Email</td>
+                        </tr>
                         </thead>
                         <tbody>
-                            {paginatedProfiles.map((profile, index) => (
-                                <tr
-                                    key={profile.userID || index}
-                                    className="h-10 border-b border-[#e8e6e6] text-textPrimaryColor text-left transition-colors duration-150 hover:bg-[#FC9D25]/20"
-                                >
-                                    <td className="pl-1 flex items-start border-r border-[#e6e6e6] relative z-10">
-                                        <Dropdown>
-                                            <DropdownTrigger>
-                                                <Button
-                                                    variant="light"
-                                                    className="flex justify-center items-center w-auto min-w-0 p-0 m-0 relative"
-                                                >
-                                                    <HiDotsVertical size={20} className="text-textPrimaryColor" />
-                                                </Button>
-                                            </DropdownTrigger>
-                                            <DropdownMenu
-                                                aria-label="Actions"
-                                                closeOnSelect={true}
-                                                className="min-w-[150px] bg-white rounded-lg shadow-xl py-2 px-1 border border-gray-100"
+                        {paginatedProfiles.map((profile, index) => (
+                            <tr
+                                key={profile.userID || index}
+                                className="h-10 border-b border-[#e8e6e6] text-textPrimaryColor text-left transition-colors duration-150 hover:bg-[#FC9D25]/20"
+                            >
+                                <td className="pl-1 flex items-start border-r border-[#e6e6e6] relative z-10">
+                                    <Dropdown>
+                                        <DropdownTrigger>
+                                            <Button
+                                                variant="light"
+                                                className="flex justify-center items-center w-auto min-w-0 p-0 m-0 relative"
                                             >
-                                                <DropdownItem
-                                                    key="edit"
-                                                    className="px-4 py-2 text-base text-gray-700 hover:bg-gray-200 hover:text-gray-900 rounded transition-colors cursor-pointer"
-                                                    onPress={() => onEditOpen(profile)}
-                                                >
-                                                    Edit
-                                                </DropdownItem>
-                                            </DropdownMenu>
-                                        </Dropdown>
-                                    </td>
-                                    <td className="pl-2 pr-2 w-16 text-right border-r border-[#e6e6e6]">{profile.userID}</td>
-                                    <td className="pl-2 pr-2 w-32 border-r border-[#e6e6e6]">{profile.firstName}</td>
-                                    <td className="pl-2 pr-2 w-32 border-r border-[#e6e6e6]">{profile.secondName}</td>
-                                    <td className="pl-2 pr-2">{profile.email}</td>
-                                </tr>
-                            ))}
+                                                <HiDotsVertical size={20} className="text-textPrimaryColor" />
+                                            </Button>
+                                        </DropdownTrigger>
+                                        <DropdownMenu
+                                            aria-label="Actions"
+                                            closeOnSelect={true}
+                                            className="min-w-[150px] bg-white rounded-lg shadow-xl py-2 px-1 border border-gray-100"
+                                        >
+                                            <DropdownItem
+                                                key="edit"
+                                                className="px-4 py-2 text-base text-gray-700 hover:bg-gray-200 hover:text-gray-900 rounded transition-colors cursor-pointer"
+                                                onPress={() => openEditModal(profile)} // Fixed to use openEditModal
+                                            >
+                                                Edit
+                                            </DropdownItem>
+                                            <DropdownItem
+                                                key="delete"
+                                                className="px-4 py-2 text-base text-red-600 hover:bg-gray-200 hover:text-red-800 rounded transition-colors cursor-pointer"
+                                                onPress={() => openDeleteModal(profile)} // Added delete trigger
+                                            >
+                                                Delete
+                                            </DropdownItem>
+                                        </DropdownMenu>
+                                    </Dropdown>
+                                </td>
+                                <td className="pl-2 pr-2 w-16 text-right border-r border-[#e6e6e6]">{profile.userID}</td>
+                                <td className="pl-2 pr-2 w-32 border-r border-[#e6e6e6]">{profile.firstName}</td>
+                                <td className="pl-2 pr-2 w-32 border-r border-[#e6e6e6]">{profile.secondName}</td>
+                                <td className="pl-2 pr-2">{profile.email}</td>
+                            </tr>
+                        ))}
                         </tbody>
                     </table>
                 ) : (
@@ -250,8 +334,8 @@ const ProfilesTable = () => {
                 />
             </div>
 
-            {/* Modal de adição */}
-            <Modal isOpen={isOpen} onOpenChange={setIsOpen} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
+            {/* Add Profile Modal */}
+            <Modal isOpen={isAddProfileModalOpen} onOpenChange={onCloseAddProfileModal} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
                 <ModalContent>
                     {(onClose) => (
                         <>
@@ -259,14 +343,14 @@ const ProfilesTable = () => {
                                 <div className="text-xl font-bold text-white">New Profile</div>
                                 <button
                                     type="button"
-                                    onClick={() => setIsOpen(false)}
+                                    onClick={onCloseAddProfileModal}
                                     className="absolute right-4 top-3 text-white text-2xl font-bold hover:text-gray-200"
                                 >
                                     &times;
                                 </button>
                             </ModalHeader>
                             <ModalBody className="py-5 px-6 bg-white">
-                                <form id="addProfileForm" onSubmit={handleAddProfile} className="space-y-6">
+                                <form id="addProfileForm" onSubmit={handleSubmitProfile} className="space-y-6">
                                     {["firstName", "secondName", "email", "password"].map((field, index) => (
                                         <div key={index}>
                                             <label htmlFor={field} className="block text-sm font-medium text-[#191919] mb-1">
@@ -283,10 +367,24 @@ const ProfilesTable = () => {
                                             />
                                         </div>
                                     ))}
+                                    <div>
+                                        <label htmlFor="propertyIDs" className="block text-sm font-medium text-[#191919] mb-1">
+                                            Select Properties
+                                        </label>
+                                        <Select
+                                            id="propertyIDs"
+                                            name="propertyIDs"
+                                            options={propertyOptions}
+                                            value={propertyOptions.filter(option => newProfile.propertyIDs.includes(option.value))}
+                                            onChange={handlePropertyChange}
+                                            isMulti
+                                            isSearchable
+                                        />
+                                    </div>
                                 </form>
                             </ModalBody>
                             <ModalFooter className="border-t border-gray-200 pt-2 px-8 bg-[#FAFAFA]">
-                                <Button onPress={() => setIsOpen(false)} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">
+                                <Button onPress={onCloseAddProfileModal} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">
                                     Cancel
                                 </Button>
                                 <Button type="submit" form="addProfileForm" className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray-600 transition">
@@ -298,21 +396,21 @@ const ProfilesTable = () => {
                 </ModalContent>
             </Modal>
 
-            {/* Modal de edição */}
-            <Modal isOpen={editIsOpen} onOpenChange={setEditIsOpen} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
+            {/* Edit Profile Modal */}
+            <Modal isOpen={isEditProfileModalOpen} onOpenChange={onCloseEditProfileModal} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
                 <ModalContent>
                     <ModalHeader className="relative rounded bg-[#FC9D25] flex justify-between items-center px-6 py-3">
                         <div className="text-xl font-bold text-white">Edit Profile</div>
                         <button
                             type="button"
-                            onClick={() => setEditIsOpen(false)}
+                            onClick={onCloseEditProfileModal}
                             className="absolute right-4 top-3 text-white text-2xl font-bold hover:text-gray-200"
                         >
                             &times;
                         </button>
                     </ModalHeader>
                     <ModalBody className="py-5 px-6 bg-white">
-                        <form id="editProfileForm" onSubmit={handleEditProfile} className="space-y-6">
+                        <form id="editProfileForm" onSubmit={handleSubmitProfile} className="space-y-6">
                             {["firstName", "secondName", "email"].map((field, index) => (
                                 <div key={index}>
                                     <label htmlFor={`edit-${field}`} className="block text-sm font-medium text-[#191919] mb-1">
@@ -322,20 +420,124 @@ const ProfilesTable = () => {
                                         id={`edit-${field}`}
                                         type={field === "password" ? "password" : "text"}
                                         name={field}
-                                        value={selectedProfile ? selectedProfile[field] : ''}
-                                        onChange={handleEditInputChange}
+                                        value={newProfile[field]}
+                                        onChange={handleInputChange}
                                         className="w-full p-1 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
                                     />
                                 </div>
                             ))}
+                            <div>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPasswordFields(!showPasswordFields)}
+                                    className="w-full p-2 bg-[#FC9D25] text-white rounded-md text-center"
+                                >
+                                    {showPasswordFields ? 'Cancel Password Change' : 'Change Password'}
+                                </button>
+                            </div>
+                            {showPasswordFields && (
+                                <div>
+                                    <div>
+                                        <label htmlFor="currentPassword" className="block text-sm font-medium text-[#191919] mb-1">
+                                            Current Password
+                                        </label>
+                                        <input
+                                            id="currentPassword"
+                                            type="password"
+                                            name="currentPassword"
+                                            value={currentPassword}
+                                            onChange={(e) => setCurrentPassword(e.target.value)}
+                                            className="w-full p-2 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="newPassword" className="block text-sm font-medium text-[#191919] mb-1">
+                                            New Password
+                                        </label>
+                                        <input
+                                            id="newPassword"
+                                            type="password"
+                                            name="newPassword"
+                                            value={newPassword}
+                                            onChange={(e) => setNewPassword(e.target.value)}
+                                            className="w-full p-2 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="confirmPassword" className="block text-sm font-medium text-[#191919] mb-1">
+                                            Confirm New Password
+                                        </label>
+                                        <input
+                                            id="confirmPassword"
+                                            type="password"
+                                            name="confirmPassword"
+                                            value={confirmPassword}
+                                            onChange={(e) => setConfirmPassword(e.target.value)}
+                                            className="w-full p-2 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                                            required
+                                        />
+                                    </div>
+                                    {passwordError && <p className="text-red-500 text-sm">{passwordError}</p>}
+                                </div>
+                            )}
+                            <div>
+                                <label htmlFor="edit-propertyIDs" className="block text-sm font-medium text-[#191919] mb-1">
+                                    Select Properties
+                                </label>
+                                <Select
+                                    id="edit-propertyIDs"
+                                    name="propertyIDs"
+                                    options={propertyOptions}
+                                    value={propertyOptions.filter(option => newProfile.propertyIDs.includes(option.value))}
+                                    onChange={handlePropertyChange}
+                                    isMulti
+                                    isSearchable
+                                />
+                            </div>
                         </form>
                     </ModalBody>
                     <ModalFooter className="border-t border-gray-200 pt-2 px-8 bg-[#FAFAFA]">
-                        <Button onPress={() => setEditIsOpen(false)} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">
+                        <Button onPress={onCloseEditProfileModal} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">
                             Cancel
                         </Button>
                         <Button type="submit" form="editProfileForm" className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray-600 transition">
                             Save
+                        </Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+
+            {/* Delete User Modal */}
+            <Modal isOpen={isDeleteUserModalOpen} onOpenChange={onCloseDeleteUserModal} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
+                <ModalContent>
+                    <ModalHeader className="relative rounded bg-[#FC9D25] flex justify-between items-center px-6 py-3">
+                        <div className="text-xl font-bold text-white">Confirm Delete User</div>
+                        <button
+                            type="button"
+                            onClick={onCloseDeleteUserModal}
+                            className="absolute right-4 top-3 text-white text-2xl font-bold hover:text-gray-200"
+                        >
+                            &times;
+                        </button>
+                    </ModalHeader>
+                    <ModalBody className="py-5 px-6 bg-[#FAFAFA]">
+                        <p className="text-[#191919]">To confirm the deletion of this user, please type their email:</p>
+                        <input
+                            type="email"
+                            value={deleteConfirmationEmail}
+                            onChange={(e) => setDeleteConfirmationEmail(e.target.value)}
+                            placeholder="User email"
+                            className="w-full p-2 bg-gray-200 rounded mt-2"
+                        />
+                    </ModalBody>
+                    <ModalFooter className="border-t border-[#EDEBEB] bg-[#FAFAFA] pt-2 px-8">
+                        <Button onPress={onCloseDeleteUserModal} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">
+                            Cancel
+                        </Button>
+                        <Button onPress={handleDeleteConfirmation} className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray-600 transition">
+                            Delete
                         </Button>
                     </ModalFooter>
                 </ModalContent>

@@ -5,6 +5,7 @@ import { HiDotsVertical } from "react-icons/hi";
 import { FaSearch } from "react-icons/fa";
 import { FaGear } from "react-icons/fa6";
 import { Plus } from "lucide-react";
+import Select from "react-select";
 import {
     Button,
     Modal,
@@ -15,15 +16,17 @@ import {
     Dropdown,
     DropdownTrigger,
     DropdownMenu,
-    DropdownItem
+    DropdownItem,
+    useDisclosure
 } from "@nextui-org/react";
 import CustomPagination from "@/src/components/table/page";
 
 const PropertiesTable = () => {
-    const [isOpen, setIsOpen] = useState(false);
-    const [editIsOpen, setEditIsOpen] = useState(false);
+    const { isOpen, onOpen, onClose } = useDisclosure();
+    const { isOpen: isEditOpen, onOpen: onEditOpen, onClose: onEditClose } = useDisclosure();
 
     const [properties, setProperties] = useState([]);
+    const [chains, setChains] = useState([]); // Added for chain options
     const [selectedProperty, setSelectedProperty] = useState(null);
 
     const [newProperty, setNewProperty] = useState({
@@ -36,7 +39,6 @@ const PropertiesTable = () => {
     });
 
     const [loading, setLoading] = useState(false);
-
     const [itemsPerPage, setItemsPerPage] = useState(15);
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
@@ -44,6 +46,7 @@ const PropertiesTable = () => {
 
     useEffect(() => {
         fetchProperties();
+        fetchChains();
     }, []);
 
     const fetchProperties = async () => {
@@ -58,17 +61,14 @@ const PropertiesTable = () => {
         }
     };
 
-    const onOpen = () => setIsOpen(true);
-    const onClose = () => setIsOpen(false);
-
-    const onEditOpen = (property) => {
-        setSelectedProperty(property);
-        setEditIsOpen(true);
-    };
-
-    const onEditClose = () => {
-        setSelectedProperty(null);
-        setEditIsOpen(false);
+    const fetchChains = async () => {
+        try {
+            const response = await fetch("/api/chains");
+            if (!response.ok) throw new Error("Failed to fetch chains");
+            setChains(await response.json());
+        } catch (error) {
+            console.error("Error fetching chains:", error);
+        }
     };
 
     const handleInputChange = (e) => {
@@ -85,14 +85,16 @@ const PropertiesTable = () => {
         e.preventDefault();
         setLoading(true);
         try {
+            const formattedProperty = {
+                ...newProperty,
+                propertyChain: newProperty.propertyChain ? [newProperty.propertyChain] : [],
+            };
             const res = await fetch("/api/properties", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(newProperty),
+                body: JSON.stringify(formattedProperty),
             });
-
             if (!res.ok) throw new Error("Failed to add property");
-
             await fetchProperties();
             setNewProperty({
                 propertyTag: "",
@@ -113,16 +115,17 @@ const PropertiesTable = () => {
     const handleEditProperty = async (e) => {
         e.preventDefault();
         setLoading(true);
-
         try {
+            const formattedProperty = {
+                ...selectedProperty,
+                propertyChain: selectedProperty.propertyChain ? [selectedProperty.propertyChain] : [],
+            };
             const res = await fetch(`/api/properties/${selectedProperty.propertyID}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(selectedProperty),
+                body: JSON.stringify(formattedProperty),
             });
-
             if (!res.ok) throw new Error("Failed to update property");
-
             await fetchProperties();
             onEditClose();
         } catch (error) {
@@ -144,6 +147,11 @@ const PropertiesTable = () => {
         onClose();
     };
 
+    const chainOptions = chains.map(chain => ({
+        value: chain.chainTag,
+        label: `${chain.chainName}(${chain.chainTag})`,
+    }));
+
     const filteredProperties = properties.filter((property) => {
         const search = searchTerm.toLowerCase();
         return (
@@ -160,9 +168,11 @@ const PropertiesTable = () => {
 
     const totalPages = Math.ceil(filteredProperties.length / itemsPerPage);
 
+    const [editingProperty, setEditingProperty] = useState(null);
+
     return (
         <div className="p-4">
-            {/* Header with Search and Add */}
+            {/* Header com + */}
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold">All Properties</h2>
                 <div className="flex items-center gap-2">
@@ -190,7 +200,7 @@ const PropertiesTable = () => {
                 />
             </div>
 
-            {/* Add Property Modal */}
+            {/* Modal de adição de propriedades*/}
             <Modal isOpen={isOpen} onOpenChange={onClose} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
                 <ModalContent>
                     {(onClose) => (
@@ -212,34 +222,61 @@ const PropertiesTable = () => {
                                             <label htmlFor={field} className="block text-sm font-medium text-[#191919] mb-1">
                                                 {field.charAt(0).toUpperCase() + field.slice(1)}
                                             </label>
-                                            <input
-                                                id={field}
-                                                type="text"
-                                                name={field}
-                                                value={newProperty[field]}
-                                                onChange={handleInputChange}
-                                                className="w-full p-2 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
-                                                required
-                                            />
+                                            {field === 'propertyTag' ? (
+                                                <textarea
+                                                    id={field}
+                                                    name={field}
+                                                    value={newProperty[field]}
+                                                    onChange={handleInputChange}
+                                                    rows={3}
+                                                    className="w-full p-2 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500 resize-none"
+                                                />
+                                            ) : (
+                                                <input
+                                                    id={field}
+                                                    type="text"
+                                                    name={field}
+                                                    value={newProperty[field]}
+                                                    onChange={handleInputChange}
+                                                    className="w-full p-2 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                                                    required
+                                                />
+                                            )}
                                         </div>
                                     ))}
+                                    <div>
+                                        <label htmlFor="propertyChain" className="block text-sm font-medium text-[#191919] mb-1">
+                                            Select Property Chain
+                                        </label>
+                                        <Select
+                                            id="propertyChain"
+                                            name="propertyChain"
+                                            options={chainOptions}
+                                            value={chainOptions.find(option => option.value === newProperty.propertyChain) || null}
+                                            onChange={(selectedOption) =>
+                                                setNewProperty((prev) => ({
+                                                    ...prev,
+                                                    propertyChain: selectedOption ? selectedOption.value : "",
+                                                }))
+                                            }
+                                            isSearchable
+                                            className="w-full"
+                                            classNamePrefix="select"
+                                        />
+                                    </div>
                                 </form>
                             </ModalBody>
                             <ModalFooter className="border-t border-[#EDEBEB] bg-[#FAFAFA] pt-2 px-8">
-                                <Button onPress={handleCloseModal} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">
-                                    Cancel
-                                </Button>
-                                <Button type="submit" form="addPropertyForm" className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray-600 transition" disabled={loading}>
-                                    {loading ? "Saving..." : "Save"}
-                                </Button>
+                                <Button onPress={handleCloseModal} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">Cancel</Button>
+                                <Button type="submit" form="addPropertyForm" className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray-600 transition">Save</Button>
                             </ModalFooter>
                         </>
                     )}
                 </ModalContent>
             </Modal>
 
-            {/* Edit Property Modal */}
-            <Modal isOpen={editIsOpen} onOpenChange={onEditClose} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
+            {/* Modal de edição de propriedade */}
+            <Modal isOpen={isEditOpen} onOpenChange={onEditClose} size="md" placement="center" className="w-100 shadow-xl rounded-lg">
                 <ModalContent>
                     {(onEditClose) => (
                         <>
@@ -253,9 +290,10 @@ const PropertiesTable = () => {
                                     &times;
                                 </button>
                             </ModalHeader>
+
                             <ModalBody className="py-5 px-6 bg-[#FAFAFA]">
-                                {selectedProperty && (
-                                    <form id="editPropertyForm" onSubmit={handleEditProperty} className="space-y-6">
+                                {editingProperty && (
+                                    <form id="editPropertyForm" onSubmit={handleUpdateProperty} className="space-y-6">
                                         {['propertyName', 'propertyServer', 'propertyPort', 'mpeHotel'].map((field, index) => (
                                             <div key={index}>
                                                 <label htmlFor={field} className="block text-sm font-medium text-[#191919] mb-1">
@@ -265,81 +303,103 @@ const PropertiesTable = () => {
                                                     id={field}
                                                     type="text"
                                                     name={field}
-                                                    value={selectedProperty[field] || ""}
-                                                    onChange={handleEditInputChange}
+                                                    value={editingProperty[field] || ""}
+                                                    onChange={handleEditChange}
                                                     className="w-full p-2 bg-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
                                                     required
                                                 />
                                             </div>
                                         ))}
+
+                                        <div>
+                                            <label htmlFor="chainID" className="block text-sm font-medium text-[#191919] mb-1">
+                                                Select Property Chain
+                                            </label>
+                                            <Select
+                                                id="chainID"
+                                                name="chainID"
+                                                options={chains.map((chain) => ({
+                                                    value: chain.chainID,
+                                                    label: chain.chainName, // Adjust this if necessary
+                                                }))}
+                                                // Ensure the selected value matches the chainID in editingProperty
+                                                value={chains.find(chain => chain.chainID === editingProperty.chainID) || null}
+                                                onChange={(selectedOption) =>
+                                                    setEditingProperty((prev) => ({
+                                                        ...prev,
+                                                        chainID: selectedOption ? selectedOption.value : "",
+                                                    }))
+                                                }
+                                                isSearchable
+                                                className="w-full"
+                                                classNamePrefix="select"
+                                            />
+                                        </div>
                                     </form>
                                 )}
                             </ModalBody>
+
                             <ModalFooter className="border-t border-[#EDEBEB] bg-[#FAFAFA] pt-2 px-8">
-                                <Button onPress={onEditClose} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">
-                                    Cancel
-                                </Button>
-                                <Button type="submit" form="editPropertyForm" className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray-600 transition" disabled={loading}>
-                                    {loading ? "Saving..." : "Save"}
-                                </Button>
+                                <Button onPress={onEditClose} className="px-6 py-2 text-gray-500 rounded-md hover:bg-gray-100 transition">Cancel</Button>
+                                <Button type="submit" form="editPropertyForm" className="px-6 py-2 bg-[#FC9D25] text-white rounded-md hover:bg-gray-600 transition">Update</Button>
                             </ModalFooter>
                         </>
                     )}
                 </ModalContent>
             </Modal>
 
-            {/* Properties Table */}
+            {/* Tabela */}
             <div className="mt-5">
                 {loading ? (
                     <div className="text-center py-8">Loading...</div>
                 ) : paginatedProperties.length > 0 ? (
                     <table className="w-full text-left mb-5 min-w-full md:min-w-0 border-collapse">
                         <thead>
-                            <tr className="bg-[#FC9D25] text-white h-12">
-                                <td className="pl-2 pr-2 w-8 border-r border-[#e6e6e6]">
-                                    <FaGear size={18} color="white" />
-                                </td>
-                                <td className="pl-2 pr-2 w-16 text-right border-r border-[#e6e6e6] uppercase">ID</td>
-                                <td className="pl-2 pr-2 w-32 border-r border-[#e6e6e6] uppercase">Property Tag</td>
-                                <td className="pl-2 pr-2 border-r border-[#e6e6e6] uppercase">Property Name</td>
-                            </tr>
+                        <tr className="bg-[#FC9D25] text-white h-12">
+                            <td className="pl-2 pr-2 w-8 border-r border-[#e6e6e6]">
+                                <FaGear size={18} color="white" />
+                            </td>
+                            <td className="pl-2 pr-2 w-16 text-right border-r border-[#e6e6e6] uppercase">ID</td>
+                            <td className="pl-2 pr-2 w-32 border-r border-[#e6e6e6] uppercase">Property Tag</td>
+                            <td className="pl-2 pr-2 border-r border-[#e6e6e6] uppercase">Property Name</td>
+                        </tr>
                         </thead>
                         <tbody>
-                            {paginatedProperties.map((property, index) => (
-                                <tr
-                                    key={property.propertyID || property.propertyTag || index}
-                                    className="h-10 border-b border-[#e8e6e6] text-textPrimaryColor text-left transition-colors duration-150 hover:bg-[#FC9D25]/20"
-                                >
-                                    <td className="pl-1 flex items-start border-r border-[#e6e6e6] relative z-10">
-                                        <Dropdown>
-                                            <DropdownTrigger>
-                                                <Button
-                                                    variant="light"
-                                                    className="flex justify-center items-center w-auto min-w-0 p-0 m-0 relative"
-                                                >
-                                                    <HiDotsVertical size={20} className="text-textPrimaryColor" />
-                                                </Button>
-                                            </DropdownTrigger>
-                                            <DropdownMenu
-                                                aria-label="Actions"
-                                                closeOnSelect={true}
-                                                className="min-w-[150px] bg-white rounded-lg shadow-xl py-2 px-1 border border-gray-100"
+                        {paginatedProperties.map((property, index) => (
+                            <tr
+                                key={property.propertyID || property.propertyTag || index}
+                                className="h-10 border-b border-[#e8e6e6] text-textPrimaryColor text-left transition-colors duration-150 hover:bg-[#FC9D25]/20"
+                            >
+                                <td className="pl-1 flex items-start border-r border-[#e6e6e6] relative z-10">
+                                    <Dropdown>
+                                        <DropdownTrigger>
+                                            <Button
+                                                variant="light"
+                                                className="flex justify-center items-center w-auto min-w-0 p-0 m-0 relative"
                                             >
-                                                <DropdownItem
-                                                    key="edit"
-                                                    className="px-4 py-2 text-base text-gray-700 hover:bg-gray-200 hover:text-gray-900 rounded transition-colors cursor-pointer"
-                                                    onPress={() => onEditOpen(property)}
-                                                >
-                                                    Edit
-                                                </DropdownItem>
-                                            </DropdownMenu>
-                                        </Dropdown>
-                                    </td>
-                                    <td className="pl-2 pr-2 w-16 text-right border-r border-[#e6e6e6]">{property.propertyID}</td>
-                                    <td className="pl-2 pr-2 w-32 border-r border-[#e6e6e6]">{property.propertyTag}</td>
-                                    <td className="pl-2 pr-2">{property.propertyName}</td>
-                                </tr>
-                            ))}
+                                                <HiDotsVertical size={20} className="text-textPrimaryColor" />
+                                            </Button>
+                                        </DropdownTrigger>
+                                        <DropdownMenu
+                                            aria-label="Actions"
+                                            closeOnSelect={true}
+                                            className="min-w-[150px] bg-white rounded-lg shadow-xl py-2 px-1 border border-gray-100"
+                                        >
+                                            <DropdownItem
+                                                key="edit"
+                                                className="px-4 py-2 text-base text-gray-700 hover:bg-gray-200 hover:text-gray-900 rounded transition-colors cursor-pointer"
+                                                onPress={() => onEditOpen(property)}
+                                            >
+                                                Edit
+                                            </DropdownItem>
+                                        </DropdownMenu>
+                                    </Dropdown>
+                                </td>
+                                <td className="pl-2 pr-2 w-16 text-right border-r border-[#e6e6e6]">{property.propertyID}</td>
+                                <td className="pl-2 pr-2 w-32 border-r border-[#e6e6e6]">{property.propertyTag}</td>
+                                <td className="pl-2 pr-2">{property.propertyName}</td>
+                            </tr>
+                        ))}
                         </tbody>
                     </table>
                 ) : (
@@ -347,7 +407,7 @@ const PropertiesTable = () => {
                 )}
             </div>
 
-            {/* Pagination */}
+            {/* Paginação */}
             <div className="bottom-0 w-full bg-white p-0 m-0 pagination-container">
                 <CustomPagination
                     page={currentPage}

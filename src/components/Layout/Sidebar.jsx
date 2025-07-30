@@ -41,11 +41,11 @@ export default function Sidebar({ mobileOpen, setMobileOpen, expanded, setExpand
 
 
   return (
-      <SidebarContext.Provider value={{ expanded: isMobile ? true : expanded }}>
+      <SidebarContext.Provider value={{ expanded: isMobile ? true : expanded , isMobile }}>
         {(isMobile && mobileOpen) || !isMobile ? (
             <aside
                 className={`h-screen fixed top-0 bg-white border-gray-200 shadow-sm z-20 
-                      transition-all duration-300 ease-in-out 
+                      transition-all duration-300 ease-in-out z-[9999]
                       ${isMobile ? "right-0 w-screen border-l" : "left-0 " + (expanded ? "w-[250px] border-r" : "w-[80px] border-r")}`}
             >
               <nav className="h-full flex flex-col relative w-full">

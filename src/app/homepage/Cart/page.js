@@ -16,7 +16,7 @@ import { IoMdClose } from "react-icons/io";
 import { CiTrash } from "react-icons/ci";
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@heroui/react";
 import { FaArrowUp } from "react-icons/fa";
-import { fetchOnlinePrices } from "../../../lib/apicartprices";
+import { fetchPreco } from "@/src/lib/apipreco";
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import { Card, CardBody } from "@heroui/react";
 import { useSession } from "next-auth/react"; // Import useSession
@@ -341,7 +341,7 @@ export default function ProductGroups() {
                     fetchSubfamily(),
                     fetchProduct(),
                     fetchClassepreco(),
-                    fetchOnlinePrices(),
+                    fetchPreco(),
                     fetchIva(),
                 ]);
 
@@ -354,8 +354,8 @@ export default function ProductGroups() {
                 });
                 const precoMap = new Map();
                 precos.forEach((preco) => {
-                    const key = String(preco.ID_Produto).trim();  // usar VCodprod (mesmo que VPRODUTO na api produtos)
-                    const value = parseFloat(String(preco.Preco).replace(',', '.')) || 0;
+                    const key = String(preco.VCodprod).trim();  // usar VCodprod (mesmo que VPRODUTO na api produtos)
+                    const value = parseFloat(String(preco.npreco).replace(',', '.')) || 0;
                     precoMap.set(key, value);
                 });
 
@@ -436,17 +436,17 @@ export default function ProductGroups() {
                 //preco
                 const structuredPrecos = precos.map((preco) => {
                     const productsForPreco = products
-                        .filter((p) => String(p.ID_TabelaPrecos) == String(preco.ID_TabelaPrecos))
+                        .filter((p) => String(p.vCodigo) == String(preco.vCodigo))
                         .map((p, index) => ({
-                            id: p?.ID_Produto ? String(p.ID_Produto) : `product-${index}`,
-                            name: p?.Produto?.trim() || 'Unnamed Product',
-                            price: parseFloat(p?.Preco) || 0, // Garantir número, não string
+                            id: p?.VCodProd ? String(p.VCodProd) : `product-${index}`,
+                            name: p?.VdescProd?.trim() || 'Unnamed Product',
+                            price: parseFloat(p?.npreco) || 0, // Garantir número, não string
                         }));
 
                     return {
-                        id: String(preco.ID_TabelaPrecos),
-                        name: preco.Produto,
-                        price: preco.Preco,
+                        id: String(preco.vCodigo),
+                        name: preco.VdescProd,
+                        price: preco.npreco,
                         products: productsForPreco,
                     };
                 });
@@ -772,7 +772,7 @@ export default function ProductGroups() {
                         )}
 
                         {/* Sidebar Carrinho */}
-                       
+
                         <div
                             className={`cart fixed top-0 right-0 h-full w-[400px] max-w-full bg-[#F0F0F0] z-[9999] shadow-lg transition-transform duration-300 ${isOpen ? 'translate-x-0' : 'translate-x-full'
                             }`}

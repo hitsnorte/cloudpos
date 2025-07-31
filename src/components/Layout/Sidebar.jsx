@@ -32,13 +32,6 @@ export default function Sidebar({ mobileOpen, setMobileOpen, expanded, setExpand
     return () => window.removeEventListener("resize", handleResize);
   }, [setMobileOpen]);
 
-  console.log("Sidebar rendered", {
-    mobileOpen,
-    expanded,
-    isMobile,
-    showUserMenu,
-  });
-
 
   return (
       <SidebarContext.Provider value={{ expanded: isMobile ? true : expanded , isMobile }}>

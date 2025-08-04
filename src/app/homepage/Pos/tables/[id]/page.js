@@ -155,8 +155,8 @@ export default function Tables() {
                                     : "Sem nome"}
                             </p>
                             {mesaTotalMap[table.ID_Mesa] && (
-                                <span className="absolute bottom-2 right-2 text-xs font-semibold text-green-700 bg-white px-1 rounded shadow-sm">
-                                    € {mesaTotalMap[table.ID_Mesa].toFixed(2)}
+                                <span className="absolute bottom-2 right-2 text-xs font-semibold text-center text-green-700 bg-white px-1 rounded shadow-sm">
+                                    Balance: {mesaTotalMap[table.ID_Mesa].toFixed(2)} €
                                 </span>
                             )}
                         </div>

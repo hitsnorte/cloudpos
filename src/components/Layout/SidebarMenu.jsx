@@ -13,36 +13,26 @@ import { TiShoppingCart } from "react-icons/ti";
 import { MdPointOfSale } from "react-icons/md";
 
 function SidebarItem({ icon, text, submenu }) {
-    const { expanded, isMobile } = useContext(SidebarContext);
+    const { expanded } = useContext(SidebarContext);
     const [open, setOpen] = useState(false);
+    const [cexp, setCexp] = useState("");
 
     return (
         <li className="relative">
             <div
-                role="button"
-                tabIndex={0}
-                onClick={() => submenu && setOpen(!open)}
-                onKeyDown={(e) => e.key === "Enter" && submenu && setOpen(!open)}
                 className="flex items-center py-2 px-3 my-1 font-medium rounded-md cursor-pointer transition-colors group hover:bg-indigo-50 text-gray-600"
+                onClick={() => submenu && setOpen(!open)}
             >
                 {icon && <span className="mr-2">{icon}</span>}
-                <span
-                    className={`ml-3 transition-all duration-200 ${expanded || isMobile ? "opacity-100 visible" : "opacity-0 invisible"
-                        }`}
-                >
+                <span className={`overflow-hidden transition-all ${expanded ? "w-52 ml-3 opacity-100" : "w-0 opacity-0"}`}>
                     {text}
                 </span>
                 {submenu && <span className="ml-auto">{open ? <ChevronDown size={16} /> : <ChevronRight size={16} />}</span>}
             </div>
             {submenu && open && (
-                <ul
-                    className={`transition-all overflow-hidden ${open && (expanded || isMobile)
-                        ? "pl-6 max-h-[500px] opacity-100 visible"
-                        : "pl-0 max-h-0 opacity-0 invisible"
-                        }`}
-                >
+                <ul className={`transition-all ${expanded ? "pl-6" : "pl-0 flex flex-col items-center"}`}>
                     {submenu.map((sub, index) => (
-                        <SidebarSubItem key={index} {...sub} expanded={expanded} isMobile={isMobile} />
+                        <SidebarSubItem key={index} {...sub} expanded={expanded} />
                     ))}
                 </ul>
             )}
@@ -50,17 +40,11 @@ function SidebarItem({ icon, text, submenu }) {
     );
 }
 
-function SidebarSubItem({ href, text, icon, expanded, isMobile }) {
-    const visible = expanded || isMobile;
-
+function SidebarSubItem({ href, text, icon, expanded }) {
     return (
         <li className="flex items-center py-2 px-3 my-1 text-gray-600 hover:bg-indigo-50 rounded-md cursor-pointer">
             {icon && <span>{icon}</span>}
-            <a
-                href={href}
-                className={`transition-all duration-300 whitespace-nowrap ${visible ? "ml-3 opacity-100 visible" : "w-0 opacity-0 invisible"
-                    }`}
-            >
+            <a href={href} className={`transition-all ${expanded ? "ml-3 opacity-100" : "w-0 opacity-0 overflow-hidden"}`}>
                 {text}
             </a>
         </li>
@@ -70,8 +54,6 @@ function SidebarSubItem({ href, text, icon, expanded, isMobile }) {
 export default function SidebarMenu() {
     const { data: session } = useSession();
     const { expanded, isMobile } = useContext(SidebarContext);
-    console.log("VALORES DO CONTEXTO:", { expanded, isMobile });
-
     const [selectedProperty, setSelectedProperty] = useState(() => localStorage.getItem("selectedProperty") || "");
     const [tempSelectedProperty, setTempSelectedProperty] = useState(null);
     const [isConfirmed, setIsConfirmed] = useState(() => JSON.parse(localStorage.getItem("isConfirmed")) || false);
@@ -135,6 +117,15 @@ export default function SidebarMenu() {
             localStorage.setItem("selectedProperty", selectedProperty);
         }
     }, [selectedProperty, isConfirmed]);
+
+    const [localIsMobile, setLocalIsMobile] = useState(false);
+
+    useEffect(() => {
+        const checkMobile = () => setLocalIsMobile(window.innerWidth < 700);
+        checkMobile();
+        window.addEventListener("resize", checkMobile);
+        return () => window.removeEventListener("resize", checkMobile);
+    }, []);
 
     return (
         <div className="p-3">
@@ -200,7 +191,7 @@ export default function SidebarMenu() {
                 <>
                     {Object.entries(menuItems).map(([key, value]) => {
                         // Show only "Shopping" on mobile, and everything on desktop
-                        if (isMobile && key !== "Shopping") return null;
+                        if (localIsMobile && key !== "Shopping") return null;
                         return (
                             <SidebarItem
                                 key={key}

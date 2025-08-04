@@ -70,19 +70,33 @@ export default function Tables() {
             setClienteNumber(clientNumber);
             setShowModal(false);
 
-            // ⚠️ Limpa primeiro qualquer mesa anterior (opcional mas ajuda a debugar)
-            console.log("TempTable para guardar:", tempTable);
+            // Obter dados atuais
+            const mesaPaxMap = JSON.parse(localStorage.getItem("mesaPaxMap") || "{}");
+
+            // Atualizar ou adicionar entrada
+            mesaPaxMap[tempTable.ID_Mesa] = clientNumber;
+
+            // Salvar no localStorage
+            localStorage.setItem("mesaPaxMap", JSON.stringify(mesaPaxMap));
+
             localStorage.removeItem("selectedMesa");
             localStorage.setItem("selectedMesa", JSON.stringify(tempTable));
-            console.log("selectedMesa guardado:", localStorage.getItem("selectedMesa"));
             localStorage.setItem("previousPage", window.location.pathname);
 
-            // ✅ Aguarda uma iteração do event loop para garantir que o localStorage está atualizado
             setTimeout(() => {
                 router.push(`/homepage/Pos/cart/${tempTable.ID_Mesa}`);
             }, 0);
         }
     };
+
+    const mesaPaxMap = typeof window !== 'undefined'
+        ? JSON.parse(localStorage.getItem("mesaPaxMap") || "{}")
+        : {};
+
+    const mesaTotalMap = typeof window !== 'undefined'
+        ? JSON.parse(localStorage.getItem("mesaTotalMap") || "{}")
+        : {};
+
 
     const handleBack = () => {
         const postoId = localStorage.getItem("postoId");
@@ -114,8 +128,14 @@ export default function Tables() {
                             setTempTable(table); // ← armazena temporariamente
                             setShowModal(true);
                         }}
-                        className="w-full h-40 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center cursor-pointer hover:bg-gray-100 transition"
+                        className="relative w-full h-40 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center cursor-pointer hover:bg-gray-100 transition"
                     >
+                        {mesaPaxMap[table.ID_Mesa] && (
+                            <span className="absolute top-2 left-2 text-[10px] w-5 h-5 flex items-center justify-center bg-red-600 text-white rounded-full shadow-sm">
+                                {mesaPaxMap[table.ID_Mesa]}
+                            </span>
+                        )}
+
                         <div className="flex flex-col items-center justify-center w-full h-full">
                             <div className="mb-2">
                                 <img
@@ -134,6 +154,11 @@ export default function Tables() {
                                         .join(" ")
                                     : "Sem nome"}
                             </p>
+                            {mesaTotalMap[table.ID_Mesa] && (
+                                <span className="absolute bottom-2 right-2 text-xs font-semibold text-green-700 bg-white px-1 rounded shadow-sm">
+                                    € {mesaTotalMap[table.ID_Mesa].toFixed(2)}
+                                </span>
+                            )}
                         </div>
                     </div>
                 ))}

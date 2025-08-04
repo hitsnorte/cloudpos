@@ -338,6 +338,22 @@ export default function Cart() {
         setCurrentCart([]);               // limpa o estado local
     };
 
+    const calculateCartTotal = (cartItems) => {
+        return cartItems.reduce((total, item) => {
+            return total + (item.price * item.quantity);
+        }, 0);
+    };
+
+    useEffect(() => {
+        if (!cartKey || !mesa) return;
+
+        const total = calculateCartTotal(currentCart);
+
+        const mesaTotalMap = JSON.parse(localStorage.getItem("mesaTotalMap") || "{}");
+        mesaTotalMap[mesa.ID_Mesa] = parseFloat(total.toFixed(2));
+        localStorage.setItem("mesaTotalMap", JSON.stringify(mesaTotalMap));
+    }, [currentCart, cartKey, mesa]);
+
     return (
         <>
             <div className="relative">
